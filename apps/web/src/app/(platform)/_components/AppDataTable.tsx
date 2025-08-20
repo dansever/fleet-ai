@@ -1,9 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
-
+import { Button } from '@/components/ui/button';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
+import { ChevronLeft, ChevronRight, Expand } from 'lucide-react';
 
 interface AppDataTableProps {
   data: any[];
@@ -26,19 +40,13 @@ export function AppDataTable({ data, columns }: AppDataTableProps) {
         <Table className="max-w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="bg-primary hover:bg-primary"
-              >
+              <TableRow key={headerGroup.id} className="bg-primary hover:bg-primary">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="text-white px-4">
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
                 })}
@@ -75,11 +83,7 @@ export function AppDataTable({ data, columns }: AppDataTableProps) {
       {/* Pagination */}
       <div className="flex items-center justify-end space-x-2 py-2">
         <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { }}
-          >
+          <Button variant="outline" size="sm" onClick={() => {}}>
             <Expand className="h-4 w-4" />
             Full View
           </Button>

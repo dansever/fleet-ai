@@ -1,13 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 type Activity = {
   id: string;
@@ -79,9 +73,7 @@ export function RecentActivity() {
     <Card className="h-full">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
-        <CardDescription>
-          Latest actions across your procurement team
-        </CardDescription>
+        <CardDescription>Latest actions across your procurement team</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-5">
@@ -96,13 +88,10 @@ export function RecentActivity() {
               </Avatar>
               <div className="space-y-1">
                 <p className="text-sm">
-                  <span className="font-medium">{activity.user.name}</span>{' '}
-                  {activity.action}{' '}
+                  <span className="font-medium">{activity.user.name}</span> {activity.action}{' '}
                   <span className="font-medium">{activity.target}</span>
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {activity.timestamp}
-                </p>
+                <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
               </div>
             </div>
           ))}

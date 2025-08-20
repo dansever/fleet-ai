@@ -1,21 +1,23 @@
 {
-    "name": "fleet-ai",
-    "private": true,
-    "scripts": {
-        "dev": "pnpm --filter @fleet-ai/web dev"
-    },
-    "dependencies": {
-        "@clerk/nextjs": "^6.31.3",
-        "@t3-oss/env-nextjs": "^0.13.8",
-        "drizzle-kit": "^0.31.4",
-        "lucide-react": "^0.511.0",
-        "recharts": "^3.1.2"
-    },
-    "devDependencies": {
-        "prettier": "^3.6.2"
-    },
-    "scripts": {
-        "clean": "rimraf \"**/.next\" \"**/.turbo\"",
-        "rebuild": "pnpm run clean && pnpm install && pnpm run build"
-    }
+  "name": "fleet-ai",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run build",
+    "clean": "rimraf \"**/.next\" \"**/.turbo\"",
+    "rebuild": "pnpm run clean && pnpm install && pnpm run build"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.31.3",
+    "@t3-oss/env-nextjs": "^0.13.8",
+    "drizzle-kit": "^0.31.4",
+    "lucide-react": "^0.511.0",
+    "recharts": "^3.1.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
 }

@@ -1,4 +1,4 @@
-import { AirportDatasetItem } from '@/features/airports/types/AirportDataset';
+import { AirportDatasetItem } from '@/features/airports/airportDatasetType';
 import { useEffect, useState } from 'react';
 import useDebounce from '../lib/hooks/use-debounce';
 

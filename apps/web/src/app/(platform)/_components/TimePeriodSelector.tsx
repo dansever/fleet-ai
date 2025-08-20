@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface TimePeriodSelectorProps {
   value: number;
@@ -21,16 +21,9 @@ const options = [
   { label: 'All', value: 99999 },
 ];
 
-export function TimePeriodSelector({
-  value,
-  onChange,
-  className,
-}: TimePeriodSelectorProps) {
+export function TimePeriodSelector({ value, onChange, className }: TimePeriodSelectorProps) {
   return (
-    <Select
-      value={value.toString()}
-      onValueChange={(val) => onChange(Number(val))}
-    >
+    <Select value={value.toString()} onValueChange={(val) => onChange(Number(val))}>
       <SelectTrigger className={cn('w-full bg-white', className)}>
         <SelectValue placeholder="Select time range" />
       </SelectTrigger>

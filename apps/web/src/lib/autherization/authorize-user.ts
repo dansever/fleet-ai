@@ -14,6 +14,7 @@ export async function authorizeUser() {
   }
 
   const dbUser = await getUserByClerkUserId(clerkUser.id);
+
   if (!dbUser || !dbUser.orgId) {
     return {
       clerkUser: null,

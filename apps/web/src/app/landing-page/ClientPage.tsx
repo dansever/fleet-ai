@@ -2,14 +2,11 @@
 
 import { GlassCard } from '@/components/miscellaneous/GlassCard';
 import { Button } from '@/components/ui/button';
-import { useUser } from '@clerk/nextjs';
 import { BarChart3, Repeat, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { LandingPageNavBar } from './_components/LandingPageNavBar';
 
 export default function LandingPageClient() {
-  const { user } = useUser();
-
   return (
     <div className="flex min-h-screen flex-col items-center gap-8">
       <LandingPageNavBar />
