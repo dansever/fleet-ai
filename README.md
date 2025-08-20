@@ -95,10 +95,18 @@ When you're ready to deploy your SaaS application to production, follow these st
 - Work happens in `dev`
 - Commit and push normally
 - When stable:
+
   ```bash
   git checkout main
   git pull origin main
   git merge dev
   git push origin main
   ```
+
+  - Switch back to dev to continue working:
+
+  ```bash
+  git checkout dev
+  ```
+
 - Keep `main` clean and production-ready
