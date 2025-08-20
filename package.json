@@ -8,7 +8,14 @@
     "typecheck": "pnpm -r typecheck",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run build",
     "clean": "rimraf \"**/.next\" \"**/.turbo\"",
-    "rebuild": "pnpm run clean && pnpm install && pnpm run build"
+    "rebuild": "pnpm run clean && pnpm install && pnpm run build",
+    "db:generate": "dotenv -e apps/web/.env.local -- drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate:local": "dotenv -e apps/web/.env.local -- drizzle-kit migrate --config=drizzle.config.ts",
+    "db:migrate:prod": "dotenv -e apps/web/.env.production -- drizzle-kit migrate --config=drizzle.config.ts",
+    "db:push:local": "dotenv -e apps/web/.env.local -- drizzle-kit push --config=drizzle.config.ts",
+    "db:push:prod": "dotenv -e apps/web/.env.production -- drizzle-kit push --config=drizzle.config.ts",
+    "studio:local": "dotenv -e apps/web/.env.local -- drizzle-kit studio --config=drizzle.config.ts",
+    "studio:remote": "dotenv -e apps/web/.env.production -- drizzle-kit studio --config=drizzle.config.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.3",
@@ -18,6 +25,7 @@
     "recharts": "^3.1.2"
   },
   "devDependencies": {
+    "dotenv-cli": "^10.0.0",
     "prettier": "^3.6.2"
   }
 }

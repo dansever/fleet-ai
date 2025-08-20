@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "dotenv -e apps/web/.env.local -- drizzle-kit migrate",
+    "db:push:local": "dotenv -e apps/web/.env.local -- drizzle-kit push",
+    "db:migrate:prod": "dotenv -e apps/web/.env.production -- drizzle-kit migrate",
+    "db:push:prod": "dotenv -e apps/web/.env.production -- drizzle-kit push"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.3",
@@ -20,6 +25,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@supabase/ssr": "^0.6.1",
     "@tailwindcss/postcss": "4.1.7",
     "@tanstack/react-table": "^8.21.3",
     "@types/node": "^22.15.18",
