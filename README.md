@@ -103,7 +103,7 @@ When you're ready to deploy your SaaS application to production, follow these st
   git push origin main
   ```
 
-  - Switch back to dev to continue working:
+- Switch back to dev to continue working:
 
   ```bash
   git checkout dev
