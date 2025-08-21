@@ -1,7 +1,7 @@
 'use client';
 
 import { GlassCard } from '@/components/miscellaneous/GlassCard';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/stories/Button/Button';
 import { BarChart3, Repeat, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { LandingPageNavBar } from './_components/LandingPageNavBar';
@@ -14,16 +14,15 @@ export default function LandingPageClient() {
         {/* Hero */}
         <section id="hero" className="relative space-y-6 pt-8 overflow-hidden">
           {/* <SoundWaveAnimation className="top-1/2 -translate-y-1/2" /> */}
-          <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center relative z-10">
+          <div className="flex max-w-[64rem] flex-col items-center gap-4 text-center relative z-10">
             <div className="rounded-full bg-primary/10 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-primary border border-primary/20">
               Introducing FleetAI
             </div>
             <h1 className="font-semibold text-3xl sm:text-5xl md:text-6xl lg:text-7xl gradient-text p-4">
               AI-Powered Airline Procurement
             </h1>
-            <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8 glass-effect p-4 rounded-lg">
-              Fleet AI is an AI-powered OS for airline procurement teams. Source, manage, and
-              optimize your airline procurement processes with ease.
+            <p className="m-2 glass-effect p-4 rounded-lg text-xl font-semibold text-primary">
+              Fleet AI is building the AI infrastructure for airline procurement teams
             </p>
           </div>
         </section>
@@ -39,12 +38,12 @@ export default function LandingPageClient() {
               social media strategy.
             </p>
           </div>
-          <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+          <div className="flex flex-row gap-4 p-2">
             <GlassCard className="p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 backdrop-blur-sm">
                 <BarChart3 className="h-6 w-6 text-primary" />
               </div>
-              <div className="space-y-2 pt-6">
+              <div className="space-y-2 pt-6 m-2">
                 <h3 className="font-bold">Sentiment-Based Scheduling</h3>
                 <p className="text-sm text-muted-foreground">
                   Analyze real-time sentiment to automatically adjust content timing and tone based
@@ -52,7 +51,7 @@ export default function LandingPageClient() {
                 </p>
               </div>
             </GlassCard>
-            <GlassCard className="p-6" highlight>
+            <GlassCard className="p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 backdrop-blur-sm">
                 <Repeat className="h-6 w-6 text-primary" />
               </div>
@@ -84,7 +83,7 @@ export default function LandingPageClient() {
           <GlassCard className="mx-auto p-8" highlight>
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <div className="max-w-[32rem] space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight gradient-text">
+                <h2 className="text-3xl font-bold tracking-tight">
                   Ready to transform your social media strategy?
                 </h2>
                 <p className="text-muted-foreground">
@@ -92,16 +91,14 @@ export default function LandingPageClient() {
                   brand.
                 </p>
               </div>
-              <Button size="lg" className="shrink-0 bg-primary/90 backdrop-blur-sm">
-                Get Started
-              </Button>
+              <Button intent="success" size="lg" text="Get Started" />
             </div>
           </GlassCard>
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-white/10 py-6 md:py-0 backdrop-blur-md bg-white/5">
-          <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+        <footer className="border-t border-white/10 py-6 md:py-0 backdrop-blur-md">
+          <div className="px-4 flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
             <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
               <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
                 &copy; {new Date().getFullYear()} FleetAI. All rights reserved.
