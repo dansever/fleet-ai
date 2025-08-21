@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     <PageLayout
       sidebarContent={null}
       headerContent={'Hello'}
-      mainContent={<div>Main Content</div>}
+      mainContent={<div>{airports.map((airport) => airport.name)}</div>}
     />
     // <div>
     //   Welcome, {dbUser.displayName}!
