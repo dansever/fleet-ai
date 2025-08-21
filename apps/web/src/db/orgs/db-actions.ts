@@ -7,19 +7,14 @@ import { eq, sql } from 'drizzle-orm';
  * Get an organization by its database id
  */
 export async function getOrgById(id: string): Promise<Organization | null> {
-  const result = await db
-    .select()
-    .from(organizationsTable)
-    .where(eq(organizationsTable.id, id));
+  const result = await db.select().from(organizationsTable).where(eq(organizationsTable.id, id));
   return result[0];
 }
 
 /**
  * Get an organization by its Clerk organization id
  */
-export async function getOrgByClerkOrgId(
-  clerkOrgId: string,
-): Promise<Organization | undefined> {
+export async function getOrgByClerkOrgId(clerkOrgId: string): Promise<Organization | undefined> {
   const result = await db
     .select()
     .from(organizationsTable)
@@ -41,10 +36,7 @@ export async function createOrg(data: NewOrganization): Promise<Organization> {
 /**
  * Update an organization - general update
  */
-export async function updateOrg(
-  id: Organization['id'],
-  data: Partial<NewOrganization>,
-) {
+export async function updateOrg(id: Organization['id'], data: Partial<NewOrganization>) {
   const result = await db
     .update(organizationsTable)
     .set({ ...data, updatedAt: new Date() })
@@ -91,8 +83,5 @@ export async function updateOrgUsage(
  * Delete an organization
  */
 export async function deleteOrgById(id: Organization['id']): Promise<void> {
-  await db
-    .delete(organizationsTable)
-    .where(eq(organizationsTable.id, id))
-    .returning();
+  await db.delete(organizationsTable).where(eq(organizationsTable.id, id)).returning();
 }

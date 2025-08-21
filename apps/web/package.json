@@ -6,17 +6,22 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "format:check": "prettier -c .",
+    "format:fix": "prettier --write .",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "dotenv -e apps/web/.env.local -- drizzle-kit migrate",
     "db:push:local": "dotenv -e apps/web/.env.local -- drizzle-kit push",
     "db:migrate:prod": "dotenv -e apps/web/.env.production -- drizzle-kit migrate",
-    "db:push:prod": "dotenv -e apps/web/.env.production -- drizzle-kit push"
+    "db:push:prod": "dotenv -e apps/web/.env.production -- drizzle-kit push",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.3",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.7",
@@ -60,9 +65,20 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "4.1.1",
+    "@storybook/addon-a11y": "9.1.2",
+    "@storybook/addon-docs": "9.1.2",
+    "@storybook/addon-vitest": "9.1.2",
+    "@storybook/nextjs-vite": "^9.1.2",
     "@types/papaparse": "^5.3.16",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.33.0",
     "eslint-config-next": "15.5.0",
-    "typescript": "^5.9.2"
+    "eslint-plugin-storybook": "9.1.2",
+    "playwright": "^1.55.0",
+    "storybook": "9.1.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }

@@ -7,21 +7,14 @@ import { and, desc, eq, gte } from 'drizzle-orm';
  * Get an RFQ by its ID
  */
 export async function getRfqById(id: Rfq['id']): Promise<Rfq | null> {
-  const result = await db
-    .select()
-    .from(rfqsTable)
-    .where(eq(rfqsTable.id, id))
-    .limit(1);
+  const result = await db.select().from(rfqsTable).where(eq(rfqsTable.id, id)).limit(1);
   return result[0] ?? null;
 }
 
 /**
  * Get an RFQ by its RFQ number within an organization
  */
-export async function getRfqByNumber(
-  orgId: string,
-  rfqNumber: string,
-): Promise<Rfq | null> {
+export async function getRfqByNumber(orgId: string, rfqNumber: string): Promise<Rfq | null> {
   const result = await db
     .select()
     .from(rfqsTable)
@@ -94,10 +87,7 @@ export async function getRecentOrgRfqs(
     .where(
       and(
         eq(rfqsTable.orgId, orgId),
-        gte(
-          rfqsTable.createdAt,
-          new Date(Date.now() - days * 24 * 60 * 60 * 1000),
-        ),
+        gte(rfqsTable.createdAt, new Date(Date.now() - days * 24 * 60 * 60 * 1000)),
       ),
     )
     .orderBy(desc(rfqsTable.createdAt))

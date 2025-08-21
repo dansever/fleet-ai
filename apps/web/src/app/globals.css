@@ -1,12 +1,62 @@
 @import 'tailwindcss';
-/*
-  ---break---
-*/
-@custom-variant dark (&:is(.dark *));
-
 @import 'tw-animate-css';
 
+/* @custom-variant dark (&:is(.dark *)); */
 @variant dark (&:is(.dark *));
+
+/* ========== CORE VARIABLES ========== */
+:root {
+  --radius: 0.625rem;
+
+  /* ========= THEME COLORS ========= */
+  --background: white;
+  --foreground: var(--primary);
+
+  --card: white;
+  --card-foreground: var(--primary);
+
+  --popover: white;
+  --popover-foreground: var(--primary);
+
+  --primary: #213555;
+  --primary-foreground: white;
+
+  --secondary: #3a6d8c;
+  --secondary-foreground: white;
+
+  --muted: #e9efec;
+  --muted-foreground: var(--primary);
+
+  --accent: #c4dad2;
+  --accent-foreground: var(--primary);
+
+  --border: #e1e7ef;
+  --input: #e1e7ef;
+  --ring: var(--primary);
+
+  /* ========= SEMANTIC COLORS ========= */
+  --destructive: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+
+  /* ========= CHART COLORS ========= */
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+
+  /* ========= SEMANTIC COLORS ========= */
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar: hsl(0 0% 98%);
+}
 
 @theme {
   --color-background: hsl(var(--background));
@@ -173,72 +223,6 @@
   }
 }
 
-/*
-  ---break---
-*/
-
-:root {
-  /* Background */
-  --background: white;
-  --foreground: var(--primary);
-
-  /* Card */
-  --card: white;
-  --card-foreground: var(--primary);
-
-  /* Popover */
-  --popover: white;
-  --popover-foreground: var(--primary);
-
-  /* Core Colors */
-  --primary: #213555;
-  --primary-foreground: white;
-  --secondary: #3a6d8c;
-  --secondary-foreground: white;
-  --muted: #e9efec;
-  --muted-foreground: var(--primary);
-  --accent: #c4dad2;
-  --accent-foreground: var(--primary);
-
-  /* Destructive */
-  --destructive: #ef4444;
-  --destructive-foreground: #fef2f2;
-  --success: #10b981;
-  --success-foreground: white;
-  --warning: #f59e0b;
-  --warning-foreground: white;
-
-  /* Border */
-  --border: #e1e7ef;
-  --input: #e1e7ef;
-  --ring: var(--primary);
-
-  /* Charts */
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
-
-  /* Radius */
-  --radius: 0.5rem;
-
-  /* Sidebar */
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 240 5.3% 26.1%;
-  --sidebar-primary: 240 5.9% 10%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 240 4.8% 95.9%;
-  --sidebar-accent-foreground: 240 5.9% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
-  --sidebar: hsl(0 0% 98%);
-}
-
-/*
-  ---break---
-*/
-
 .dark {
   --background: hsl(240 10% 3.9%);
   --foreground: hsl(0 0% 98%);
@@ -274,10 +258,6 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
-/*
-  ---break---
-*/
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -294,11 +274,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -321,10 +298,6 @@
   --color-sidebar: var(--sidebar);
 }
 
-/*
-  ---break---
-*/
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -334,11 +307,7 @@
   }
 }
 
-/*
-  ----ADDED STYLES----
-*/
-
-/* Glass Effect */
+/* ========= GLASS EFFECT ========= */
 .glass-effect {
   @apply bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg;
 }
@@ -351,7 +320,7 @@
   @apply bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 shadow-md transition-all;
 }
 
-/* Hero Glow */
+/* ========= HERO GLOW ========= */
 .gradient-text {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-500 to-cyan-500;
 }

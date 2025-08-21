@@ -1,0 +1,180 @@
+.
+|-- DATABASE.md
+|-- ENVIRONMENT.md
+|-- LICENSE
+|-- README.md
+|-- apps
+|   |-- backend
+|   |   |-- api
+|   |   |-- db
+|   |   |-- features
+|   |   |-- main.py
+|   |   |-- services
+|   |   `-- utils
+|   `-- web
+|       |-- components.json
+|       |-- next-env.d.ts
+|       |-- next.config.ts
+|       |-- package.json
+|       |-- public
+|       |   |-- favicon.ico
+|       |   `-- logos
+|       |       `-- fleet-ai-logo.svg
+|       |-- src
+|       |   |-- app
+|       |   |   |-- (auth)
+|       |   |   |   |-- layout.tsx
+|       |   |   |   |-- sign-in
+|       |   |   |   |   `-- [[...sign-in]]
+|       |   |   |   |       `-- page.tsx
+|       |   |   |   `-- sign-up
+|       |   |   |       `-- [[...sign-up]]
+|       |   |   |           `-- page.tsx
+|       |   |   |-- (platform)
+|       |   |   |   |-- _components
+|       |   |   |   |   |-- AirportList.tsx
+|       |   |   |   |   |-- AppDataTable.tsx
+|       |   |   |   |   |-- RecentActivity.tsx
+|       |   |   |   |   |-- TimePeriodSelector.tsx
+|       |   |   |   |   `-- sidebar
+|       |   |   |   |       |-- AppSidebar.tsx
+|       |   |   |   |       |-- ClientUserButton.tsx
+|       |   |   |   |       `-- SidebarTabs.ts
+|       |   |   |   |-- dashboard
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- ContextProvider.tsx
+|       |   |   |   |   `-- page.tsx
+|       |   |   |   `-- layout.tsx
+|       |   |   |-- api
+|       |   |   |-- globals.css
+|       |   |   |-- landing-page
+|       |   |   |   |-- ClientPage.tsx
+|       |   |   |   |-- _components
+|       |   |   |   |   |-- AnimatedGridBackground.tsx
+|       |   |   |   |   |-- GradientBackground.tsx
+|       |   |   |   |   `-- LandingPageNavBar.tsx
+|       |   |   |   `-- page.tsx
+|       |   |   |-- layout.tsx
+|       |   |   `-- not-found.tsx
+|       |   |-- components
+|       |   |   |-- magicui
+|       |   |   |   `-- animated-grid-pattern.tsx
+|       |   |   |-- miscellaneous
+|       |   |   |   |-- BrandLogo.tsx
+|       |   |   |   `-- GlassCard.tsx
+|       |   |   `-- ui
+|       |   |       |-- avatar.tsx
+|       |   |       |-- badge.tsx
+|       |   |       |-- button.tsx
+|       |   |       |-- card.tsx
+|       |   |       |-- dialog.tsx
+|       |   |       |-- dropdown-menu.tsx
+|       |   |       |-- input.tsx
+|       |   |       |-- label.tsx
+|       |   |       |-- radio-group.tsx
+|       |   |       |-- scroll-area.tsx
+|       |   |       |-- select.tsx
+|       |   |       |-- separator.tsx
+|       |   |       |-- sheet.tsx
+|       |   |       |-- sidebar.tsx
+|       |   |       |-- skeleton.tsx
+|       |   |       |-- slider.tsx
+|       |   |       |-- sonner.tsx
+|       |   |       |-- switch.tsx
+|       |   |       |-- table.tsx
+|       |   |       |-- tabs.tsx
+|       |   |       |-- textarea.tsx
+|       |   |       `-- tooltip.tsx
+|       |   |-- db
+|       |   |   |-- airports
+|       |   |   |   `-- db-actions.ts
+|       |   |   |-- org-settings
+|       |   |   |   `-- db-actions.ts
+|       |   |   |-- orgs
+|       |   |   |   `-- db-actions.ts
+|       |   |   |-- quotes
+|       |   |   |   `-- db-actions.ts
+|       |   |   |-- rfqs
+|       |   |   |   `-- db-actions.ts
+|       |   |   |-- users
+|       |   |   |   `-- db-actions.ts
+|       |   |   `-- vendors
+|       |   |       `-- db-actions.ts
+|       |   |-- drizzle
+|       |   |   |-- db.ts
+|       |   |   |-- migrations
+|       |   |   |   |-- 0000_square_kat_farrell.sql
+|       |   |   |   `-- meta
+|       |   |   |       |-- 0000_snapshot.json
+|       |   |   |       `-- _journal.json
+|       |   |   |-- schema
+|       |   |   |   |-- enums.ts
+|       |   |   |   `-- schema.ts
+|       |   |   |-- schema.ts
+|       |   |   `-- types.ts
+|       |   |-- features
+|       |   |   |-- airports
+|       |   |   |   |-- AirportAutocomplete.tsx
+|       |   |   |   |-- AirportDialog.tsx
+|       |   |   |   |-- airportDatasetService.ts
+|       |   |   |   `-- airportDatasetType.ts
+|       |   |   |-- fuel
+|       |   |   |   |-- bid
+|       |   |   |   `-- tender
+|       |   |   |-- quotes
+|       |   |   `-- rfqs
+|       |   |-- hooks
+|       |   |   |-- use-airport-autocomplete.ts
+|       |   |   |-- use-country-map.ts
+|       |   |   |-- use-mobile.ts
+|       |   |   `-- use-pdf-files.ts
+|       |   |-- lib
+|       |   |   |-- autherization
+|       |   |   |   |-- authorize-resource.ts
+|       |   |   |   `-- authorize-user.ts
+|       |   |   |-- core
+|       |   |   |   |-- error.ts
+|       |   |   |   |-- fetcher.ts
+|       |   |   |   `-- formatters.ts
+|       |   |   |-- env
+|       |   |   |   |-- client.ts
+|       |   |   |   `-- server.ts
+|       |   |   |-- hooks
+|       |   |   |   |-- use-clerk-provider-data.ts
+|       |   |   |   |-- use-debounce.ts
+|       |   |   |   |-- use-media-query.ts
+|       |   |   |   |-- use-mobile.ts
+|       |   |   |   |-- use-toast.ts
+|       |   |   |   `-- useWindowSize.ts
+|       |   |   `-- utils.ts
+|       |   |-- middleware.ts
+|       |   |-- styles
+|       |   |   `-- tailwindStyles.ts
+|       |   `-- utils
+|       |       |-- download-csv.ts
+|       |       |-- get-airport-data-from-csv.ts
+|       |       |-- scroll.ts
+|       |       `-- supabase
+|       |           |-- client.ts
+|       |           |-- middleware.ts
+|       |           `-- server.ts
+|       |-- tsconfig.json
+|       `-- tsconfig.tsbuildinfo
+|-- data
+|   |-- README.md
+|   |-- airports.csv
+|   `-- countries.csv
+|-- dev-tools
+|   |-- commands.sh
+|   `-- project-structure.txt
+|-- docker-compose.yml
+|-- drizzle.config.ts
+|-- google-credentials.json
+|-- middleware.ts
+|-- next-env.d.ts
+|-- package.json
+|-- pnpm-lock.yaml
+|-- pnpm-workspace.yaml
+`-- postcss.config.mjs
+
+58 directories, 119 files

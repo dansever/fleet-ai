@@ -1,15 +1,9 @@
 import { db } from '@/drizzle/db';
 import { orgSettingsTable } from '@/drizzle/schema/schema';
-import {
-  NewOrgSettings,
-  OrgSettings,
-  UpdateOrgSettings,
-} from '@/drizzle/types';
+import { NewOrgSettings, OrgSettings, UpdateOrgSettings } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 
-export async function getOrgSettingsById(
-  orgId: OrgSettings['orgId'],
-): Promise<OrgSettings | null> {
+export async function getOrgSettingsById(orgId: OrgSettings['orgId']): Promise<OrgSettings | null> {
   const result = await db
     .select()
     .from(orgSettingsTable)
@@ -26,10 +20,7 @@ export async function createOrgSettings(data: NewOrgSettings) {
   return result[0];
 }
 
-export async function updateOrgSettings(
-  orgId: OrgSettings['orgId'],
-  data: UpdateOrgSettings,
-) {
+export async function updateOrgSettings(orgId: OrgSettings['orgId'], data: UpdateOrgSettings) {
   const result = await db
     .update(orgSettingsTable)
     .set({ ...data, updatedAt: new Date() })
@@ -39,8 +30,5 @@ export async function updateOrgSettings(
 }
 
 export async function deleteOrgSettings(orgId: OrgSettings['orgId']) {
-  await db
-    .delete(orgSettingsTable)
-    .where(eq(orgSettingsTable.orgId, orgId))
-    .returning();
+  await db.delete(orgSettingsTable).where(eq(orgSettingsTable.orgId, orgId)).returning();
 }
