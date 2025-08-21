@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -31,7 +31,6 @@ const buttonStyles = cva(
         add: 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white',
         favorite: 'border border-pink-200 text-pink-600 hover:bg-pink-50',
         edit: 'border border-blue-200 text-blue-600 hover:bg-blue-50',
-        icon: 'bg-transparent hover:bg-muted/40 border-2 border-muted text-primary/70',
       },
       size: {
         sm: 'h-8 px-2 text-sm',
@@ -39,11 +38,6 @@ const buttonStyles = cva(
         lg: 'h-12 px-4 text-lg',
       },
     },
-    compoundVariants: [
-      { intent: 'icon', size: 'sm', class: 'w-8 p-0' },
-      { intent: 'icon', size: 'md', class: 'w-10 p-0' },
-      { intent: 'icon', size: 'lg', class: 'w-12 p-0' },
-    ],
     defaultVariants: {
       intent: 'primary',
       size: 'md',
@@ -54,12 +48,47 @@ const buttonStyles = cva(
 type ButtonStyleProps = VariantProps<typeof buttonStyles>;
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    ButtonStyleProps {}
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
+    ButtonStyleProps {
+  /** The text to display in the button */
+  text: string;
+  /** Optional icon to display before the text */
+  icon?: LucideIcon;
+  /** Position of the icon relative to text */
+  iconPosition?: 'left' | 'right';
+  /** Show only the icon without text */
+  iconOnly?: boolean;
+}
 
 // ========= Text / Icon + Text Button =========
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, intent, size, type = 'button', children, ...props }, ref) => {
+  (
+    {
+      className,
+      intent,
+      size,
+      type = 'button',
+      text = null,
+      icon: Icon = null,
+      iconPosition = 'left',
+      ...props
+    },
+    ref,
+  ) => {
+    // Determine icon size based on button size
+    const getIconSize = () => {
+      switch (size) {
+        case 'sm':
+          return 'h-3 w-3';
+        case 'lg':
+          return 'h-5 w-5';
+        default:
+          return 'h-4 w-4';
+      }
+    };
+
+    const iconSize = getIconSize();
+
     return (
       <button
         ref={ref}
@@ -67,45 +96,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={twMerge(buttonStyles({ intent, size }), className)}
         {...props}
       >
-        {children}
+        {/* Icon only mode */}
+        {text === null && Icon && <Icon className={iconSize} />}
+
+        {/* Icon + Text mode */}
+        {text !== null && (
+          <>
+            {Icon && iconPosition === 'left' && <Icon className={`${iconSize} mr-2`} />}
+            {text}
+            {Icon && iconPosition === 'right' && <Icon className={`${iconSize} ml-2`} />}
+          </>
+        )}
       </button>
     );
   },
 );
 Button.displayName = 'Button';
-
-// ========= Icon Button =========
-export const IconButton = React.forwardRef<HTMLButtonElement, ButtonProps & { icon: LucideIcon }>(
-  ({ className, size, intent = 'icon', icon, type = 'button', ...props }, ref) => {
-    const iconSize = size === 'lg' ? 24 : size === 'sm' ? 16 : 20;
-
-    // Render the icon, supporting both component and element
-    const renderIcon = () => {
-      if (React.isValidElement(icon)) {
-        // element case: <Plus />
-        return React.cloneElement(
-          icon as React.ReactElement<{ size?: number; 'aria-hidden'?: boolean }>,
-          {
-            size: iconSize,
-            'aria-hidden': true,
-          },
-        );
-      }
-      // component type case: Plus
-      const IconComp = icon as LucideIcon;
-      return <IconComp size={iconSize} aria-hidden="true" />;
-    };
-
-    return (
-      <button
-        ref={ref}
-        type={type}
-        className={twMerge(buttonStyles({ intent, size }), className)}
-        {...props}
-      >
-        {renderIcon()}
-      </button>
-    );
-  },
-);
-IconButton.displayName = 'IconButton';

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { PlusIcon } from 'lucide-react';
-import { Button, IconButton } from './Button';
+import { Download as DownloadIcon, Edit as EditIcon, Heart, Plus } from 'lucide-react';
+import { Button } from './Button';
 
 const intents = [
   'primary',
@@ -13,14 +13,23 @@ const intents = [
   'add',
   'favorite',
   'edit',
-  'icon',
 ] as const;
 
 const sizes = ['sm', 'md', 'lg'] as const;
 
 const meta = {
-  title: 'Button',
+  title: 'Components/Button',
   component: Button,
+  argTypes: {
+    intent: {
+      control: 'select',
+      options: intents,
+    },
+    size: {
+      control: { type: 'inline-radio' }, // radio buttons
+      options: sizes,
+    },
+  },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -30,7 +39,7 @@ export const Default: Story = {
   args: {
     intent: 'primary',
     size: 'md',
-    children: 'Default',
+    text: 'Default',
   },
 };
 
@@ -38,7 +47,7 @@ export const Primary: Story = {
   args: {
     intent: 'primary',
     size: 'md',
-    children: 'Primary',
+    text: 'Primary',
   },
 };
 
@@ -46,7 +55,7 @@ export const Secondary: Story = {
   args: {
     intent: 'secondary',
     size: 'md',
-    children: 'Secondary',
+    text: 'Secondary',
   },
 };
 
@@ -54,7 +63,7 @@ export const Sucess: Story = {
   args: {
     intent: 'success',
     size: 'md',
-    children: 'Success',
+    text: 'Success',
   },
 };
 
@@ -62,7 +71,7 @@ export const Warning: Story = {
   args: {
     intent: 'warning',
     size: 'md',
-    children: 'Warning',
+    text: 'Warning',
   },
 };
 
@@ -70,7 +79,7 @@ export const Danger: Story = {
   args: {
     intent: 'danger',
     size: 'md',
-    children: 'Danger',
+    text: 'Danger',
   },
 };
 
@@ -78,7 +87,7 @@ export const Ghost: Story = {
   args: {
     intent: 'ghost',
     size: 'md',
-    children: 'Ghost',
+    text: 'Ghost',
   },
 };
 
@@ -86,7 +95,16 @@ export const Download: Story = {
   args: {
     intent: 'download',
     size: 'md',
-    children: 'Download',
+    text: 'Download',
+  },
+};
+
+export const DownloadWithIcon: Story = {
+  args: {
+    intent: 'download',
+    size: 'md',
+    text: 'Download File',
+    icon: DownloadIcon,
   },
 };
 
@@ -94,7 +112,8 @@ export const Add: Story = {
   args: {
     intent: 'add',
     size: 'md',
-    children: 'Add',
+    text: 'Add Item',
+    icon: Plus,
   },
 };
 
@@ -102,7 +121,8 @@ export const Favorite: Story = {
   args: {
     intent: 'favorite',
     size: 'md',
-    children: 'Favorite',
+    text: 'Add to Favorites',
+    icon: Heart,
   },
 };
 
@@ -110,46 +130,63 @@ export const Edit: Story = {
   args: {
     intent: 'edit',
     size: 'md',
-    children: 'Edit',
+    text: 'Edit',
   },
 };
 
-// Icon Button Stories
-type IconStory = StoryObj<typeof IconButton>;
-
-export const IconSmall: IconStory = {
+export const EditWithIcon: Story = {
   args: {
-    icon: PlusIcon,
-    size: 'sm',
-  },
-};
-
-export const IconMedium: IconStory = {
-  args: {
-    icon: PlusIcon,
+    intent: 'edit',
     size: 'md',
+    text: 'Edit Item',
+    icon: EditIcon,
   },
 };
 
-export const IconLarge: IconStory = {
+// Example of icon-only button
+export const HeartIconOnly: Story = {
   args: {
-    icon: PlusIcon,
-    size: 'lg',
+    intent: 'favorite',
+    size: 'md',
+    text: 'Favorite',
+    icon: Heart,
+    iconOnly: true,
   },
 };
 
-export const IconPrimary: IconStory = {
+// Example of icon on the right
+export const IconRight: Story = {
   args: {
-    icon: PlusIcon,
     intent: 'primary',
     size: 'md',
+    text: 'Continue',
+    icon: Heart,
+    iconPosition: 'right',
   },
 };
 
-export const IconDanger: IconStory = {
+export const Like: Story = {
   args: {
-    icon: PlusIcon,
-    intent: 'danger',
-    size: 'md',
+    intent: 'favorite',
+    icon: Heart,
+  },
+};
+
+// Example of different sizes with icons
+export const SmallWithIcon: Story = {
+  args: {
+    intent: 'favorite',
+    size: 'sm',
+    text: 'Small',
+    icon: Heart,
+  },
+};
+
+export const LargeWithIcon: Story = {
+  args: {
+    intent: 'favorite',
+    size: 'lg',
+    text: 'Large',
+    icon: Heart,
   },
 };
