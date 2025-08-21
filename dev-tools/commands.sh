@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Quick helper commands for FleetAI project
-# Run from the repo root: ./commands.sh <command>
-# Example: ./commands.sh dev
+# Run from the repo root: ./dev-tools/commands.sh <command>
 
 case "$1" in
   dev)
