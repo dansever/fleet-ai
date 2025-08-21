@@ -8,8 +8,6 @@ export function useClerkProviderData(provider: string, all: boolean = false) {
   if (all) {
     return user.externalAccounts;
   } else {
-    return (
-      user.externalAccounts?.find((acc) => acc.provider === provider) || null
-    );
+    return user.externalAccounts?.find((acc) => acc.provider === provider) || null;
   }
 }

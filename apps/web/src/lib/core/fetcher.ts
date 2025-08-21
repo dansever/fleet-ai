@@ -9,10 +9,7 @@ export const fetcher = (url: string) => fetch(url).then((res) => res.json());
  * Automatically sets Content-Type to application/json.
  * Use for: POST, PUT, DELETE requests with JSON bodies
  */
-export async function apiFetch<T>(
-  url: string,
-  options?: RequestInit,
-): Promise<T> {
+export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   console.log('apiFetch', url, options);
   const res = await fetch(url, {
     ...options,
@@ -25,9 +22,7 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(
-      `API error ${res.status} on ${url}: ${errorText || res.statusText}`,
-    );
+    throw new Error(`API error ${res.status} on ${url}: ${errorText || res.statusText}`);
   }
   if (res.status === 204) return null as unknown as T;
 
@@ -53,9 +48,7 @@ export async function apiFormFetch<T>(
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(
-      `API error ${res.status} on ${url}: ${errorText || res.statusText}`,
-    );
+    throw new Error(`API error ${res.status} on ${url}: ${errorText || res.statusText}`);
   }
   if (res.status === 204) return null as unknown as T;
 

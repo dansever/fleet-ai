@@ -115,8 +115,7 @@ export function formatCurrency(
 ): string | null {
   if (amount == null) return null;
 
-  const parsedAmount =
-    typeof amount === 'number' ? amount : parseFloat(amount.toString());
+  const parsedAmount = typeof amount === 'number' ? amount : parseFloat(amount.toString());
   if (isNaN(parsedAmount)) return null;
 
   const resolvedCurrency = currency?.toUpperCase() || 'USD';

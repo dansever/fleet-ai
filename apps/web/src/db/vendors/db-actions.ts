@@ -7,24 +7,15 @@ import { and, eq } from 'drizzle-orm';
  * Get a vendor by ID
  */
 export async function getVendorById(id: Vendor['id']): Promise<Vendor | null> {
-  const result = await db
-    .select()
-    .from(vendorsTable)
-    .where(eq(vendorsTable.id, id))
-    .limit(1);
+  const result = await db.select().from(vendorsTable).where(eq(vendorsTable.id, id)).limit(1);
   return result[0] ?? null;
 }
 
 /**
  * Get all vendors for an organization
  */
-export async function getVendorsByOrg(
-  orgId: Organization['id'],
-): Promise<Vendor[]> {
-  const vendors = await db
-    .select()
-    .from(vendorsTable)
-    .where(eq(vendorsTable.orgId, orgId));
+export async function getVendorsByOrg(orgId: Organization['id']): Promise<Vendor[]> {
+  const vendors = await db.select().from(vendorsTable).where(eq(vendorsTable.orgId, orgId));
   return vendors;
 }
 
@@ -43,10 +34,7 @@ export async function createVendor(data: NewVendor): Promise<Vendor> {
 /**
  * Update a vendor
  */
-export async function updateVendor(
-  id: Vendor['id'],
-  data: UpdateVendor,
-): Promise<Vendor> {
+export async function updateVendor(id: Vendor['id'], data: UpdateVendor): Promise<Vendor> {
   const result = await db
     .update(vendorsTable)
     .set({ ...data, updatedAt: new Date() })
