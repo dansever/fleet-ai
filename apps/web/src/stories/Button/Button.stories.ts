@@ -1,54 +1,155 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { PlusIcon } from 'lucide-react';
+import { Button, IconButton } from './Button';
 
-import { fn } from 'storybook/test';
+const intents = [
+  'primary',
+  'secondary',
+  'success',
+  'warning',
+  'danger',
+  'ghost',
+  'download',
+  'add',
+  'favorite',
+  'edit',
+  'icon',
+] as const;
 
-import { Button } from './Button';
+const sizes = ['sm', 'md', 'lg'] as const;
 
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-  title: 'Example/Button',
+  title: 'Button',
   component: Button,
-  parameters: {
-    // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
-    layout: 'centered',
-  },
-  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs
-  tags: ['autodocs'],
-  // More on argTypes: https://storybook.js.org/docs/api/argtypes
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
-  // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
-  args: { onClick: fn() },
 } satisfies Meta<typeof Button>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof Button>;
 
-// More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
+export const Default: Story = {
+  args: {
+    intent: 'primary',
+    size: 'md',
+    children: 'Default',
+  },
+};
+
 export const Primary: Story = {
   args: {
-    primary: true,
-    label: 'Button',
+    intent: 'primary',
+    size: 'md',
+    children: 'Primary',
   },
 };
 
 export const Secondary: Story = {
   args: {
-    label: 'Button',
+    intent: 'secondary',
+    size: 'md',
+    children: 'Secondary',
   },
 };
 
-export const Large: Story = {
+export const Sucess: Story = {
   args: {
-    size: 'large',
-    label: 'Button',
+    intent: 'success',
+    size: 'md',
+    children: 'Success',
   },
 };
 
-export const Small: Story = {
+export const Warning: Story = {
   args: {
-    size: 'small',
-    label: 'Button',
+    intent: 'warning',
+    size: 'md',
+    children: 'Warning',
+  },
+};
+
+export const Danger: Story = {
+  args: {
+    intent: 'danger',
+    size: 'md',
+    children: 'Danger',
+  },
+};
+
+export const Ghost: Story = {
+  args: {
+    intent: 'ghost',
+    size: 'md',
+    children: 'Ghost',
+  },
+};
+
+export const Download: Story = {
+  args: {
+    intent: 'download',
+    size: 'md',
+    children: 'Download',
+  },
+};
+
+export const Add: Story = {
+  args: {
+    intent: 'add',
+    size: 'md',
+    children: 'Add',
+  },
+};
+
+export const Favorite: Story = {
+  args: {
+    intent: 'favorite',
+    size: 'md',
+    children: 'Favorite',
+  },
+};
+
+export const Edit: Story = {
+  args: {
+    intent: 'edit',
+    size: 'md',
+    children: 'Edit',
+  },
+};
+
+// Icon Button Stories
+type IconStory = StoryObj<typeof IconButton>;
+
+export const IconSmall: IconStory = {
+  args: {
+    icon: PlusIcon,
+    size: 'sm',
+  },
+};
+
+export const IconMedium: IconStory = {
+  args: {
+    icon: PlusIcon,
+    size: 'md',
+  },
+};
+
+export const IconLarge: IconStory = {
+  args: {
+    icon: PlusIcon,
+    size: 'lg',
+  },
+};
+
+export const IconPrimary: IconStory = {
+  args: {
+    icon: PlusIcon,
+    intent: 'primary',
+    size: 'md',
+  },
+};
+
+export const IconDanger: IconStory = {
+  args: {
+    icon: PlusIcon,
+    intent: 'danger',
+    size: 'md',
   },
 };
