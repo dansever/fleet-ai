@@ -23,23 +23,5 @@ export default async function DashboardPage() {
       headerContent={'Hello'}
       mainContent={<div>{airports.map((airport) => airport.name)}</div>}
     />
-    // <div>
-    //   Welcome, {dbUser.displayName}!
-    //   {airports.map((airport) => (
-    //     <div key={airport.id} className="flex items-center gap-2">
-    //       {airport.name}
-    //       <Button
-    //         intent="success"
-    //         size="md"
-    //         // onClick={() => {
-    //         //   console.log('Storybook Button clicked');
-    //         // }}
-    //       >
-    //         Add Airport
-    //       </Button>
-    //       <IconButton icon={PlusIcon} intent="primary" size="sm" />
-    //     </div>
-    //   ))}
-    // </div>
   );
 }
