@@ -1,6 +1,6 @@
 import { db } from '@/drizzle/db';
 import { airportsTable } from '@/drizzle/schema/schema';
-import { authorizeUser } from '@/lib/autherization/authorize-user';
+import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
