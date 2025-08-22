@@ -3,9 +3,9 @@ import {
   Fuel,
   Home,
   Inbox,
-  LifeBuoy,
   MessageCircle,
   Plane,
+  Settings,
   Settings2,
   ShoppingCart,
 } from 'lucide-react';
@@ -80,13 +80,7 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
     {
       title: 'Settings',
       url: '/settings',
-      icon: Settings2,
-      isReady: true,
-    },
-    {
-      title: 'Support',
-      url: '/support',
-      icon: LifeBuoy,
+      icon: Settings,
       isReady: true,
     },
   ],

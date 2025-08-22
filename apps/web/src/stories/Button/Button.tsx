@@ -58,6 +58,8 @@ export interface ButtonProps
   iconPosition?: 'left' | 'right';
   /** Show only the icon without text */
   iconOnly?: boolean;
+  /** Show loading state */
+  isLoading?: boolean;
 }
 
 // ========= Text / Icon + Text Button =========
@@ -71,6 +73,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       text = null,
       icon: Icon = null,
       iconPosition = 'left',
+      isLoading = false,
       ...props
     },
     ref,
@@ -94,6 +97,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={twMerge(buttonStyles({ intent, size }), className)}
+        disabled={isLoading || props.disabled}
         {...props}
       >
         {/* Icon only mode */}

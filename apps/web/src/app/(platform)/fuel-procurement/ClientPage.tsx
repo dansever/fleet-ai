@@ -6,6 +6,7 @@ import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import AirportList from '../_components/AirportList';
 import { useFuelProcurement } from './ContextProvider';
+import FuelTendersPage from './subpages/FuelTenders';
 
 export default function FuelProcurementClientPage() {
   const { airports, selectedAirport, setSelectedAirport } = useFuelProcurement();
@@ -41,7 +42,9 @@ function AirportContentPage() {
         onTabChange={() => {}}
         children={
           <>
-            <TabsContent value="fuel-tenders">Fuel Tenders</TabsContent>
+            <TabsContent value="fuel-tenders">
+              <FuelTendersPage />
+            </TabsContent>
             <TabsContent value="manage-contracts">Manage Contracts</TabsContent>
           </>
         }
