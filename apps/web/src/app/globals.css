@@ -300,10 +300,34 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/0;
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Prevent overscroll bounce effect */
+  html,
+  body {
+    overscroll-behavior: none;
+    overflow-x: hidden;
+  }
+
+  /* ========= HEADINGS & TEXT ========= */
+  h1 {
+    @apply text-3xl font-semibold py-1;
+  }
+  h2 {
+    @apply text-2xl font-semibold py-1;
+  }
+  h3 {
+    @apply text-xl font-medium;
+  }
+  h4 {
+    @apply text-lg font-medium;
+  }
+  p {
+    @apply text-base;
   }
 }
 

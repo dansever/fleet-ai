@@ -27,13 +27,12 @@ import ClientUserButton from './ClientUserButton';
 import { sidebarTabs } from './SidebarTabs';
 
 const SIDEBAR_MENU_BUTTON_SIZES = {
-  sm: 'text-sm px-2 py-1',
-  md: 'text-md px-2 py-1.5',
-  lg: 'text-lg px-2 py-2',
+  md: 'text-base pl-3 pr-1 py-5',
+  lg: 'text-lg pl-3 pr-1 py-6',
 };
 
 const SIDEBAR_MENU_BUTTON_BASE =
-  'flex items-center truncate gap-2 font-normal text-gray-700 rounded-lg bg-gradient-to-r transition-colors duration-200';
+  'flex items-center truncate gap-2 font-normal text-gray-700 bg-gradient-to-r transition-colors duration-200';
 
 const SIDEBAR_MENU_BUTTON_VARIANTS = {
   default: 'hover:bg-gradient-to-r hover:from-blue-100 hover:to-pink-100/80',
@@ -66,7 +65,13 @@ function SidebarNavItem({
     >
       <SidebarMenuButton
         disabled={!item.isReady}
-        className={cn(SIDEBAR_MENU_BUTTON_BASE, variantClass, SIDEBAR_MENU_BUTTON_SIZES.sm)}
+        className={cn(
+          SIDEBAR_MENU_BUTTON_BASE,
+          variantClass,
+          SIDEBAR_MENU_BUTTON_SIZES.md,
+          !isCollapsed && 'rounded-xl',
+          isCollapsed && 'rounded-lg',
+        )}
         asChild
       >
         <div className="flex items-center">
@@ -93,11 +98,20 @@ function SidebarNavItem({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <SidebarMenuItem>{menuButton}</SidebarMenuItem>
+          <SidebarMenuButton
+            disabled={!item.isReady}
+            className={cn(
+              SIDEBAR_MENU_BUTTON_BASE,
+              variantClass,
+              'cursor-pointer',
+              SIDEBAR_MENU_BUTTON_SIZES.md,
+              isCollapsed ? 'rounded-lg justify-center' : 'rounded-xl',
+            )}
+          >
+            <item.icon className="h-4 w-4 flex-shrink-0" />
+          </SidebarMenuButton>
         </TooltipTrigger>
-        <TooltipContent side="right" className="text-background font-bold">
-          {item.title} {!item.isReady ? '(Soon)' : ''}
-        </TooltipContent>
+        <TooltipContent side="right">{item.title}</TooltipContent>
       </Tooltip>
     );
   }

@@ -15,7 +15,6 @@ export async function getUserById(id: User['id']): Promise<User | null> {
  * Get a user by their Clerk user id
  */
 export async function getUserByClerkUserId(clerkUserId: User['clerkUserId']): Promise<User | null> {
-  console.log('Inside getUserByClerkUserId');
   const result = await db
     .select()
     .from(usersTable)

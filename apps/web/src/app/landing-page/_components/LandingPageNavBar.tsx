@@ -1,9 +1,8 @@
 'use client';
 
 import { BrandLogo } from '@/components/miscellaneous/BrandLogo';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/stories/Button/Button';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from '@clerk/nextjs';
-import Link from 'next/link';
 
 export function LandingPageNavBar() {
   const { isLoaded } = useAuth();
@@ -18,19 +17,15 @@ export function LandingPageNavBar() {
         ) : (
           <>
             <SignedIn>
-              <Button variant="default" size="lg">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
+              <Button intent="primary" size="md" text="Dashboard" />
             </SignedIn>
             <SignedOut>
               <div className="flex items-center gap-1 sm:gap-2">
                 <SignInButton mode="modal">
-                  <Button variant="outline" size="lg">
-                    Log In
-                  </Button>
+                  <Button intent="secondary" size="md" text="Log In" />
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <Button size="lg">Sign Up</Button>
+                  <Button intent="primary" size="md" text="Sign Up" />
                 </SignUpButton>
               </div>
             </SignedOut>

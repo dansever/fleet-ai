@@ -12,8 +12,6 @@ export interface PageLayoutProps {
   className?: string;
   /** Width of the sidebar (default: 20rem) */
   sidebarWidth?: string;
-  /** Height of the header (default: 4rem) */
-  headerHeight?: string;
 }
 
 export const PageLayout: FC<PageLayoutProps> = ({
@@ -22,15 +20,22 @@ export const PageLayout: FC<PageLayoutProps> = ({
   mainContent,
   className,
   sidebarWidth = '20rem',
-  headerHeight = '4rem',
 }) => {
   return (
     <div className={cn('flex h-screen', className)}>
       {/* Left Sidebar Panel - Only render if sidebarContent exists */}
       {sidebarContent && (
         <div
-          className="border-r border-border bg-card flex flex-col"
-          style={{ width: sidebarWidth }}
+          className="border-r border-border bg-card flex flex-col overflow-hidden min-w-0"
+          style={{
+            // Smooth width transition
+            width: 'var(--sidebar-w)',
+            transition: 'width 240ms ease',
+            // Drive width via CSS var so React prop changes animate
+            ['--sidebar-w' as any]: sidebarWidth,
+            // Helps the browser plan for width changes
+            willChange: 'width',
+          }}
         >
           <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
         </div>
@@ -39,10 +44,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
       {/* Right Main Panel */}
       <div className="flex-1 flex flex-col">
         {/* Fixed Header */}
-        <div
-          className="p-4 border-b border-border bg-card/50 backdrop-blur-sm flex items-center"
-          style={{ height: headerHeight }}
-        >
+        <div className="px-4 py-1.5 border-b border-border bg-card/50 backdrop-blur-sm flex items-center">
           {headerContent}
         </div>
 
