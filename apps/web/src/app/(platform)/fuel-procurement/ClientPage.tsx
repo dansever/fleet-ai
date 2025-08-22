@@ -1,7 +1,9 @@
 'use client';
 
 import { useSidebar } from '@/components/ui/sidebar';
+import { TabsContent } from '@/components/ui/tabs';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import AirportList from '../_components/AirportList';
 import { useFuelProcurement } from './ContextProvider';
 
@@ -20,9 +22,30 @@ export default function FuelProcurementClientPage() {
           InsertAddAirportButton={false}
         />
       }
-      headerContent={<div>Client Page</div>}
-      mainContent={<div>{isCollapsed ? 'Collapsed' : 'Expanded'}</div>}
+      headerContent={<h2>{selectedAirport?.name}</h2>}
+      mainContent={<AirportContentPage />}
       sidebarWidth={isCollapsed ? '20rem' : '18rem'}
     />
+  );
+}
+
+function AirportContentPage() {
+  return (
+    <div>
+      <Tabs
+        tabs={[
+          { label: 'Fuel Tenders', value: 'fuel-tenders' },
+          { label: 'Manage Contracts', value: 'manage-contracts' },
+        ]}
+        selectedTab={'fuel-tenders'}
+        onTabChange={() => {}}
+        children={
+          <>
+            <TabsContent value="fuel-tenders">Fuel Tenders</TabsContent>
+            <TabsContent value="manage-contracts">Manage Contracts</TabsContent>
+          </>
+        }
+      />
+    </div>
   );
 }
