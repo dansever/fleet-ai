@@ -1,5 +1,5 @@
 // src/services/apiClient.ts
-// Axious Client
+// Axios Client
 
 import { env } from '@/lib/env/client';
 import axios, { AxiosInstance } from 'axios';
@@ -9,48 +9,55 @@ import axios, { AxiosInstance } from 'axios';
  * Example: /api/quotes, /api/users
  */
 export const api = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_BASE_URL, // e.g., "http://localhost:3000"
+  baseURL: `${env.NEXT_PUBLIC_APP_URL}`,
 });
 
 /**
- * API client for calling external backend (e.g., FastAPI) from the frontend.
- * Example: http://localhost:8000 or deployed backend URL
+ * API client for calling FastAPI backend directly from the frontend.
+ * Example: /api/airports, /api/users
  */
 export const backendApi = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_URL, // e.g., "http://localhost:8000"
+  baseURL: env.NEXT_PUBLIC_BACKEND_URL,
 });
 
 // ------------------------ DEBUGGING ------------------------
 
-function attachDebug(i: AxiosInstance, label: string) {
-  i.interceptors.request.use((cfg) => {
-    const url = `${cfg.baseURL ?? ''}${cfg.url ?? ''}`;
-    console.log(`[${label}] → ${cfg.method?.toUpperCase() || 'GET'} ${url}`);
-    if (cfg.data) {
-      console.log(`   ↳ request data:`, cfg.data);
+const isDebugMode = env.NEXT_PUBLIC_DEBUG_MODE;
+
+function attachDebug(instance: AxiosInstance, label: string) {
+  instance.interceptors.request.use((config) => {
+    const url = `${config.baseURL ?? ''}${config.url ?? ''}`;
+    console.log(`[${label}] → ${config.method?.toUpperCase() || 'GET'} ${url}`);
+
+    if (isDebugMode) {
+      if (config.data) {
+        console.log(`   ↳ request data:`, config.data);
+      }
+      if (config.params) {
+        console.log(`   ↳ query params:`, config.params);
+      }
     }
-    if (cfg.params) {
-      console.log(`   ↳ query params:`, cfg.params);
-    }
-    return cfg;
+    return config;
   });
 
-  i.interceptors.response.use(
-    (res) => {
-      console.log(`[${label}] ← ${res.status} ${res.config.url}`);
-      if (res.data) {
-        console.log(`   ↳ response data:`, res.data);
+  instance.interceptors.response.use(
+    (response) => {
+      console.log(`[${label}] ← ${response.status} ${response.config.url}`);
+
+      if (isDebugMode && response.data) {
+        console.log(`   ↳ response data:`, response.data);
       }
-      return res;
+      return response;
     },
-    (err) => {
-      const url = err.config?.url ?? 'unknown';
-      const status = err.response?.status ?? 'no-response';
-      console.log(`[${label}] × ${status} ${url} ${err.message}`);
-      if (err.response?.data) {
-        console.log(`   ↳ error data:`, err.response.data);
+    (error) => {
+      const url = error.config?.url ?? 'unknown';
+      const status = error.response?.status ?? 'no-response';
+      console.log(`[${label}] × ${status} ${url} ${error.message}`);
+
+      if (isDebugMode && error.response?.data) {
+        console.log(`   ↳ error data:`, error.response.data);
       }
-      return Promise.reject(err);
+      return Promise.reject(error);
     },
   );
 }
