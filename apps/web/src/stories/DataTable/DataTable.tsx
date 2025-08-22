@@ -1,0 +1,278 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ChevronDownIcon, ChevronUpIcon, FilterIcon, SearchIcon } from 'lucide-react';
+import type React from 'react';
+import { useMemo, useState } from 'react';
+
+export interface Column<T> {
+  key: keyof T | string;
+  header: string;
+  accessor?: (item: T) => React.ReactNode;
+  sortable?: boolean;
+  filterable?: boolean;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+export interface DataTableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  title?: string;
+  description?: string;
+  searchable?: boolean;
+  filterable?: boolean;
+  pagination?: boolean;
+  pageSize?: number;
+  className?: string;
+  onRowClick?: (item: T) => void;
+  rowClassName?: (item: T) => string;
+}
+
+type SortDirection = 'asc' | 'desc' | null;
+
+export function DataTable<T extends Record<string, any>>({
+  data,
+  columns,
+  title,
+  description,
+  searchable = true,
+  filterable = false,
+  pagination = true,
+  pageSize = 10,
+  className = '',
+  onRowClick,
+  rowClassName,
+}: DataTableProps<T>) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+
+  // Filter and search data
+  const filteredData = useMemo(() => {
+    let result = [...data];
+
+    // Apply search
+    if (searchTerm) {
+      result = result.filter((item) =>
+        Object.values(item).some((value) =>
+          String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
+      );
+    }
+
+    // Apply column filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        result = result.filter((item) =>
+          String(item[key]).toLowerCase().includes(value.toLowerCase()),
+        );
+      }
+    });
+
+    // Apply sorting
+    if (sortColumn && sortDirection) {
+      result.sort((a, b) => {
+        const aValue = a[sortColumn];
+        const bValue = b[sortColumn];
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, searchTerm, sortColumn, sortDirection, filters]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const paginatedData = pagination
+    ? filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    : filteredData;
+
+  const handleSort = (columnKey: string) => {
+    if (sortColumn === columnKey) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc'));
+      if (sortDirection === 'desc') {
+        setSortColumn(null);
+      }
+    } else {
+      setSortColumn(columnKey);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (columnKey: string) => {
+    if (sortColumn !== columnKey) return null;
+    return sortDirection === 'asc' ? (
+      <ChevronUpIcon className="w-4 h-4" />
+    ) : (
+      <ChevronDownIcon className="w-4 h-4" />
+    );
+  };
+
+  return (
+    <div
+      className={`bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-lg ${className}`}
+    >
+      {/* Header */}
+      {(title || description) && (
+        <div className="p-6 border-b border-gray-200/50">
+          {title && <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>}
+          {description && <p className="text-gray-600">{description}</p>}
+        </div>
+      )}
+
+      {/* Controls */}
+      {(searchable || filterable) && (
+        <div className="p-6 border-b border-gray-200/50 space-y-4">
+          {searchable && (
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search across all columns..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 rounded-2xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+              />
+            </div>
+          )}
+
+          {filterable && (
+            <div className="flex flex-wrap gap-3">
+              {columns
+                .filter((col) => col.filterable)
+                .map((column) => (
+                  <div key={String(column.key)} className="flex-1 min-w-[200px]">
+                    <Input
+                      placeholder={`Filter by ${column.header}...`}
+                      value={filters[String(column.key)] || ''}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          [String(column.key)]: e.target.value,
+                        }))
+                      }
+                      className="rounded-2xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+                    />
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200/50">
+              {columns.map((column) => (
+                <th
+                  key={String(column.key)}
+                  className={`px-6 py-4 text-left text-sm font-semibold text-gray-900 ${
+                    column.sortable ? 'cursor-pointer hover:bg-gray-50/50' : ''
+                  } ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : ''}`}
+                  style={{ width: column.width }}
+                  onClick={() => column.sortable && handleSort(String(column.key))}
+                >
+                  <div className="flex items-center gap-2">
+                    {column.header}
+                    {column.sortable && getSortIcon(String(column.key))}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((item, index) => (
+              <tr
+                key={index}
+                className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors ${
+                  onRowClick ? 'cursor-pointer' : ''
+                } ${rowClassName ? rowClassName(item) : ''}`}
+                onClick={() => onRowClick?.(item)}
+              >
+                {columns.map((column) => (
+                  <td
+                    key={String(column.key)}
+                    className={`px-6 py-4 text-sm text-gray-700 ${
+                      column.align === 'center'
+                        ? 'text-center'
+                        : column.align === 'right'
+                          ? 'text-right'
+                          : ''
+                    }`}
+                  >
+                    {column.accessor ? column.accessor(item) : item[column.key as keyof T]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Empty State */}
+      {paginatedData.length === 0 && (
+        <div className="p-12 text-center">
+          <div className="text-gray-400 mb-2">
+            <FilterIcon className="w-12 h-12 mx-auto mb-4" />
+          </div>
+          <h4 className="text-lg font-semibold text-gray-900 mb-2">No results found</h4>
+          <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination && totalPages > 1 && (
+        <div className="p-6 border-t border-gray-200/50 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} results
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="rounded-xl"
+            >
+              Previous
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className="rounded-xl w-10"
+                  >
+                    {page}
+                  </Button>
+                );
+              })}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-xl"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

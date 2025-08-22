@@ -67,6 +67,7 @@ export const DetailDialog = ({
       <DialogContent
         onEscapeKeyDown={(e) => isLoading && e.preventDefault()}
         onPointerDownOutside={(e) => isLoading && e.preventDefault()}
+        aria-describedby={undefined}
         className={cn(
           'min-w-[60vw] sm:min-w-[65vw] md:min-w-[70vw] lg:min-w-[75vw]',
           'max-h-[90vh] sm:max-h-[85vh] md:max-h-[80vh]',

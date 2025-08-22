@@ -19,7 +19,6 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
-import { Separator } from '@radix-ui/react-separator';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -231,24 +230,24 @@ export function AppSidebar({
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {sidebarTabs.administration.map((item) => (
+                  <SidebarNavItem
+                    key={item.title}
+                    item={item}
+                    isActive={pathname === item.url}
+                    isCollapsed={isCollapsed}
+                  />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        <Separator />
-        <SidebarGroup className="mt-auto border-t border-border">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sidebarTabs.administration.map((item) => (
-                <SidebarNavItem
-                  key={item.title}
-                  item={item}
-                  isActive={pathname === item.url}
-                  isCollapsed={isCollapsed}
-                />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
         <div style={{ position: 'relative', width: '100%', height: '40px' }}>
           {user?.organizationMemberships[0].organization.imageUrl && !isCollapsed && (
             <Image
