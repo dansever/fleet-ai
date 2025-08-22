@@ -1,5 +1,5 @@
-import type * as React from 'react';
 import { cn } from '@/lib/utils';
+import type * as React from 'react';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ export function GlassCard({ children, className, highlight = false, ...props }: 
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-xl',
+        'relative overflow-hidden rounded-xl border border-white/5 bg-white/25 backdrop-blur-sm shadow-sm',
         highlight && 'border-primary/20 bg-primary/5',
         className,
       )}

@@ -214,3 +214,62 @@ export const NotificationCard = ({
     </Card>
   );
 };
+
+// StatusBadge component for person cards
+const StatusBadge = ({ status }: { status: string }) => (
+  <Badge
+    variant={status === 'active' ? 'default' : 'secondary'}
+    className={status === 'active' ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
+  >
+    {status}
+  </Badge>
+);
+
+// List Item Card - For scrollable lists with flexible content
+export const ListItemCard = ({
+  children,
+  icon = null,
+  iconBackground,
+  isSelected = false,
+  onClick,
+  className,
+}: {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  iconBackground?: string;
+  isSelected?: boolean;
+  onClick?: () => void;
+  className?: string;
+}) => (
+  <Card
+    className={cn(
+      'box-border overflow-hidden rounded-2xl p-2 transition-all duration-200 cursor-pointer hover:shadow-md w-full min-w-0',
+      isSelected
+        ? 'ring-2 ring-green-500 bg-gradient-to-br from-green-100 to-green-50'
+        : 'hover:bg-gray-50',
+      className,
+    )}
+    onClick={onClick}
+  >
+    <CardContent className="px-0">
+      <div className="flex flex-row w-full gap-2">
+        {icon && (
+          <div
+            className={cn(
+              'w-10 h-10 bg-gradient-to-r text-gray-700 rounded-lg p-2 flex items-center justify-center shrink-0 self-start',
+              iconBackground,
+            )}
+          >
+            {icon}
+          </div>
+        )}
+
+        {/* Fills all remaining width */}
+        <div className={cn('flex-1 min-w-0', !icon && 'pl-1')}>
+          {/* Force children to span the full width */}
+          <div className="w-full max-w-full">{children}</div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);

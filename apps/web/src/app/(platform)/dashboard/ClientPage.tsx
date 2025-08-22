@@ -1,9 +1,11 @@
 'use client';
 
-export default async function DashboardClientPage() {
+import { Input } from '@/components/ui/input';
+
+export default function DashboardClientPage() {
   return (
     <div>
-      <h1>Hello</h1>
+      <Input placeholder="Search" />
     </div>
   );
 }

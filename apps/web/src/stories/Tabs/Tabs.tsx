@@ -1,4 +1,4 @@
-import { TabsContent, TabsList, TabsTrigger, Tabs as TabsUI } from '@/components/ui/tabs';
+import { TabsList, TabsTrigger, Tabs as TabsUI } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 export interface TabsProps {
@@ -31,6 +31,7 @@ export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: Ta
         </TabsTrigger>
       ))}
     </TabsList>
-    <TabsContent value={selectedTab}>{children}</TabsContent>
+    {/* Let consumers pass their own <TabsContent> */}
+    {children}
   </TabsUI>
 );

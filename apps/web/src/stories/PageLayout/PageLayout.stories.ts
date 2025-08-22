@@ -19,10 +19,6 @@ const meta: Meta<typeof PageLayout> = {
       control: 'text',
       description: 'Width of the sidebar panel',
     },
-    headerHeight: {
-      control: 'text',
-      description: 'Height of the header',
-    },
     className: {
       control: 'text',
       description: 'Additional CSS classes',
