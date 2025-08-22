@@ -20,7 +20,7 @@ export const env = createEnv({
 
     // App Configuration
     NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
-    NEXT_PUBLIC_API_DEBUG: z.boolean().default(false),
+    // NEXT_PUBLIC_API_DEBUG: z.boolean().default(false),
 
     // Azure Integration (Optional)
     NEXT_PUBLIC_AZURE_CLIENT_ID: z.string().optional(),
@@ -44,7 +44,7 @@ export const env = createEnv({
 
     // App Configuration
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NEXT_PUBLIC_API_DEBUG: process.env.NEXT_PUBLIC_API_DEBUG,
+    // NEXT_PUBLIC_API_DEBUG: process.env.NEXT_PUBLIC_API_DEBUG,
 
     // Azure Integration
     NEXT_PUBLIC_AZURE_CLIENT_ID: process.env.NEXT_PUBLIC_AZURE_CLIENT_ID,

@@ -3,6 +3,12 @@ import { useFuelProcurement } from '../ContextProvider';
 
 export default function FuelTendersPage() {
   const { selectedAirport } = useFuelProcurement();
+
   if (!selectedAirport) return null;
-  return <AirportDialog airport={selectedAirport} />;
+
+  return (
+    <div>
+      <AirportDialog airport={selectedAirport} />
+    </div>
+  );
 }

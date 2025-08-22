@@ -37,17 +37,6 @@ export default function FuelProcurementProvider({
   });
   const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
 
-  // const refreshAirports = useCallback(async () => {
-  //   const airports = await getAirports();
-  //   setAirports(airports);
-  // }, []);
-
-  // useEffect(() => {
-  //   if (hasServerData) {
-  //     refreshAirports();
-  //   }
-  // }, [hasServerData, refreshAirports]);
-
   const value: FuelProcurementContextType = {
     dbUser,
     airports,

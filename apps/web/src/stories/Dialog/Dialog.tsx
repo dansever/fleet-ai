@@ -7,6 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Edit2, Save, X } from 'lucide-react';
 import type React from 'react';
@@ -17,7 +20,7 @@ export interface DetailDialogProps {
   trigger: React.ReactNode;
   title: string;
   subtitle?: string;
-  children: React.ReactNode;
+  children: React.ReactNode | ((isEditing: boolean) => React.ReactNode);
   className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -38,14 +41,32 @@ export const DetailDialog = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    onSave?.({}); // You can pass actual form data here
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      await onSave?.({}); // await the parent logic
+      setIsEditing(false); // leave edit mode only on success
+      // optionally: onOpenChange?.(false) if you want to auto-close dialog
+    } catch {
+      // keep editing; parent already showed a toast
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (isLoading) return;
+        setIsEditing(false);
+        onOpenChange?.(next);
+      }}
+    >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
+        onEscapeKeyDown={(e) => isLoading && e.preventDefault()}
+        onPointerDownOutside={(e) => isLoading && e.preventDefault()}
         className={cn(
           'min-w-[60vw] sm:min-w-[65vw] md:min-w-[70vw] lg:min-w-[75vw]',
           'max-h-[90vh] sm:max-h-[85vh] md:max-h-[80vh]',
@@ -98,7 +119,9 @@ export const DetailDialog = ({
         </DialogHeader>
 
         {/* Content area with better spacing for sections */}
-        <div className="p-2 max-h-[70vh] overflow-y-auto bg-gray-50">{children}</div>
+        <div className="p-2 max-h-[70vh] overflow-y-auto bg-gray-50">
+          {typeof children === 'function' ? children(isEditing) : children}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -129,10 +152,16 @@ export const KeyValuePair = ({
   label,
   value,
   className,
+  editMode = false,
+  onChange,
+  name,
 }: {
   label: string;
-  value: string | React.ReactNode;
+  value: string | number | boolean | React.ReactNode;
   className?: string;
+  editMode?: boolean;
+  onChange?: (value: string | number | boolean) => void;
+  name?: string;
 }) => (
   <div
     className={cn(
@@ -141,7 +170,46 @@ export const KeyValuePair = ({
     )}
   >
     <span className="font-medium text-gray-600 w-1/3">{label}</span>
-    <span className="ml-auto text-left w-2/3">{value}</span>
+
+    <span className="ml-auto text-left w-2/3">
+      {editMode ? (
+        typeof value === 'string' ? (
+          <Textarea
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            name={name}
+            rows={2}
+            className="w-full resize-none min-h-[2.5rem] leading-tight whitespace-pre-wrap break-words"
+          />
+        ) : typeof value === 'number' ? (
+          <Input
+            type="number"
+            value={value}
+            onChange={(e) => onChange?.(e.currentTarget.valueAsNumber)}
+            name={name}
+            className="w-full"
+          />
+        ) : typeof value === 'boolean' ? (
+          <Switch
+            checked={value}
+            onCheckedChange={(checked) => onChange?.(checked)} // keep boolean
+            name={name}
+          />
+        ) : (
+          value
+        )
+      ) : typeof value === 'boolean' ? (
+        <span
+          className={`px-2 py-1 rounded text-xs font-medium ${
+            value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}
+        >
+          {value ? 'Yes' : 'No'}
+        </span>
+      ) : (
+        value
+      )}
+    </span>
   </div>
 );
 

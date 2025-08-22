@@ -21,11 +21,8 @@ export const backendApi = axios.create({
 });
 
 // ------------------------ DEBUGGING ------------------------
-const DEBUG = env.NEXT_PUBLIC_API_DEBUG;
 
 function attachDebug(i: AxiosInstance, label: string) {
-  if (!DEBUG) return;
-
   i.interceptors.request.use((cfg) => {
     const url = `${cfg.baseURL ?? ''}${cfg.url ?? ''}`;
     console.log(`[${label}] → ${cfg.method?.toUpperCase() || 'GET'} ${url}`);
