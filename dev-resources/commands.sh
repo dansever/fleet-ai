@@ -17,26 +17,31 @@ case "$1" in
     ;;
 
   studio:local)
+    # Open Drizzle Studio (local DB)
     echo "📊 Opening Drizzle Studio (local DB)..."
     dotenv -e apps/web/.env.local -- drizzle-kit studio --config=drizzle.config.ts
     ;;
 
   studio:remote)
+    # Open Drizzle Studio (remote DB)
     echo "📊 Opening Drizzle Studio (Supabase)..."
     dotenv -e apps/web/.env.production -- drizzle-kit studio --config=drizzle.config.ts
     ;;
 
   migrate:local)
+    # Run migrations on local DB
     echo "📦 Running local DB migrations..."
     dotenv -e apps/web/.env.local -- drizzle-kit migrate --config=drizzle.config.ts
     ;;
 
   migrate:remote)
+    # Run migrations on remote DB
     echo "📦 Running Supabase DB migrations..."
     dotenv -e apps/web/.env.production -- drizzle-kit migrate --config=drizzle.config.ts
     ;;
 
   db:generate)
+    # Generate Drizzle schema from DB
     echo "📝 Generating Drizzle schema from DB..."
     dotenv -e apps/web/.env.local -- drizzle-kit generate --config=drizzle.config.ts
     ;;

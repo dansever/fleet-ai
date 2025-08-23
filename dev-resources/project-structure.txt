@@ -1,22 +1,37 @@
 .
-|-- DATABASE.md
-|-- ENVIRONMENT.md
 |-- LICENSE
 |-- README.md
 |-- apps
 |   |-- backend
-|   |   |-- api
+|   |   |-- README.md
+|   |   |-- SETUP.md
+|   |   |-- app
+|   |   |   |-- api
+|   |   |   `-- features
+|   |   |-- config
 |   |   |-- db
-|   |   |-- features
 |   |   |-- main.py
+|   |   |-- middleware
+|   |   |   |-- auth.py
+|   |   |   |-- error_handling.py
+|   |   |   |-- logging.py
+|   |   |   `-- rate_limiting.py
+|   |   |-- notebooks
+|   |   |-- requirements.txt
 |   |   |-- services
+|   |   |-- start.ps1
 |   |   `-- utils
 |   `-- web
 |       |-- components.json
 |       |-- next-env.d.ts
 |       |-- next.config.ts
 |       |-- package.json
+|       |-- postcss.config.mjs
 |       |-- public
+|       |   |-- data
+|       |   |   |-- README.md
+|       |   |   |-- airports.csv
+|       |   |   `-- countries.csv
 |       |   |-- favicon.ico
 |       |   `-- logos
 |       |       `-- fleet-ai-logo.svg
@@ -44,8 +59,40 @@
 |       |   |   |   |   |-- ClientPage.tsx
 |       |   |   |   |   |-- ContextProvider.tsx
 |       |   |   |   |   `-- page.tsx
-|       |   |   |   `-- layout.tsx
+|       |   |   |   |-- fuel-procurement
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- ContextProvider.tsx
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |-- page.tsx
+|       |   |   |   |   `-- subpages
+|       |   |   |   |       `-- FuelTenders.tsx
+|       |   |   |   |-- layout.tsx
+|       |   |   |   |-- settings
+|       |   |   |   |   `-- page.tsx
+|       |   |   |   `-- technical-procurement
+|       |   |   |       |-- ClientPage.tsx
+|       |   |   |       |-- ContextProvider.tsx
+|       |   |   |       |-- _components
+|       |   |   |       |   `-- RfqList.tsx
+|       |   |   |       `-- page.tsx
 |       |   |   |-- api
+|       |   |   |   |-- airports
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- fuel-tenders
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- orgs
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- quotes
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- rfqs
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- users
+|       |   |   |   |   `-- route.ts
+|       |   |   |   `-- webhooks
+|       |   |   |       |-- clerk
+|       |   |   |       |   `-- route.ts
+|       |   |   |       `-- stripe
+|       |   |   |           `-- route.ts
 |       |   |   |-- globals.css
 |       |   |   |-- landing-page
 |       |   |   |   |-- ClientPage.tsx
@@ -66,11 +113,15 @@
 |       |   |       |-- avatar.tsx
 |       |   |       |-- badge.tsx
 |       |   |       |-- button.tsx
+|       |   |       |-- calendar.tsx
 |       |   |       |-- card.tsx
+|       |   |       |-- checkbox.tsx
 |       |   |       |-- dialog.tsx
 |       |   |       |-- dropdown-menu.tsx
 |       |   |       |-- input.tsx
 |       |   |       |-- label.tsx
+|       |   |       |-- popover.tsx
+|       |   |       |-- progress.tsx
 |       |   |       |-- radio-group.tsx
 |       |   |       |-- scroll-area.tsx
 |       |   |       |-- select.tsx
@@ -87,6 +138,8 @@
 |       |   |       `-- tooltip.tsx
 |       |   |-- db
 |       |   |   |-- airports
+|       |   |   |   `-- db-actions.ts
+|       |   |   |-- fuel-tenders
 |       |   |   |   `-- db-actions.ts
 |       |   |   |-- org-settings
 |       |   |   |   `-- db-actions.ts
@@ -121,15 +174,17 @@
 |       |   |   |-- fuel
 |       |   |   |   |-- bid
 |       |   |   |   `-- tender
+|       |   |   |       `-- TenderDialog.tsx
 |       |   |   |-- quotes
 |       |   |   `-- rfqs
+|       |   |       `-- RfqDialog.tsx
 |       |   |-- hooks
 |       |   |   |-- use-airport-autocomplete.ts
 |       |   |   |-- use-country-map.ts
 |       |   |   |-- use-mobile.ts
 |       |   |   `-- use-pdf-files.ts
 |       |   |-- lib
-|       |   |   |-- autherization
+|       |   |   |-- authorization
 |       |   |   |   |-- authorize-resource.ts
 |       |   |   |   `-- authorize-user.ts
 |       |   |   |-- core
@@ -148,6 +203,70 @@
 |       |   |   |   `-- useWindowSize.ts
 |       |   |   `-- utils.ts
 |       |   |-- middleware.ts
+|       |   |-- services
+|       |   |   |-- api-client.ts
+|       |   |   |-- core
+|       |   |   |   |-- airport-client.ts
+|       |   |   |   |-- org-client.ts
+|       |   |   |   `-- user-client.ts
+|       |   |   |-- fuel
+|       |   |   |   |-- fuel-bid-client.ts
+|       |   |   |   `-- fuel-tender-client.ts
+|       |   |   |-- technical
+|       |   |   |   |-- quote-client.ts
+|       |   |   |   `-- rfq-client.ts
+|       |   |   `-- vendors
+|       |   |       |-- contact-client.ts
+|       |   |       `-- vendor-client.ts
+|       |   |-- stories
+|       |   |   |-- Button
+|       |   |   |   |-- Button.stories.ts
+|       |   |   |   `-- Button.tsx
+|       |   |   |-- Card
+|       |   |   |   |-- Card.tsx
+|       |   |   |   |-- FeatureCard.stories.ts
+|       |   |   |   |-- ListItemCard.stories.ts
+|       |   |   |   |-- NotificationCard.stories.ts
+|       |   |   |   |-- ProfileCard.stories.ts
+|       |   |   |   |-- ProjectCard.stories.ts
+|       |   |   |   `-- StatsCard.stories.ts
+|       |   |   |-- Configure.mdx
+|       |   |   |-- DataTable
+|       |   |   |   |-- DataTable.stories.ts
+|       |   |   |   `-- DataTable.tsx
+|       |   |   |-- Dialog
+|       |   |   |   |-- Dialog.stories.ts
+|       |   |   |   `-- Dialog.tsx
+|       |   |   |-- Form
+|       |   |   |   |-- Form.stories.ts
+|       |   |   |   `-- Form.tsx
+|       |   |   |-- Header
+|       |   |   |   |-- Header.stories.ts
+|       |   |   |   |-- Header.tsx
+|       |   |   |   `-- header.css
+|       |   |   |-- PageLayout
+|       |   |   |   |-- PageLayout.stories.ts
+|       |   |   |   `-- PageLayout.tsx
+|       |   |   |-- Tabs
+|       |   |   |   |-- Tabs.stories.ts
+|       |   |   |   `-- Tabs.tsx
+|       |   |   `-- assets
+|       |   |       |-- accessibility.png
+|       |   |       |-- accessibility.svg
+|       |   |       |-- addon-library.png
+|       |   |       |-- assets.png
+|       |   |       |-- avif-test-image.avif
+|       |   |       |-- context.png
+|       |   |       |-- discord.svg
+|       |   |       |-- docs.png
+|       |   |       |-- figma-plugin.png
+|       |   |       |-- github.svg
+|       |   |       |-- share.png
+|       |   |       |-- styling.png
+|       |   |       |-- testing.png
+|       |   |       |-- theming.png
+|       |   |       |-- tutorials.svg
+|       |   |       `-- youtube.svg
 |       |   |-- styles
 |       |   |   `-- tailwindStyles.ts
 |       |   `-- utils
@@ -158,23 +277,22 @@
 |       |           |-- client.ts
 |       |           |-- middleware.ts
 |       |           `-- server.ts
+|       |-- tailwind.config.ts
 |       |-- tsconfig.json
-|       `-- tsconfig.tsbuildinfo
-|-- data
-|   |-- README.md
-|   |-- airports.csv
-|   `-- countries.csv
-|-- dev-tools
+|       |-- tsconfig.tsbuildinfo
+|       |-- vitest.config.ts
+|       `-- vitest.shims.d.ts
+|-- dev-resources
+|   |-- DATABASE.md
+|   |-- DEPLOYMENT.md
+|   |-- ENVIRONMENT.md
 |   |-- commands.sh
 |   `-- project-structure.txt
 |-- docker-compose.yml
 |-- drizzle.config.ts
 |-- google-credentials.json
-|-- middleware.ts
-|-- next-env.d.ts
 |-- package.json
 |-- pnpm-lock.yaml
-|-- pnpm-workspace.yaml
-`-- postcss.config.mjs
+`-- pnpm-workspace.yaml
 
-58 directories, 119 files
+93 directories, 202 files

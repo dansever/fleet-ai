@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { LucideIcon } from 'lucide-react';
+import Link from 'next/link';
 import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -8,7 +9,7 @@ const buttonStyles = cva(
     'inline-flex items-center justify-center',
     'rounded-2xl',
     'transition-colors duration-200',
-    'font-semibold text-center',
+    'font-normal text-center',
     'cursor-pointer',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:opacity-50 disabled:pointer-events-none',
@@ -56,10 +57,12 @@ export interface ButtonProps
   icon?: LucideIcon;
   /** Position of the icon relative to text */
   iconPosition?: 'left' | 'right';
-  /** Show only the icon without text */
-  iconOnly?: boolean;
   /** Show loading state */
   isLoading?: boolean;
+  /** Link to navigate to (if provided, renders as Link instead of button) */
+  href?: string;
+  /** Open link in new tab */
+  external?: boolean;
 }
 
 // ========= Text / Icon + Text Button =========
@@ -74,6 +77,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: Icon = null,
       iconPosition = 'left',
       isLoading = false,
+      href,
+      external = false,
       ...props
     },
     ref,
@@ -91,15 +96,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const iconSize = getIconSize();
+    const baseClassName = twMerge(buttonStyles({ intent, size }), className);
 
-    return (
-      <button
-        ref={ref}
-        type={type}
-        className={twMerge(buttonStyles({ intent, size }), className)}
-        disabled={isLoading || props.disabled}
-        {...props}
-      >
+    // Content to render (same for both button and link)
+    const content = (
+      <>
         {/* Icon only mode */}
         {text === null && Icon && <Icon className={iconSize} />}
 
@@ -111,6 +112,36 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             {Icon && iconPosition === 'right' && <Icon className={`${iconSize} ml-2`} />}
           </>
         )}
+      </>
+    );
+
+    // Render as Link if href is provided
+    if (href) {
+      if (external) {
+        return (
+          <a href={href} className={baseClassName} target="_blank" rel="noopener noreferrer">
+            {content}
+          </a>
+        );
+      }
+
+      return (
+        <Link href={href} className={baseClassName}>
+          {content}
+        </Link>
+      );
+    }
+
+    // Render as button
+    return (
+      <button
+        ref={ref}
+        type={type}
+        className={baseClassName}
+        disabled={isLoading || props.disabled}
+        {...props}
+      >
+        {content}
       </button>
     );
   },

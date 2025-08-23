@@ -1,7 +1,8 @@
 import { Button } from '@/stories/Button/Button';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { createElement } from 'react';
-import { DetailDialog, DialogSection, KeyValuePair, TagList } from './Dialog';
+import { DialogSection, KeyValuePair, TagList } from '../Card/Card';
+import { DetailDialog } from './Dialog';
 
 const meta: Meta<typeof DetailDialog> = {
   title: 'Components/Dialog/DetailDialog',

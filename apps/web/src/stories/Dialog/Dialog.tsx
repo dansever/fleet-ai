@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -7,9 +6,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Edit2, Save, X } from 'lucide-react';
 import type React from 'react';
@@ -127,100 +123,3 @@ export const DetailDialog = ({
     </Dialog>
   );
 };
-
-// Dialog Section - Added sectioned card component for organized dialog content
-export const DialogSection = ({
-  title,
-  children,
-  className,
-  gradient = 'from-violet-500 to-blue-500',
-}: {
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-  gradient?: string;
-}) => (
-  <div className={cn('rounded-2xl border border-gray-200 overflow-hidden mb-4', className)}>
-    <div className={cn('bg-gradient-to-r text-white px-4 py-3', gradient)}>
-      <h4 className="font-semibold text-sm">{title}</h4>
-    </div>
-    <div className="p-4 bg-white">{children}</div>
-  </div>
-);
-
-// Key-Value Pair - For displaying structured information
-export const KeyValuePair = ({
-  label,
-  value,
-  className,
-  editMode = false,
-  onChange,
-  name,
-}: {
-  label: string;
-  value: string | number | boolean | React.ReactNode;
-  className?: string;
-  editMode?: boolean;
-  onChange?: (value: string | number | boolean) => void;
-  name?: string;
-}) => (
-  <div
-    className={cn(
-      'flex items-start py-2 gap-8 border-b border-gray-100 last:border-b-0',
-      className,
-    )}
-  >
-    <span className="font-medium text-gray-600 w-1/3">{label}</span>
-
-    <span className="ml-auto text-left w-2/3">
-      {editMode ? (
-        typeof value === 'string' ? (
-          <Textarea
-            value={value}
-            onChange={(e) => onChange?.(e.target.value)}
-            name={name}
-            rows={2}
-            className="w-full resize-none min-h-[2.5rem] leading-tight whitespace-pre-wrap break-words"
-          />
-        ) : typeof value === 'number' ? (
-          <Input
-            type="number"
-            value={value}
-            onChange={(e) => onChange?.(e.currentTarget.valueAsNumber)}
-            name={name}
-            className="w-full"
-          />
-        ) : typeof value === 'boolean' ? (
-          <Switch
-            checked={value}
-            onCheckedChange={(checked) => onChange?.(checked)} // keep boolean
-            name={name}
-          />
-        ) : (
-          value
-        )
-      ) : typeof value === 'boolean' ? (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {value ? 'Yes' : 'No'}
-        </span>
-      ) : (
-        value
-      )}
-    </span>
-  </div>
-);
-
-// Tag List - For displaying badges/tags in dialogs
-export const TagList = ({ tags, className }: { tags: string[]; className?: string }) => (
-  <div className={cn('flex flex-wrap gap-2', className)}>
-    {tags.map((tag, index) => (
-      <Badge key={index} variant="outline" className="rounded-full">
-        {tag}
-      </Badge>
-    ))}
-  </div>
-);

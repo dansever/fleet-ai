@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import type { Rfq } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
-import { DetailDialog, DialogSection, KeyValuePair } from '@/stories/Dialog/Dialog';
+import { DialogSection, KeyValuePair } from '@/stories/Card/Card';
+import { DetailDialog } from '@/stories/Dialog/Dialog';
 
 export default function RfqDialog({ rfq }: { rfq: Rfq }) {
   return (

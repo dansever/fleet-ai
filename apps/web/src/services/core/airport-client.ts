@@ -6,9 +6,8 @@ import { api } from '../api-client';
  * @returns Array of airports
  */
 export async function getAirports() {
-  console.log('getAirports');
-  // const res = await api.get('/api/airports');
-  // return res.data;
+  const res = await api.get('/api/airports');
+  return res.data;
 }
 
 /**

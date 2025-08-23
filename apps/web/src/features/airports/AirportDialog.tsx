@@ -3,11 +3,18 @@
 import type { Airport } from '@/drizzle/types';
 import { updateAirport } from '@/services/core/airport-client';
 import { Button } from '@/stories/Button/Button';
-import { DetailDialog, DialogSection, KeyValuePair } from '@/stories/Dialog/Dialog';
+import { DialogSection, KeyValuePair } from '@/stories/Card/Card';
+import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export default function AirportDialog({ airport }: { airport: Airport }) {
+export default function AirportDialog({
+  airport,
+  onChange,
+}: {
+  airport: Airport;
+  onChange: (airport: Airport) => void;
+}) {
   const [formData, setFormData] = useState({
     name: airport.name,
     city: airport.city,
@@ -41,6 +48,12 @@ export default function AirportDialog({ airport }: { airport: Airport }) {
     try {
       await updateAirport(airport.id, formData);
       toast.success('Airport saved successfully');
+
+      // Call onChange to update parent with new data
+      onChange({
+        ...airport,
+        ...formData,
+      });
     } catch (error) {
       toast.error('Failed to save');
     } finally {

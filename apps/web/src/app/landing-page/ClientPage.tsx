@@ -4,9 +4,11 @@ import { GlassCard } from '@/components/miscellaneous/GlassCard';
 import { Button } from '@/stories/Button/Button';
 import { BarChart3, Repeat, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LandingPageNavBar } from './_components/LandingPageNavBar';
 
 export default function LandingPageClient() {
+  const router = useRouter();
   return (
     <div className="flex min-h-screen flex-col items-center gap-8">
       <LandingPageNavBar />
