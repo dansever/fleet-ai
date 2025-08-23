@@ -2,46 +2,61 @@
 
 import type { FuelTender } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
-import { updateFuelTender } from '@/services/fuel/fuel-tender-client';
+import {
+  createFuelTender,
+  updateFuelTender,
+  type CreateFuelTenderData,
+} from '@/services/fuel/fuel-tender-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
+import { Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function TenderDialog({
   tender,
+  airportId,
   onChange,
+  DialogType = 'view',
+  triggerClassName,
+  buttonSize = 'md',
 }: {
-  tender: FuelTender;
+  tender: FuelTender | null;
+  airportId?: string; // Required when isNew is true
   onChange: (tender: FuelTender) => void;
+  DialogType: 'add' | 'edit' | 'view';
+  triggerClassName?: string;
+  buttonSize?: 'sm' | 'md' | 'lg';
 }) {
   const [formData, setFormData] = useState({
-    title: tender.title,
-    description: tender.description,
-    fuelType: tender.fuelType,
-    baseCurrency: tender.baseCurrency,
-    baseUom: tender.baseUom,
-    biddingStarts: tender.biddingStarts,
-    biddingEnds: tender.biddingEnds,
-    deliveryStarts: tender.deliveryStarts,
-    deliveryEnds: tender.deliveryEnds,
+    title: tender?.title || '',
+    description: tender?.description || '',
+    fuelType: tender?.fuelType || '',
+    baseCurrency: tender?.baseCurrency || 'USD',
+    baseUom: tender?.baseUom || 'USG',
+    biddingStarts: tender?.biddingStarts || null,
+    biddingEnds: tender?.biddingEnds || null,
+    deliveryStarts: tender?.deliveryStarts || null,
+    deliveryEnds: tender?.deliveryEnds || null,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const isAdd = DialogType === 'add';
+  const isEdit = DialogType === 'edit';
 
-  // Update formData when airport prop changes
+  // Update formData when tender prop changes
   useEffect(() => {
     setFormData({
-      title: tender.title,
-      description: tender.description,
-      fuelType: tender.fuelType,
-      baseCurrency: tender.baseCurrency,
-      baseUom: tender.baseUom,
-      biddingStarts: tender.biddingStarts,
-      biddingEnds: tender.biddingEnds,
-      deliveryStarts: tender.deliveryStarts,
-      deliveryEnds: tender.deliveryEnds,
+      title: tender?.title || '',
+      description: tender?.description || '',
+      fuelType: tender?.fuelType || '',
+      baseCurrency: tender?.baseCurrency || 'USD',
+      baseUom: tender?.baseUom || 'USG',
+      biddingStarts: tender?.biddingStarts || null,
+      biddingEnds: tender?.biddingEnds || null,
+      deliveryStarts: tender?.deliveryStarts || null,
+      deliveryEnds: tender?.deliveryEnds || null,
     });
   }, [tender]);
 
@@ -52,34 +67,88 @@ export default function TenderDialog({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await updateFuelTender(tender.id, formData);
-      toast.success('Tender saved successfully');
+      let savedTender: FuelTender;
+
+      if (isAdd) {
+        // Create new tender (orgId is handled server-side, airportId must be provided)
+        if (!airportId) {
+          throw new Error('Airport ID is required when creating a new tender');
+        }
+        const createData: CreateFuelTenderData = {
+          ...formData,
+          airportId,
+        };
+        savedTender = await createFuelTender(createData);
+        toast.success('Tender created successfully');
+      } else {
+        // Update existing tender
+        if (!tender?.id) {
+          throw new Error('Tender ID is required for updates');
+        }
+        savedTender = await updateFuelTender(tender.id, formData);
+        toast.success('Tender updated successfully');
+      }
 
       // Call onChange to update parent with new data
-      onChange({
-        ...tender,
-        ...formData,
-      });
+      onChange(savedTender);
     } catch (error) {
-      toast.error('Failed to save');
+      const action = isAdd ? 'create' : 'update';
+      toast.error(`Failed to ${action} tender`);
+      console.error(`Error ${action}ing tender:`, error);
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleCancel = () => {
+    if (isAdd) {
+      setFormData({
+        title: '',
+        description: '',
+        fuelType: '',
+        baseCurrency: '',
+        baseUom: '',
+        biddingStarts: null,
+        biddingEnds: null,
+        deliveryStarts: null,
+        deliveryEnds: null,
+      });
+    }
+  };
+
+  const triggerText = isAdd
+    ? 'Add New Tender'
+    : isEdit
+      ? 'Edit'
+      : `View ${tender?.title || 'Tender'}`;
+  const dialogTitle = isAdd ? 'Add New Tender' : tender?.title || 'Tender Details';
+  const saveButtonText = isAdd ? 'Create Tender' : 'Save Changes';
+
   return (
     <DetailDialog
-      trigger={<Button intent="primary" text={`View ${tender.title}`} />}
-      title={tender.title}
+      trigger={
+        <Button
+          intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+          text={triggerText}
+          icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
+          size={buttonSize}
+          className={triggerClassName}
+        />
+      }
+      headerGradient="from-orange-500 to-red-500"
+      title={dialogTitle}
       onSave={handleSave}
+      onCancel={handleCancel}
+      initialEditing={isAdd}
+      saveButtonText={saveButtonText}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ContentSection
-            header="Information"
-            gradient="from-blue-500 to-green-500"
+            header="Tender Information"
+            headerGradient="from-orange-500 to-red-400"
             children={
-              <div className="flex flex-col justify-between">
+              <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
                   label="Title"
                   value={formData.title}
@@ -112,10 +181,10 @@ export default function TenderDialog({
             }
           />
           <ContentSection
-            header="Location"
-            gradient="from-blue-500 to-green-500"
+            header="Configuration & Timeline"
+            headerGradient="from-orange-500 to-red-400"
             children={
-              <div className="flex flex-col justify-between">
+              <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
                   label="Base UOM"
                   value={formData.baseUom}
@@ -136,6 +205,20 @@ export default function TenderDialog({
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('biddingEnds', value)}
                   name="biddingEnds"
+                />
+                <KeyValuePair
+                  label="Delivery Starts"
+                  value={formData.deliveryStarts ? formatDate(formData.deliveryStarts) : ''}
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('deliveryStarts', value)}
+                  name="deliveryStarts"
+                />
+                <KeyValuePair
+                  label="Delivery Ends"
+                  value={formData.deliveryEnds ? formatDate(formData.deliveryEnds) : ''}
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('deliveryEnds', value)}
+                  name="deliveryEnds"
                 />
               </div>
             }

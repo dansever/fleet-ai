@@ -1,11 +1,12 @@
 'use client';
 
+import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { AlertCircle, CalendarIcon, Loader2, PencilIcon, PlusIcon, TrashIcon } from 'lucide-react';
+import { AlertCircle, CalendarIcon, Loader2, PlusIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useFuelProcurement } from '../ContextProvider';
 
@@ -99,12 +100,12 @@ export default function FuelTendersPage() {
                 <h3>{currentTender.title}</h3>
                 {/* Buttons */}
                 <div className="flex gap-2">
-                  <Button
-                    intent="secondary"
-                    icon={PencilIcon}
-                    text="Edit"
-                    onClick={() => {}}
-                    className="bg-white/20 text-white-700"
+                  <TenderDialog
+                    tender={currentTender}
+                    airportId={selectedAirport.id}
+                    onChange={() => {}}
+                    DialogType="edit"
+                    triggerClassName="bg-white/20 text-white-700"
                   />
                   <Button
                     intent="secondary"

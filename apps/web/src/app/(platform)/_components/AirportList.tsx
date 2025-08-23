@@ -1,15 +1,16 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Airport } from '@/drizzle/types';
+import AirportDialog from '@/features/airports/AirportDialog';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { cn } from '@/lib/utils';
+import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
-import { Home, Plane, Plus, Search, X } from 'lucide-react';
+import { Home, Plane, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface AirportListProps {
@@ -80,13 +81,10 @@ export default function AirportList({
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-2 border-b border-border">
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between items-center">
           <h1 className="font-light italic">Airports</h1>
           {InsertAddAirportButton && (
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Airport
-            </Button>
+            <AirportDialog airport={null} DialogType="add" onChange={() => {}} buttonSize="sm" />
           )}
         </div>
         <p className="text-sm text-muted-foreground">{airports.length} Airports</p>
@@ -112,22 +110,20 @@ export default function AirportList({
         <div className="flex flex-row gap-2 items-center justify-between">
           <ModernSelect
             options={countryOptions}
+            placeholder="Select Country"
             onValueChange={(value: string) => setSelectedCountries(value.split(','))}
             value={selectedCountries.join(',')}
           />
 
           {/* Clear Filters */}
-
           <Button
-            variant="link"
+            intent="ghost"
             size="sm"
+            icon={X}
+            text="Clear Filters"
             disabled={!hasActiveFilters}
             onClick={clearFilters}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-            Clear
-          </Button>
+          />
         </div>
 
         {/* Results Count */}

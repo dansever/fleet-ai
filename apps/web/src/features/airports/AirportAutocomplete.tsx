@@ -1,19 +1,19 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
 import { cn } from '@/lib/utils';
-import { Loader2, MapPin, Plane, X } from 'lucide-react';
+import { Button } from '@/stories/Button/Button';
+import { Loader2, MapPin, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AirportDatasetItem } from './airportDatasetType';
 
 // import your helpers (make sure these exist)
 // If you switched to a CSV-backed country map, expose a sync fallback or pre-load it higher up.
 import { useCountryMap } from '@/hooks/use-country-map'; // or wherever you put it
+import { ModernInput } from '@/stories/Form/Form';
 
 interface AirportAutocompleteProps {
   label?: string;
@@ -132,7 +132,7 @@ export default function AirportAutocomplete(props: AirportAutocompleteProps) {
       )}
 
       <div className="relative">
-        <Input
+        <ModernInput
           ref={inputRef}
           id="airport-autocomplete"
           type="text"
@@ -144,7 +144,6 @@ export default function AirportAutocomplete(props: AirportAutocompleteProps) {
           onKeyDown={handleKeyDown}
           required={required}
           disabled={disabled}
-          className="pr-20 bg-white"
           role="combobox"
           aria-expanded={isOpen}
           aria-controls="airport-listbox"
@@ -155,16 +154,13 @@ export default function AirportAutocomplete(props: AirportAutocompleteProps) {
           {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           {value && !disabled && (
             <Button
-              type="button"
-              variant="ghost"
+              intent="ghost"
               size="sm"
               className="h-6 w-6 p-0 hover:bg-transparent"
               onClick={clearInput}
-            >
-              <X className="h-3 w-3" />
-            </Button>
+              icon={X}
+            />
           )}
-          <Plane className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>
 

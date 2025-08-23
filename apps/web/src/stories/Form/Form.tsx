@@ -36,6 +36,7 @@ export const ModernInput = ({
     {icon && <div className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</div>}
     <Input
       type={type}
+      autoComplete="off"
       placeholder={placeholder}
       className={cn(
         'w-full rounded-xl border-2 pr-4 focus:border-primary/50 focus:ring-0',
@@ -61,6 +62,7 @@ export const SearchInput = ({
     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
     <Input
       type="search"
+      autoComplete="off"
       placeholder={placeholder}
       className="w-full rounded-2xl bg-muted pl-9 pr-4 border-0 focus:ring-2 focus:ring-primary/20"
       {...props}
@@ -112,7 +114,12 @@ export const ModernTextarea = ({
 }) => (
   <Textarea
     placeholder={placeholder}
-    className="w-full rounded-2xl border-2 focus:border-primary/50 focus:ring-0 min-h-[80px]"
+    autoComplete="off"
+    className={cn(
+      'rounded-2xl border-2 focus:border-primary/50 focus:ring-0',
+      'min-h-[60px] max-h-[160px]',
+      className,
+    )}
     {...props}
   />
 );
@@ -160,7 +167,7 @@ export const ModernSwitch = ({
 }: {
   className?: string;
   [key: string]: any;
-}) => <Switch {...props} />;
+}) => <Switch {...props} className="cursor-pointer scale-125" />;
 
 // DatePicker component with modern styling
 export const DatePicker = ({

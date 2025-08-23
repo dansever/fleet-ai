@@ -1,8 +1,6 @@
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type React from 'react';
+import { ModernInput, ModernSwitch, ModernTextarea } from '../Form/Form';
 
 // Key-Value Pair - For displaying structured information
 export const KeyValuePair = ({
@@ -43,44 +41,39 @@ export const KeyValuePair = ({
       {label}
     </span>
 
-    <span className={cn('text-left', valueClassName)}>
-      {editMode ? (
-        typeof value === 'string' ? (
-          <Textarea
-            value={value}
-            onChange={(e) => onChange?.(e.target.value)}
-            name={name}
-            rows={2}
-            className="w-full resize-none min-h-[2.5rem] leading-tight whitespace-pre-wrap break-words"
-          />
-        ) : typeof value === 'number' ? (
-          <Input
-            type="number"
-            value={value}
-            onChange={(e) => onChange?.(e.currentTarget.valueAsNumber)}
-            name={name}
-            className="w-full"
-          />
-        ) : typeof value === 'boolean' ? (
-          <Switch
-            checked={value}
-            onCheckedChange={(checked) => onChange?.(checked)} // keep boolean
-            name={name}
-          />
-        ) : (
-          value
-        )
+    {editMode ? (
+      typeof value === 'string' ? (
+        <ModernTextarea
+          value={value}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
+          name={name}
+          className="max-w-3/5 resize-none leading-tight whitespace-pre-wrap text-left break-words min-h-[40px]"
+        />
+      ) : typeof value === 'number' ? (
+        <ModernInput
+          type="number"
+          value={value}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange?.(e.currentTarget.valueAsNumber)
+          }
+          name={name}
+          className="max-w-3/5"
+        />
       ) : typeof value === 'boolean' ? (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {value ? 'Yes' : 'No'}
-        </span>
+        <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
       ) : (
         value
-      )}
-    </span>
+      )
+    ) : typeof value === 'boolean' ? (
+      <span
+        className={`px-2 py-1 rounded text-xs font-medium ${
+          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}
+      >
+        {value ? 'Yes' : 'No'}
+      </span>
+    ) : (
+      value
+    )}
   </div>
 );

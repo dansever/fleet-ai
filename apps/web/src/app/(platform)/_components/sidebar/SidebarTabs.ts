@@ -1,9 +1,7 @@
 import {
-  Building2,
   Fuel,
-  Home,
-  Inbox,
-  MessageCircle,
+  LayoutDashboard,
+  Package,
   Plane,
   Settings,
   Settings2,
@@ -12,6 +10,7 @@ import {
 
 interface SidebarTab {
   title: string;
+  description?: string;
   url: string;
   icon: React.ElementType;
   isReady?: boolean;
@@ -21,50 +20,41 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
   dashboard: [
     {
       title: 'Dashboard',
+      description: 'Overview & Analytics',
       url: '/dashboard',
-      icon: Home,
+      icon: LayoutDashboard,
       isReady: true,
     },
   ],
   procurement: [
     {
       title: 'Technical',
+      description: 'Parts & Services RFQs',
       url: '/technical-procurement',
-      icon: Plane,
+      icon: Package,
       isReady: true,
     },
     {
       title: 'Fuel',
+      description: 'Fuel Tenders & Contracts',
       url: '/fuel-procurement',
       icon: Fuel,
       isReady: true,
     },
     {
       title: 'Airport Hub',
+      description: 'Airport Operations & Contracts',
       url: '/airport-hub',
-      icon: Building2,
+      icon: Plane,
       isReady: false,
     },
   ],
   supplier: [
     {
       title: 'Supplier Hub',
+      description: 'Supplier Management',
       url: '/supplier-hub',
       icon: ShoppingCart,
-      isReady: true,
-    },
-  ],
-  tools: [
-    {
-      title: 'AI Chat',
-      url: '/chat',
-      icon: MessageCircle,
-      isReady: true,
-    },
-    {
-      title: 'Inbox',
-      url: '/inbox',
-      icon: Inbox,
       isReady: true,
     },
   ],

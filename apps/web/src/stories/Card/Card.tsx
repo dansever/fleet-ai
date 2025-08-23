@@ -57,7 +57,7 @@ export const ProjectCard = ({
   <Card
     className={cn(
       'rounded-3xl overflow-hidden hover:shadow-lg transition-shadow',
-      image && 'p-0',
+      image && 'pt-0',
       className,
     )}
   >

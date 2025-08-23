@@ -9,7 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Edit2, Save, X } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../Button/Button';
 
 export interface DetailDialogProps {
@@ -21,6 +21,10 @@ export interface DetailDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSave?: (data: any) => void;
+  onCancel?: () => void;
+  headerGradient?: string;
+  initialEditing?: boolean;
+  saveButtonText?: string;
 }
 
 // Detail Dialog - Framework for showing detailed object information
@@ -33,9 +37,18 @@ export const DetailDialog = ({
   open,
   onOpenChange,
   onSave,
+  onCancel,
+  headerGradient = 'from-violet-600 to-blue-600',
+  initialEditing = false,
+  saveButtonText = 'Save',
 }: DetailDialogProps) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditing);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update editing state when initialEditing prop changes
+  useEffect(() => {
+    setIsEditing(initialEditing);
+  }, [initialEditing]);
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -50,12 +63,16 @@ export const DetailDialog = ({
     }
   };
 
+  const handleCancel = () => {
+    setIsEditing(false);
+    onCancel?.();
+  };
+
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         if (isLoading) return;
-        setIsEditing(false);
         onOpenChange?.(next);
       }}
     >
@@ -74,7 +91,7 @@ export const DetailDialog = ({
         )}
       >
         {/* Header with gradient background */}
-        <DialogHeader className="bg-gradient-to-r from-violet-600 to-blue-600 text-white p-6">
+        <DialogHeader className={`bg-gradient-to-r ${headerGradient} text-white p-6`}>
           <div className="flex items-start justify-between gap-8 ">
             <div className="flex flex-col gap-2 text-left items-start">
               <DialogTitle className="text-lg sm:text-xl md:text-2xl">{title}</DialogTitle>
@@ -97,7 +114,7 @@ export const DetailDialog = ({
                 <>
                   <Button
                     intent="success"
-                    text="Save"
+                    text={saveButtonText}
                     icon={Save}
                     onClick={handleSave}
                     disabled={isLoading}
@@ -106,7 +123,7 @@ export const DetailDialog = ({
                     intent="danger"
                     text="Cancel"
                     icon={X}
-                    onClick={() => setIsEditing(false)}
+                    onClick={handleCancel}
                     disabled={isLoading}
                   />
                 </>
@@ -116,7 +133,7 @@ export const DetailDialog = ({
         </DialogHeader>
 
         {/* Content area with better spacing for sections */}
-        <div className="p-2 max-h-[70vh] overflow-y-auto bg-gray-50">
+        <div className="p-2 max-h-[70vh] overflow-y-auto bg-gray-50" style={{ zIndex: 1 }}>
           {typeof children === 'function' ? children(isEditing) : children}
         </div>
       </DialogContent>
