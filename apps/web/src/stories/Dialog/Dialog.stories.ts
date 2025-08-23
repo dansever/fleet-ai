@@ -1,7 +1,8 @@
 import { Button } from '@/stories/Button/Button';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { createElement } from 'react';
-import { DialogSection, KeyValuePair, TagList } from '../Card/Card';
+import { ContentSection, TagList } from '../Card/Card';
+import { KeyValuePair } from '../Utilities/KeyValuePair';
 import { DetailDialog } from './Dialog';
 
 const meta: Meta<typeof DetailDialog> = {
@@ -12,7 +13,7 @@ const meta: Meta<typeof DetailDialog> = {
     docs: {
       description: {
         component:
-          'A comprehensive dialog component with gradient header, scrollable content area, and supporting components for structured information display. Includes InfoSection, KeyValuePair, TagList, and DialogSection sub-components.',
+          'A comprehensive dialog component with gradient header, scrollable content area, and supporting components for structured information display. Includes InfoSection, KeyValuePair, TagList, and ContentSection sub-components.',
       },
     },
   },
@@ -91,8 +92,8 @@ export const Default: Story = {
       'div',
       { className: 'space-y-4 grid grid-cols-1 md:grid-cols-2 gap-2 ' },
       [
-        createElement(DialogSection, {
-          title: 'Flight ID',
+        createElement(ContentSection, {
+          header: 'Flight ID',
           children: createElement(
             'div',
             { className: 'flex flex-col justify-between' },
@@ -102,14 +103,14 @@ export const Default: Story = {
           ),
           gradient: 'from-violet-500 to-blue-500',
         }),
-        createElement(DialogSection, {
-          title: 'Flight ID',
+        createElement(ContentSection, {
+          header: 'Flight ID',
           children: 'FL-2024-001',
           gradient: 'from-yellow-500 to-red-500',
         }),
-        createElement(DialogSection, {
+        createElement(ContentSection, {
           className: 'col-span-full',
-          title: 'Flight ID',
+          header: 'Flight ID',
           children: createElement(TagList, { tags: ['Active', 'Pending', 'Cancelled'] }),
           gradient: 'from-green-500 to-blue-500',
         }),

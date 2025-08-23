@@ -2,20 +2,13 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { cn } from '@/lib/utils';
 import { ListItemCard } from '@/stories/Card/Card';
+import { ModernInput, ModernSelect } from '@/stories/Form/Form';
 import { Home, Plane, Plus, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -105,46 +98,37 @@ export default function AirportList({
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
+          {/* <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" /> */}
+          <ModernInput
             placeholder="Search airports"
-            className="pl-10"
+            icon={<Search />}
+            className="w-full"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Country Filter */}
-        <div className="relative">
-          <Select
-            onValueChange={(value) => setSelectedCountries(value.split(','))}
+        <div className="flex flex-row gap-2 items-center justify-between">
+          <ModernSelect
+            options={countryOptions}
+            onValueChange={(value: string) => setSelectedCountries(value.split(','))}
             value={selectedCountries.join(',')}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select country" />
-            </SelectTrigger>
-            <SelectContent>
-              {countryOptions.map((country) => (
-                <SelectItem key={country.value} value={country.value}>
-                  {country.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          />
 
-        {/* Clear Filters */}
-        {hasActiveFilters && (
+          {/* Clear Filters */}
+
           <Button
             variant="link"
             size="sm"
+            disabled={!hasActiveFilters}
             onClick={clearFilters}
-            className="self-start text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground"
           >
-            <X className="h-4 w-4 mr-1" />
-            Clear filters
+            <X className="h-4 w-4" />
+            Clear
           </Button>
-        )}
+        </div>
 
         {/* Results Count */}
         <div className="text-sm text-muted-foreground">

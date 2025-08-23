@@ -52,7 +52,7 @@ export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     ButtonStyleProps {
   /** The text to display in the button */
-  text: string;
+  text?: string | null;
   /** Optional icon to display before the text */
   icon?: LucideIcon;
   /** Position of the icon relative to text */

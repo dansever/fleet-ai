@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { createElement } from 'react';
 import {
   DatePicker,
-  ModernCheckbox,
   ModernInput,
   ModernSelect,
   ModernSwitch,
@@ -66,12 +65,6 @@ export const Select: StoryObj<typeof ModernSelect> = {
       { value: 'option3', label: 'Option 3' },
     ],
   },
-};
-
-// Checkbox
-export const Checkbox: StoryObj<typeof ModernCheckbox> = {
-  render: (args) => createElement(ModernCheckbox, args),
-  args: {},
 };
 
 // Switch

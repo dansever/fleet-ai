@@ -3,8 +3,9 @@
 import type { Airport } from '@/drizzle/types';
 import { updateAirport } from '@/services/core/airport-client';
 import { Button } from '@/stories/Button/Button';
-import { DialogSection, KeyValuePair } from '@/stories/Card/Card';
+import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
+import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -69,8 +70,8 @@ export default function AirportDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DialogSection
-            title="Information"
+          <ContentSection
+            header="Information"
             gradient="from-blue-500 to-green-500"
             children={
               <div className="flex flex-col justify-between">
@@ -105,8 +106,8 @@ export default function AirportDialog({
               </div>
             }
           />
-          <DialogSection
-            title="Location"
+          <ContentSection
+            header="Location"
             gradient="from-blue-500 to-green-500"
             children={
               <div className="flex flex-col justify-between">

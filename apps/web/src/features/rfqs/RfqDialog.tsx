@@ -2,8 +2,9 @@ import { Badge } from '@/components/ui/badge';
 import type { Rfq } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
-import { DialogSection, KeyValuePair } from '@/stories/Card/Card';
+import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
+import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 
 export default function RfqDialog({ rfq }: { rfq: Rfq }) {
   return (
@@ -14,8 +15,8 @@ export default function RfqDialog({ rfq }: { rfq: Rfq }) {
       onOpenChange={() => {}}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <DialogSection
-          title="Information"
+        <ContentSection
+          header="Information"
           gradient="from-blue-500 to-green-500"
           children={
             <div className="flex flex-col justify-between">
@@ -24,8 +25,8 @@ export default function RfqDialog({ rfq }: { rfq: Rfq }) {
             </div>
           }
         />
-        <DialogSection
-          title="Location"
+        <ContentSection
+          header="Location"
           gradient="from-blue-500 to-green-500"
           children={
             <div className="flex flex-col justify-between">

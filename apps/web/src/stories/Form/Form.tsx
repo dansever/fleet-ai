@@ -1,7 +1,6 @@
 'use client';
 
 import { Calendar } from '@/components/ui/calendar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -14,6 +13,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/core/formatters';
+import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { useState } from 'react';
@@ -23,19 +23,28 @@ export const ModernInput = ({
   placeholder,
   type = 'text',
   className,
+  icon,
   ...props
 }: {
   placeholder?: string;
   type?: string;
   className?: string;
+  icon?: React.ReactNode;
   [key: string]: any;
 }) => (
-  <Input
-    type={type}
-    placeholder={placeholder}
-    className="w-full rounded-2xl border-2 focus:border-primary/50 focus:ring-0"
-    {...props}
-  />
+  <div className="relative">
+    {icon && <div className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</div>}
+    <Input
+      type={type}
+      placeholder={placeholder}
+      className={cn(
+        'w-full rounded-xl border-2 pr-4 focus:border-primary/50 focus:ring-0',
+        icon && 'pl-10',
+        className,
+      )}
+      {...props}
+    />
+  </div>
 );
 
 // Search Input
@@ -53,7 +62,7 @@ export const SearchInput = ({
     <Input
       type="search"
       placeholder={placeholder}
-      className="w-full rounded-2xl bg-muted pl-9 pr-4 py-2 border-0 focus:ring-2 focus:ring-primary/20"
+      className="w-full rounded-2xl bg-muted pl-9 pr-4 border-0 focus:ring-2 focus:ring-primary/20"
       {...props}
     />
   </div>
@@ -112,41 +121,37 @@ export const ModernTextarea = ({
 export const ModernSelect = ({
   placeholder = 'Select an option',
   options,
-  className,
+  triggerClassName,
   ...props
 }: {
   placeholder?: string;
-  options: { value: string; label: string }[];
-  className?: string;
+  options: { value: string; label: React.ReactNode }[];
+  triggerClassName?: string;
   [key: string]: any;
-}) => (
-  <Select {...props}>
-    <SelectTrigger className="w-full rounded-2xl border-2 focus:border-primary/50 focus:ring-0">
-      <SelectValue placeholder={placeholder} />
-    </SelectTrigger>
-    <SelectContent className="rounded-2xl">
-      {options.map((option) => (
-        <SelectItem key={option.value} value={option.value}>
-          {option.label}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-);
+}) => {
+  const selected = options.find((opt) => opt.value === props.value);
 
-// Checkbox with modern styling
-export const ModernCheckbox = ({
-  className,
-  ...props
-}: {
-  className?: string;
-  [key: string]: any;
-}) => (
-  <Checkbox
-    className="rounded-sm border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-    {...props}
-  />
-);
+  return (
+    <Select {...props}>
+      <SelectTrigger
+        className={cn('rounded-xl border-2 focus:border-primary/50 focus:ring-0', triggerClassName)}
+      >
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="rounded-2xl">
+        {options.map((option) => (
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            className="whitespace-normal py-2 leading-snug text-left"
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
 
 // Switch with modern styling
 export const ModernSwitch = ({
