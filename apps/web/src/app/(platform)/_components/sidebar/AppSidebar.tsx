@@ -19,7 +19,6 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
-import { Separator } from '@radix-ui/react-separator';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -231,8 +230,8 @@ export function AppSidebar({
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          <SidebarGroup className="mt-auto">
-            <SidebarGroupLabel>Admin & Support</SidebarGroupLabel>
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {sidebarTabs.administration.map((item) => (
@@ -249,7 +248,6 @@ export function AppSidebar({
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        <Separator />
         <div style={{ position: 'relative', width: '100%', height: '40px' }}>
           {user?.organizationMemberships[0].organization.imageUrl && !isCollapsed && (
             <Image

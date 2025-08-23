@@ -17,7 +17,7 @@ export function LandingPageNavBar() {
         ) : (
           <>
             <SignedIn>
-              <Button intent="primary" size="md" text="Dashboard" />
+              <Button intent="primary" size="md" text="Dashboard" href="/dashboard" />
             </SignedIn>
             <SignedOut>
               <div className="flex items-center gap-1 sm:gap-2">

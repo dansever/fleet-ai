@@ -273,3 +273,34 @@ export const ListItemCard = ({
     </CardContent>
   </Card>
 );
+
+// Content Section - Sectioned card component for organized content
+export const ContentSection = ({
+  header,
+  children,
+  className,
+  headerGradient = 'from-blue-600 via-violet-600 to-blue-700',
+}: {
+  header: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  headerGradient?: string;
+}) => (
+  <div className={cn('rounded-2xl border border-gray-200 overflow-hidden', className)}>
+    <div className={cn('bg-gradient-to-r text-white px-4 py-3', headerGradient)}>
+      {typeof header === 'string' ? <h4>{header}</h4> : header}
+    </div>
+    <div className="p-4">{children}</div>
+  </div>
+);
+
+// Tag List - For displaying badges/tags
+export const TagList = ({ tags, className }: { tags: string[]; className?: string }) => (
+  <div className={cn('flex flex-wrap gap-2', className)}>
+    {tags.map((tag, index) => (
+      <Badge key={index} variant="outline" className="rounded-full">
+        {tag}
+      </Badge>
+    ))}
+  </div>
+);

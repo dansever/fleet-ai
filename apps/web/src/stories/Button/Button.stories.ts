@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { Download as DownloadIcon, Edit as EditIcon, Heart, Plus } from 'lucide-react';
+import {
+  ChevronRight,
+  Download as DownloadIcon,
+  Edit as EditIcon,
+  Heart,
+  Plus,
+} from 'lucide-react';
 import { Button } from './Button';
 
 const intents = [
@@ -96,14 +102,6 @@ export const Download: Story = {
     intent: 'download',
     size: 'md',
     text: 'Download',
-  },
-};
-
-export const DownloadWithIcon: Story = {
-  args: {
-    intent: 'download',
-    size: 'md',
-    text: 'Download File',
     icon: DownloadIcon,
   },
 };
@@ -130,37 +128,17 @@ export const Edit: Story = {
   args: {
     intent: 'edit',
     size: 'md',
-    text: 'Edit',
-  },
-};
-
-export const EditWithIcon: Story = {
-  args: {
-    intent: 'edit',
-    size: 'md',
     text: 'Edit Item',
     icon: EditIcon,
   },
 };
 
-// Example of icon-only button
-export const HeartIconOnly: Story = {
-  args: {
-    intent: 'favorite',
-    size: 'md',
-    text: 'Favorite',
-    icon: Heart,
-    iconOnly: true,
-  },
-};
-
-// Example of icon on the right
 export const IconRight: Story = {
   args: {
     intent: 'primary',
     size: 'md',
     text: 'Continue',
-    icon: Heart,
+    icon: ChevronRight,
     iconPosition: 'right',
   },
 };
@@ -168,25 +146,6 @@ export const IconRight: Story = {
 export const Like: Story = {
   args: {
     intent: 'favorite',
-    icon: Heart,
-  },
-};
-
-// Example of different sizes with icons
-export const SmallWithIcon: Story = {
-  args: {
-    intent: 'favorite',
-    size: 'sm',
-    text: 'Small',
-    icon: Heart,
-  },
-};
-
-export const LargeWithIcon: Story = {
-  args: {
-    intent: 'favorite',
-    size: 'lg',
-    text: 'Large',
     icon: Heart,
   },
 };
