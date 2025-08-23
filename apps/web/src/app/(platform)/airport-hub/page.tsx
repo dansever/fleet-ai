@@ -4,7 +4,7 @@ import { jsonError } from '@/lib/core/error';
 import FuelProcurementClientPage from './ClientPage';
 import FuelProcurementProvider from './ContextProvider';
 
-export default async function FuelProcurementPage() {
+export default async function AirportHubPage() {
   const { dbUser, error } = await authorizeUser();
   if (error || !dbUser) {
     return jsonError('Unauthorized', 401);

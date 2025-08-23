@@ -46,7 +46,7 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       description: 'Airport Operations & Contracts',
       url: '/airport-hub',
       icon: Plane,
-      isReady: false,
+      isReady: true,
     },
   ],
   supplier: [

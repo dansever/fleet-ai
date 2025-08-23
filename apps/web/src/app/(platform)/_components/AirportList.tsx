@@ -120,7 +120,8 @@ export default function AirportList({
             intent="ghost"
             size="sm"
             icon={X}
-            text="Clear Filters"
+            text="Clear"
+            className="font-semibold hover:bg-transparent hover:underline"
             disabled={!hasActiveFilters}
             onClick={clearFilters}
           />

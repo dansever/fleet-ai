@@ -1,44 +1,46 @@
 'use client';
 
-import { Airport, FuelTender, User } from '@/drizzle/types';
+import { Airport, ServiceContract, User } from '@/drizzle/types';
 import { getAirports } from '@/services/core/airport-client';
-import { getFuelTendersByAirport } from '@/services/fuel/fuel-tender-client';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type LoadingState = {
   airports: boolean;
-  tenders: boolean;
+  contracts: boolean;
 };
 
 export type ErrorState = {
   airports: string | null;
-  tenders: string | null;
+  contracts: string | null;
   general: string | null;
 };
 
 export type FuelProcurementContextType = {
   // User and airports
   dbUser: User;
+  // Airports
   airports: Airport[];
   setAirports: (airports: Airport[]) => void;
+  // Selected airport
+  selectedAirport: Airport | null;
+  setSelectedAirport: (airport: Airport | null) => void;
+  // Refresh, Update, Add, Remove airports
   refreshAirports: () => Promise<void>;
   updateAirport: (updatedAirport: Airport) => void;
   addAirport: (newAirport: Airport) => void;
   removeAirport: (airportId: string) => void;
 
-  // Selected airport
-  selectedAirport: Airport | null;
-  setSelectedAirport: (airport: Airport | null) => void;
-
-  // Tenders
-  airportTenders: FuelTender[];
-  selectedTender: FuelTender | null;
-  setSelectedTender: (tender: FuelTender | null) => void;
-  selectTenderById: (tenderId: string) => void; // New optimized tender selection
-  refreshTenders: () => Promise<void>;
-  updateTender: (updatedTender: FuelTender) => void;
-  addTender: (newTender: FuelTender) => void;
-  removeTender: (tenderId: string) => void;
+  // Contracts
+  airportContracts: ServiceContract[];
+  setAirportContracts: (contracts: ServiceContract[]) => void;
+  // Selected contract
+  selectedContract: ServiceContract | null;
+  setSelectedContract: (contract: ServiceContract | null) => void;
+  // Refresh, Update, Add, Remove contracts
+  refreshContracts: () => Promise<void>;
+  updateContract: (updatedContract: ServiceContract) => void;
+  addContract: (newContract: ServiceContract) => void;
+  removeContract: (contractId: string) => void;
 
   // Loading and error states
   loading: LoadingState;
@@ -62,22 +64,22 @@ export default function FuelProcurementProvider({
 }) {
   const [airports, setAirports] = useState<Airport[]>(initialAirports);
   const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
-  const [airportTenders, setAirportTenders] = useState<FuelTender[]>([]);
-  const [selectedTender, setSelectedTender] = useState<FuelTender | null>(null);
+  const [airportContracts, setAirportContracts] = useState<ServiceContract[]>([]);
+  const [selectedContract, setSelectedContract] = useState<ServiceContract | null>(null);
 
-  // Cache to avoid refetching tenders for the same airport
-  const [tendersCache, setTendersCache] = useState<Record<string, FuelTender[]>>({});
+  // Cache to avoid refetching contracts for the same airport
+  const [contractsCache, setContractsCache] = useState<Record<string, ServiceContract[]>>({});
 
   // Loading states
   const [loading, setLoading] = useState<LoadingState>({
     airports: false,
-    tenders: false,
+    contracts: false,
   });
 
   // Error states
   const [errors, setErrors] = useState<ErrorState>({
     airports: null,
-    tenders: null,
+    contracts: null,
     general: null,
   });
 
@@ -107,21 +109,21 @@ export default function FuelProcurementProvider({
   }, [initialAirports, sortAirports]);
 
   /**
-   * Load fuel tenders for the selected airport (only when airport changes)
+   * Load ground handling contracts for the selected airport (only when airport changes)
    */
   useEffect(() => {
     if (!selectedAirport) {
-      setAirportTenders([]);
-      setSelectedTender(null);
+      setAirportContracts([]);
+      setSelectedContract(null);
       return;
     }
 
-    const loadTenders = async () => {
+    const loadContracts = async () => {
       // Check cache first
-      if (tendersCache[selectedAirport.id]) {
-        const cachedTenders = tendersCache[selectedAirport.id];
-        setAirportTenders(cachedTenders);
-        setSelectedTender(cachedTenders.length > 0 ? cachedTenders[0] : null);
+      if (contractsCache[selectedAirport.id]) {
+        const cachedContracts = contractsCache[selectedAirport.id];
+        setAirportContracts(cachedContracts);
+        setSelectedContract(cachedContracts.length > 0 ? cachedContracts[0] : null);
         return;
       }
 
@@ -129,32 +131,32 @@ export default function FuelProcurementProvider({
       setErrors((prev) => ({ ...prev, tenders: null }));
 
       try {
-        const tenders = await getFuelTendersByAirport(selectedAirport.id);
-        setAirportTenders(tenders);
+        const contracts = await getServiceContractsByAirport(selectedAirport.id);
+        setAirportContracts(contracts);
 
         // Cache the tenders for this airport
-        setTendersCache((prev) => ({
+        setContractsCache((prev) => ({
           ...prev,
-          [selectedAirport.id]: tenders,
+          [selectedAirport.id]: contracts,
         }));
 
         // Always set first tender as selected when loading tenders for a new airport
-        setSelectedTender(tenders.length > 0 ? tenders[0] : null);
+        setSelectedContract(contracts.length > 0 ? contracts[0] : null);
       } catch (error) {
-        console.error('Error loading fuel tenders:', error);
+        console.error('Error loading ground handling contracts:', error);
         setErrors((prev) => ({
           ...prev,
           tenders: error instanceof Error ? error.message : 'Failed to load fuel tenders',
         }));
-        setAirportTenders([]);
-        setSelectedTender(null);
+        setAirportContracts([]);
+        setSelectedContract(null);
       } finally {
         setLoading((prev) => ({ ...prev, tenders: false }));
       }
     };
 
-    loadTenders();
-  }, [selectedAirport, tendersCache]); // Depend on selectedAirport and tendersCache
+    loadContracts();
+  }, [selectedAirport, contractsCache]); // Depend on selectedAirport and contractsCache
 
   /**
    * Refresh airports
@@ -194,11 +196,11 @@ export default function FuelProcurementProvider({
   /**
    * Refresh tenders for the currently selected airport (clears cache)
    */
-  const refreshTenders = useCallback(async () => {
+  const refreshContracts = useCallback(async () => {
     if (!selectedAirport) return;
 
     // Clear cache for this airport to force fresh data
-    setTendersCache((prev) => {
+    setContractsCache((prev) => {
       const updated = { ...prev };
       delete updated[selectedAirport.id];
       return updated;
@@ -208,21 +210,23 @@ export default function FuelProcurementProvider({
     setErrors((prev) => ({ ...prev, tenders: null }));
 
     try {
-      const tenders = await getFuelTendersByAirport(selectedAirport.id);
-      setAirportTenders(tenders);
+      // const contracts = await getGroundHandlingContractsByAirport(selectedAirport.id);
+      setAirportContracts([]);
 
       // Update cache with fresh data
-      setTendersCache((prev) => ({
+      setContractsCache((prev) => ({
         ...prev,
-        [selectedAirport.id]: tenders,
+        [selectedAirport.id]: [],
       }));
 
       // Preserve the currently selected tender if it still exists, otherwise select first
-      if (selectedTender) {
-        const updatedSelectedTender = tenders.find((t) => t.id === selectedTender.id);
-        setSelectedTender(updatedSelectedTender || (tenders.length > 0 ? tenders[0] : null));
-      } else if (tenders.length > 0) {
-        setSelectedTender(tenders[0]);
+      if (selectedContract) {
+        const updatedSelectedContract = airportContracts.find((t) => t.id === selectedContract.id);
+        setSelectedContract(
+          updatedSelectedContract || (airportContracts.length > 0 ? airportContracts[0] : null),
+        );
+      } else if (airportContracts.length > 0) {
+        setSelectedContract(airportContracts[0]);
       }
     } catch (error) {
       console.error('Error refreshing fuel tenders:', error);
@@ -233,19 +237,19 @@ export default function FuelProcurementProvider({
     } finally {
       setLoading((prev) => ({ ...prev, tenders: false }));
     }
-  }, [selectedAirport, selectedTender]);
+  }, [selectedAirport, selectedContract]);
 
   /**
-   * Select tender by ID without refetching (instant selection)
+   * Select contract by ID without refetching (instant selection)
    */
-  const selectTenderById = useCallback(
-    (tenderId: string) => {
-      const tender = airportTenders.find((t) => t.id === tenderId);
-      if (tender) {
-        setSelectedTender(tender);
+  const selectContractById = useCallback(
+    (contractId: string) => {
+      const contract = airportContracts.find((t) => t.id === contractId);
+      if (contract) {
+        setSelectedContract(contract);
       }
     },
-    [airportTenders],
+    [airportContracts],
   );
 
   /**
@@ -298,38 +302,42 @@ export default function FuelProcurementProvider({
   /**
    * Update tender
    */
-  const updateTender = useCallback(
-    (updatedTender: FuelTender) => {
-      setAirportTenders((prevTenders) =>
-        prevTenders.map((tender) => (tender.id === updatedTender.id ? updatedTender : tender)),
+  const updateContract = useCallback(
+    (updatedContract: ServiceContract) => {
+      setAirportContracts((prevContracts) =>
+        prevContracts.map((contract) =>
+          contract.id === updatedContract.id ? updatedContract : contract,
+        ),
       );
 
-      if (selectedTender?.id === updatedTender.id) {
-        setSelectedTender(updatedTender);
+      if (selectedContract?.id === updatedContract.id) {
+        setSelectedContract(updatedContract);
       }
     },
-    [selectedTender],
+    [selectedContract],
   );
 
   /**
    * Add tender
    */
-  const addTender = useCallback((newTender: FuelTender) => {
-    setAirportTenders((prevTenders) => [newTender, ...prevTenders]);
+  const addContract = useCallback((newContract: ServiceContract) => {
+    setAirportContracts((prevContracts) => [newContract, ...prevContracts]);
   }, []);
 
   /**
    * Remove tender
    */
-  const removeTender = useCallback(
-    (tenderId: string) => {
-      setAirportTenders((prevTenders) => prevTenders.filter((tender) => tender.id !== tenderId));
+  const removeContract = useCallback(
+    (contractId: string) => {
+      setAirportContracts((prevContracts) =>
+        prevContracts.filter((contract) => contract.id !== contractId),
+      );
 
-      if (selectedTender?.id === tenderId) {
-        setSelectedTender(null);
+      if (selectedContract?.id === contractId) {
+        setSelectedContract(null);
       }
     },
-    [selectedTender],
+    [selectedContract],
   );
 
   /**
@@ -345,7 +353,7 @@ export default function FuelProcurementProvider({
   const clearAllErrors = useCallback(() => {
     setErrors({
       airports: null,
-      tenders: null,
+      contracts: null,
       general: null,
     });
   }, []);
@@ -356,21 +364,20 @@ export default function FuelProcurementProvider({
   const value: FuelProcurementContextType = {
     dbUser,
     airports,
-    setAirports,
     refreshAirports,
     updateAirport,
     addAirport,
     removeAirport,
     selectedAirport,
     setSelectedAirport,
-    airportTenders,
-    selectedTender,
-    setSelectedTender,
-    selectTenderById,
-    refreshTenders,
-    updateTender,
-    addTender,
-    removeTender,
+    airportContracts,
+    setAirportContracts,
+    selectedContract,
+    setSelectedContract,
+    refreshContracts,
+    updateContract,
+    addContract,
+    removeContract,
     loading,
     errors,
     clearError,

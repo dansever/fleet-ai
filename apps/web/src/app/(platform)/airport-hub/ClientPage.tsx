@@ -12,15 +12,8 @@ import FuelTendersPage from './subpages/FuelTenders';
 type TabValue = 'fuel-tenders' | 'manage-contracts';
 
 export default function FuelProcurementClientPage() {
-  const {
-    airports,
-    setAirports,
-    selectedAirport,
-    setSelectedAirport,
-    loading,
-    errors,
-    clearError,
-  } = useFuelProcurement();
+  const { airports, selectedAirport, setSelectedAirport, loading, errors, clearError } =
+    useFuelProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
