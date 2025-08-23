@@ -138,12 +138,12 @@ export default function AirportList({
 
       {/* Airport List */}
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full">
+        <ScrollArea className="h-full overflow-y-auto">
           {/* Smoothly adjust inner padding as the sidebar width animates */}
           <div
             className={cn(
-              'p-4 space-y-3 transition-[padding,opacity] duration-200 ease-in-out',
-              !isCollapsed && 'px-2',
+              'p-3 space-y-3 transition-[padding,opacity] duration-200 ease-in-out',
+              !isCollapsed && 'pl-2',
             )}
           >
             {filteredAirports.map((airport) => (
