@@ -4,7 +4,7 @@ import { Button } from '../Button/Button';
 import { ConfirmationPopover } from './Popover';
 
 const meta: Meta<typeof ConfirmationPopover> = {
-  title: 'Components/Popover',
+  title: 'Components/Popover/ConfirmationPopover',
   component: ConfirmationPopover,
   parameters: {
     layout: 'padded',

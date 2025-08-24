@@ -1,6 +1,7 @@
 'use client';
 
 import type { FuelTender } from '@/drizzle/types';
+import { serializeFuelTenderDates } from '@/lib/utils/date-helpers';
 import {
   createFuelTender,
   updateFuelTender,
@@ -30,11 +31,11 @@ export default function TenderDialog({
   buttonSize?: 'sm' | 'md' | 'lg';
 }) {
   const [formData, setFormData] = useState({
-    title: tender?.title || '',
-    description: tender?.description || '',
-    fuelType: tender?.fuelType || '',
-    baseCurrency: tender?.baseCurrency || '',
-    baseUom: tender?.baseUom || '',
+    title: tender?.title || null,
+    description: tender?.description || null,
+    fuelType: tender?.fuelType || null,
+    baseCurrency: tender?.baseCurrency || null,
+    baseUom: tender?.baseUom || null,
     biddingStarts: tender?.biddingStarts || null,
     biddingEnds: tender?.biddingEnds || null,
     deliveryStarts: tender?.deliveryStarts || null,
@@ -47,11 +48,11 @@ export default function TenderDialog({
   // Update formData when tender prop changes
   useEffect(() => {
     setFormData({
-      title: tender?.title || '',
-      description: tender?.description || '',
-      fuelType: tender?.fuelType || '',
-      baseCurrency: tender?.baseCurrency || '',
-      baseUom: tender?.baseUom || '',
+      title: tender?.title || null,
+      description: tender?.description || null,
+      fuelType: tender?.fuelType || null,
+      baseCurrency: tender?.baseCurrency || null,
+      baseUom: tender?.baseUom || null,
       biddingStarts: tender?.biddingStarts ? new Date(tender?.biddingStarts) : null,
       biddingEnds: tender?.biddingEnds ? new Date(tender?.biddingEnds) : null,
       deliveryStarts: tender?.deliveryStarts ? new Date(tender?.deliveryStarts) : null,
@@ -69,13 +70,7 @@ export default function TenderDialog({
       let savedTender: FuelTender;
 
       // Serialize dates to ISO strings before sending
-      const serializedFormData = {
-        ...formData,
-        biddingStarts: formData.biddingStarts?.toISOString() || null,
-        biddingEnds: formData.biddingEnds?.toISOString() || null,
-        deliveryStarts: formData.deliveryStarts?.toISOString() || null,
-        deliveryEnds: formData.deliveryEnds?.toISOString() || null,
-      };
+      const serializedFormData = serializeFuelTenderDates(formData);
 
       if (isAdd) {
         // Create new tender (orgId is handled server-side, airportId must be provided)
@@ -83,8 +78,16 @@ export default function TenderDialog({
           throw new Error('Airport ID is required when creating a new tender');
         }
         const createData: CreateFuelTenderData = {
-          ...serializedFormData,
           airportId,
+          title: serializedFormData.title || '', // Ensure title is not null
+          description: serializedFormData.description,
+          fuelType: serializedFormData.fuelType,
+          baseCurrency: serializedFormData.baseCurrency,
+          baseUom: serializedFormData.baseUom,
+          biddingStarts: serializedFormData.biddingStarts || undefined,
+          biddingEnds: serializedFormData.biddingEnds || undefined,
+          deliveryStarts: serializedFormData.deliveryStarts || undefined,
+          deliveryEnds: serializedFormData.deliveryEnds || undefined,
         };
         savedTender = await createFuelTender(createData);
         toast.success('Tender created successfully');
@@ -93,7 +96,12 @@ export default function TenderDialog({
         if (!tender?.id) {
           throw new Error('Tender ID is required for updates');
         }
-        savedTender = await updateFuelTender(tender.id, formData);
+        // Ensure required fields are not null for updates
+        const updateData = {
+          ...serializedFormData,
+          title: serializedFormData.title || tender.title || '',
+        };
+        savedTender = await updateFuelTender(tender.id, updateData);
         toast.success('Tender updated successfully');
       }
 
@@ -111,11 +119,11 @@ export default function TenderDialog({
   const handleCancel = () => {
     if (isAdd) {
       setFormData({
-        title: '',
-        description: '',
-        fuelType: '',
-        baseCurrency: '',
-        baseUom: '',
+        title: null,
+        description: null,
+        fuelType: null,
+        baseCurrency: null,
+        baseUom: null,
         biddingStarts: null,
         biddingEnds: null,
         deliveryStarts: null,

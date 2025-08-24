@@ -467,6 +467,159 @@ const [errors, setErrors] = useState<ErrorState>({
 // Use shadcn/ui for base components
 ```
 
+## Date & Time Handling
+
+### Database Schema
+
+**All timestamps use this pattern:**
+
+```typescript
+timestamp('column_name', { withTimezone: true });
+
+// Required audit fields (auto-managed):
+timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
+timestamp('updated_at', { withTimezone: true }).notNull().defaultNow();
+
+// Optional business dates (nullable):
+timestamp('bidding_starts', { withTimezone: true });
+```
+
+### Standardized Flow
+
+```
+User Input (DatePicker) → Component State (Date) → API Call (ISO String) → Database (TIMESTAMPTZ) → Display (formatDate)
+```
+
+### Component State Pattern
+
+```typescript
+// ✅ CORRECT: Store dates as Date objects or null
+const [formData, setFormData] = useState({
+  startDate: record?.startDate ? new Date(record.startDate) : null,
+  endDate: record?.endDate ? new Date(record.endDate) : null,
+});
+
+// ❌ INCORRECT: Don't store as strings
+const [formData, setFormData] = useState({
+  startDate: record?.startDate || null, // Could be string - wrong!
+});
+```
+
+### Form Submission Pattern
+
+```typescript
+// ✅ CORRECT: Serialize dates before API calls
+import { serializeFuelTenderDates } from '@/lib/utils/date-helpers';
+
+const handleSave = async () => {
+  const serializedData = serializeFuelTenderDates(formData);
+  await createRecord(serializedData);
+};
+
+// Or manually:
+const payload = {
+  ...formData,
+  startDate: formData.startDate?.toISOString() || null,
+  endDate: formData.endDate?.toISOString() || null,
+};
+```
+
+### API Route Pattern
+
+```typescript
+// ✅ CORRECT: Let Drizzle handle date conversion automatically
+export async function POST(request: NextRequest) {
+  const body = await request.json(); // ISO strings from client
+
+  // Drizzle automatically converts ISO strings to Date objects for TIMESTAMPTZ columns
+  const result = await createRecord(body); // No manual conversion needed!
+  return NextResponse.json(result);
+}
+
+// ❌ INCORRECT: Don't manually convert dates
+const data = {
+  ...body,
+  startDate: body.startDate ? new Date(body.startDate) : null, // Unnecessary!
+};
+```
+
+### Display Pattern
+
+```typescript
+// ✅ CORRECT: Use formatDate for display
+import { formatDate } from '@/lib/core/formatters';
+
+<div>{formatDate(record.createdAt)}</div>
+<td>{formatDate(record.startDate)}</td>
+
+// ✅ CORRECT: Convert to Date for DatePicker
+<DatePicker
+  value={record.startDate ? new Date(record.startDate) : undefined}
+  onChange={(date) => handleChange('startDate', date)}
+/>
+```
+
+### KeyValuePair with Dates
+
+```typescript
+// ✅ CORRECT: Pass Date objects directly
+<KeyValuePair
+  label="Start Date"
+  value={formData.startDate} // Already a Date object or null
+  valueType="date"
+  editMode={isEditing}
+  onChange={(value) => handleFieldChange('startDate', value)}
+/>
+
+// ❌ INCORRECT: Don't convert Date to Date
+<KeyValuePair
+  value={formData.startDate ? new Date(formData.startDate) : null} // Redundant!
+/>
+```
+
+### Utility Functions
+
+```typescript
+// Available in @/lib/utils/date-helpers
+import {
+  safeDate, // Safe conversion to Date or null
+  safeISOString, // Safe conversion to ISO string or null
+  serializeFuelTenderDates, // Specialized for fuel tenders
+  createDateFilter, // Filter by date range
+  sortByDate, // Sort arrays by date field
+  getRelativeTime, // "2 hours ago" format
+} from '@/lib/utils/date-helpers';
+
+// Display formatting
+import { formatDate } from '@/lib/core/formatters';
+formatDate(date); // "Jan 15, 2025"
+formatDate(date, { weekday: 'long' }); // "Tuesday"
+```
+
+### Common Mistakes to Avoid
+
+```typescript
+// ❌ Don't do these:
+value={formData.date ? new Date(formData.date) : null} // Double conversion
+await apiCall(formData) // Sending Date objects to API
+const date = new Date(possiblyNullValue) // Not handling null
+
+// ✅ Do these instead:
+value={formData.date} // Already correct type
+const serialized = serializeFuelTenderDates(formData)
+const date = possiblyNullValue ? new Date(possiblyNullValue) : null
+```
+
+### Quick Reference
+
+| Scenario        | Pattern                      | Example                                         |
+| --------------- | ---------------------------- | ----------------------------------------------- |
+| Component State | Store as Date or null        | `useState({ date: new Date(value) \|\| null })` |
+| Form Submission | Serialize with toISOString() | `date?.toISOString() \|\| null`                 |
+| API Handling    | Let Drizzle convert          | No manual conversion needed                     |
+| Display         | Use formatDate()             | `formatDate(record.createdAt)`                  |
+| DatePicker      | Pass Date object             | `<DatePicker value={dateObj} />`                |
+
 ## Environment Configuration
 
 ### Client Environment

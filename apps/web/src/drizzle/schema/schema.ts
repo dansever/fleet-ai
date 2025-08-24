@@ -434,8 +434,8 @@ export const fuelTendersTable = pgTable(
     fuelType: text('fuel_type'),
 
     // Base Configuration
-    baseCurrency: text('base_currency').default('USD'),
-    baseUom: text('base_uom').default('USG'),
+    baseCurrency: text('base_currency'),
+    baseUom: text('base_uom'),
 
     // Timeline
     biddingStarts: timestamp('bidding_starts', { withTimezone: true }),

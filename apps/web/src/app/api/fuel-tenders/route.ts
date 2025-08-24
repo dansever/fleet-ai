@@ -134,14 +134,10 @@ export async function PUT(request: NextRequest) {
     // Parse request body and handle date conversion
     const body = await request.json();
 
-    // Convert ISO strings back to Date objects for database
+    // Drizzle automatically converts ISO strings to Date objects for TIMESTAMPTZ columns
     const fuelTenderData: NewFuelTender = {
       ...body,
       orgId, // Ensure fuel tender belongs to user's organization
-      biddingStarts: body.biddingStarts ? new Date(body.biddingStarts) : null,
-      biddingEnds: body.biddingEnds ? new Date(body.biddingEnds) : null,
-      deliveryStarts: body.deliveryStarts ? new Date(body.deliveryStarts) : null,
-      deliveryEnds: body.deliveryEnds ? new Date(body.deliveryEnds) : null,
     };
 
     const updateData: UpdateFuelTender = fuelTenderData;
