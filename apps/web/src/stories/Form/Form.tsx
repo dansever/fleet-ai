@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
+import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { useState } from 'react';
 
@@ -150,7 +151,7 @@ export const ModernSelect = ({
           <SelectItem
             key={option.value}
             value={option.value}
-            className="whitespace-normal py-2 leading-snug text-left"
+            className="whitespace-normal py-2 leading-snug text-left min-h-[40px]"
           >
             {option.label}
           </SelectItem>
@@ -179,14 +180,14 @@ export const DatePicker = ({
   calendarClassName,
   ...props
 }: {
-  value?: Date;
-  onChange?: (value: Date) => void;
+  value?: string;
+  onChange?: (value: string) => void;
   fromYear?: number;
   toYear?: number;
   [key: string]: any;
 }) => {
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(value);
+  const [date, setDate] = useState<Date | undefined>(value ? new Date(value) : undefined);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -209,8 +210,10 @@ export const DatePicker = ({
           selected={date}
           captionLayout="dropdown"
           onSelect={(date) => {
-            setDate(date as Date);
-            onChange?.(date as Date);
+            if (!date) return;
+            const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            setDate(localDate);
+            onChange?.(format(localDate, 'yyyy-MM-dd')); // <-- returns a string
             setOpen(false);
           }}
           fromYear={fromYear}

@@ -53,10 +53,10 @@ export default function TenderDialog({
       fuelType: tender?.fuelType || null,
       baseCurrency: tender?.baseCurrency || null,
       baseUom: tender?.baseUom || null,
-      biddingStarts: tender?.biddingStarts ? new Date(tender?.biddingStarts) : null,
-      biddingEnds: tender?.biddingEnds ? new Date(tender?.biddingEnds) : null,
-      deliveryStarts: tender?.deliveryStarts ? new Date(tender?.deliveryStarts) : null,
-      deliveryEnds: tender?.deliveryEnds ? new Date(tender?.deliveryEnds) : null,
+      biddingStarts: tender?.biddingStarts || null,
+      biddingEnds: tender?.biddingEnds || null,
+      deliveryStarts: tender?.deliveryStarts || null,
+      deliveryEnds: tender?.deliveryEnds || null,
     });
   }, [tender]);
 
@@ -84,10 +84,10 @@ export default function TenderDialog({
           fuelType: serializedFormData.fuelType,
           baseCurrency: serializedFormData.baseCurrency,
           baseUom: serializedFormData.baseUom,
-          biddingStarts: serializedFormData.biddingStarts || undefined,
-          biddingEnds: serializedFormData.biddingEnds || undefined,
-          deliveryStarts: serializedFormData.deliveryStarts || undefined,
-          deliveryEnds: serializedFormData.deliveryEnds || undefined,
+          biddingStarts: serializedFormData.biddingStarts,
+          biddingEnds: serializedFormData.biddingEnds,
+          deliveryStarts: serializedFormData.deliveryStarts,
+          deliveryEnds: serializedFormData.deliveryEnds,
         };
         savedTender = await createFuelTender(createData);
         toast.success('Tender created successfully');
@@ -98,8 +98,15 @@ export default function TenderDialog({
         }
         // Ensure required fields are not null for updates
         const updateData = {
-          ...serializedFormData,
           title: serializedFormData.title || tender.title || '',
+          description: serializedFormData.description,
+          fuelType: serializedFormData.fuelType,
+          baseCurrency: serializedFormData.baseCurrency,
+          baseUom: serializedFormData.baseUom,
+          biddingStarts: serializedFormData.biddingStarts,
+          biddingEnds: serializedFormData.biddingEnds,
+          deliveryStarts: serializedFormData.deliveryStarts,
+          deliveryEnds: serializedFormData.deliveryEnds,
         };
         savedTender = await updateFuelTender(tender.id, updateData);
         toast.success('Tender updated successfully');

@@ -1,4 +1,4 @@
-import type { Airport, FuelTender, NewFuelTender, UpdateFuelTender } from '@/drizzle/types';
+import type { Airport, FuelTender, NewFuelTender } from '@/drizzle/types';
 import { api } from '../api-client';
 
 // Client-side type for creating fuel tenders (orgId is handled server-side)
@@ -42,7 +42,7 @@ export async function createFuelTender(data: CreateFuelTenderData): Promise<Fuel
  */
 export async function updateFuelTender(
   id: FuelTender['id'],
-  data: UpdateFuelTender,
+  data: Partial<CreateFuelTenderData>,
 ): Promise<FuelTender> {
   const res = await api.put(`/api/fuel-tenders?id=${id}`, data);
   return res.data;

@@ -16,11 +16,13 @@ import type { AirportDatasetItem } from './airportDatasetType';
 export default function AirportDialog({
   airport,
   DialogType = 'view',
+  triggerButtonIntent = 'secondary',
   onChange,
   buttonSize = 'md',
 }: {
   airport: Airport | null;
   DialogType: 'add' | 'edit' | 'view';
+  triggerButtonIntent?: 'primary' | 'secondary' | 'ghost' | 'add';
   onChange: (airport: Airport) => void;
   buttonSize?: 'sm' | 'md' | 'lg';
 }) {
@@ -123,7 +125,7 @@ export default function AirportDialog({
     <DetailDialog
       trigger={
         <Button
-          intent={isAdd ? 'add' : 'primary'}
+          intent={triggerButtonIntent}
           text={triggerText}
           icon={isAdd ? Plus : undefined}
           size={buttonSize}

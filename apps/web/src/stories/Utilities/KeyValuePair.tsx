@@ -16,13 +16,13 @@ export const KeyValuePair = ({
   name,
 }: {
   label: string;
-  value: string | number | boolean | Date | null;
+  value: string | number | boolean | null;
   valueType: 'string' | 'number' | 'boolean' | 'date' | 'null';
   className?: string;
   keyClassName?: string;
   valueClassName?: string;
   editMode?: boolean;
-  onChange?: (value: string | number | boolean | Date) => void;
+  onChange?: (value: string | number | boolean) => void;
   name?: string;
 }) => (
   <div
@@ -47,7 +47,7 @@ export const KeyValuePair = ({
     {editMode ? (
       valueType === 'string' ? (
         <ModernTextarea
-          value={value}
+          value={value ? value : ''}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
           name={name}
           className="max-w-3/5 resize-none leading-tight whitespace-pre-wrap text-left break-words min-h-[40px]"
@@ -66,13 +66,13 @@ export const KeyValuePair = ({
         <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
       ) : valueType === 'date' ? (
         <DatePicker
-          value={value as Date}
-          onChange={(value: Date) => onChange?.(value)}
+          value={value as string}
+          onChange={(value: string) => onChange?.(value)}
           name={name}
           triggerClassName="max-w-2/4"
         />
       ) : (
-        <div className="max-w-3/5">{value instanceof Date ? formatDate(value) : value}</div>
+        <div className="max-w-3/5">{value}</div>
       )
     ) : valueType === 'boolean' ? (
       <span
@@ -83,7 +83,7 @@ export const KeyValuePair = ({
         {value ? 'Yes' : 'No'}
       </span>
     ) : valueType === 'date' ? (
-      <div className="max-w-3/5">{formatDate(value as Date)}</div>
+      <div className="max-w-3/5">{formatDate(value as string)}</div>
     ) : (
       <div className="max-w-3/5">{value as string | number}</div>
     )}

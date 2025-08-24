@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import {
   boolean,
+  date,
   foreignKey,
   integer,
   jsonb,
@@ -12,6 +13,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { decisionEnum, OrderDirectionEnum, statusEnum } from './enums';
+export * from './enums';
 
 // Shared timestamps
 const createdAt = timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
@@ -424,7 +426,7 @@ export const fuelTendersTable = pgTable(
   'fuel_tenders',
   {
     // System Fields
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
     airportId: uuid('airport_id').notNull(), //fk to airports table
 
@@ -438,10 +440,10 @@ export const fuelTendersTable = pgTable(
     baseUom: text('base_uom'),
 
     // Timeline
-    biddingStarts: timestamp('bidding_starts', { withTimezone: true }),
-    biddingEnds: timestamp('bidding_ends', { withTimezone: true }),
-    deliveryStarts: timestamp('delivery_starts', { withTimezone: true }),
-    deliveryEnds: timestamp('delivery_ends', { withTimezone: true }),
+    biddingStarts: date('bidding_starts'),
+    biddingEnds: date('bidding_ends'),
+    deliveryStarts: date('delivery_starts'),
+    deliveryEnds: date('delivery_ends'),
 
     // Workflow Management
     status: statusEnum('status').default('pending'),
@@ -470,7 +472,7 @@ export const fuelBids = pgTable(
   'fuel_bids',
   {
     // System Fields
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
     tenderId: uuid('tender_id').notNull(), //fk to fuel tenders table
 
     // Bid Information
@@ -548,7 +550,7 @@ export const fuelContracts = pgTable(
   'fuel_contracts',
   {
     // System Fields
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
     airportId: uuid('airport_id').notNull(), //fk to airports table
 

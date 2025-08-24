@@ -95,6 +95,7 @@ export default function FuelTendersPage() {
             onValueChange={selectTenderById}
             value={selectedTender?.id}
             triggerClassName="min-h-12"
+            disabled={!airportTenders.length}
             options={airportTenders.map((tender) => ({
               value: tender.id,
               label: (
