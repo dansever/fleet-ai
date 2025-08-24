@@ -109,6 +109,8 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
+    console.log('PUT /api/fuel-tenders');
+
     // Authorize user
     const { dbUser, error } = await authorizeUser();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
@@ -129,9 +131,20 @@ export async function PUT(request: NextRequest) {
       return jsonError('Unauthorized', 401);
     }
 
-    // Parse request body
+    // Parse request body and handle date conversion
     const body = await request.json();
-    const updateData: UpdateFuelTender = body;
+
+    // Convert ISO strings back to Date objects for database
+    const fuelTenderData: NewFuelTender = {
+      ...body,
+      orgId, // Ensure fuel tender belongs to user's organization
+      biddingStarts: body.biddingStarts ? new Date(body.biddingStarts) : null,
+      biddingEnds: body.biddingEnds ? new Date(body.biddingEnds) : null,
+      deliveryStarts: body.deliveryStarts ? new Date(body.deliveryStarts) : null,
+      deliveryEnds: body.deliveryEnds ? new Date(body.deliveryEnds) : null,
+    };
+
+    const updateData: UpdateFuelTender = fuelTenderData;
 
     // Prevent changing organization
     delete updateData.orgId;

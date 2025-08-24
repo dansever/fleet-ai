@@ -1,7 +1,6 @@
 'use client';
 
 import type { FuelTender } from '@/drizzle/types';
-import { formatDate } from '@/lib/core/formatters';
 import {
   createFuelTender,
   updateFuelTender,
@@ -53,14 +52,14 @@ export default function TenderDialog({
       fuelType: tender?.fuelType || '',
       baseCurrency: tender?.baseCurrency || '',
       baseUom: tender?.baseUom || '',
-      biddingStarts: tender?.biddingStarts || null,
-      biddingEnds: tender?.biddingEnds || null,
-      deliveryStarts: tender?.deliveryStarts || null,
-      deliveryEnds: tender?.deliveryEnds || null,
+      biddingStarts: tender?.biddingStarts ? new Date(tender?.biddingStarts) : null,
+      biddingEnds: tender?.biddingEnds ? new Date(tender?.biddingEnds) : null,
+      deliveryStarts: tender?.deliveryStarts ? new Date(tender?.deliveryStarts) : null,
+      deliveryEnds: tender?.deliveryEnds ? new Date(tender?.deliveryEnds) : null,
     });
   }, [tender]);
 
-  const handleFieldChange = (field: string, value: string | boolean | number) => {
+  const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -69,13 +68,22 @@ export default function TenderDialog({
     try {
       let savedTender: FuelTender;
 
+      // Serialize dates to ISO strings before sending
+      const serializedFormData = {
+        ...formData,
+        biddingStarts: formData.biddingStarts?.toISOString() || null,
+        biddingEnds: formData.biddingEnds?.toISOString() || null,
+        deliveryStarts: formData.deliveryStarts?.toISOString() || null,
+        deliveryEnds: formData.deliveryEnds?.toISOString() || null,
+      };
+
       if (isAdd) {
         // Create new tender (orgId is handled server-side, airportId must be provided)
         if (!airportId) {
           throw new Error('Airport ID is required when creating a new tender');
         }
         const createData: CreateFuelTenderData = {
-          ...formData,
+          ...serializedFormData,
           airportId,
         };
         savedTender = await createFuelTender(createData);
@@ -193,9 +201,10 @@ export default function TenderDialog({
                   onChange={(value) => handleFieldChange('baseUom', value)}
                   name="baseUom"
                 />
+
                 <KeyValuePair
                   label="Bidding Starts"
-                  value={formData.biddingStarts ? formatDate(formData.biddingStarts) : ''}
+                  value={formData.biddingStarts}
                   valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('biddingStarts', value)}
@@ -203,7 +212,7 @@ export default function TenderDialog({
                 />
                 <KeyValuePair
                   label="Bidding Ends"
-                  value={formData.biddingEnds ? formatDate(formData.biddingEnds) : ''}
+                  value={formData.biddingEnds}
                   valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('biddingEnds', value)}
@@ -211,7 +220,7 @@ export default function TenderDialog({
                 />
                 <KeyValuePair
                   label="Delivery Starts"
-                  value={formData.deliveryStarts ? formatDate(formData.deliveryStarts) : ''}
+                  value={formData.deliveryStarts}
                   valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('deliveryStarts', value)}
@@ -219,7 +228,7 @@ export default function TenderDialog({
                 />
                 <KeyValuePair
                   label="Delivery Ends"
-                  value={formData.deliveryEnds ? formatDate(formData.deliveryEnds) : ''}
+                  value={formData.deliveryEnds}
                   valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('deliveryEnds', value)}

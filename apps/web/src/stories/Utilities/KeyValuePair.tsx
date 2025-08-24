@@ -16,13 +16,13 @@ export const KeyValuePair = ({
   name,
 }: {
   label: string;
-  value: string | number | boolean | React.ReactNode;
-  valueType: 'string' | 'number' | 'boolean' | 'date';
+  value: string | number | boolean | Date | null;
+  valueType: 'string' | 'number' | 'boolean' | 'date' | 'null';
   className?: string;
   keyClassName?: string;
   valueClassName?: string;
   editMode?: boolean;
-  onChange?: (value: string | number | boolean) => void;
+  onChange?: (value: string | number | boolean | Date) => void;
   name?: string;
 }) => (
   <div
@@ -66,13 +66,13 @@ export const KeyValuePair = ({
         <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
       ) : valueType === 'date' ? (
         <DatePicker
-          value={value as unknown as Date}
-          onChange={(value: Date) => onChange?.(formatDate(value))}
+          value={value as Date}
+          onChange={(value: Date) => onChange?.(value)}
           name={name}
           triggerClassName="max-w-2/4"
         />
       ) : (
-        value
+        <div className="max-w-3/5">{value instanceof Date ? formatDate(value) : value}</div>
       )
     ) : valueType === 'boolean' ? (
       <span
@@ -82,8 +82,10 @@ export const KeyValuePair = ({
       >
         {value ? 'Yes' : 'No'}
       </span>
+    ) : valueType === 'date' ? (
+      <div className="max-w-3/5">{formatDate(value as Date)}</div>
     ) : (
-      <div className="max-w-3/5">{value}</div>
+      <div className="max-w-3/5">{value as string | number}</div>
     )}
   </div>
 );

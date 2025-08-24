@@ -304,19 +304,41 @@ export default function FuelProcurementProvider({
         prevTenders.map((tender) => (tender.id === updatedTender.id ? updatedTender : tender)),
       );
 
+      // Update the cache for the current airport
+      if (selectedAirport) {
+        setTendersCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]:
+            prev[selectedAirport.id]?.map((tender) =>
+              tender.id === updatedTender.id ? updatedTender : tender,
+            ) || [],
+        }));
+      }
+
       if (selectedTender?.id === updatedTender.id) {
         setSelectedTender(updatedTender);
       }
     },
-    [selectedTender],
+    [selectedTender, selectedAirport],
   );
 
   /**
    * Add tender
    */
-  const addTender = useCallback((newTender: FuelTender) => {
-    setAirportTenders((prevTenders) => [newTender, ...prevTenders]);
-  }, []);
+  const addTender = useCallback(
+    (newTender: FuelTender) => {
+      setAirportTenders((prevTenders) => [newTender, ...prevTenders]);
+
+      // Update the cache for the current airport
+      if (selectedAirport) {
+        setTendersCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]: [newTender, ...(prev[selectedAirport.id] || [])],
+        }));
+      }
+    },
+    [selectedAirport],
+  );
 
   /**
    * Remove tender

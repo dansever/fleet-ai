@@ -97,9 +97,17 @@ export const Default: Story = {
           children: createElement(
             'div',
             { className: 'flex flex-col justify-between' },
-            createElement(KeyValuePair, { label: 'Flight ID', value: 'FL-2024-001' }),
-            createElement(KeyValuePair, { label: 'Destination', value: 'London, United Kingdom' }),
-            createElement(KeyValuePair, { label: 'Status', value: 'Active' }),
+            createElement(KeyValuePair, {
+              label: 'Flight ID',
+              value: 'FL-2024-001',
+              valueType: 'string',
+            }),
+            createElement(KeyValuePair, {
+              label: 'Destination',
+              value: 'London, United Kingdom',
+              valueType: 'string',
+            }),
+            createElement(KeyValuePair, { label: 'Status', value: 'Active', valueType: 'string' }),
           ),
           headerGradient: 'from-violet-500 to-blue-500',
         }),

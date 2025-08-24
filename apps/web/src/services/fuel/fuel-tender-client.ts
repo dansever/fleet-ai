@@ -2,7 +2,16 @@ import type { FuelTender, NewFuelTender, UpdateFuelTender } from '@/drizzle/type
 import { api } from '../api-client';
 
 // Client-side type for creating fuel tenders (orgId is handled server-side)
-export type CreateFuelTenderData = Omit<NewFuelTender, 'orgId' | 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateFuelTenderData = Omit<
+  NewFuelTender,
+  'orgId' | 'id' | 'createdAt' | 'updatedAt'
+> & {
+  // ISO string for API transport
+  biddingStarts?: string | null;
+  biddingEnds?: string | null;
+  deliveryStarts?: string | null;
+  deliveryEnds?: string | null;
+};
 
 /**
  * Get a fuel tender by ID

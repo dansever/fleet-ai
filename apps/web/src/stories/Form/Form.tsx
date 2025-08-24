@@ -209,7 +209,8 @@ export const DatePicker = ({
           selected={date}
           captionLayout="dropdown"
           onSelect={(date) => {
-            setDate(date);
+            setDate(date as Date);
+            onChange?.(date as Date);
             setOpen(false);
           }}
           fromYear={fromYear}

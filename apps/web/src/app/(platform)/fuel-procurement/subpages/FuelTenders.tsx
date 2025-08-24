@@ -1,5 +1,6 @@
 'use client';
 
+import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
@@ -21,9 +22,23 @@ export default function FuelTendersPage() {
     errors,
     clearError,
     refreshTenders,
+    updateTender,
+    addTender,
   } = useFuelProcurement();
 
   const [showTenderDropdown, setShowTenderDropdown] = useState(false);
+
+  // Handle tender addition
+  const handleTenderAdded = (newTender: FuelTender) => {
+    addTender(newTender);
+    // Select the newly added tender
+    selectTenderById(newTender.id);
+  };
+
+  // Handle tender update
+  const handleTenderUpdated = (updatedTender: FuelTender) => {
+    updateTender(updatedTender);
+  };
 
   if (!selectedAirport) return null;
 
@@ -94,7 +109,7 @@ export default function FuelTendersPage() {
             <TenderDialog
               tender={null}
               airportId={selectedAirport.id}
-              onChange={() => {}}
+              onChange={handleTenderAdded}
               DialogType="add"
             />
           </div>
@@ -109,7 +124,7 @@ export default function FuelTendersPage() {
                   <TenderDialog
                     tender={currentTender}
                     airportId={selectedAirport.id}
-                    onChange={() => {}}
+                    onChange={handleTenderUpdated}
                     DialogType="edit"
                     triggerClassName="bg-white/20 text-white-700"
                   />

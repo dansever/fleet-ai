@@ -50,6 +50,12 @@ export const DetailDialog = ({
     setIsEditing(initialEditing);
   }, [initialEditing]);
 
+  useEffect(() => {
+    if (open === true) {
+      setIsEditing(initialEditing);
+    }
+  }, [open, initialEditing]);
+
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -68,14 +74,16 @@ export const DetailDialog = ({
     onCancel?.();
   };
 
+  // Custom onOpenChange handler to reset editing state when dialog opens
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen === true) {
+      setIsEditing(initialEditing);
+    }
+    onOpenChange?.(nextOpen);
+  };
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (isLoading) return;
-        onOpenChange?.(next);
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         onEscapeKeyDown={(e) => isLoading && e.preventDefault()}

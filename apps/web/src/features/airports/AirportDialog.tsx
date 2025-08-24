@@ -52,7 +52,7 @@ export default function AirportDialog({
     });
   }, [airport]);
 
-  const handleFieldChange = (field: string, value: string | boolean | number) => {
+  const handleFieldChange = (field: string, value: string | boolean | number | Date) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
