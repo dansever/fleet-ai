@@ -196,7 +196,7 @@ export default function FuelTendersPage() {
                 </div>
               }
             >
-              <div className="grid grid-cols-7 gap-4">
+              <div className="grid grid-cols-9 gap-4">
                 {/* Tender Information */}
                 <ContentSection
                   headerGradient="none"
@@ -208,7 +208,7 @@ export default function FuelTendersPage() {
                       <h4>Details</h4>
                     </div>
                   }
-                  className="col-span-2 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
+                  className="col-span-3 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
                 >
                   <KeyValuePair
                     label="Fuel Type"
@@ -225,7 +225,7 @@ export default function FuelTendersPage() {
 
                 {/* Timeline */}
                 <ContentSection
-                  className="col-span-3 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
+                  className="col-span-4 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
                   headerGradient="none"
                   header={
                     <div className="flex items-start gap-2 text-foreground">

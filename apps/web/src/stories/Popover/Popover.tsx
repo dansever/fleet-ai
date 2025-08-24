@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { FileText, Plus, Send, Upload, X } from 'lucide-react';
 import { ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '../Button/Button';
+import { ContentSection } from '../Card/Card';
 
 // Confirmation Popover Component for delete actions
 export interface ConfirmationPopoverProps {
@@ -16,6 +17,7 @@ export interface ConfirmationPopoverProps {
   intent?: 'danger' | 'warning' | 'info';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  popoverContentAlign?: 'start' | 'center' | 'end';
 }
 
 export const ConfirmationPopover = ({
@@ -29,6 +31,7 @@ export const ConfirmationPopover = ({
   intent = 'info',
   open,
   onOpenChange,
+  popoverContentAlign = 'end',
 }: ConfirmationPopoverProps) => {
   if (intent && !['danger', 'warning', 'info'].includes(intent)) {
     return `Invalid intent: ${intent}`;
@@ -68,8 +71,8 @@ export const ConfirmationPopover = ({
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
+        align={popoverContentAlign}
         className="w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0"
-        align="start"
       >
         {/* Header with intent-based gradient */}
         <div className={cn('bg-gradient-to-r text-white p-4', styles.gradient)}>
@@ -102,6 +105,7 @@ export interface FileUploadPopoverProps {
   className?: string;
   triggerButtonIntent?: 'primary' | 'secondary' | 'ghost';
   triggerButtonText?: string;
+  popoverContentAlign?: 'start' | 'center' | 'end';
 }
 
 export const FileUploadPopover = ({
@@ -112,6 +116,7 @@ export const FileUploadPopover = ({
   className,
   triggerButtonIntent = 'primary',
   triggerButtonText = 'Upload',
+  popoverContentAlign = 'end',
 }: FileUploadPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -190,65 +195,72 @@ export const FileUploadPopover = ({
           <Button intent={triggerButtonIntent} text={triggerButtonText} icon={Upload} />
         </PopoverTrigger>
         <PopoverContent
+          align={popoverContentAlign}
           className="w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0"
-          align="start"
         >
           {!selectedFile ? (
             <>
               {/* Upload Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
-                <div className="flex items-center gap-3">
-                  <Upload className="w-5 h-5" />
-                  <div>
-                    <h4 className="font-semibold text-sm">Upload Document</h4>
-                    <p className="text-white/90 text-xs mt-1">Drag and drop or click to select</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Drop Zone */}
-              <div className="p-4 space-y-2 bg-white">
-                <div
-                  className={cn(
-                    'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
-                    isDragOver
-                      ? 'border-blue-400 bg-blue-50'
-                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
-                  )}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="space-y-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
-                      <Upload className="w-6 h-6 text-white" />
-                    </div>
+              <ContentSection
+                header={
+                  <div className="flex items-center gap-3">
+                    <Upload className="w-5 h-5" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {isDragOver ? 'Drop your file here' : 'Click to upload or drag and drop'}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">Maximum file size: {maxSize}MB</p>
+                      <h4 className="font-semibold text-sm">Upload Document</h4>
+                      <p className="text-white/90 text-xs mt-1">Drag and drop or click to select</p>
                     </div>
                   </div>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={accept}
-                  onChange={handleFileInputChange}
-                  className="hidden"
-                />
+                }
+                headerGradient="from-blue-500 to-purple-600"
+                children={
+                  <div className="space-y-2 ">
+                    <div
+                      className={cn(
+                        'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+                        isDragOver
+                          ? 'border-blue-400 bg-blue-50'
+                          : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
+                      )}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <div className="space-y-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+                          <Upload className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {isDragOver
+                              ? 'Drop your file here'
+                              : 'Click to upload or drag and drop'}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Maximum file size: {maxSize}MB
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={accept}
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                    />
 
-                <Button
-                  intent="ghost"
-                  onClick={onManualUpload}
-                  size="sm"
-                  text="Or Input Data Manually"
-                  className="text-xs justify-center"
-                  icon={Plus}
-                />
-              </div>
+                    <Button
+                      intent="ghost"
+                      onClick={onManualUpload}
+                      size="sm"
+                      text="Or Input Data Manually"
+                      className="text-xs justify-center"
+                      icon={Plus}
+                    />
+                  </div>
+                }
+              />
             </>
           ) : (
             <>

@@ -27,15 +27,14 @@ export const KeyValuePair = ({
 }) => (
   <div
     className={cn(
-      'text-xs md:text-sm lg:text-base',
-      'text-gray-600',
+      'text-sm',
+      'text-gray-600 items-center',
       'flex justify-between gap-1 py-1 border-b border-gray-100 last:border-b-0',
       className,
     )}
   >
     <span
       className={cn(
-        'text-xs md:text-sm lg:text-base',
         'text-gray-600',
         'font-semibold max-w-2/5 line-clamp-2 break-words',
         keyClassName,
@@ -85,7 +84,7 @@ export const KeyValuePair = ({
     ) : valueType === 'date' ? (
       <div className="max-w-3/5">{formatDate(value as string)}</div>
     ) : (
-      <div className="max-w-3/5">{value as string | number}</div>
+      <div className="max-w-4/5">{value as string | number}</div>
     )}
   </div>
 );

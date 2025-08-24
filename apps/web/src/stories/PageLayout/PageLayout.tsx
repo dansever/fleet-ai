@@ -42,7 +42,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
       )}
 
       {/* Right Main Panel */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-4xl">
         {/* Fixed Header */}
         <div className="px-4 py-1.5 border-b border-border bg-card/50 backdrop-blur-sm flex items-center flex-shrink-0">
           {headerContent}
