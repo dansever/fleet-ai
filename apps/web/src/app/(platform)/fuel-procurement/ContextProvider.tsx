@@ -1,18 +1,21 @@
 'use client';
 
-import { Airport, FuelTender, User } from '@/drizzle/types';
+import { Airport, FuelBid, FuelTender, User } from '@/drizzle/types';
 import { getAirports } from '@/services/core/airport-client';
+import { getFuelBidsByTender } from '@/services/fuel/fuel-bid-client';
 import { getFuelTendersByAirport } from '@/services/fuel/fuel-tender-client';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type LoadingState = {
   airports: boolean;
   tenders: boolean;
+  fuelBids: boolean;
 };
 
 export type ErrorState = {
   airports: string | null;
   tenders: string | null;
+  fuelBids: string | null;
   general: string | null;
 };
 
@@ -40,6 +43,14 @@ export type FuelProcurementContextType = {
   addTender: (newTender: FuelTender) => void;
   removeTender: (tenderId: string) => void;
 
+  // Fuel Bids
+  fuelBids: FuelBid[];
+  setFuelBids: (fuelBids: FuelBid[]) => void;
+  refreshFuelBids: () => Promise<void>;
+  updateFuelBid: (updatedFuelBid: FuelBid) => void;
+  addFuelBid: (newFuelBid: FuelBid) => void;
+  removeFuelBid: (fuelBidId: string) => void;
+
   // Loading and error states
   loading: LoadingState;
   errors: ErrorState;
@@ -64,20 +75,26 @@ export default function FuelProcurementProvider({
   const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
   const [airportTenders, setAirportTenders] = useState<FuelTender[]>([]);
   const [selectedTender, setSelectedTender] = useState<FuelTender | null>(null);
+  const [fuelBids, setFuelBids] = useState<FuelBid[]>([]);
 
   // Cache to avoid refetching tenders for the same airport
   const [tendersCache, setTendersCache] = useState<Record<string, FuelTender[]>>({});
+
+  // Cache to avoid refetching fuel bids for the same tender
+  const [fuelBidsCache, setFuelBidsCache] = useState<Record<string, FuelBid[]>>({});
 
   // Loading states
   const [loading, setLoading] = useState<LoadingState>({
     airports: false,
     tenders: false,
+    fuelBids: false,
   });
 
   // Error states
   const [errors, setErrors] = useState<ErrorState>({
     airports: null,
     tenders: null,
+    fuelBids: null,
     general: null,
   });
 
@@ -236,6 +253,50 @@ export default function FuelProcurementProvider({
   }, [selectedAirport, selectedTender]);
 
   /**
+   * Load fuel bids for the selected tender (only when tender changes)
+   */
+  useEffect(() => {
+    if (!selectedTender) {
+      setFuelBids([]);
+      return;
+    }
+
+    const loadFuelBids = async () => {
+      // Check cache first
+      if (fuelBidsCache[selectedTender.id]) {
+        const cachedFuelBids = fuelBidsCache[selectedTender.id];
+        setFuelBids(cachedFuelBids);
+        return;
+      }
+
+      setLoading((prev) => ({ ...prev, fuelBids: true }));
+      setErrors((prev) => ({ ...prev, fuelBids: null }));
+
+      try {
+        const fuelBids = await getFuelBidsByTender(selectedTender.id);
+        setFuelBids(fuelBids);
+
+        // Cache the fuel bids for this tender
+        setFuelBidsCache((prev) => ({
+          ...prev,
+          [selectedTender.id]: fuelBids,
+        }));
+      } catch (error) {
+        console.error('Error loading fuel bids:', error);
+        setErrors((prev) => ({
+          ...prev,
+          fuelBids: error instanceof Error ? error.message : 'Failed to load fuel bids',
+        }));
+        setFuelBids([]);
+      } finally {
+        setLoading((prev) => ({ ...prev, fuelBids: false }));
+      }
+    };
+
+    loadFuelBids();
+  }, [selectedTender, fuelBidsCache]);
+
+  /**
    * Select tender by ID without refetching (instant selection)
    */
   const selectTenderById = useCallback(
@@ -355,6 +416,105 @@ export default function FuelProcurementProvider({
   );
 
   /**
+   * Refresh fuel bids (clears cache)
+   */
+  const refreshFuelBids = useCallback(async () => {
+    if (!selectedTender) return;
+
+    // Clear cache for this tender to force fresh data
+    setFuelBidsCache((prev) => {
+      const updated = { ...prev };
+      delete updated[selectedTender.id];
+      return updated;
+    });
+
+    setLoading((prev) => ({ ...prev, fuelBids: true }));
+    setErrors((prev) => ({ ...prev, fuelBids: null }));
+
+    try {
+      const fuelBids = await getFuelBidsByTender(selectedTender.id);
+      setFuelBids(fuelBids);
+
+      // Update cache with fresh data
+      setFuelBidsCache((prev) => ({
+        ...prev,
+        [selectedTender.id]: fuelBids,
+      }));
+    } catch (error) {
+      console.error('Error refreshing fuel bids:', error);
+      setErrors((prev) => ({
+        ...prev,
+        fuelBids: error instanceof Error ? error.message : 'Failed to refresh fuel bids',
+      }));
+    } finally {
+      setLoading((prev) => ({ ...prev, fuelBids: false }));
+    }
+  }, [selectedTender]);
+
+  /**
+   * Update fuel bid
+   */
+  const updateFuelBid = useCallback(
+    (updatedFuelBid: FuelBid) => {
+      setFuelBids((prevFuelBids) =>
+        prevFuelBids.map((fuelBid) =>
+          fuelBid.id === updatedFuelBid.id ? updatedFuelBid : fuelBid,
+        ),
+      );
+
+      // Update the cache for the current tender
+      if (selectedTender) {
+        setFuelBidsCache((prev) => ({
+          ...prev,
+          [selectedTender.id]:
+            prev[selectedTender.id]?.map((fuelBid) =>
+              fuelBid.id === updatedFuelBid.id ? updatedFuelBid : fuelBid,
+            ) || [],
+        }));
+      }
+    },
+    [selectedTender],
+  );
+
+  /**
+   * Add fuel bid
+   */
+  const addFuelBid = useCallback(
+    (newFuelBid: FuelBid) => {
+      setFuelBids((prevFuelBids) => [newFuelBid, ...prevFuelBids]);
+
+      // Update the cache for the current tender
+      if (selectedTender) {
+        setFuelBidsCache((prev) => ({
+          ...prev,
+          [selectedTender.id]: [newFuelBid, ...(prev[selectedTender.id] || [])],
+        }));
+      }
+    },
+    [selectedTender],
+  );
+
+  /**
+   * Remove fuel bid
+   */
+  const removeFuelBid = useCallback(
+    (fuelBidId: string) => {
+      setFuelBids((prevFuelBids) => prevFuelBids.filter((fuelBid) => fuelBid.id !== fuelBidId));
+
+      // Update the cache for the current tender
+      if (selectedTender) {
+        setFuelBidsCache((prev) => ({
+          ...prev,
+          [selectedTender.id]: (prev[selectedTender.id] || []).filter(
+            (fuelBid) => fuelBid.id !== fuelBidId,
+          ),
+        }));
+      }
+    },
+    [selectedTender],
+  );
+
+  /**
    * Clear specific error
    */
   const clearError = useCallback((errorType: keyof ErrorState) => {
@@ -368,6 +528,7 @@ export default function FuelProcurementProvider({
     setErrors({
       airports: null,
       tenders: null,
+      fuelBids: null,
       general: null,
     });
   }, []);
@@ -393,6 +554,12 @@ export default function FuelProcurementProvider({
     updateTender,
     addTender,
     removeTender,
+    fuelBids,
+    setFuelBids,
+    refreshFuelBids,
+    updateFuelBid,
+    addFuelBid,
+    removeFuelBid,
     loading,
     errors,
     clearError,

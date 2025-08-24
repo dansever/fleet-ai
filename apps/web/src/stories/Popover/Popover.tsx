@@ -244,7 +244,7 @@ export const FileUploadPopover = ({
                   intent="ghost"
                   onClick={onManualUpload}
                   size="sm"
-                  text="Or manually upload an object"
+                  text="Or Input Data Manually"
                   className="text-xs justify-center"
                   icon={Plus}
                 />

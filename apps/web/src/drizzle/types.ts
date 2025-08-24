@@ -2,7 +2,7 @@ import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import {
   airportsTable,
   contactsTable,
-  fuelBids,
+  fuelBidsTable,
   fuelContractInvoices,
   fuelContracts,
   fuelTendersTable,
@@ -73,8 +73,8 @@ export type NewFuelTender = InferInsertModel<typeof fuelTendersTable>;
 export type UpdateFuelTender = Partial<NewFuelTender>;
 
 // ==================== FUEL BIDS ====================
-export type FuelBid = InferSelectModel<typeof fuelBids>;
-export type NewFuelBid = InferInsertModel<typeof fuelBids>;
+export type FuelBid = InferSelectModel<typeof fuelBidsTable>;
+export type NewFuelBid = InferInsertModel<typeof fuelBidsTable>;
 export type UpdateFuelBid = Partial<NewFuelBid>;
 
 // ==================== FUEL CONTRACTS ====================

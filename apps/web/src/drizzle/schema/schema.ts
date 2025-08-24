@@ -468,7 +468,7 @@ export const fuelTendersTable = pgTable(
 );
 
 // -------------------- Fuel Bids --------------------
-export const fuelBids = pgTable(
+export const fuelBidsTable = pgTable(
   'fuel_bids',
   {
     // System Fields

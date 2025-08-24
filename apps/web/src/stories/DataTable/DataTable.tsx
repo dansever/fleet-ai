@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { ChevronDownIcon, ChevronUpIcon, FilterIcon, SearchIcon } from 'lucide-react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
@@ -167,54 +168,58 @@ export function DataTable<T extends Record<string, any>>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200/50">
-              {columns.map((column) => (
-                <th
-                  key={String(column.key)}
-                  className={`px-6 py-4 text-left text-sm font-semibold text-gray-900 ${
-                    column.sortable ? 'cursor-pointer hover:bg-gray-50/50' : ''
-                  } ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : ''}`}
-                  style={{ width: column.width }}
-                  onClick={() => column.sortable && handleSort(String(column.key))}
-                >
-                  <div className="flex items-center gap-2">
-                    {column.header}
-                    {column.sortable && getSortIcon(String(column.key))}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((item, index) => (
-              <tr
-                key={index}
-                className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors ${
-                  onRowClick ? 'cursor-pointer' : ''
-                } ${rowClassName ? rowClassName(item) : ''}`}
-                onClick={() => onRowClick?.(item)}
-              >
+      <div className="w-full max-w-full overflow-x-auto">
+        <ScrollArea className="w-full max-w-full">
+          <table className="min-w-full border-collapse">
+            <thead>
+              <tr className="border-b border-gray-200/50">
                 {columns.map((column) => (
-                  <td
+                  <th
                     key={String(column.key)}
-                    className={`px-6 py-4 text-sm text-gray-700 ${
-                      column.align === 'center'
-                        ? 'text-center'
-                        : column.align === 'right'
-                          ? 'text-right'
-                          : ''
-                    }`}
+                    className={`px-6 py-4 text-left text-sm font-semibold text-gray-900 ${
+                      column.sortable ? 'cursor-pointer hover:bg-gray-50/50' : ''
+                    } ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : ''}`}
+                    style={{ width: column.width }}
+                    onClick={() => column.sortable && handleSort(String(column.key))}
                   >
-                    {column.accessor ? column.accessor(item) : item[column.key as keyof T]}
-                  </td>
+                    <div className="flex items-center gap-2">
+                      {column.header}
+                      {column.sortable && getSortIcon(String(column.key))}
+                    </div>
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedData.map((item, index) => (
+                <tr
+                  key={index}
+                  className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors ${
+                    onRowClick ? 'cursor-pointer' : ''
+                  } ${rowClassName ? rowClassName(item) : ''}`}
+                  onClick={() => onRowClick?.(item)}
+                >
+                  {columns.map((column) => (
+                    <td
+                      key={String(column.key)}
+                      className={`px-6 py-4 text-sm text-gray-700 ${
+                        column.align === 'center'
+                          ? 'text-center'
+                          : column.align === 'right'
+                            ? 'text-right'
+                            : ''
+                      }`}
+                    >
+                      {column.accessor ? column.accessor(item) : item[column.key as keyof T]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <br />
+          <ScrollBar orientation="horizontal" className="px-4" />
+        </ScrollArea>
       </div>
 
       {/* Empty State */}

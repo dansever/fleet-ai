@@ -1,5 +1,6 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { formatDate } from '@/lib/core/formatters';
@@ -9,10 +10,11 @@ import { ContentSection } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { AlertCircle, CalendarIcon, Loader2, TrashIcon } from 'lucide-react';
+import { AlertCircle, CalendarIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
+import FuelBidsTable from '../_components/FuelBidsTable';
 
 export default function FuelTendersPage() {
   const {
@@ -20,6 +22,11 @@ export default function FuelTendersPage() {
     airportTenders,
     selectedTender,
     selectTenderById,
+    fuelBids,
+    refreshFuelBids,
+    updateFuelBid,
+    addFuelBid,
+    removeFuelBid,
     loading,
     errors,
     clearError,
@@ -89,6 +96,33 @@ export default function FuelTendersPage() {
           </div>
         )}
 
+        {/* Fuel Bids Error State */}
+        {errors.fuelBids && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-medium text-red-800">Error Loading Fuel Bids</h3>
+                <p className="text-sm text-red-700 mt-1">{errors.fuelBids}</p>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => refreshFuelBids()}
+                    className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
+                  >
+                    Retry
+                  </button>
+                  <button
+                    onClick={() => clearError('fuelBids')}
+                    className="text-sm text-red-600 hover:text-red-800"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between gap-2 items-center">
           <ModernSelect
             placeholder="Select a tender"
@@ -121,170 +155,195 @@ export default function FuelTendersPage() {
         </div>
 
         {/* Loading State */}
-        {loading.tenders && (
-          <div className="flex items-center justify-center p-8">
-            <Loader2 className="w-6 h-6 animate-spin mr-3" />
-            <span className="text-gray-600">Loading fuel tenders...</span>
-          </div>
-        )}
+        {loading.tenders && <LoadingComponent size="md" text="Loading fuel tenders..." />}
 
         {currentTender && (
-          <ContentSection
-            header={
-              <div className="flex flex-col gap-2">
-                <div className="flex items-start gap-2 justify-between">
-                  <h3>{currentTender.title}</h3>
-                  {/* Buttons */}
-                  <div className="flex gap-2">
-                    <TenderDialog
-                      tender={currentTender}
-                      airportId={selectedAirport.id}
-                      onChange={handleTenderUpdated}
-                      DialogType="edit"
-                      triggerClassName="bg-white/20 text-white-700"
-                    />
-                    <ConfirmationPopover
-                      trigger={
-                        <Button
-                          intent="secondary"
-                          icon={TrashIcon}
-                          text="Delete"
-                          className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
+          <div className="flex flex-col gap-4">
+            <ContentSection
+              header={
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-start gap-2 justify-between">
+                    <h3>{currentTender.title}</h3>
+                    {/* Buttons */}
+                    <div className="flex gap-2">
+                      <TenderDialog
+                        tender={currentTender}
+                        airportId={selectedAirport.id}
+                        onChange={handleTenderUpdated}
+                        DialogType="edit"
+                        triggerClassName="bg-white/20 text-white-700"
+                      />
+                      <ConfirmationPopover
+                        trigger={
+                          <Button
+                            intent="secondary"
+                            icon={TrashIcon}
+                            text="Delete"
+                            className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
+                          />
+                        }
+                        intent="danger"
+                        title="Delete Tender"
+                        onConfirm={handleTenderDelete}
+                        open={isDeletePopoverOpen}
+                        onOpenChange={setIsDeletePopoverOpen}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-blue-100">
+                    {currentTender.description || 'No description available'}
+                  </p>
+                </div>
+              }
+            >
+              <div className="grid grid-cols-7 gap-4">
+                {/* Tender Information */}
+                <ContentSection
+                  headerGradient="none"
+                  header={
+                    <div className="flex items-start gap-2 text-foreground">
+                      <div className="p-2 bg-blue-600 rounded-xl">
+                        <CalendarIcon className="w-5 h-5 text-white" />
+                      </div>
+                      <h4>Details</h4>
+                    </div>
+                  }
+                  className="col-span-2 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
+                >
+                  <KeyValuePair
+                    label="Fuel Type"
+                    value={currentTender.fuelType}
+                    valueType="string"
+                  />
+                  <KeyValuePair
+                    label="Currency"
+                    value={currentTender.baseCurrency}
+                    valueType="string"
+                  />
+                  <KeyValuePair label="Base UOM" value={currentTender.baseUom} valueType="string" />
+                </ContentSection>
+
+                {/* Timeline */}
+                <ContentSection
+                  className="col-span-3 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
+                  headerGradient="none"
+                  header={
+                    <div className="flex items-start gap-2 text-foreground">
+                      <div className="p-2 bg-purple-600 rounded-xl">
+                        <CalendarIcon className="w-5 h-5 text-white" />
+                      </div>
+                      <h4>Timeline</h4>
+                    </div>
+                  }
+                >
+                  <div className="flex flex-row gap-8 justify-between">
+                    <div className="flex flex-col gap-2 w-1/2">
+                      <h4 className="font-bold">Bidding Period</h4>
+                      <div className="flex flex-col">
+                        <KeyValuePair
+                          label="Starts"
+                          value={
+                            currentTender.biddingStarts
+                              ? formatDate(currentTender.biddingStarts)
+                              : 'TBD'
+                          }
+                          valueType="date"
                         />
-                      }
-                      intent="danger"
-                      title="Delete Tender"
-                      onConfirm={handleTenderDelete}
-                      open={isDeletePopoverOpen}
-                      onOpenChange={setIsDeletePopoverOpen}
-                    />
+                        <KeyValuePair
+                          label="Ends"
+                          value={
+                            currentTender.biddingEnds
+                              ? formatDate(currentTender.biddingEnds)
+                              : 'TBD'
+                          }
+                          valueType="date"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 w-1/2">
+                      <h4 className="font-bold">Delivery Period</h4>
+                      <div className="flex flex-col">
+                        <KeyValuePair
+                          label="Starts"
+                          value={
+                            currentTender.deliveryStarts
+                              ? formatDate(currentTender.deliveryStarts)
+                              : 'TBD'
+                          }
+                          valueType="date"
+                        />
+                        <KeyValuePair
+                          label="Ends"
+                          value={
+                            currentTender.deliveryEnds
+                              ? formatDate(currentTender.deliveryEnds)
+                              : 'TBD'
+                          }
+                          valueType="date"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <p className="text-blue-100">
-                  {currentTender.description || 'No description available'}
-                </p>
+                </ContentSection>
+
+                {/* Quick Stats */}
+                <ContentSection
+                  className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
+                  headerGradient="none"
+                  header={
+                    <div className="flex items-start gap-2 text-foreground">
+                      <div className="p-2 bg-orange-600 rounded-xl">
+                        <CalendarIcon className="w-5 h-5 text-white" />
+                      </div>
+                      <h4>Summary</h4>
+                    </div>
+                  }
+                >
+                  <KeyValuePair
+                    keyClassName="max-w-1/2"
+                    label="Total Bids"
+                    value={fuelBids.length}
+                    valueType="number"
+                  />
+                  <KeyValuePair
+                    keyClassName="max-w-1/2"
+                    label="Accepted"
+                    value={
+                      fuelBids.filter(
+                        (bid) =>
+                          bid.decision?.toLowerCase() === 'accepted' ||
+                          bid.decision?.toLowerCase() === 'winner',
+                      ).length
+                    }
+                    valueType="number"
+                  />
+                  <KeyValuePair
+                    keyClassName="max-w-1/2"
+                    label="Pending"
+                    value={
+                      fuelBids.filter(
+                        (bid) => !bid.decision || bid.decision.toLowerCase() === 'pending',
+                      ).length
+                    }
+                    valueType="number"
+                  />
+                </ContentSection>
               </div>
-            }
-          >
-            <div className="grid grid-cols-7 gap-4">
-              {/* Tender Information */}
-              <ContentSection
-                headerGradient="none"
-                header={
-                  <div className="flex items-start gap-2 text-foreground">
-                    <div className="p-2 bg-blue-600 rounded-xl">
-                      <CalendarIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <h4>Details</h4>
-                  </div>
-                }
-                className="col-span-2 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
-              >
-                <KeyValuePair label="Fuel Type" value={currentTender.fuelType} valueType="string" />
-                <KeyValuePair
-                  label="Currency"
-                  value={currentTender.baseCurrency}
-                  valueType="string"
-                />
-                <KeyValuePair label="Base UOM" value={currentTender.baseUom} valueType="string" />
-              </ContentSection>
+            </ContentSection>
 
-              {/* Timeline */}
-              <ContentSection
-                className="col-span-3 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
-                headerGradient="none"
-                header={
-                  <div className="flex items-start gap-2 text-foreground">
-                    <div className="p-2 bg-purple-600 rounded-xl">
-                      <CalendarIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <h4>Timeline</h4>
-                  </div>
-                }
-              >
-                <div className="flex flex-row gap-8 justify-between">
-                  <div className="flex flex-col gap-2 w-1/2">
-                    <h4 className="font-bold">Bidding Period</h4>
-                    <div className="flex flex-col">
-                      <KeyValuePair
-                        label="Starts"
-                        value={
-                          currentTender.biddingStarts
-                            ? formatDate(currentTender.biddingStarts)
-                            : 'TBD'
-                        }
-                        valueType="date"
-                      />
-                      <KeyValuePair
-                        label="Ends"
-                        value={
-                          currentTender.biddingEnds ? formatDate(currentTender.biddingEnds) : 'TBD'
-                        }
-                        valueType="date"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 w-1/2">
-                    <h4 className="font-bold">Delivery Period</h4>
-                    <div className="flex flex-col">
-                      <KeyValuePair
-                        label="Starts"
-                        value={
-                          currentTender.deliveryStarts
-                            ? formatDate(currentTender.deliveryStarts)
-                            : 'TBD'
-                        }
-                        valueType="date"
-                      />
-                      <KeyValuePair
-                        label="Ends"
-                        value={
-                          currentTender.deliveryEnds
-                            ? formatDate(currentTender.deliveryEnds)
-                            : 'TBD'
-                        }
-                        valueType="date"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </ContentSection>
-
-              {/* Quick Stats */}
-              <ContentSection
-                className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
-                headerGradient="none"
-                header={
-                  <div className="flex items-start gap-2 text-foreground">
-                    <div className="p-2 bg-orange-600 rounded-xl">
-                      <CalendarIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <h4>Summary</h4>
-                  </div>
-                }
-              >
-                <KeyValuePair
-                  keyClassName="max-w-1/2"
-                  label="Total Bids"
-                  value={0}
-                  valueType="number"
-                />
-                <KeyValuePair
-                  keyClassName="max-w-1/2"
-                  label="Shortlisted"
-                  value={0}
-                  valueType="number"
-                />
-                <KeyValuePair
-                  keyClassName="max-w-1/2"
-                  label="Pending"
-                  value={0}
-                  valueType="number"
-                />
-              </ContentSection>
-            </div>
-          </ContentSection>
+            {/* Fuel Bids Loading State */}
+            {loading.fuelBids ? (
+              <LoadingComponent size="md" text="Loading fuel bids..." />
+            ) : (
+              <FuelBidsTable
+                fuelBids={fuelBids}
+                tender={currentTender}
+                onRefresh={refreshFuelBids}
+                isRefreshing={loading.fuelBids}
+              />
+            )}
+          </div>
         )}
       </div>
     </div>
