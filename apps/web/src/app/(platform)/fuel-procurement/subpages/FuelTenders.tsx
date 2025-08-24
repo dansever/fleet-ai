@@ -153,9 +153,13 @@ export default function FuelTendersPage() {
               }
               className="col-span-2 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
             >
-              <KeyValuePair label="Fuel Type" value={currentTender.fuelType} />
-              <KeyValuePair label="Currency" value={currentTender.baseCurrency} />
-              <KeyValuePair label="Base UOM" value={currentTender.baseUom} />
+              <KeyValuePair label="Fuel Type" value={currentTender.fuelType} valueType="string" />
+              <KeyValuePair
+                label="Currency"
+                value={currentTender.baseCurrency}
+                valueType="string"
+              />
+              <KeyValuePair label="Base UOM" value={currentTender.baseUom} valueType="string" />
             </ContentSection>
 
             {/* Timeline */}
@@ -171,8 +175,8 @@ export default function FuelTendersPage() {
                 </div>
               }
             >
-              <div className="flex flex-row gap-4 justify-between">
-                <div className="flex flex-col gap-2">
+              <div className="flex flex-row gap-8 justify-between">
+                <div className="flex flex-col gap-2 w-1/2">
                   <h4 className="font-bold">Bidding Period</h4>
                   <div className="flex flex-col">
                     <KeyValuePair
@@ -182,17 +186,19 @@ export default function FuelTendersPage() {
                           ? formatDate(currentTender.biddingStarts)
                           : 'TBD'
                       }
+                      valueType="date"
                     />
                     <KeyValuePair
                       label="Ends"
                       value={
                         currentTender.biddingEnds ? formatDate(currentTender.biddingEnds) : 'TBD'
                       }
+                      valueType="date"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 w-1/2">
                   <h4 className="font-bold">Delivery Period</h4>
                   <div className="flex flex-col">
                     <KeyValuePair
@@ -202,12 +208,14 @@ export default function FuelTendersPage() {
                           ? formatDate(currentTender.deliveryStarts)
                           : 'TBD'
                       }
+                      valueType="date"
                     />
                     <KeyValuePair
                       label="Ends"
                       value={
                         currentTender.deliveryEnds ? formatDate(currentTender.deliveryEnds) : 'TBD'
                       }
+                      valueType="date"
                     />
                   </div>
                 </div>
@@ -227,9 +235,19 @@ export default function FuelTendersPage() {
                 </div>
               }
             >
-              <KeyValuePair keyClassName="max-w-1/2" label="Total Bids" value={0} />
-              <KeyValuePair keyClassName="max-w-1/2" label="Shortlisted" value={0} />
-              <KeyValuePair keyClassName="max-w-1/2" label="Pending" value={0} />
+              <KeyValuePair
+                keyClassName="max-w-1/2"
+                label="Total Bids"
+                value={0}
+                valueType="number"
+              />
+              <KeyValuePair
+                keyClassName="max-w-1/2"
+                label="Shortlisted"
+                value={0}
+                valueType="number"
+              />
+              <KeyValuePair keyClassName="max-w-1/2" label="Pending" value={0} valueType="number" />
             </ContentSection>
           </div>
         </ContentSection>

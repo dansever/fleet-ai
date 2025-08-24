@@ -29,7 +29,7 @@ export const KeyValuePair = ({
     className={cn(
       'text-xs md:text-sm lg:text-base',
       'text-gray-600',
-      'flex justify-between gap-2 py-1 border-b border-gray-100 last:border-b-0',
+      'flex justify-between gap-1 py-1 border-b border-gray-100 last:border-b-0',
       className,
     )}
   >
@@ -83,7 +83,7 @@ export const KeyValuePair = ({
         {value ? 'Yes' : 'No'}
       </span>
     ) : (
-      value
+      <div className="max-w-3/5">{value}</div>
     )}
   </div>
 );

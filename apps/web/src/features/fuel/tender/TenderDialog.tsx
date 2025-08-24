@@ -131,18 +131,18 @@ export default function TenderDialog({
           className={triggerClassName}
         />
       }
-      headerGradient="from-orange-500 to-red-500"
+      headerGradient="from-orange-500 to-orange-500"
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isAdd}
+      initialEditing={isEdit || isAdd}
       saveButtonText={saveButtonText}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ContentSection
             header="Tender Information"
-            headerGradient="from-orange-500 to-red-400"
+            headerGradient="from-orange-500 to-orange-300"
             children={
               <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
@@ -182,7 +182,7 @@ export default function TenderDialog({
           />
           <ContentSection
             header="Configuration & Timeline"
-            headerGradient="from-orange-500 to-red-400"
+            headerGradient="from-orange-500 to-orange-300"
             children={
               <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
