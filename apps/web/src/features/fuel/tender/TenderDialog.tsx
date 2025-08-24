@@ -34,8 +34,8 @@ export default function TenderDialog({
     title: tender?.title || '',
     description: tender?.description || '',
     fuelType: tender?.fuelType || '',
-    baseCurrency: tender?.baseCurrency || 'USD',
-    baseUom: tender?.baseUom || 'USG',
+    baseCurrency: tender?.baseCurrency || '',
+    baseUom: tender?.baseUom || '',
     biddingStarts: tender?.biddingStarts || null,
     biddingEnds: tender?.biddingEnds || null,
     deliveryStarts: tender?.deliveryStarts || null,
@@ -51,8 +51,8 @@ export default function TenderDialog({
       title: tender?.title || '',
       description: tender?.description || '',
       fuelType: tender?.fuelType || '',
-      baseCurrency: tender?.baseCurrency || 'USD',
-      baseUom: tender?.baseUom || 'USG',
+      baseCurrency: tender?.baseCurrency || '',
+      baseUom: tender?.baseUom || '',
       biddingStarts: tender?.biddingStarts || null,
       biddingEnds: tender?.biddingEnds || null,
       deliveryStarts: tender?.deliveryStarts || null,
@@ -116,11 +116,7 @@ export default function TenderDialog({
     }
   };
 
-  const triggerText = isAdd
-    ? 'Add New Tender'
-    : isEdit
-      ? 'Edit'
-      : `View ${tender?.title || 'Tender'}`;
+  const triggerText = isAdd ? 'Add Tender' : isEdit ? 'Edit' : `View ${tender?.title || 'Tender'}`;
   const dialogTitle = isAdd ? 'Add New Tender' : tender?.title || 'Tender Details';
   const saveButtonText = isAdd ? 'Create Tender' : 'Save Changes';
 
@@ -152,12 +148,14 @@ export default function TenderDialog({
                 <KeyValuePair
                   label="Title"
                   value={formData.title}
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('title', value)}
                   name="title"
                 />
                 <KeyValuePair
                   label="Description"
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('description', value)}
                   name="description"
@@ -165,6 +163,7 @@ export default function TenderDialog({
                 />
                 <KeyValuePair
                   label="Fuel Type"
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('fuelType', value)}
                   name="fuelType"
@@ -172,6 +171,7 @@ export default function TenderDialog({
                 />
                 <KeyValuePair
                   label="Base Currency"
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('baseCurrency', value)}
                   name="baseCurrency"
@@ -188,6 +188,7 @@ export default function TenderDialog({
                 <KeyValuePair
                   label="Base UOM"
                   value={formData.baseUom}
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('baseUom', value)}
                   name="baseUom"
@@ -195,6 +196,7 @@ export default function TenderDialog({
                 <KeyValuePair
                   label="Bidding Starts"
                   value={formData.biddingStarts ? formatDate(formData.biddingStarts) : ''}
+                  valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('biddingStarts', value)}
                   name="biddingStarts"
@@ -202,6 +204,7 @@ export default function TenderDialog({
                 <KeyValuePair
                   label="Bidding Ends"
                   value={formData.biddingEnds ? formatDate(formData.biddingEnds) : ''}
+                  valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('biddingEnds', value)}
                   name="biddingEnds"
@@ -209,6 +212,7 @@ export default function TenderDialog({
                 <KeyValuePair
                   label="Delivery Starts"
                   value={formData.deliveryStarts ? formatDate(formData.deliveryStarts) : ''}
+                  valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('deliveryStarts', value)}
                   name="deliveryStarts"
@@ -216,6 +220,7 @@ export default function TenderDialog({
                 <KeyValuePair
                   label="Delivery Ends"
                   value={formData.deliveryEnds ? formatDate(formData.deliveryEnds) : ''}
+                  valueType="date"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('deliveryEnds', value)}
                   name="deliveryEnds"

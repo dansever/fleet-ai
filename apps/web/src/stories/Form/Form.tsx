@@ -175,6 +175,8 @@ export const DatePicker = ({
   onChange,
   fromYear = 2025,
   toYear = 2030,
+  triggerClassName,
+  calendarClassName,
   ...props
 }: {
   value?: Date;
@@ -192,15 +194,18 @@ export const DatePicker = ({
         <Button
           intent="secondary"
           id="date"
-          className="w-full justify-start font-normal"
+          className={cn('w-full justify-start font-normal', triggerClassName)}
           text={date ? formatDate(date) : 'Select date'}
           icon={ChevronDown}
         />
       </PopoverTrigger>
-      <PopoverContent className="w-auto overflow-hidden p-0 border-0" align="start">
+      <PopoverContent className="w-auto overflow-hidden p-0 border-0 rounded-2xl" align="start">
         <Calendar
           mode="single"
-          className="rounded-2xl border-2 focus:border-primary/50 focus:ring-0"
+          className={cn(
+            'rounded-2xl border-2 focus:border-primary/50 focus:ring-0',
+            calendarClassName,
+          )}
           selected={date}
           captionLayout="dropdown"
           onSelect={(date) => {

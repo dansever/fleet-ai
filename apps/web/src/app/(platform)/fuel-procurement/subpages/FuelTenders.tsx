@@ -5,8 +5,9 @@ import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
+import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { AlertCircle, CalendarIcon, Loader2, PlusIcon, TrashIcon } from 'lucide-react';
+import { AlertCircle, CalendarIcon, Loader2, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useFuelProcurement } from '../ContextProvider';
 
@@ -90,7 +91,12 @@ export default function FuelTendersPage() {
             }))}
           />
           <div className="flex gap-2">
-            <Button intent="add" icon={PlusIcon} text="Add New Tender" onClick={() => {}} />
+            <TenderDialog
+              tender={null}
+              airportId={selectedAirport.id}
+              onChange={() => {}}
+              DialogType="add"
+            />
           </div>
         </div>
         <ContentSection
@@ -107,14 +113,23 @@ export default function FuelTendersPage() {
                     DialogType="edit"
                     triggerClassName="bg-white/20 text-white-700"
                   />
-                  <Button
-                    intent="secondary"
-                    icon={TrashIcon}
-                    text="Delete"
-                    onClick={() => {
+                  <ConfirmationPopover
+                    trigger={
+                      <Button
+                        intent="secondary"
+                        icon={TrashIcon}
+                        text="Delete"
+                        onClick={() => {
+                          console.log('Delete Tender');
+                        }}
+                        className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
+                      />
+                    }
+                    intent="danger"
+                    title="Delete Tender"
+                    onConfirm={() => {
                       console.log('Delete Tender');
                     }}
-                    className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
                   />
                 </div>
               </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Airport, ServiceContract, User } from '@/drizzle/types';
+import { getServiceContractsByAirport } from '@/services/contracts/service-contract-client';
 import { getAirports } from '@/services/core/airport-client';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -18,24 +19,23 @@ export type ErrorState = {
 export type FuelProcurementContextType = {
   // User and airports
   dbUser: User;
-  // Airports
   airports: Airport[];
   setAirports: (airports: Airport[]) => void;
-  // Selected airport
   selectedAirport: Airport | null;
   setSelectedAirport: (airport: Airport | null) => void;
+
   // Refresh, Update, Add, Remove airports
   refreshAirports: () => Promise<void>;
   updateAirport: (updatedAirport: Airport) => void;
   addAirport: (newAirport: Airport) => void;
   removeAirport: (airportId: string) => void;
 
-  // Contracts
+  // Service Contracts
   airportContracts: ServiceContract[];
   setAirportContracts: (contracts: ServiceContract[]) => void;
-  // Selected contract
   selectedContract: ServiceContract | null;
   setSelectedContract: (contract: ServiceContract | null) => void;
+
   // Refresh, Update, Add, Remove contracts
   refreshContracts: () => Promise<void>;
   updateContract: (updatedContract: ServiceContract) => void;
@@ -99,7 +99,6 @@ export default function FuelProcurementProvider({
    */
   useEffect(() => {
     const sortedAirports = sortAirports(initialAirports);
-    console.log('sortedAirports', sortedAirports);
     setAirports(sortedAirports);
 
     // Always set first airport as selected on initial load
@@ -290,7 +289,6 @@ export default function FuelProcurementProvider({
   const removeAirport = useCallback(
     (airportId: string) => {
       setAirports((prevAirports) => prevAirports.filter((airport) => airport.id !== airportId));
-
       if (selectedAirport?.id === airportId) {
         // Select first available airport or null
         setSelectedAirport(airports.find((a) => a.id !== airportId) || null);
@@ -364,6 +362,7 @@ export default function FuelProcurementProvider({
   const value: FuelProcurementContextType = {
     dbUser,
     airports,
+    setAirports,
     refreshAirports,
     updateAirport,
     addAirport,

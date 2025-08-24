@@ -1,11 +1,13 @@
+import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import type React from 'react';
-import { ModernInput, ModernSwitch, ModernTextarea } from '../Form/Form';
+import { DatePicker, ModernInput, ModernSwitch, ModernTextarea } from '../Form/Form';
 
 // Key-Value Pair - For displaying structured information
 export const KeyValuePair = ({
   label,
   value,
+  valueType = 'string',
   className,
   keyClassName,
   valueClassName,
@@ -15,6 +17,7 @@ export const KeyValuePair = ({
 }: {
   label: string;
   value: string | number | boolean | React.ReactNode;
+  valueType: 'string' | 'number' | 'boolean' | 'date';
   className?: string;
   keyClassName?: string;
   valueClassName?: string;
@@ -42,14 +45,14 @@ export const KeyValuePair = ({
     </span>
 
     {editMode ? (
-      typeof value === 'string' ? (
+      valueType === 'string' ? (
         <ModernTextarea
           value={value}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
           name={name}
           className="max-w-3/5 resize-none leading-tight whitespace-pre-wrap text-left break-words min-h-[40px]"
         />
-      ) : typeof value === 'number' ? (
+      ) : valueType === 'number' ? (
         <ModernInput
           type="number"
           value={value}
@@ -59,12 +62,19 @@ export const KeyValuePair = ({
           name={name}
           className="max-w-3/5"
         />
-      ) : typeof value === 'boolean' ? (
+      ) : valueType === 'boolean' ? (
         <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
+      ) : valueType === 'date' ? (
+        <DatePicker
+          value={value as unknown as Date}
+          onChange={(value: Date) => onChange?.(formatDate(value))}
+          name={name}
+          triggerClassName="max-w-2/4"
+        />
       ) : (
         value
       )
-    ) : typeof value === 'boolean' ? (
+    ) : valueType === 'boolean' ? (
       <span
         className={`px-2 py-1 rounded text-xs font-medium ${
           value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

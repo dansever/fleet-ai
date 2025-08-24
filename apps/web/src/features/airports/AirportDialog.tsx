@@ -156,6 +156,7 @@ export default function AirportDialog({
                   <KeyValuePair
                     label="Airport Name"
                     value={formData.name}
+                    valueType="string"
                     editMode={isEditing}
                     onChange={(value) => handleFieldChange('name', value)}
                     name="name"
@@ -163,6 +164,7 @@ export default function AirportDialog({
                 )}
                 <KeyValuePair
                   label="IATA"
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('iata', value)}
                   name="iata"
@@ -170,6 +172,7 @@ export default function AirportDialog({
                 />
                 <KeyValuePair
                   label="ICAO"
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('icao', value)}
                   name="icao"
@@ -177,6 +180,7 @@ export default function AirportDialog({
                 />
                 <KeyValuePair
                   label="Hub"
+                  valueType="boolean"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('isHub', value)}
                   name="isHub"
@@ -193,6 +197,7 @@ export default function AirportDialog({
                 <KeyValuePair
                   label="City"
                   value={formData.city}
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('city', value)}
                   name="city"
@@ -200,6 +205,7 @@ export default function AirportDialog({
                 <KeyValuePair
                   label="State"
                   value={formData.state}
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('state', value)}
                   name="state"
@@ -207,6 +213,7 @@ export default function AirportDialog({
                 <KeyValuePair
                   label="Country"
                   value={formData.country}
+                  valueType="string"
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('country', value)}
                   name="country"
