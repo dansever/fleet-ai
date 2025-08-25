@@ -4,14 +4,20 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useSidebar } from '@/components/ui/sidebar';
+import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
+import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
+import { createRandomQuote } from '@/features/quotes/utils';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
+import { createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { ConfirmationPopover } from '@/stories/Popover/Popover';
+import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Plus, RefreshCw, TrashIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { CopyableText } from '../_components/CopyableText';
 import { useTechnicalProcurement } from './ContextProvider';
 import RfqList from './_components/RfqList';
 
@@ -27,9 +33,54 @@ export default function TechnicalProcurementClientPage() {
     isLoadingQuotes,
     updateRfq,
     addRfq,
+    addQuote,
+    deleteRfqAndSelectAdjacent,
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+
+  const handleDeleteRfq = async () => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+    try {
+      await deleteRfqAndSelectAdjacent(selectedRfq.id);
+      toast.success('RFQ deleted successfully');
+    } catch (error) {
+      console.error('Error deleting RFQ:', error);
+      toast.error('Error deleting RFQ');
+    }
+  };
+
+  // Handle file upload for quote extraction
+  const handleQuoteFileUpload = async (file: File) => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+
+    try {
+      toast.info('Extracting quote from file...');
+
+      // Extract quote data from file
+      const extractedData = await extractQuote(file);
+
+      // Convert to database format
+      const convertedQuote = convertPydanticToQuote(extractedData, selectedRfq.id);
+
+      // Create the quote in the database
+      const newQuote = await createQuote(convertedQuote);
+
+      // Add to local cache
+      addQuote(newQuote);
+
+      toast.success('Quote extracted and added successfully');
+    } catch (error) {
+      console.error('Error extracting quote:', error);
+      toast.error('Error extracting quote from file');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -146,9 +197,7 @@ export default function TechnicalProcurementClientPage() {
                       }
                       intent="danger"
                       title="Delete RFQ"
-                      onConfirm={() => {}}
-                      open={false}
-                      onOpenChange={() => {}}
+                      onConfirm={handleDeleteRfq}
                     />
                   </div>
                 </div>
@@ -223,17 +272,21 @@ export default function TechnicalProcurementClientPage() {
                 />
 
                 <KeyValuePair
-                  label="Contact Name"
+                  label="Contact"
                   value={selectedRfq.vendorContactName || ''}
                   valueType="string"
                 />
                 <KeyValuePair
-                  label="Contact Email"
-                  value={selectedRfq.vendorContactEmail || ''}
+                  label="Email"
+                  value={
+                    selectedRfq.vendorContactEmail && (
+                      <CopyableText text={selectedRfq.vendorContactEmail} />
+                    )
+                  }
                   valueType="string"
                 />
                 <KeyValuePair
-                  label="Contact Phone"
+                  label="Phone"
                   value={selectedRfq.vendorContactPhone || ''}
                   valueType="string"
                 />
@@ -248,14 +301,14 @@ export default function TechnicalProcurementClientPage() {
                     <div className="p-2 bg-orange-600 rounded-xl">
                       <CalendarIcon className="w-5 h-5 text-white" />
                     </div>
-                    <h4>TBD</h4>
+                    <h4>General</h4>
                   </div>
                 }
               >
                 <KeyValuePair
                   keyClassName="max-w-1/2"
                   label="Urgency"
-                  value={selectedRfq.urgencyLevel || ''}
+                  value={getUrgencyLevelDisplay(selectedRfq.urgencyLevel)}
                   valueType="string"
                 />
                 <KeyValuePair
@@ -294,7 +347,20 @@ export default function TechnicalProcurementClientPage() {
                 icon={RefreshCw}
                 className={`${isLoadingQuotes && 'animate-spin'}`}
               />
-              <Button intent="secondary" text="Add Quote" icon={Plus} />
+              <FileUploadPopover
+                triggerButtonText="Upload Quote"
+                triggerButtonIntent="add"
+                onSend={handleQuoteFileUpload}
+              />
+              <Button
+                intent="secondary"
+                text="Add Quote"
+                icon={Plus}
+                onClick={async () => {
+                  const randomQuote = await createRandomQuote(selectedRfq.id);
+                  addQuote(randomQuote);
+                }}
+              />
             </div>
           </div>
         </CardHeader>

@@ -6,13 +6,13 @@ import { Button } from '../Button/Button';
 import { ContentSection } from '../Card/Card';
 
 // Confirmation Popover Component for delete actions
-export interface ConfirmationPopoverProps {
+interface ConfirmationPopoverProps {
   trigger: ReactNode;
   title: string;
   description?: string;
   confirmText?: string;
   cancelText?: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
   intent?: 'danger' | 'warning' | 'info';
   open?: boolean;
@@ -37,14 +37,26 @@ export const ConfirmationPopover = ({
     return `Invalid intent: ${intent}`;
   }
 
-  const handleConfirm = () => {
-    onConfirm();
-    onOpenChange?.(false);
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const actualOpen = isControlled ? open! : internalOpen;
+  const setOpen = (v: boolean) => (isControlled ? onOpenChange?.(v) : setInternalOpen(v));
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
+    try {
+      setSubmitting(true);
+      await onConfirm();
+      setOpen(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
     onCancel?.();
-    onOpenChange?.(false);
+    setOpen(false);
   };
 
   const intentStyles = {
@@ -63,18 +75,17 @@ export const ConfirmationPopover = ({
       confirmButton: 'bg-blue-500 hover:bg-blue-600 text-white',
       icon: 'ℹ️',
     },
-  };
+  } as const;
 
   const styles = intentStyles[intent];
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover open={actualOpen} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         align={popoverContentAlign}
         className="w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0"
       >
-        {/* Header with intent-based gradient */}
         <div className={cn('bg-gradient-to-r text-white p-4', styles.gradient)}>
           <div className="flex items-center gap-3">
             <span className="text-2xl">{styles.icon}</span>
@@ -85,11 +96,22 @@ export const ConfirmationPopover = ({
           </div>
         </div>
 
-        {/* Action buttons */}
         <div className="p-4 bg-white">
           <div className="flex gap-2 justify-end">
-            <Button intent="secondary" onClick={handleCancel} size="sm" text={cancelText} />
-            <Button intent={intent} onClick={handleConfirm} size="sm" text={confirmText} />
+            <Button
+              intent="secondary"
+              onClick={handleCancel}
+              size="sm"
+              text={cancelText}
+              disabled={submitting}
+            />
+            <Button
+              intent={intent}
+              onClick={handleConfirm}
+              size="sm"
+              text={confirmText}
+              disabled={submitting}
+            />
           </div>
         </div>
       </PopoverContent>
@@ -99,23 +121,26 @@ export const ConfirmationPopover = ({
 
 export interface FileUploadPopoverProps {
   onSend?: (file: File) => void;
-  secondaryUploadButtonText?: string;
-  secondaryUploadButtonIntent?: 'primary' | 'secondary' | 'ghost';
-  onSecondaryUploadButton?: () => void;
   accept?: string;
   maxSize?: number; // in MB
   className?: string;
-  triggerButtonIntent?: 'primary' | 'secondary' | 'ghost';
+
+  // Trigger Button
+  triggerButtonIntent?: 'primary' | 'secondary' | 'ghost' | 'add';
   triggerButtonText?: string;
-  popoverContentAlign?: 'start' | 'center' | 'end';
   buttonSize?: 'sm' | 'md' | 'lg';
+
+  // Popover Behavior
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  popoverContentAlign?: 'start' | 'center' | 'end';
+
+  // Children can be nodes or a render-prop that gets a close() helper
+  children?: ReactNode | ((utils: { close: () => void }) => ReactNode);
 }
 
 export const FileUploadPopover = ({
   onSend,
-  secondaryUploadButtonText = 'Or Input Data Manually',
-  secondaryUploadButtonIntent = 'ghost',
-  onSecondaryUploadButton,
   accept = '*/*',
   maxSize = 10,
   className,
@@ -123,11 +148,23 @@ export const FileUploadPopover = ({
   triggerButtonText = 'Upload',
   popoverContentAlign = 'end',
   buttonSize = 'md',
+  open, // controlled
+  onOpenChange, // controlled
+  children,
 }: FileUploadPopoverProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isControlled ? open! : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const close = () => setOpen(false);
 
   const handleFileSelect = useCallback(
     (file: File) => {
@@ -144,11 +181,8 @@ export const FileUploadPopover = ({
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
-
       const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
-        handleFileSelect(files[0]);
-      }
+      if (files[0]) handleFileSelect(files[0]);
     },
     [handleFileSelect],
   );
@@ -165,10 +199,8 @@ export const FileUploadPopover = ({
 
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        handleFileSelect(files[0]);
-      }
+      const f = e.target.files?.[0];
+      if (f) handleFileSelect(f);
     },
     [handleFileSelect],
   );
@@ -177,15 +209,13 @@ export const FileUploadPopover = ({
     if (selectedFile && onSend) {
       await onSend(selectedFile);
       setSelectedFile(null);
-      setIsOpen(false);
-      // setSelectedFile(null);
-      // setIsOpen(false);
+      close(); // works in both modes
     }
   };
 
   const handleCancel = () => {
     setSelectedFile(null);
-    setIsOpen(false);
+    close();
   };
 
   const formatFileSize = (bytes: number) => {
@@ -198,7 +228,7 @@ export const FileUploadPopover = ({
 
   return (
     <div className={cn('space-y-3 flex flex-row gap-2', className)}>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             intent={triggerButtonIntent}
@@ -207,13 +237,13 @@ export const FileUploadPopover = ({
             size={buttonSize}
           />
         </PopoverTrigger>
+
         <PopoverContent
           align={popoverContentAlign}
-          className="w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0"
+          className={cn('w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0')}
         >
           {!selectedFile ? (
             <>
-              {/* Upload Header */}
               <ContentSection
                 header={
                   <div className="flex items-center gap-3">
@@ -226,7 +256,7 @@ export const FileUploadPopover = ({
                 }
                 headerGradient="from-blue-500 to-purple-600"
                 children={
-                  <div className="space-y-2 ">
+                  <div className="space-y-2">
                     <div
                       className={cn(
                         'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
@@ -255,6 +285,7 @@ export const FileUploadPopover = ({
                         </div>
                       </div>
                     </div>
+
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -262,20 +293,15 @@ export const FileUploadPopover = ({
                       onChange={handleFileInputChange}
                       className="hidden"
                     />
-                    <Button
-                      intent={secondaryUploadButtonIntent}
-                      onClick={onSecondaryUploadButton}
-                      size="md"
-                      text={secondaryUploadButtonText}
-                      className="justify-center underline w-full"
-                    />
+
+                    {/* Support render-prop children so callers can close the popover from inside */}
+                    {typeof children === 'function' ? children({ close }) : children}
                   </div>
                 }
               />
             </>
           ) : (
             <>
-              {/* File Selected Header */}
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4">
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5" />
@@ -286,7 +312,6 @@ export const FileUploadPopover = ({
                 </div>
               </div>
 
-              {/* File Info */}
               <div className="p-4 bg-white">
                 <div className="bg-gray-50 rounded-xl p-3 mb-4">
                   <div className="flex items-center gap-3">
@@ -302,7 +327,6 @@ export const FileUploadPopover = ({
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-2">
                   <Button
                     intent="secondary"
@@ -318,8 +342,6 @@ export const FileUploadPopover = ({
           )}
         </PopoverContent>
       </Popover>
-
-      {/* Manual Upload Button */}
     </div>
   );
 };

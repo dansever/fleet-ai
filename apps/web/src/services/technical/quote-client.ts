@@ -1,5 +1,5 @@
 import type { NewQuote, Quote } from '@/drizzle/types';
-import { api } from '../api-client';
+import { api, backendApi } from '@/services/api-client';
 
 /**
  * Get a quote by ID
@@ -39,6 +39,23 @@ export async function createQuote(data: Partial<NewQuote>): Promise<Quote> {
 export async function updateQuote(id: Quote['id'], data: Partial<NewQuote>): Promise<Quote> {
   const res = await api.put(`/api/quotes?id=${id}`, data);
   return res.data;
+}
+
+/**
+ * Extract quote from file
+ */
+export async function extractQuote(file: File): Promise<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await backendApi.post('/api/v1/technical/quotes/extract', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  // The backend returns a ResponseEnvelope, so extract the data
+  return res.data.data;
 }
 
 /**

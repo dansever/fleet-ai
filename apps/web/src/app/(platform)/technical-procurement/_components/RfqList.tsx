@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Rfq } from '@/drizzle/types';
 import RfqDialog from '@/features/rfqs/RfqDialog';
+import { createRandomRfq } from '@/features/rfqs/utils';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
@@ -38,6 +39,7 @@ export default function RfqList({
   const [showAddRfqDialog, setShowAddRfqDialog] = useState(false);
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const [uploadRfqPopoverOpen, setUploadRfqPopoverOpen] = useState(false);
 
   const openAddRfqDialog = () => {
     setShowAddRfqDialog(true);
@@ -129,6 +131,7 @@ export default function RfqList({
             <Button
               intent="ghost"
               icon={RefreshCw}
+              size="sm"
               className={`${isLoading && 'animate-spin'}`}
               disabled={isLoading}
               onClick={onRefresh}
@@ -136,11 +139,34 @@ export default function RfqList({
             {InsertAddRfqButton && (
               <>
                 <FileUploadPopover
-                  triggerButtonIntent="secondary"
-                  triggerButtonText="Add RFQ"
+                  open={uploadRfqPopoverOpen}
+                  onOpenChange={setUploadRfqPopoverOpen}
+                  triggerButtonIntent="add"
+                  triggerButtonText="Upload RFQ"
+                  buttonSize="sm"
                   onSend={() => {}}
-                  onSecondaryUploadButton={openAddRfqDialog}
-                />
+                >
+                  <div className="flex flex-col gap-2 text-sm">
+                    <Button
+                      intent="secondary"
+                      text="Manually Add RFQ"
+                      size="sm"
+                      onClick={openAddRfqDialog}
+                    />
+                    <Button
+                      intent="ghost"
+                      text="Or generate random RFQ"
+                      size="sm"
+                      className="text-gray-500"
+                      onClick={async () => {
+                        const rfq = await createRandomRfq();
+                        onAddRfq?.(rfq);
+                        console.log('Time to close the popover');
+                        setUploadRfqPopoverOpen(false);
+                      }}
+                    />
+                  </div>
+                </FileUploadPopover>
               </>
             )}
           </div>

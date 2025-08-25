@@ -102,3 +102,21 @@ export function getContractTypeDisplay(
     contractType.charAt(0).toUpperCase() + contractType.slice(1)
   );
 }
+
+// --------------------  Urgency Level Enum --------------------
+export const urgencyLevelEnum = pgEnum('urgency_level', ['routine', 'urgent', 'aog']);
+export type UrgencyLevel = (typeof urgencyLevelEnum.enumValues)[number];
+export const urgencyLevelDisplayMap: Record<UrgencyLevel, string> = {
+  routine: 'Routine',
+  urgent: 'Urgent',
+  aog: 'AOG',
+};
+export function getUrgencyLevelDisplay(
+  urgencyLevel: UrgencyLevel | string | null | undefined,
+): string {
+  if (!urgencyLevel) return 'Unknown';
+  return (
+    urgencyLevelDisplayMap[urgencyLevel as UrgencyLevel] ||
+    urgencyLevel.charAt(0).toUpperCase() + urgencyLevel.slice(1)
+  );
+}

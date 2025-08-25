@@ -2,7 +2,7 @@
 
 import { Quote, Rfq } from '@/drizzle/types';
 import { getQuotesByRfq } from '@/services/technical/quote-client';
-import { getRfqs } from '@/services/technical/rfq-client';
+import { deleteRfq, getRfqs } from '@/services/technical/rfq-client';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 export interface TechnicalProcurementContextValue {
@@ -22,6 +22,8 @@ export interface TechnicalProcurementContextValue {
   clearQuotesCache: () => void;
   updateRfq: (updatedRfq: Rfq) => void;
   addRfq: (newRfq: Rfq) => void;
+  addQuote: (newQuote: Partial<Quote>) => void;
+  deleteRfqAndSelectAdjacent: (rfqId: string) => Promise<void>;
 
   // Loading states
   isLoadingRfqs: boolean;
@@ -60,6 +62,30 @@ export function TechnicalProcurementContextProvider({
   const selectedRfqQuotes = selectedRfqId ? quotesCache.get(selectedRfqId) || [] : [];
   const isLoadingQuotes = selectedRfqId ? loadingQuotesForRfq.has(selectedRfqId) : false;
   const isLoading = isLoadingRfqs || isLoadingQuotes;
+
+  // Helper function to select adjacent RFQ when current one is removed
+  const findAdjacentRfqId = (rfqList: Rfq[], removedRfqId: string): string | null => {
+    if (rfqList.length === 0) return null;
+
+    const currentIndex = rfqList.findIndex((rfq) => rfq.id === removedRfqId);
+    if (currentIndex === -1) {
+      // If the RFQ wasn't found, select the first one
+      return rfqList[0].id;
+    }
+
+    // Try to select the next RFQ first (prefer going down the list)
+    if (currentIndex < rfqList.length - 1) {
+      return rfqList[currentIndex + 1].id;
+    }
+
+    // If we're at the end, select the previous RFQ
+    if (currentIndex > 0) {
+      return rfqList[currentIndex - 1].id;
+    }
+
+    // If there's only one RFQ and it's being deleted, return null
+    return null;
+  };
 
   // Fetch quotes for a specific RFQ with caching
   const fetchQuotesForRfq = async (rfqId: string) => {
@@ -103,9 +129,10 @@ export function TechnicalProcurementContextProvider({
       const freshRfqs = await getRfqs();
       setRfqs(freshRfqs);
 
-      // If selected RFQ no longer exists, select the first one or null
+      // If selected RFQ no longer exists, select an adjacent one
       if (selectedRfqId && !freshRfqs.find((rfq) => rfq.id === selectedRfqId)) {
-        setSelectedRfqId(freshRfqs.length > 0 ? freshRfqs[0].id : null);
+        const newSelectedId = findAdjacentRfqId(freshRfqs, selectedRfqId);
+        setSelectedRfqId(newSelectedId);
       }
     } catch (error) {
       console.error('Failed to refresh RFQs:', error);
@@ -167,6 +194,52 @@ export function TechnicalProcurementContextProvider({
     setSelectedRfqId(newRfq.id);
   };
 
+  const addQuote = (newQuote: Partial<Quote>) => {
+    // Ensure the quote has an rfqId
+    if (!newQuote.rfqId) {
+      console.error('Cannot add quote without rfqId');
+      return;
+    }
+
+    // Add the quote to the cache for the appropriate RFQ
+    setQuotesCache((prev) => {
+      const newCache = new Map(prev);
+      const existingQuotes = newCache.get(newQuote.rfqId!) || [];
+
+      // Add the new quote to the beginning of the array (most recent first)
+      const updatedQuotes = [newQuote as Quote, ...existingQuotes];
+      newCache.set(newQuote.rfqId!, updatedQuotes);
+
+      return newCache;
+    });
+  };
+
+  const deleteRfqAndSelectAdjacent = async (rfqId: string) => {
+    try {
+      // Delete from the server
+      await deleteRfq(rfqId);
+
+      // Find the adjacent RFQ before removing the current one
+      const newSelectedRfqId = findAdjacentRfqId(rfqs, rfqId);
+
+      // Remove from local state
+      setRfqs((prev) => prev.filter((rfq) => rfq.id !== rfqId));
+
+      // Clear quotes cache for the deleted RFQ
+      setQuotesCache((prev) => {
+        const newCache = new Map(prev);
+        newCache.delete(rfqId);
+        return newCache;
+      });
+
+      // Update selected RFQ to adjacent one
+      setSelectedRfqId(newSelectedRfqId);
+    } catch (error) {
+      console.error('Failed to delete RFQ:', error);
+      throw error; // Re-throw so the UI can handle the error
+    }
+  };
+
   // Client-side data fetching only if no server data provided
   useEffect(() => {
     if (!hasServerData) {
@@ -205,6 +278,8 @@ export function TechnicalProcurementContextProvider({
     clearQuotesCache,
     updateRfq,
     addRfq,
+    addQuote,
+    deleteRfqAndSelectAdjacent,
 
     // Loading states
     isLoadingRfqs,

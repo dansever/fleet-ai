@@ -1,5 +1,6 @@
 'use client';
 
+import { getUrgencyLevelDisplay, UrgencyLevel, urgencyLevelEnum } from '@/drizzle/schema/enums';
 import type { Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
 import { createRfq, updateRfq, type CreateRfqData } from '@/services/technical/rfq-client';
@@ -279,12 +280,10 @@ export default function RfqDialog({
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('urgencyLevel', value)}
                   name="urgencyLevel"
-                  selectOptions={[
-                    { value: 'low', label: 'Low' },
-                    { value: 'normal', label: 'Normal' },
-                    { value: 'high', label: 'High' },
-                    { value: 'urgent', label: 'Urgent' },
-                  ]}
+                  selectOptions={Object.values(urgencyLevelEnum.enumValues).map((level) => ({
+                    value: level,
+                    label: getUrgencyLevelDisplay(level as UrgencyLevel),
+                  }))}
                 />
               </div>
             }
