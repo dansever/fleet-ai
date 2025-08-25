@@ -3,7 +3,7 @@
 import type { Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
 import { createRfq, updateRfq, type CreateRfqData } from '@/services/technical/rfq-client';
-import { Button } from '@/stories/Button/Button';
+import { Button, ButtonProps } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
@@ -21,6 +21,7 @@ export default function RfqDialog({
   open,
   onOpenChange,
   withTrigger = true,
+  triggerIntent,
 }: {
   rfq: Rfq | null;
   onChange: (rfq: Rfq) => void;
@@ -28,7 +29,7 @@ export default function RfqDialog({
   triggerText?: string;
   triggerClassName?: string;
   buttonSize?: 'sm' | 'md' | 'lg';
-  triggerIntent?: 'primary' | 'secondary' | 'add' | 'delete';
+  triggerIntent?: 'primary' | 'secondary' | 'add' | 'delete' | 'info';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   withTrigger?: boolean;
@@ -197,7 +198,15 @@ export default function RfqDialog({
       trigger={
         withTrigger ? (
           <Button
-            intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+            intent={
+              triggerIntent
+                ? (triggerIntent as ButtonProps['intent'])
+                : isAdd
+                  ? 'add'
+                  : isEdit
+                    ? 'secondary'
+                    : 'primary'
+            }
             text={triggerText}
             icon={
               isAdd

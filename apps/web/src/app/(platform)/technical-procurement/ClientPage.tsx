@@ -7,8 +7,11 @@ import { useSidebar } from '@/components/ui/sidebar';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
+import { ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { FileText, Plus, RefreshCw } from 'lucide-react';
+import { ConfirmationPopover } from '@/stories/Popover/Popover';
+import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
+import { CalendarIcon, FileText, Plus, RefreshCw, TrashIcon } from 'lucide-react';
 import { useTechnicalProcurement } from './ContextProvider';
 import RfqList from './_components/RfqList';
 
@@ -95,8 +98,13 @@ export default function TechnicalProcurementClientPage() {
       </div>
 
       <div className="flex gap-2">
-        <RfqDialog rfq={selectedRfq} onChange={updateRfq} triggerText="Edit" DialogType="edit" />
-        <RfqDialog rfq={selectedRfq} onChange={() => {}} triggerText="View" DialogType="view" />
+        <RfqDialog
+          rfq={selectedRfq}
+          onChange={() => {}}
+          triggerText="View"
+          triggerIntent="secondary"
+          DialogType="view"
+        />
       </div>
     </div>
   ) : (
@@ -109,93 +117,164 @@ export default function TechnicalProcurementClientPage() {
   // Main content
   const mainContent = selectedRfq ? (
     <div className="space-y-6">
-      {/* RFQ Details Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="">
         {/* RFQ Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>RFQ Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Part Number</label>
-              <p className="text-sm">{selectedRfq.partNumber || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Part Description</label>
-              <p className="text-sm">{selectedRfq.partDescription || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Quantity</label>
-              <p className="text-sm">{selectedRfq.quantity || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Condition</label>
-              <p className="text-sm">{selectedRfq.conditionCode || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Unit of Measure</label>
-              <p className="text-sm">{selectedRfq.unitOfMeasure || 'Not specified'}</p>
-            </div>
-          </CardContent>
-        </Card>
+        {selectedRfq && (
+          <ContentSection
+            header={
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start gap-2 justify-between">
+                  <h3>{selectedRfq.rfqNumber}</h3>
+                  {/* Buttons */}
+                  <div className="flex gap-2">
+                    <RfqDialog
+                      rfq={selectedRfq}
+                      onChange={updateRfq}
+                      triggerText="Edit"
+                      DialogType="edit"
+                      triggerClassName="bg-white/20 text-white-700"
+                    />
 
-        {/* Vendor Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Vendor Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Vendor Name</label>
-              <p className="text-sm">{selectedRfq.vendorName || 'Not specified'}</p>
+                    <ConfirmationPopover
+                      trigger={
+                        <Button
+                          intent="secondary"
+                          icon={TrashIcon}
+                          text="Delete"
+                          className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
+                        />
+                      }
+                      intent="danger"
+                      title="Delete RFQ"
+                      onConfirm={() => {}}
+                      open={false}
+                      onOpenChange={() => {}}
+                    />
+                  </div>
+                </div>
+                <p className="text-blue-100">
+                  {selectedRfq.buyerComments || 'No buyer comments available'}
+                </p>
+              </div>
+            }
+          >
+            <div className="grid grid-cols-3 gap-4">
+              {/* Tender Information */}
+              <ContentSection
+                className="col-span-1 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
+                headerGradient="none"
+                header={
+                  <div className="flex items-start gap-2 text-foreground">
+                    <div className="p-2 bg-blue-600 rounded-xl">
+                      <CalendarIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <h4>Details</h4>
+                  </div>
+                }
+              >
+                <KeyValuePair
+                  label="Part Number"
+                  value={selectedRfq.partNumber || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Alt. Part Number"
+                  value={selectedRfq.altPartNumber || ''}
+                  valueType="string"
+                />
+
+                <KeyValuePair
+                  label="Description"
+                  value={selectedRfq.partDescription || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Quantity"
+                  value={
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                      {selectedRfq.quantity || ''}
+                    </Badge>
+                  }
+                  valueType="number"
+                />
+              </ContentSection>
+              {/* Timeline */}
+              <ContentSection
+                className="col-span-1 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
+                headerGradient="none"
+                header={
+                  <div className="flex items-start gap-2 text-foreground">
+                    <div className="p-2 bg-purple-600 rounded-xl">
+                      <CalendarIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <h4>Vendor Information</h4>
+                  </div>
+                }
+              >
+                <KeyValuePair
+                  label="Name"
+                  value={selectedRfq.vendorName || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Address"
+                  value={selectedRfq.vendorAddress || ''}
+                  valueType="string"
+                />
+
+                <KeyValuePair
+                  label="Contact Name"
+                  value={selectedRfq.vendorContactName || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Contact Email"
+                  value={selectedRfq.vendorContactEmail || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Contact Phone"
+                  value={selectedRfq.vendorContactPhone || ''}
+                  valueType="string"
+                />
+              </ContentSection>
+
+              {/* Quick Stats */}
+              <ContentSection
+                className="col-span-1 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
+                headerGradient="none"
+                header={
+                  <div className="flex items-start gap-2 text-foreground">
+                    <div className="p-2 bg-orange-600 rounded-xl">
+                      <CalendarIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <h4>TBD</h4>
+                  </div>
+                }
+              >
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Urgency"
+                  value={selectedRfq.urgencyLevel || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Deliver To"
+                  value={selectedRfq.deliverTo || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Buyer Comments"
+                  value={selectedRfq.buyerComments || ''}
+                  valueType="string"
+                />
+              </ContentSection>
             </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Contact Name</label>
-              <p className="text-sm">{selectedRfq.vendorContactName || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Contact Email</label>
-              <p className="text-sm">{selectedRfq.vendorContactEmail || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Contact Phone</label>
-              <p className="text-sm">{selectedRfq.vendorContactPhone || 'Not specified'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Address</label>
-              <p className="text-sm">{selectedRfq.vendorAddress || 'Not specified'}</p>
-            </div>
-          </CardContent>
-        </Card>
+          </ContentSection>
+        )}
       </div>
-
-      {/* Commercial Terms */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Commercial Terms</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Pricing Type</label>
-            <p className="text-sm">{selectedRfq.pricingType || 'Not specified'}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Urgency Level</label>
-            <p className="text-sm">{selectedRfq.urgencyLevel || 'Not specified'}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Deliver To</label>
-            <p className="text-sm">{selectedRfq.deliverTo || 'Not specified'}</p>
-          </div>
-          {selectedRfq.buyerComments && (
-            <div className="md:col-span-2 lg:col-span-3">
-              <label className="text-sm font-medium text-muted-foreground">Buyer Comments</label>
-              <p className="text-sm">{selectedRfq.buyerComments}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Quotes Section */}
       <Card>

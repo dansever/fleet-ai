@@ -117,15 +117,32 @@ export function TechnicalProcurementContextProvider({
   const refreshSelectedRfqQuotes = async () => {
     if (!selectedRfqId) return;
 
-    // Remove from cache to force refresh
-    setQuotesCache((prev) => {
-      const newCache = new Map(prev);
-      newCache.delete(selectedRfqId);
-      return newCache;
-    });
+    // Start loading immediately
+    setLoadingQuotesForRfq((prev) => new Set([...prev, selectedRfqId]));
 
-    // Fetch fresh quotes
-    await fetchQuotesForRfq(selectedRfqId);
+    try {
+      // Remove from cache to force refresh
+      setQuotesCache((prev) => {
+        const newCache = new Map(prev);
+        newCache.delete(selectedRfqId);
+        return newCache;
+      });
+
+      // Fetch fresh quotes directly (bypass cache check)
+      const quotes = await getQuotesByRfq(selectedRfqId);
+
+      // Cache the results
+      setQuotesCache((prev) => new Map(prev).set(selectedRfqId, quotes));
+    } catch (error) {
+      console.error(`Failed to refresh quotes for RFQ ${selectedRfqId}:`, error);
+    } finally {
+      // Remove from loading set
+      setLoadingQuotesForRfq((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedRfqId);
+        return newSet;
+      });
+    }
   };
 
   const refreshData = async () => {

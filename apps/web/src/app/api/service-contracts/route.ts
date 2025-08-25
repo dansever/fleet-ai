@@ -1,5 +1,7 @@
-import { getOrgById } from '@/db/orgs/db-actions';
-import { getServiceContractsByAirport } from '@/db/service-contracts/db-actions';
+import {
+  getServiceContract,
+  getServiceContractsByAirport,
+} from '@/db/service-contracts/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,17 +26,12 @@ export async function GET(request: NextRequest) {
     const id = searchParams.get('id');
     const airportId = searchParams.get('airportId');
 
-    if (!id || !airportId) return jsonError('No parameters found - ID or AirportID');
+    if (!id && !airportId) return jsonError('No parameters found - ID or AirportID required');
 
-    // Get specific org by DB ID
+    // Get service contract by ID
     if (id) {
-      // User can only access their own organization
-      if (id !== userOrgId) return jsonError('Unauthorized', 401);
-
-      const org = await getOrgById(id);
-      if (!org) return jsonError('Organization not found', 404);
-
-      return NextResponse.json(org);
+      const contract = await getServiceContract(id);
+      return NextResponse.json(contract);
     }
 
     // Get service contracts by airport
@@ -43,8 +40,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(contracts);
     }
   } catch (error) {
-    console.error('Error fetching organization:', error);
-    return jsonError('Failed to fetch organization', 500);
+    console.error('Error fetching service contracts:', error);
+    return jsonError('Failed to fetch service contracts', 500);
   }
 }
 

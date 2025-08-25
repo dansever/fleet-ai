@@ -336,12 +336,7 @@ export default function FuelTendersPage() {
             {loading.fuelBids ? (
               <LoadingComponent size="md" text="Loading fuel bids..." />
             ) : (
-              <FuelBidsComparison
-                fuelBids={fuelBids}
-                tender={currentTender}
-                onRefresh={refreshFuelBids}
-                isRefreshing={loading.fuelBids}
-              />
+              <FuelBidsComparison onRefresh={refreshFuelBids} isRefreshing={loading.fuelBids} />
             )}
           </div>
         )}
