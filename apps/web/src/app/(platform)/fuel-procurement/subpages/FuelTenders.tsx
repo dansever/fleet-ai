@@ -14,7 +14,7 @@ import { AlertCircle, CalendarIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
-import FuelBidsTable from '../_components/FuelBidsTable';
+import FuelBidsComparison from '../_components/FuelBidsComparison';
 
 export default function FuelTendersPage() {
   const {
@@ -336,7 +336,7 @@ export default function FuelTendersPage() {
             {loading.fuelBids ? (
               <LoadingComponent size="md" text="Loading fuel bids..." />
             ) : (
-              <FuelBidsTable
+              <FuelBidsComparison
                 fuelBids={fuelBids}
                 tender={currentTender}
                 onRefresh={refreshFuelBids}

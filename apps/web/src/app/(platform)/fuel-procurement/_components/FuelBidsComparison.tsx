@@ -1,43 +1,26 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FuelBid, FuelTender } from '@/drizzle/types';
+import { FuelBid, NewFuelBid } from '@/drizzle/types';
+import { convertPydanticToFuelBid } from '@/features/fuel/bid/pydanticConverter';
+import { formatCurrency, formatDate } from '@/lib/core/formatters';
+import { createFuelBid, extractFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { CheckCircle, Clock, FileText, RefreshCw, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useFuelProcurement } from '../ContextProvider';
 
 interface FuelBidsTableProps {
-  fuelBids: FuelBid[];
-  tender: FuelTender;
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
 
-const formatCurrency = (amount: string | number | null, currency = 'USD') => {
-  if (!amount) return '-';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  }).format(num);
-};
-
-const formatDate = (date: string | Date | null) => {
-  if (!date) return '-';
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date));
-};
-
 const getDecisionBadge = (decision: string | null) => {
   if (!decision) return <Badge variant="secondary">Pending</Badge>;
-
   switch (decision.toLowerCase()) {
     case 'accepted':
     case 'winner':
@@ -259,12 +242,26 @@ const fuelBidColumns: Column<FuelBid>[] = [
   },
 ];
 
-export default function FuelBidsTable({
-  fuelBids,
-  tender,
-  onRefresh,
-  isRefreshing,
-}: FuelBidsTableProps) {
+export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBidsTableProps) {
+  const { selectedTender, fuelBids, setFuelBids, addFuelBid } = useFuelProcurement();
+  const [newBid, setNewBid] = useState<NewFuelBid | null>(null);
+
+  if (!selectedTender) {
+    return null;
+  }
+
+  const handleSendFile = async (file: File) => {
+    try {
+      const result = await extractFuelBid(file);
+      const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
+      const newdBid = await createFuelBid(convertedBid, selectedTender.id);
+      addFuelBid(newdBid);
+      toast.success('Fuel bid extracted successfully');
+    } catch (error) {
+      toast.error('Error extracting fuel bid');
+    }
+  };
+
   return (
     <Card className="bg-gradient-to-br from-white to-slate-100 border-slate-200 shadow-2xl rounded-3xl">
       <CardHeader>
@@ -274,7 +271,9 @@ export default function FuelBidsTable({
               <FileText className="w-6 h-6 text-blue-500" />
               Fuel Bids
             </CardTitle>
-            <p className="text-slate-600 mt-1">Compare and evaluate fuel bids for {tender.title}</p>
+            <p className="text-slate-600 mt-1">
+              Compare and evaluate fuel bids for {selectedTender?.title}
+            </p>
           </div>
           <div className="flex gap-2">
             {onRefresh && (
@@ -290,7 +289,7 @@ export default function FuelBidsTable({
             <FileUploadPopover
               triggerButtonIntent="primary"
               triggerButtonText="New Bid"
-              onSend={() => {}}
+              onSend={handleSendFile}
               onManualUpload={() => {}}
             />
           </div>
@@ -304,7 +303,7 @@ export default function FuelBidsTable({
           filterable={true}
           pagination={true}
           pageSize={10}
-          onRowClick={(bid) => console.log('Bid clicked:', bid)}
+          onRowClick={() => {}}
         />
       </CardContent>
     </Card>

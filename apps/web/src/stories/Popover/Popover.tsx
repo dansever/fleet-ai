@@ -167,11 +167,13 @@ export const FileUploadPopover = ({
     [handleFileSelect],
   );
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (selectedFile && onSend) {
-      onSend(selectedFile);
+      await onSend(selectedFile);
       setSelectedFile(null);
       setIsOpen(false);
+      // setSelectedFile(null);
+      // setIsOpen(false);
     }
   };
 
