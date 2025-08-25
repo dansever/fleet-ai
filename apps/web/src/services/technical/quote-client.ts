@@ -10,14 +10,6 @@ export async function getQuote(id: Quote['id']): Promise<Quote> {
 }
 
 /**
- * Get all quotes for the current organization
- */
-export async function getQuotes(): Promise<Quote[]> {
-  const res = await api.get('/api/quotes');
-  return res.data;
-}
-
-/**
  * Get all quotes for a specific RFQ
  */
 export async function getQuotesByRfq(rfqId: Quote['rfqId']): Promise<Quote[]> {
@@ -42,6 +34,13 @@ export async function updateQuote(id: Quote['id'], data: Partial<NewQuote>): Pro
 }
 
 /**
+ * Delete a quote
+ */
+export async function deleteQuote(id: Quote['id']): Promise<void> {
+  await api.delete(`/api/quotes?id=${id}`);
+}
+
+/**
  * Extract quote from file
  */
 export async function extractQuote(file: File): Promise<any> {
@@ -56,11 +55,4 @@ export async function extractQuote(file: File): Promise<any> {
 
   // The backend returns a ResponseEnvelope, so extract the data
   return res.data.data;
-}
-
-/**
- * Delete a quote
- */
-export async function deleteQuote(id: Quote['id']): Promise<void> {
-  await api.delete(`/api/quotes?id=${id}`);
 }

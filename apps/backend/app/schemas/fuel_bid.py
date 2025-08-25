@@ -13,12 +13,16 @@ class FuelBid(BaseModel):
     title: str | None = Field(None, description="Title or reference name of the bid proposal, if provided.")
     supplier_comments: str | None = Field(None,description="Additional comments or notes from the supplier about their bid.")
     bid_submitted_at: str | None = Field(None,description="Date when the bid was submitted, in YYYY-MM-DD format.")
-    ai_summary: str | None = Field(None,description=(
-        "Summary of this fuel bid in 4 sentences or fewer."
-        "Focus on the critical commercial and technical terms. Include all the details that are relevant to the bid - terms, pricing, units of measure, notes, etc."
-        "Avoid verbose phrasing. Be concise and to the point."
-        )
+    ai_summary: str | None = Field(
+    None,
+    description=(
+        "Summary of this fuel bid in 4 sentences or fewer. "
+        "Focus on the critical commercial and technical terms. Include all the details that are relevant to the bid - terms, pricing, units of measure, notes, etc. "
+        "Avoid verbose phrasing. Be concise and to the point. "
+        "Format the summary as concise, titled bullet points, each starting with a short title followed by a colon (e.g., 'Pricing:', 'Volumes:', 'Delivery:', 'Terms:')."
+        ),
     )
+
     
     # Bid Details
     price_type: str | None = Field(None,description="Pricing method: 'fixed' for set prices, 'index_formula' for market-indexed pricing.")

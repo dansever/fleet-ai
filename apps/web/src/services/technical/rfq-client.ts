@@ -1,5 +1,5 @@
 import type { NewRfq, Rfq } from '@/drizzle/types';
-import { api } from '../api-client';
+import { api, backendApi } from '../api-client';
 
 // Client-side type for creating RFQs (orgId and userId are handled server-side)
 export type CreateRfqData = Omit<
@@ -47,4 +47,21 @@ export async function updateRfq(id: Rfq['id'], data: Partial<NewRfq>): Promise<R
  */
 export async function deleteRfq(id: Rfq['id']): Promise<void> {
   await api.delete(`/api/rfqs?id=${id}`);
+}
+
+/**
+ * Extract RFQ from file
+ */
+export async function extractRfq(file: File): Promise<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await backendApi.post('/api/v1/technical/rfqs/extract', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  // The backend returns a ResponseEnvelope, so extract the data
+  return res.data.data;
 }

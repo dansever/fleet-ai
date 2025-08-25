@@ -97,18 +97,25 @@ function SidebarNavItem({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <SidebarMenuButton
-            disabled={!item.isReady}
-            className={cn(
-              SIDEBAR_MENU_BUTTON_BASE,
-              variantClass,
-              'cursor-pointer',
-              SIDEBAR_MENU_BUTTON_SIZES.md,
-              isCollapsed ? 'rounded-lg justify-center' : 'rounded-xl',
-            )}
+          <Link
+            href={item.isReady ? item.url : '#'}
+            onClick={(e) => {
+              if (!item.isReady) e.preventDefault();
+            }}
           >
-            <item.icon className="h-4 w-4 flex-shrink-0" />
-          </SidebarMenuButton>
+            <SidebarMenuButton
+              disabled={!item.isReady}
+              className={cn(
+                SIDEBAR_MENU_BUTTON_BASE,
+                variantClass,
+                'cursor-pointer',
+                SIDEBAR_MENU_BUTTON_SIZES.md,
+                isCollapsed ? 'rounded-lg justify-center' : 'rounded-xl',
+              )}
+            >
+              <item.icon className="h-4 w-4 flex-shrink-0" />
+            </SidebarMenuButton>
+          </Link>
         </TooltipTrigger>
         <TooltipContent side="right">{item.title}</TooltipContent>
       </Tooltip>

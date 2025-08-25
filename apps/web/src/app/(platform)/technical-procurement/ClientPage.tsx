@@ -1,10 +1,10 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
+import { Quote } from '@/drizzle/types';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import { createRandomQuote } from '@/features/quotes/utils';
 import RfqDialog from '@/features/rfqs/RfqDialog';
@@ -15,10 +15,12 @@ import { ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { CalendarIcon, FileText, Plus, RefreshCw, TrashIcon } from 'lucide-react';
+import { CalendarIcon, FileText, Package, RefreshCw, TrashIcon } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { CopyableText } from '../_components/CopyableText';
 import { useTechnicalProcurement } from './ContextProvider';
+import QuotesComparison from './_components/QuotesComparison';
 import RfqList from './_components/RfqList';
 
 export default function TechnicalProcurementClientPage() {
@@ -38,6 +40,7 @@ export default function TechnicalProcurementClientPage() {
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const [uploadQuotePopoverOpen, setUploadQuotePopoverOpen] = useState(false);
 
   const handleDeleteRfq = async () => {
     if (!selectedRfq) {
@@ -329,81 +332,71 @@ export default function TechnicalProcurementClientPage() {
         )}
       </div>
 
-      {/* Quotes Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Received Quotes</CardTitle>
-              <CardDescription>
-                {selectedRfqQuotes.length} quote{selectedRfqQuotes.length !== 1 ? 's' : ''} received
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                intent="ghost"
-                onClick={refreshSelectedRfqQuotes}
-                disabled={isLoadingQuotes}
-                icon={RefreshCw}
-                className={`${isLoadingQuotes && 'animate-spin'}`}
-              />
-              <FileUploadPopover
-                triggerButtonText="Upload Quote"
-                triggerButtonIntent="add"
-                onSend={handleQuoteFileUpload}
-              />
-              <Button
-                intent="secondary"
-                text="Add Quote"
-                icon={Plus}
-                onClick={async () => {
-                  const randomQuote = await createRandomQuote(selectedRfq.id);
-                  addQuote(randomQuote);
-                }}
-              />
+      <Card className="bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-xl rounded-3xl overflow-hidden">
+        <CardHeader className="flex items-start justify-between">
+          {/* Left Side - Title and Description */}
+          <div>
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              Technical Quotes Comparison
+            </CardTitle>
+            <p className="text-slate-600 mt-2 ml-12">
+              Compare and evaluate quotes for{' '}
+              <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
+            </p>
+            <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
+              <span>Total Quotes: {selectedRfqQuotes.length}</span>
+              {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
+                <span>
+                  Pending: {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
+                </span>
+              )}
+              {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
+                <span className="text-green-600">
+                  Accepted:{' '}
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
+                </span>
+              )}
             </div>
           </div>
+          {/* Right Side - Actions */}
+          <div className="flex gap-2">
+            <Button
+              intent="ghost"
+              onClick={refreshSelectedRfqQuotes}
+              disabled={isLoadingQuotes}
+              icon={RefreshCw}
+              className={`${isLoadingQuotes && 'animate-spin'}`}
+            />
+            <FileUploadPopover
+              open={uploadQuotePopoverOpen}
+              onOpenChange={setUploadQuotePopoverOpen}
+              triggerButtonIntent="add"
+              triggerButtonText="Upload Quote"
+              onSend={() => {}}
+            >
+              <div className="flex flex-col gap-2 text-sm">
+                <Button intent="secondary" text="Manually Add Quote" size="sm" onClick={() => {}} />
+                <Button
+                  intent="ghost"
+                  text="Or generate random Quote"
+                  size="sm"
+                  className="text-gray-500"
+                  onClick={async () => {
+                    const quote = await createRandomQuote(selectedRfq.id);
+                    addQuote(quote);
+                    console.log('Time to close the popover');
+                    setUploadQuotePopoverOpen(false);
+                  }}
+                />
+              </div>
+            </FileUploadPopover>
+          </div>
         </CardHeader>
-        <CardContent>
-          {isLoadingQuotes ? (
-            <div className="text-center text-muted-foreground py-8">
-              <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
-              <p>Loading quotes...</p>
-            </div>
-          ) : selectedRfqQuotes.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <FileText className="h-8 w-8 mx-auto mb-2" />
-              <p>No quotes received yet</p>
-              <p className="text-sm">Quotes will appear here once vendors respond</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {selectedRfqQuotes.map((quote) => (
-                <Card key={quote.id} className="border-l-4 border-l-blue-500">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-medium">Quote #{quote.id.slice(0, 8)}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Received: {formatDate(new Date(quote.createdAt))}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">Price: TBD</p>
-                        <p className="text-sm text-muted-foreground">Valid until: TBD</p>
-                      </div>
-                    </div>
-                    <Separator className="my-3" />
-                    <div className="flex gap-2">
-                      <Button intent="secondary" size="sm" text="View Details" />
-                      <Button intent="secondary" size="sm" text="Compare" />
-                      <Button intent="secondary" size="sm" text="Approve" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <CardContent className="p-0">
+          <QuotesComparison />
         </CardContent>
       </Card>
     </div>
