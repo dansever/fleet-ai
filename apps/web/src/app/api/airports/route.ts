@@ -9,7 +9,7 @@ import { NewAirport, UpdateAirport } from '@/drizzle/types';
 import { loadAirportDataset } from '@/features/airports/airportDatasetService';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/error';
+import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**

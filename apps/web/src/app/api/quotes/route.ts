@@ -6,7 +6,7 @@ import {
   updateQuote,
 } from '@/db/quotes/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/error';
+import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * Query parameters:
  * - id: string (get specific quote)
  * - rfqId: string (get quotes by RFQ)
+ * - No parameters: get all quotes for organization
  */
 export async function GET(request: NextRequest) {
   try {
@@ -44,8 +45,6 @@ export async function GET(request: NextRequest) {
       const quotes = await getQuotesByRfq(rfqId);
       return NextResponse.json(quotes);
     }
-
-    return jsonError('Missing required parameter: id or rfqId', 400);
   } catch (error) {
     console.error('Error fetching quotes:', error);
     return jsonError('Failed to fetch quotes', 500);

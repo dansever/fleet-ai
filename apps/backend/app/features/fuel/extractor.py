@@ -19,7 +19,7 @@ def extract_fuel_bid(file: UploadFile = File(...)) -> ResponseEnvelope:
         # run extraction once
         # result = process_document_extraction(file=file, **FUEL_BID_CONFIG)
 
-        CACHE_FILE = os.path.join(os.getcwd(), "fuel_bid_cache.json")
+        CACHE_FILE = os.path.join(os.getcwd(), "mock_data/fuel_bid_cache.json")
 
         # write result.data to file
         # with open(CACHE_FILE, "w") as f:

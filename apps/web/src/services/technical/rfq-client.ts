@@ -4,11 +4,10 @@ import { api } from '../api-client';
 // Client-side type for creating RFQs (orgId and userId are handled server-side)
 export type CreateRfqData = Omit<
   NewRfq,
-  'orgId' | 'userId' | 'id' | 'createdAt' | 'updatedAt' | 'statusHistory'
+  'orgId' | 'userId' | 'id' | 'createdAt' | 'updatedAt' | 'statusHistory' | 'sentAt'
 > & {
   // ISO string for API transport (null becomes undefined for optional fields)
   sentAt?: string | null;
-  receivedAt?: string | null;
 };
 
 /**

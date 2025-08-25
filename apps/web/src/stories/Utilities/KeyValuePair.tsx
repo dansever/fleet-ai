@@ -56,28 +56,32 @@ export const KeyValuePair = ({
       ) : valueType === 'number' ? (
         <ModernInput
           type="number"
-          value={value}
+          value={value ?? ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             onChange?.(e.currentTarget.valueAsNumber)
           }
           min={0}
           name={name}
+          className="min-w-3/5"
         />
       ) : valueType === 'boolean' ? (
-        <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
+        <ModernSwitch
+          checked={!!value}
+          onCheckedChange={(checked: boolean) => onChange?.(checked)}
+        />
       ) : valueType === 'date' ? (
         <DatePicker
-          value={value as string}
+          value={(value as string) ?? ''}
           onChange={(value: string) => onChange?.(value)}
           name={name}
-          triggerClassName="max-w-2/4"
+          triggerClassName="max-w-3/5 flex-1"
         />
       ) : valueType === 'select' ? (
         <ModernSelect
-          value={value as string}
+          value={(value as string) ?? ''}
           onValueChange={(value: string) => onChange?.(value)}
           options={selectOptions || []}
-          triggerClassName="max-w-3/5"
+          triggerClassName="flex-1 min-w-2/5 max-w-3/5"
         />
       ) : (
         <div className="max-w-3/5">{value instanceof Date ? formatDate(value) : value}</div>

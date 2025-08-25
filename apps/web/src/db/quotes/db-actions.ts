@@ -1,5 +1,5 @@
 import { db } from '@/drizzle/db';
-import { quotesTable, rfqsTable } from '@/drizzle/schema/schema';
+import { quotesTable } from '@/drizzle/schema/schema';
 import { NewQuote, Quote, Rfq } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 
@@ -37,18 +37,6 @@ export async function updateQuote(id: Quote['id'], data: Partial<NewQuote>): Pro
 export async function createQuote(data: NewQuote): Promise<Quote> {
   const result = await db.insert(quotesTable).values(data).returning();
   return result[0];
-}
-
-/**
- * Get all quotes for an organization (across all RFQs)
- */
-export async function getQuotesByOrg(orgId: string): Promise<Quote[]> {
-  const quotes = await db
-    .select()
-    .from(quotesTable)
-    .innerJoin(rfqsTable, eq(quotesTable.rfqId, rfqsTable.id))
-    .where(eq(rfqsTable.orgId, orgId));
-  return quotes.map((row) => row.quotes);
 }
 
 /**

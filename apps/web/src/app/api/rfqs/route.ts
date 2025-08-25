@@ -10,7 +10,7 @@ import {
 import { NewRfq } from '@/drizzle/types';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/error';
+import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -41,8 +41,7 @@ export async function GET(request: NextRequest) {
       if (!rfq) return jsonError('RFQ not found', 404);
 
       // Authorize access to RFQ
-      if (!authorizeResource(rfq, dbUser))
-        return jsonError('Unauthorized', 401);
+      if (!authorizeResource(rfq, dbUser)) return jsonError('Unauthorized', 401);
 
       return NextResponse.json(rfq);
     }
@@ -84,10 +83,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Prepare RFQ data with user and org info
+    // Convert ISO strings back to Date objects for timestamp fields
     const rfqData: NewRfq = {
       ...body,
       userId: dbUser.id,
       orgId: dbUser.orgId,
+      // Convert timestamp strings to Date objects (or null)
+      sentAt: body.sentAt ? new Date(body.sentAt) : null,
     };
 
     // Create RFQ
@@ -124,7 +126,16 @@ export async function PUT(request: NextRequest) {
 
     // Update RFQ
     const body = await request.json();
-    const updatedRfq = await updateRfq(id, body);
+
+    // Convert timestamp strings to Date objects for update data
+    const updateData = {
+      ...body,
+      // Convert timestamp strings to Date objects (or null)
+      sentAt: body.sentAt ? new Date(body.sentAt) : null,
+      receivedAt: body.receivedAt ? new Date(body.receivedAt) : null,
+    };
+
+    const updatedRfq = await updateRfq(id, updateData);
 
     return NextResponse.json(updatedRfq);
   } catch (error) {

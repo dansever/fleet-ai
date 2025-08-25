@@ -1,9 +1,10 @@
-import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import { assertDbReady } from '@/drizzle/db';
+import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
 import React from 'react';
-import { Toaster } from '@/components/ui/sonner';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Fleet AI',
@@ -19,7 +20,8 @@ export const viewport: Viewport = {
 
 const manrope = Manrope({ subsets: ['latin'] });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  await assertDbReady();
   return (
     <html suppressHydrationWarning lang="en">
       <body className={manrope.className}>
