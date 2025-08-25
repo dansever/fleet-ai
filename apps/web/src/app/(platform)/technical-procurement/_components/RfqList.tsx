@@ -4,16 +4,19 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Rfq } from '@/drizzle/types';
+import { convertPydanticToRfq } from '@/features/rfqs/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { createRandomRfq } from '@/features/rfqs/utils';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
+import { createRfq, extractRfq } from '@/services/technical/rfq-client';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { FileText, RefreshCw, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 interface RfqListProps {
   rfqs: Rfq[];
@@ -43,6 +46,30 @@ export default function RfqList({
 
   const openAddRfqDialog = () => {
     setShowAddRfqDialog(true);
+  };
+
+  const handleSendRfq = async (file: File) => {
+    try {
+      const rfq = await extractRfq(file);
+      onAddRfq?.(rfq);
+      onRefresh();
+      toast.success('RFQ extracted successfully');
+    } catch (error) {
+      toast.error('Error extracting RFQ');
+    }
+    setUploadRfqPopoverOpen(false);
+  };
+
+  const handleSendRfqFile = async (file: File) => {
+    try {
+      const result = await extractRfq(file);
+      const convertedRfq = convertPydanticToRfq(result);
+      const newRfq = await createRfq(convertedRfq);
+      onAddRfq?.(newRfq);
+      toast.success('RFQ extracted successfully');
+    } catch (error) {
+      toast.error('Error extracting RFQ');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -144,7 +171,7 @@ export default function RfqList({
                   triggerButtonIntent="add"
                   triggerButtonText="Upload RFQ"
                   buttonSize="sm"
-                  onSend={() => {}}
+                  onSend={handleSendRfqFile}
                 >
                   <div className="flex flex-col gap-2 text-sm">
                     <Button
