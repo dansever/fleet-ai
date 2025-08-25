@@ -7,7 +7,7 @@ import {
 } from '@/db/users/db-actions';
 import { NewUser } from '@/drizzle/types';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/error';
+import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**

@@ -1,6 +1,6 @@
 import { getAirportsByOrgId } from '@/db/airports/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/error';
+import { jsonError } from '@/lib/core/errors';
 import FuelProcurementClientPage from './ClientPage';
 import FuelProcurementProvider from './ContextProvider';
 

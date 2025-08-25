@@ -221,7 +221,6 @@ export const rfqsTable = pgTable(
 
     // Timestamps
     sentAt: timestamp('sent_at', { withTimezone: true }),
-    receivedAt: timestamp('received_at', { withTimezone: true }),
     createdAt,
     updatedAt,
   },
@@ -297,7 +296,7 @@ export const quotesTable = pgTable(
     status: statusEnum('status').default('pending'),
 
     // Timestamps
-    receivedAt: timestamp('received_at', { withTimezone: true }),
+    sentAt: timestamp('sent_at', { withTimezone: true }),
     createdAt,
     updatedAt,
   },

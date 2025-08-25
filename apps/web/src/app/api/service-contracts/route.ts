@@ -1,7 +1,7 @@
 import { getOrgById } from '@/db/orgs/db-actions';
 import { getServiceContractsByAirport } from '@/db/service-contracts/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/error';
+import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**

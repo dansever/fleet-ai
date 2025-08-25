@@ -7,7 +7,7 @@ import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { Pencil, Plus } from 'lucide-react';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -17,12 +17,21 @@ export default function RfqDialog({
   DialogType = 'view',
   triggerClassName,
   buttonSize = 'md',
+  triggerText,
+  open,
+  onOpenChange,
+  withTrigger = true,
 }: {
   rfq: Rfq | null;
   onChange: (rfq: Rfq) => void;
   DialogType: 'add' | 'edit' | 'view';
+  triggerText?: string;
   triggerClassName?: string;
   buttonSize?: 'sm' | 'md' | 'lg';
+  triggerIntent?: 'primary' | 'secondary' | 'add' | 'delete';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
     direction: rfq?.direction || null,
@@ -43,8 +52,7 @@ export default function RfqDialog({
     deliverTo: rfq?.deliverTo || null,
     buyerComments: rfq?.buyerComments || null,
     status: rfq?.status || 'pending',
-    sentAt: rfq?.sentAt || null,
-    receivedAt: rfq?.receivedAt || null,
+    sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
   });
   const [isSaving, setIsSaving] = useState(false);
   const isAdd = DialogType === 'add';
@@ -71,8 +79,7 @@ export default function RfqDialog({
       deliverTo: rfq?.deliverTo || null,
       buyerComments: rfq?.buyerComments || null,
       status: rfq?.status || 'pending',
-      sentAt: rfq?.sentAt || null,
-      receivedAt: rfq?.receivedAt || null,
+      sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
     });
   }, [rfq]);
 
@@ -111,7 +118,6 @@ export default function RfqDialog({
           status: serializedFormData.status,
           selectedQuoteId: null,
           sentAt: serializedFormData.sentAt,
-          receivedAt: serializedFormData.receivedAt,
         };
         savedRfq = await createRfq(createData);
         toast.success('RFQ created successfully');
@@ -179,25 +185,33 @@ export default function RfqDialog({
         buyerComments: null,
         status: 'pending',
         sentAt: null,
-        receivedAt: null,
       });
     }
   };
 
-  const triggerText = isAdd ? 'Add RFQ' : isEdit ? 'Edit' : `View ${rfq?.rfqNumber || 'RFQ'}`;
   const dialogTitle = isAdd ? 'Add New RFQ' : rfq?.rfqNumber || 'RFQ Details';
   const saveButtonText = isAdd ? 'Create RFQ' : 'Save Changes';
 
   return (
     <DetailDialog
       trigger={
-        <Button
-          intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
-          text={triggerText}
-          icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
-          size={buttonSize}
-          className={triggerClassName}
-        />
+        withTrigger ? (
+          <Button
+            intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+            text={triggerText}
+            icon={
+              isAdd
+                ? Plus
+                : DialogType === 'edit'
+                  ? Pencil
+                  : DialogType === 'view'
+                    ? Eye
+                    : undefined
+            }
+            size={buttonSize}
+            className={triggerClassName}
+          />
+        ) : null
       }
       headerGradient="from-purple-500 to-purple-500"
       title={dialogTitle}
@@ -205,9 +219,11 @@ export default function RfqDialog({
       onCancel={handleCancel}
       initialEditing={isEdit || isAdd}
       saveButtonText={saveButtonText}
+      open={open}
+      onOpenChange={onOpenChange}
     >
       {(isEditing) => (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ContentSection
             header="RFQ Information"
             headerGradient="from-purple-500 to-purple-300"
@@ -404,14 +420,6 @@ export default function RfqDialog({
                   editMode={isEditing}
                   onChange={(value) => handleFieldChange('sentAt', value)}
                   name="sentAt"
-                />
-                <KeyValuePair
-                  label="Received At"
-                  value={formData.receivedAt}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('receivedAt', value)}
-                  name="receivedAt"
                 />
               </div>
             }

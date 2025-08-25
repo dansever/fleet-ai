@@ -43,7 +43,7 @@ export default function FuelProcurementClientPage() {
           airports={airports}
           onAirportSelect={setSelectedAirport}
           selectedAirport={selectedAirport}
-          InsertAddAirportButton={true}
+          InsertAddAirportButton={false}
         />
       }
       headerContent={

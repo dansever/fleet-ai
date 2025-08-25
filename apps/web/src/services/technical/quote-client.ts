@@ -1,24 +1,11 @@
-import type { NewQuote, Quote, Rfq } from '@/drizzle/types';
+import type { NewQuote, Quote } from '@/drizzle/types';
 import { api } from '../api-client';
-
-// Client-side type for creating Quotes
-export type CreateQuoteData = Omit<NewQuote, 'id' | 'createdAt' | 'updatedAt'> & {
-  receivedAt?: string | null;
-};
 
 /**
  * Get a quote by ID
  */
 export async function getQuote(id: Quote['id']): Promise<Quote> {
   const res = await api.get(`/api/quotes?id=${id}`);
-  return res.data;
-}
-
-/**
- * Get quotes by RFQ ID
- */
-export async function getQuotesByRfq(rfqId: Rfq['id']): Promise<Quote[]> {
-  const res = await api.get(`/api/quotes?rfqId=${rfqId}`);
   return res.data;
 }
 
@@ -31,9 +18,17 @@ export async function getQuotes(): Promise<Quote[]> {
 }
 
 /**
+ * Get all quotes for a specific RFQ
+ */
+export async function getQuotesByRfq(rfqId: Quote['rfqId']): Promise<Quote[]> {
+  const res = await api.get(`/api/quotes?rfqId=${rfqId}`);
+  return res.data;
+}
+
+/**
  * Create a new quote
  */
-export async function createQuote(data: CreateQuoteData): Promise<Quote> {
+export async function createQuote(data: Partial<NewQuote>): Promise<Quote> {
   const res = await api.post('/api/quotes', data);
   return res.data;
 }
@@ -41,7 +36,7 @@ export async function createQuote(data: CreateQuoteData): Promise<Quote> {
 /**
  * Update an existing quote
  */
-export async function updateQuote(id: Quote['id'], data: Partial<CreateQuoteData>): Promise<Quote> {
+export async function updateQuote(id: Quote['id'], data: Partial<NewQuote>): Promise<Quote> {
   const res = await api.put(`/api/quotes?id=${id}`, data);
   return res.data;
 }

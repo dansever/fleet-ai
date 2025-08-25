@@ -1,6 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { FileText, Plus, Send, Upload, X } from 'lucide-react';
+import { FileText, Send, Upload, X } from 'lucide-react';
 import { ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '../Button/Button';
 import { ContentSection } from '../Card/Card';
@@ -99,24 +99,30 @@ export const ConfirmationPopover = ({
 
 export interface FileUploadPopoverProps {
   onSend?: (file: File) => void;
-  onManualUpload?: () => void;
+  secondaryUploadButtonText?: string;
+  secondaryUploadButtonIntent?: 'primary' | 'secondary' | 'ghost';
+  onSecondaryUploadButton?: () => void;
   accept?: string;
   maxSize?: number; // in MB
   className?: string;
   triggerButtonIntent?: 'primary' | 'secondary' | 'ghost';
   triggerButtonText?: string;
   popoverContentAlign?: 'start' | 'center' | 'end';
+  buttonSize?: 'sm' | 'md' | 'lg';
 }
 
 export const FileUploadPopover = ({
   onSend,
-  onManualUpload,
+  secondaryUploadButtonText = 'Or Input Data Manually',
+  secondaryUploadButtonIntent = 'ghost',
+  onSecondaryUploadButton,
   accept = '*/*',
   maxSize = 10,
   className,
   triggerButtonIntent = 'primary',
   triggerButtonText = 'Upload',
   popoverContentAlign = 'end',
+  buttonSize = 'md',
 }: FileUploadPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -194,7 +200,12 @@ export const FileUploadPopover = ({
     <div className={cn('space-y-3 flex flex-row gap-2', className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button intent={triggerButtonIntent} text={triggerButtonText} icon={Upload} />
+          <Button
+            intent={triggerButtonIntent}
+            text={triggerButtonText}
+            icon={Upload}
+            size={buttonSize}
+          />
         </PopoverTrigger>
         <PopoverContent
           align={popoverContentAlign}
@@ -251,14 +262,12 @@ export const FileUploadPopover = ({
                       onChange={handleFileInputChange}
                       className="hidden"
                     />
-
                     <Button
-                      intent="ghost"
-                      onClick={onManualUpload}
-                      size="sm"
-                      text="Or Input Data Manually"
-                      className="text-xs justify-center"
-                      icon={Plus}
+                      intent={secondaryUploadButtonIntent}
+                      onClick={onSecondaryUploadButton}
+                      size="md"
+                      text={secondaryUploadButtonText}
+                      className="justify-center underline w-full"
                     />
                   </div>
                 }

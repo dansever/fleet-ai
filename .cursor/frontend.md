@@ -651,7 +651,7 @@ import { formatDate } from '@/lib/core/formatters';
 <KeyValuePair
   label="Sent At"
   value={formData.sentAt} // Date object or null
-  valueType="datetime"     // Use "datetime" for timestamps
+  valueType="date"        // Use "date" for both DATE and TIMESTAMP fields
   editMode={isEditing}
   onChange={(value) => handleFieldChange('sentAt', value)}
 />
@@ -699,10 +699,10 @@ const date = possiblyNullValue ? new Date(possiblyNullValue) : null // Safe conv
 
 ### Quick Reference
 
-| Field Type    | Component State             | Form Submission                 | Display                 | Input Component                      |
-| ------------- | --------------------------- | ------------------------------- | ----------------------- | ------------------------------------ |
-| **TIMESTAMP** | `new Date(value) \|\| null` | `date?.toISOString() \|\| null` | `formatDate(timestamp)` | `<DateTimePicker value={dateObj} />` |
-| **DATE**      | `new Date(value) \|\| null` | `formatDateForAPI(date)`        | `formatDate(date)`      | `<DatePicker value={dateObj} />`     |
+| Field Type    | Component State             | Form Submission                 | Display                 | Input Component                     |
+| ------------- | --------------------------- | ------------------------------- | ----------------------- | ----------------------------------- |
+| **TIMESTAMP** | `new Date(value) \|\| null` | `date?.toISOString() \|\| null` | `formatDate(timestamp)` | `<KeyValuePair valueType="date" />` |
+| **DATE**      | `new Date(value) \|\| null` | `formatDateForAPI(date)`        | `formatDate(date)`      | `<KeyValuePair valueType="date" />` |
 
 ### Python Backend Integration
 
