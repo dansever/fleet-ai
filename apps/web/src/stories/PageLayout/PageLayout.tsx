@@ -22,11 +22,11 @@ export const PageLayout: FC<PageLayoutProps> = ({
   sidebarWidth = '20rem',
 }) => {
   return (
-    <div className={cn('flex h-screen', className)}>
+    <div className={cn('flex flex-row h-screen', className)}>
       {/* Left Sidebar Panel - Only render if sidebarContent exists */}
       {sidebarContent && (
         <div
-          className="border-r border-border bg-card flex flex-col overflow-hidden min-w-0"
+          className="border-r border-border bg-card flex flex-col overflow-hidden min-w-0 flex-shrink-0"
           style={{
             // Smooth width transition
             width: 'var(--sidebar-w)',
@@ -42,9 +42,9 @@ export const PageLayout: FC<PageLayoutProps> = ({
       )}
 
       {/* Right Main Panel */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-4xl">
         {/* Fixed Header */}
-        <div className="px-4 py-1.5 border-b border-border bg-card/50 backdrop-blur-sm flex items-center">
+        <div className="px-4 py-1.5 border-b border-border bg-card/50 backdrop-blur-sm flex items-center flex-shrink-0">
           {headerContent}
         </div>
 

@@ -1,6 +1,9 @@
 import { NewAirport, UpdateAirport } from '@/drizzle/types';
 import { api } from '../api-client';
 
+// Client-side type for creating airports (orgId is handled server-side)
+export type CreateAirportData = Omit<NewAirport, 'orgId' | 'id' | 'createdAt' | 'updatedAt'>;
+
 /**
  * Get all airports for the current organization
  * @returns Array of airports
@@ -22,10 +25,10 @@ export async function getAirport(id: string) {
 
 /**
  * Create a new airport
- * @param airport - The airport data to create
+ * @param airport - The airport data to create (orgId is handled server-side)
  * @returns The created airport
  */
-export async function createAirport(airport: NewAirport) {
+export async function createAirport(airport: CreateAirportData) {
   const res = await api.post('/api/airports', airport);
   return res.data;
 }

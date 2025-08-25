@@ -4,7 +4,6 @@ import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportList';
 import { useFuelProcurement } from './ContextProvider';
@@ -13,51 +12,39 @@ import FuelTendersPage from './subpages/FuelTenders';
 type TabValue = 'fuel-tenders' | 'manage-contracts';
 
 export default function FuelProcurementClientPage() {
-  const { airports, selectedAirport, setSelectedAirport, loading, errors, clearError } =
-    useFuelProcurement();
+  const {
+    airports,
+    setAirports,
+    selectedAirport,
+    setSelectedAirport,
+    loading,
+    errors,
+    clearError,
+  } = useFuelProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+
+  if (loading.airports) {
+    return <div>Loading...</div>;
+  }
+
+  if (errors.airports) {
+    return <div>Error: {errors.airports}</div>;
+  }
+
+  if (!airports) {
+    return <div>No airports found</div>;
+  }
 
   return (
     <PageLayout
       sidebarContent={
-        <div className="space-y-4">
-          {/* Airport Loading State */}
-          {loading.airports && (
-            <div className="flex items-center justify-center p-4">
-              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              <span className="text-sm text-gray-600">Loading airports...</span>
-            </div>
-          )}
-
-          {/* Airport Error State */}
-          {errors.airports && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm text-red-800">{errors.airports}</p>
-                  <button
-                    onClick={() => clearError('airports')}
-                    className="text-xs text-red-600 hover:text-red-800 mt-1"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Airport List */}
-          {!loading.airports && !errors.airports && (
-            <AirportList
-              airports={airports}
-              onAirportSelect={setSelectedAirport}
-              selectedAirport={selectedAirport}
-              InsertAddAirportButton={false}
-            />
-          )}
-        </div>
+        <AirportList
+          airports={airports}
+          onAirportSelect={setSelectedAirport}
+          selectedAirport={selectedAirport}
+          InsertAddAirportButton={true}
+        />
       }
       headerContent={
         <h2 className="text-xl font-semibold">

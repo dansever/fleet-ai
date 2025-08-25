@@ -1,13 +1,13 @@
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import type React from 'react';
+import { DatePicker, ModernInput, ModernSwitch, ModernTextarea } from '../Form/Form';
 
 // Key-Value Pair - For displaying structured information
 export const KeyValuePair = ({
   label,
   value,
+  valueType = 'string',
   className,
   keyClassName,
   valueClassName,
@@ -16,7 +16,8 @@ export const KeyValuePair = ({
   name,
 }: {
   label: string;
-  value: string | number | boolean | React.ReactNode;
+  value: string | number | boolean | null;
+  valueType: 'string' | 'number' | 'boolean' | 'date' | 'null';
   className?: string;
   keyClassName?: string;
   valueClassName?: string;
@@ -26,15 +27,14 @@ export const KeyValuePair = ({
 }) => (
   <div
     className={cn(
-      'text-xs md:text-sm lg:text-base',
-      'text-gray-600',
-      'flex justify-between gap-2 py-1 border-b border-gray-100 last:border-b-0',
+      'text-sm',
+      'text-gray-600 items-center',
+      'flex justify-between gap-1 py-1 border-b border-gray-100 last:border-b-0',
       className,
     )}
   >
     <span
       className={cn(
-        'text-xs md:text-sm lg:text-base',
         'text-gray-600',
         'font-semibold max-w-2/5 line-clamp-2 break-words',
         keyClassName,
@@ -43,44 +43,48 @@ export const KeyValuePair = ({
       {label}
     </span>
 
-    <span className={cn('text-left', valueClassName)}>
-      {editMode ? (
-        typeof value === 'string' ? (
-          <Textarea
-            value={value}
-            onChange={(e) => onChange?.(e.target.value)}
-            name={name}
-            rows={2}
-            className="w-full resize-none min-h-[2.5rem] leading-tight whitespace-pre-wrap break-words"
-          />
-        ) : typeof value === 'number' ? (
-          <Input
-            type="number"
-            value={value}
-            onChange={(e) => onChange?.(e.currentTarget.valueAsNumber)}
-            name={name}
-            className="w-full"
-          />
-        ) : typeof value === 'boolean' ? (
-          <Switch
-            checked={value}
-            onCheckedChange={(checked) => onChange?.(checked)} // keep boolean
-            name={name}
-          />
-        ) : (
-          value
-        )
-      ) : typeof value === 'boolean' ? (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {value ? 'Yes' : 'No'}
-        </span>
+    {editMode ? (
+      valueType === 'string' ? (
+        <ModernTextarea
+          value={value ? value : ''}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
+          name={name}
+          className="max-w-3/5 resize-none leading-tight whitespace-pre-wrap text-left break-words min-h-[40px]"
+        />
+      ) : valueType === 'number' ? (
+        <ModernInput
+          type="number"
+          value={value}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            onChange?.(e.currentTarget.valueAsNumber)
+          }
+          name={name}
+          className="max-w-3/5"
+        />
+      ) : valueType === 'boolean' ? (
+        <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
+      ) : valueType === 'date' ? (
+        <DatePicker
+          value={value as string}
+          onChange={(value: string) => onChange?.(value)}
+          name={name}
+          triggerClassName="max-w-2/4"
+        />
       ) : (
-        value
-      )}
-    </span>
+        <div className="max-w-3/5">{value}</div>
+      )
+    ) : valueType === 'boolean' ? (
+      <span
+        className={`px-2 py-1 rounded text-xs font-medium ${
+          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}
+      >
+        {value ? 'Yes' : 'No'}
+      </span>
+    ) : valueType === 'date' ? (
+      <div className="max-w-3/5">{formatDate(value as string)}</div>
+    ) : (
+      <div className="max-w-4/5">{value as string | number}</div>
+    )}
   </div>
 );

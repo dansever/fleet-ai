@@ -1,3 +1,7 @@
+CREATE TYPE "public"."contract_type" AS ENUM('fuel', 'ground_handling', 'cargo_handling', 'airport_services', 'catering', 'maintenance_mro', 'aeronautical_services', 'non_aeronautical_services', 'security', 'cleaning', 'it_services', 'construction', 'leasing', 'consulting', 'other');--> statement-breakpoint
+CREATE TYPE "public"."order_direction" AS ENUM('sent', 'received');--> statement-breakpoint
+CREATE TYPE "public"."decision" AS ENUM('undecided', 'accepted', 'rejected', 'shortlisted');--> statement-breakpoint
+CREATE TYPE "public"."status" AS ENUM('draft', 'pending', 'in_progress', 'completed', 'rejected', 'closed');--> statement-breakpoint
 CREATE TABLE "airports" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"org_id" uuid NOT NULL,
@@ -123,12 +127,12 @@ CREATE TABLE "fuel_tenders" (
 	"title" text NOT NULL,
 	"description" text,
 	"fuel_type" text,
-	"base_currency" text DEFAULT 'USD',
-	"base_uom" text DEFAULT 'USG',
-	"bidding_starts" timestamp with time zone,
-	"bidding_ends" timestamp with time zone,
-	"delivery_starts" timestamp with time zone,
-	"delivery_ends" timestamp with time zone,
+	"base_currency" text,
+	"base_uom" text,
+	"bidding_starts" date,
+	"bidding_ends" date,
+	"delivery_starts" date,
+	"delivery_ends" date,
 	"status" "status" DEFAULT 'pending',
 	"winning_bid_id" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,

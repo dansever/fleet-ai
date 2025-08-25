@@ -200,21 +200,7 @@ export function AppSidebar({
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>Tools</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {sidebarTabs.tools.map((item) => (
-                  <SidebarNavItem
-                    key={item.title}
-                    item={item}
-                    isActive={pathname === item.url}
-                    isCollapsed={isCollapsed}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+
           <SidebarGroup>
             <SidebarGroupLabel>Dev</SidebarGroupLabel>
             <SidebarGroupContent>

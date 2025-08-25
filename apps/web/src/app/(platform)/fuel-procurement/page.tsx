@@ -25,7 +25,6 @@ export default async function FuelProcurementPage() {
       </FuelProcurementProvider>
     );
   } catch (error) {
-    console.error('Error loading fuel procurement page:', error);
     return jsonError('Failed to load fuel procurement data', 500);
   }
 }

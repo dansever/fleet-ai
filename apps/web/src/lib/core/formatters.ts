@@ -62,7 +62,7 @@ export function formatCompactNumber(
    → "May 21, 2025" (UTC date)
 */
 export function formatDate(
-  date: Date | string,
+  date: Date | string | null,
   options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
@@ -71,6 +71,8 @@ export function formatDate(
   locale: string = 'en-US',
   useUTC: boolean = false,
 ): string {
+  if (!date) return '';
+
   let d: Date;
   let isDateOnly = false;
 

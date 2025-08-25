@@ -23,18 +23,17 @@ const buttonStyles = cva(
         success:
           'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white',
         warning:
-          'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white',
+          'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white',
         danger:
-          'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white',
+          'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white',
         ghost: 'bg-transparent hover:bg-muted/50',
-        download:
-          'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-primary-foreground',
+        info: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-primary-foreground',
         add: 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white',
         favorite: 'border border-pink-200 text-pink-600 hover:bg-pink-50',
         edit: 'border border-blue-200 text-blue-600 hover:bg-blue-50',
       },
       size: {
-        sm: 'h-8 px-2 text-sm',
+        sm: 'h-8 p-3 text-sm',
         md: 'h-10 px-4 text-base',
         lg: 'h-12 px-4 text-lg',
       },

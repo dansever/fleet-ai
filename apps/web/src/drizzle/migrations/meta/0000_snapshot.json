@@ -1,5 +1,5 @@
 {
-  "id": "0affa4ed-6af8-4946-a877-918dd1b24f44",
+  "id": "d59b7090-5d51-4fcf-92f3-acdb8f62b0ce",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -91,8 +91,12 @@
           "name": "fk_airports_org_id",
           "tableFrom": "airports",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -177,8 +181,12 @@
           "name": "fk_contacts_org_id",
           "tableFrom": "contacts",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -186,8 +194,12 @@
           "name": "fk_contacts_vendor_id",
           "tableFrom": "contacts",
           "tableTo": "vendors",
-          "columnsFrom": ["vendor_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "vendor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -431,8 +443,12 @@
           "name": "fk_fuel_bids_tender_id",
           "tableFrom": "fuel_bids",
           "tableTo": "fuel_tenders",
-          "columnsFrom": ["tender_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tender_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -440,8 +456,12 @@
           "name": "fk_fuel_bids_decision_by_user_id",
           "tableFrom": "fuel_bids",
           "tableTo": "users",
-          "columnsFrom": ["decision_by_user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "decision_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -557,8 +577,12 @@
           "name": "fk_fuel_contract_invoices_fuel_contract_id",
           "tableFrom": "fuel_contract_invoices",
           "tableTo": "fuel_contracts",
-          "columnsFrom": ["fuel_contract_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "fuel_contract_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -794,8 +818,12 @@
           "name": "fk_fuel_contracts_org_id",
           "tableFrom": "fuel_contracts",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -803,8 +831,12 @@
           "name": "fk_fuel_contracts_airport_id",
           "tableFrom": "fuel_contracts",
           "tableTo": "airports",
-          "columnsFrom": ["airport_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "airport_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -860,37 +892,35 @@
           "name": "base_currency",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'USD'"
+          "notNull": false
         },
         "base_uom": {
           "name": "base_uom",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'USG'"
+          "notNull": false
         },
         "bidding_starts": {
           "name": "bidding_starts",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
         "bidding_ends": {
           "name": "bidding_ends",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
         "delivery_starts": {
           "name": "delivery_starts",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
         "delivery_ends": {
           "name": "delivery_ends",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
@@ -929,8 +959,12 @@
           "name": "fk_fuel_tenders_org_id",
           "tableFrom": "fuel_tenders",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -938,8 +972,12 @@
           "name": "fk_fuel_tenders_airport_id",
           "tableFrom": "fuel_tenders",
           "tableTo": "airports",
-          "columnsFrom": ["airport_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "airport_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1002,8 +1040,12 @@
           "name": "fk_org_settings_org_id",
           "tableFrom": "org_settings",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1080,7 +1122,9 @@
         "organizations_clerk_org_id_unique": {
           "name": "organizations_clerk_org_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["clerk_org_id"]
+          "columns": [
+            "clerk_org_id"
+          ]
         }
       },
       "policies": {},
@@ -1327,8 +1371,12 @@
           "name": "fk_quotes_rfq_id",
           "tableFrom": "quotes",
           "tableTo": "rfqs",
-          "columnsFrom": ["rfq_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "rfq_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1541,8 +1589,12 @@
           "name": "fk_rfqs_user_id",
           "tableFrom": "rfqs",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1550,8 +1602,12 @@
           "name": "fk_rfqs_org_id",
           "tableFrom": "rfqs",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1689,8 +1745,12 @@
           "name": "fk_service_contract_invoices_service_contract_id",
           "tableFrom": "service_contract_invoices",
           "tableTo": "service_contracts",
-          "columnsFrom": ["service_contract_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "service_contract_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1852,8 +1912,12 @@
           "name": "fk_service_contracts_org_id",
           "tableFrom": "service_contracts",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1861,8 +1925,12 @@
           "name": "fk_service_contracts_airport_id",
           "tableFrom": "service_contracts",
           "tableTo": "airports",
-          "columnsFrom": ["airport_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "airport_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1962,8 +2030,12 @@
           "name": "fk_users_org_id",
           "tableFrom": "users",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1973,7 +2045,9 @@
         "users_clerk_user_id_unique": {
           "name": "users_clerk_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["clerk_user_id"]
+          "columns": [
+            "clerk_user_id"
+          ]
         }
       },
       "policies": {},
@@ -2036,8 +2110,12 @@
           "name": "fk_vendors_org_id",
           "tableFrom": "vendors",
           "tableTo": "organizations",
-          "columnsFrom": ["org_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2049,7 +2127,59 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.contract_type": {
+      "name": "contract_type",
+      "schema": "public",
+      "values": [
+        "fuel",
+        "ground_handling",
+        "cargo_handling",
+        "airport_services",
+        "catering",
+        "maintenance_mro",
+        "aeronautical_services",
+        "non_aeronautical_services",
+        "security",
+        "cleaning",
+        "it_services",
+        "construction",
+        "leasing",
+        "consulting",
+        "other"
+      ]
+    },
+    "public.order_direction": {
+      "name": "order_direction",
+      "schema": "public",
+      "values": [
+        "sent",
+        "received"
+      ]
+    },
+    "public.decision": {
+      "name": "decision",
+      "schema": "public",
+      "values": [
+        "undecided",
+        "accepted",
+        "rejected",
+        "shortlisted"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "pending",
+        "in_progress",
+        "completed",
+        "rejected",
+        "closed"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

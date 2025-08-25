@@ -99,7 +99,7 @@ export const Ghost: Story = {
 
 export const Download: Story = {
   args: {
-    intent: 'download',
+    intent: 'info',
     size: 'md',
     text: 'Download',
     icon: DownloadIcon,

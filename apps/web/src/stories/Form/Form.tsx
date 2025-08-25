@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
+import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { useState } from 'react';
 
@@ -36,6 +37,7 @@ export const ModernInput = ({
     {icon && <div className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</div>}
     <Input
       type={type}
+      autoComplete="off"
       placeholder={placeholder}
       className={cn(
         'w-full rounded-xl border-2 pr-4 focus:border-primary/50 focus:ring-0',
@@ -61,6 +63,7 @@ export const SearchInput = ({
     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
     <Input
       type="search"
+      autoComplete="off"
       placeholder={placeholder}
       className="w-full rounded-2xl bg-muted pl-9 pr-4 border-0 focus:ring-2 focus:ring-primary/20"
       {...props}
@@ -112,7 +115,12 @@ export const ModernTextarea = ({
 }) => (
   <Textarea
     placeholder={placeholder}
-    className="w-full rounded-2xl border-2 focus:border-primary/50 focus:ring-0 min-h-[80px]"
+    autoComplete="off"
+    className={cn(
+      'rounded-2xl border-2 focus:border-primary/50 focus:ring-0',
+      'min-h-[60px] max-h-[160px]',
+      className,
+    )}
     {...props}
   />
 );
@@ -143,7 +151,7 @@ export const ModernSelect = ({
           <SelectItem
             key={option.value}
             value={option.value}
-            className="whitespace-normal py-2 leading-snug text-left"
+            className="whitespace-normal py-2 leading-snug text-left min-h-[40px]"
           >
             {option.label}
           </SelectItem>
@@ -160,7 +168,7 @@ export const ModernSwitch = ({
 }: {
   className?: string;
   [key: string]: any;
-}) => <Switch {...props} />;
+}) => <Switch {...props} className="cursor-pointer scale-125" />;
 
 // DatePicker component with modern styling
 export const DatePicker = ({
@@ -168,16 +176,18 @@ export const DatePicker = ({
   onChange,
   fromYear = 2025,
   toYear = 2030,
+  triggerClassName,
+  calendarClassName,
   ...props
 }: {
-  value?: Date;
-  onChange?: (value: Date) => void;
+  value?: string;
+  onChange?: (value: string) => void;
   fromYear?: number;
   toYear?: number;
   [key: string]: any;
 }) => {
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(value);
+  const [date, setDate] = useState<Date | undefined>(value ? new Date(value) : undefined);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -185,19 +195,25 @@ export const DatePicker = ({
         <Button
           intent="secondary"
           id="date"
-          className="w-full justify-start font-normal"
+          className={cn('w-full justify-start font-normal', triggerClassName)}
           text={date ? formatDate(date) : 'Select date'}
           icon={ChevronDown}
         />
       </PopoverTrigger>
-      <PopoverContent className="w-auto overflow-hidden p-0 border-0" align="start">
+      <PopoverContent className="w-auto overflow-hidden p-0 border-0 rounded-2xl" align="start">
         <Calendar
           mode="single"
-          className="rounded-2xl border-2 focus:border-primary/50 focus:ring-0"
+          className={cn(
+            'rounded-2xl border-2 focus:border-primary/50 focus:ring-0',
+            calendarClassName,
+          )}
           selected={date}
           captionLayout="dropdown"
           onSelect={(date) => {
-            setDate(date);
+            if (!date) return;
+            const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            setDate(localDate);
+            onChange?.(format(localDate, 'yyyy-MM-dd')); // <-- returns a string
             setOpen(false);
           }}
           fromYear={fromYear}
