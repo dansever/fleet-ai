@@ -3,13 +3,14 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FuelBid, NewFuelBid } from '@/drizzle/types';
+import FuelBidDialog from '@/features/fuel/bid/FuelBidDialog';
 import { convertPydanticToFuelBid } from '@/features/fuel/bid/pydanticConverter';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
 import { createFuelBid, extractFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
-import { CheckCircle, Clock, FileText, RefreshCw, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, FileText, RefreshCw, Star, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
@@ -49,10 +50,47 @@ const getDecisionBadge = (decision: string | null) => {
 
 const fuelBidColumns: Column<FuelBid>[] = [
   {
+    key: 'actions',
+    header: 'Actions',
+    accessor: (bid) => (
+      <div className="flex flex-col gap-2">
+        <FuelBidDialog bid={bid} onChange={() => {}} DialogType="view" buttonSize="sm" />
+        <Button intent="secondary" text="Shortlist" icon={Star} size="sm" onClick={() => {}} />
+        <Button intent="success" text="Accept" icon={CheckCircle} size="sm" onClick={() => {}} />
+        <Button
+          intent="secondary"
+          className="hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white"
+          text="Reject"
+          icon={XCircle}
+          size="sm"
+          onClick={() => {}}
+        />
+      </div>
+    ),
+    align: 'left' as const,
+  },
+  {
+    key: 'submission',
+    header: 'Submission',
+    accessor: (bid) => (
+      <div className="min-w-[120px] text-sm">
+        <div className="text-slate-900">{formatDate(bid.bidSubmittedAt)}</div>
+        {bid.round && (
+          <Badge variant="secondary" className="text-xs mt-1">
+            Round {bid.round}
+          </Badge>
+        )}
+        {bid.title && <div className="text-xs text-slate-500 mt-1">{bid.title}</div>}
+      </div>
+    ),
+    sortable: true,
+    align: 'left' as const,
+  },
+  {
     key: 'vendor',
     header: 'Vendor',
     accessor: (bid) => (
-      <div className="min-w-[200px]">
+      <div className="min-w-[160px]">
         <div className="font-semibold text-slate-900">{bid.vendorName || 'Unknown Vendor'}</div>
         {bid.vendorContactName && (
           <div className="text-sm text-slate-600">{bid.vendorContactName}</div>
@@ -72,7 +110,7 @@ const fuelBidColumns: Column<FuelBid>[] = [
     key: 'pricing',
     header: 'Base Pricing',
     accessor: (bid) => (
-      <div className="min-w-[180px]">
+      <div className="min-w-[160px]">
         <div className="font-semibold text-lg text-slate-900">
           {bid.normalizedUnitPriceUsdPerUsg
             ? formatCurrency(bid.normalizedUnitPriceUsdPerUsg, 'USD')
@@ -90,6 +128,17 @@ const fuelBidColumns: Column<FuelBid>[] = [
             {bid.priceType === 'index_formula' ? 'Index-Linked' : 'Fixed Price'}
           </Badge>
         )}
+      </div>
+    ),
+    normalizeAccessor: (bid) => (
+      <div className="min-w-[160px]">
+        <div className="font-semibold text-lg">
+          {bid.normalizedUnitPriceUsdPerUsg
+            ? formatCurrency(bid.normalizedUnitPriceUsdPerUsg, 'USD')
+            : bid.baseUnitPrice
+              ? formatCurrency(bid.baseUnitPrice, bid.currency || 'USD')
+              : '-'}
+        </div>
       </div>
     ),
     sortable: true,
@@ -148,6 +197,16 @@ const fuelBidColumns: Column<FuelBid>[] = [
         )}
       </div>
     ),
+    normalizeAccessor: (bid) => (
+      <div className="min-w-[140px] text-sm">
+        {bid.intoPlaneFee && (
+          <div>Into-plane: {formatCurrency(bid.intoPlaneFee, bid.currency || 'USD')}</div>
+        )}
+        {bid.handlingFee && (
+          <div>Handling: {formatCurrency(bid.handlingFee, bid.currency || 'USD')}</div>
+        )}
+      </div>
+    ),
     align: 'left' as const,
   },
   {
@@ -176,13 +235,33 @@ const fuelBidColumns: Column<FuelBid>[] = [
         </div>
       </div>
     ),
+    normalizeAccessor: (bid) => (
+      <div className="min-w-[160px] text-sm">
+        {bid.paymentTerms && <div>Payment: {bid.paymentTerms}</div>}
+        {bid.densityAt15C && <div>Density: {bid.densityAt15C} kg/m³</div>}
+        {bid.includesTaxes && <div>Taxes Incl.</div>}
+        {bid.includesAirportFees && <div>Airport Fees Incl.</div>}
+      </div>
+    ),
+    align: 'left' as const,
+  },
+
+  {
+    key: 'vendorComments',
+    header: 'Vendor Comments',
+    accessor: (bid) => (
+      <div className="min-w-[200px] text-sm">
+        {bid.vendorComments && <div className="text-slate-700 italic">{bid.vendorComments}</div>}
+        {!bid.vendorComments && <span className="text-slate-400">No additional comments</span>}
+      </div>
+    ),
     align: 'left' as const,
   },
   {
-    key: 'comments',
-    header: 'Comments & Summary',
+    key: 'aiSummary',
+    header: 'AI Summary',
     accessor: (bid) => (
-      <div className="min-w-[200px] text-sm">
+      <div className="min-w-[240px] text-sm">
         {bid.aiSummary && (
           <div className="text-slate-900 mb-2">
             <Badge
@@ -194,33 +273,8 @@ const fuelBidColumns: Column<FuelBid>[] = [
             <div className="text-slate-700 italic">{bid.aiSummary}</div>
           </div>
         )}
-        {bid.vendorComments && (
-          <div className="text-slate-700">
-            <span className="font-medium">Vendor Notes:</span> {bid.vendorComments}
-          </div>
-        )}
-        {!bid.aiSummary && !bid.vendorComments && (
-          <span className="text-slate-400">No additional comments</span>
-        )}
       </div>
     ),
-    align: 'left' as const,
-  },
-  {
-    key: 'submission',
-    header: 'Submission',
-    accessor: (bid) => (
-      <div className="min-w-[120px] text-sm">
-        <div className="text-slate-900">{formatDate(bid.bidSubmittedAt)}</div>
-        {bid.round && (
-          <Badge variant="secondary" className="text-xs mt-1">
-            Round {bid.round}
-          </Badge>
-        )}
-        {bid.title && <div className="text-xs text-slate-500 mt-1">{bid.title}</div>}
-      </div>
-    ),
-    sortable: true,
     align: 'left' as const,
   },
   {
