@@ -59,7 +59,7 @@ const fuelBidColumns: Column<FuelBid>[] = [
         <Button intent="success" text="Accept" icon={CheckCircle} size="sm" onClick={() => {}} />
         <Button
           intent="secondary"
-          className="hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white"
+          className="hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white hover:border-0"
           text="Reject"
           icon={XCircle}
           size="sm"

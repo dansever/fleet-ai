@@ -237,5 +237,56 @@ export const serializeFuelTenderDates = <T extends Record<string, any>>(
  * Helper to deserialize fuel tender dates specifically
  */
 export const deserializeFuelTenderDates = <T extends Record<string, any>>(data: T): T => {
-  return deserializeDatesFromAPI(data, DATE_FIELD_PRESETS.FUEL_TENDER);
+  return deserializeDatesFromAPI(data, [...DATE_FIELD_PRESETS.FUEL_TENDER]);
+};
+
+/**
+ * Helper to serialize RFQ dates specifically
+ * Converts Date objects to ISO strings or null
+ */
+export const serializeRfqDates = <T extends Record<string, any>>(
+  data: T,
+): T & {
+  sentAt?: string | null;
+  receivedAt?: string | null;
+} => {
+  return {
+    ...data,
+    sentAt: safeISOString(data.sentAt),
+    receivedAt: safeISOString(data.receivedAt),
+  } as T & {
+    sentAt?: string | null;
+    receivedAt?: string | null;
+  };
+};
+
+/**
+ * Helper to deserialize RFQ dates specifically
+ */
+export const deserializeRfqDates = <T extends Record<string, any>>(data: T): T => {
+  return deserializeDatesFromAPI(data, [...DATE_FIELD_PRESETS.RFQ]);
+};
+
+/**
+ * Helper to serialize Quote dates specifically
+ * Converts Date objects to ISO strings or null
+ */
+export const serializeQuoteDates = <T extends Record<string, any>>(
+  data: T,
+): T & {
+  receivedAt?: string | null;
+} => {
+  return {
+    ...data,
+    receivedAt: safeISOString(data.receivedAt),
+  } as T & {
+    receivedAt?: string | null;
+  };
+};
+
+/**
+ * Helper to deserialize Quote dates specifically
+ */
+export const deserializeQuoteDates = <T extends Record<string, any>>(data: T): T => {
+  return deserializeDatesFromAPI(data, [DATE_FIELDS.RECEIVED_AT]);
 };

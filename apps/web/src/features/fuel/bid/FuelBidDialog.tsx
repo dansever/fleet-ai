@@ -213,7 +213,7 @@ export default function FuelBidDialog({
           className={triggerClassName}
         />
       }
-      headerGradient="from-green-500 to-green-500"
+      headerGradient="from-pink-500 to-pink-500"
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
@@ -225,7 +225,7 @@ export default function FuelBidDialog({
           {/* Bid Information & Timeline */}
           <ContentSection
             header="Bid Information & Timeline"
-            headerGradient="from-green-500 to-green-300"
+            headerGradient="from-pink-600 to-pink-400"
             children={
               <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
@@ -283,7 +283,7 @@ export default function FuelBidDialog({
           {/* Vendor Information */}
           <ContentSection
             header="Vendor Information"
-            headerGradient="from-green-500 to-green-300"
+            headerGradient="from-pink-600 to-pink-400"
             children={
               <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
@@ -341,7 +341,7 @@ export default function FuelBidDialog({
           {/* Pricing Structure & Terms */}
           <ContentSection
             header="Pricing Structure & Terms"
-            headerGradient="from-green-500 to-green-300"
+            headerGradient="from-pink-600 to-pink-400"
             children={
               <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair
@@ -431,7 +431,7 @@ export default function FuelBidDialog({
           {/* Fees & Specifications */}
           <ContentSection
             header="Fees & Specifications"
-            headerGradient="from-green-500 to-green-300"
+            headerGradient="from-pink-600 to-pink-400"
             children={
               <div className="flex flex-col justify-between space-y-4">
                 <KeyValuePair

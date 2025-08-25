@@ -1,6 +1,8 @@
 import { getAirportsByOrgId } from '@/db/airports/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/error';
+import AirportHubClientPage from './ClientPage';
+import AirportHubProvider from './ContextProvider';
 
 export default async function AirportHubPage() {
   const { dbUser, error } = await authorizeUser();
@@ -17,10 +19,9 @@ export default async function AirportHubPage() {
     if (!airports) return jsonError('Failed to fetch airports', 500);
 
     return (
-      // <FuelProcurementProvider dbUser={dbUser} initialAirports={airports} hasServerData={true}>
-      //   <FuelProcurementClientPage />
-      // </FuelProcurementProvider>
-      <div>Hello</div>
+      <AirportHubProvider dbUser={dbUser} initialAirports={airports} hasServerData={true}>
+        <AirportHubClientPage />
+      </AirportHubProvider>
     );
   } catch (error) {
     return jsonError('Failed to load fuel procurement data', 500);

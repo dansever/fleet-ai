@@ -16,7 +16,7 @@ export type ErrorState = {
   general: string | null;
 };
 
-export type FuelProcurementContextType = {
+export type AirportHubContextType = {
   // User and airports
   dbUser: User;
   airports: Airport[];
@@ -49,9 +49,9 @@ export type FuelProcurementContextType = {
   clearAllErrors: () => void;
 };
 
-const FuelProcurementContext = createContext<FuelProcurementContextType | undefined>(undefined);
+const AirportHubContext = createContext<AirportHubContextType | undefined>(undefined);
 
-export default function FuelProcurementProvider({
+export default function AirportHubProvider({
   dbUser,
   initialAirports,
   hasServerData,
@@ -359,7 +359,7 @@ export default function FuelProcurementProvider({
   /**
    * Context value
    */
-  const value: FuelProcurementContextType = {
+  const value: AirportHubContextType = {
     dbUser,
     airports,
     setAirports,
@@ -383,15 +383,13 @@ export default function FuelProcurementProvider({
     clearAllErrors,
   };
 
-  return (
-    <FuelProcurementContext.Provider value={value}>{children}</FuelProcurementContext.Provider>
-  );
+  return <AirportHubContext.Provider value={value}>{children}</AirportHubContext.Provider>;
 }
 
-export function useFuelProcurement() {
-  const context = useContext(FuelProcurementContext);
+export function useAirportHub() {
+  const context = useContext(AirportHubContext);
   if (!context) {
-    throw new Error('useFuelProcurement must be used within a FuelProcurementProvider');
+    throw new Error('useAirportHub must be used within a AirportHubProvider');
   }
   return context;
 }

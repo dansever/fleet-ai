@@ -240,12 +240,12 @@ export function DataTable<T extends Record<string, any>>({
                               <span className="rounded bg-gray-200 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-700">
                                 normalized
                               </span>
-                              <span className="monospace text-blue-500">
+                              <span className="font-mono text-blue-500">
                                 {column.normalizeAccessor?.(item)}
                               </span>
                             </span>
                           ) : (
-                            <span className="text-xs monospace text-blue-500">
+                            <span className="text-xs font-mono text-blue-500">
                               {column.normalizeAccessor?.(item)}
                             </span>
                           )}

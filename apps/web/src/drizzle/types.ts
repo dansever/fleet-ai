@@ -52,7 +52,6 @@ export type NewRfq = InferInsertModel<typeof rfqsTable>;
 export type UpdateRfq = Partial<NewRfq>;
 
 // ==================== QUOTES ====================
-export type QuoteWithOrgId = Quote & { orgId: string };
 export type Quote = InferSelectModel<typeof quotesTable>;
 export type NewQuote = InferInsertModel<typeof quotesTable>;
 export type UpdateQuote = Partial<NewQuote>;

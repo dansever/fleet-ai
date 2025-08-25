@@ -4,12 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/stories/Button/Button';
+import { FileUploadPopover } from '@/stories/Popover/Popover';
 // import { MultiSelect, MultiSelectOption } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Rfq } from '@/drizzle/types';
 // import { RfqDialog } from '@/features/rfqs/components/RfqDialog';
 // import { fromPydanticRfq } from '@/lib/converters/rfq-converter';
+import { createRandomRfq } from '@/features/rfqs/utils';
 import { formatCompactNumber } from '@/lib/core/formatters';
 // import { extractRfqDataFromFile } from '@/services/technical/rfq-client';
 import {
@@ -44,7 +46,7 @@ interface RfqListProps {
   selectedRfq: Rfq | null;
   onRfqSelect: (rfq: Rfq) => void;
   updateRfq: (rfqId: string, updates: Partial<Rfq>) => Promise<Rfq>;
-  addRfq: (newRfq: Rfq) => void;
+  addRfq: (newRfq: Rfq) => Promise<Rfq>;
 }
 
 // Add RFQ Popover Component
@@ -53,7 +55,7 @@ function AddRfqPopover({
   addRfq,
 }: {
   updateRfq: (rfqId: string, updates: Partial<Rfq>) => Promise<Rfq>;
-  addRfq: (newRfq: Rfq) => void;
+  addRfq: (newRfq: Rfq) => Promise<Rfq>;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -389,7 +391,18 @@ export default function RfqList({
       <div className="flex-shrink-0 px-4 py-2 border-b border-border">
         <div className="flex flex-row justify-between">
           <h1 className="font-light italic">Sent RFQs</h1>
-          <AddRfqPopover updateRfq={updateRfq} addRfq={addRfq} />
+          <FileUploadPopover
+            triggerButtonIntent="primary"
+            triggerButtonText="Add RFQ"
+            popoverContentAlign="start"
+            onSend={() => {}}
+            onManualUpload={() => {
+              createRandomRfq().then((rfq) => {
+                addRfq(rfq);
+              });
+            }}
+            className="w-40"
+          />
         </div>
         <p className="text-sm text-muted-foreground">{rfqs.length} RFQs</p>
       </div>
