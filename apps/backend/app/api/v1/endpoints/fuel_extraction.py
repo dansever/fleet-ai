@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from app.features.fuel.fuel_bid_extractor import extract_fuel_bid
+from app.features.fuel.extractor import extract_fuel_bid
 from app.shared.schemas.response import ResponseEnvelope
 from app.utils import get_logger
 
@@ -7,7 +7,7 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
-@router.post("/extract", response_model=ResponseEnvelope)
+@router.post("/fuel/bids/extract", response_model=ResponseEnvelope)
 async def extract_fuel_bid_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -22,7 +22,6 @@ async def extract_fuel_bid_from_document(
         result = extract_fuel_bid(file)
         logger.info("✅ Fuel bid extraction completed successfully")
         return result
-        
     except HTTPException:
         raise
     except Exception as e:
@@ -31,3 +30,12 @@ async def extract_fuel_bid_from_document(
             status_code=500, 
             detail="Internal server error during fuel bid extraction"
         )
+
+
+@router.post("/fuel/contracts/extract", response_model=ResponseEnvelope)
+async def extract_fuel_contract_from_document(
+    file: UploadFile = File(...)
+) -> ResponseEnvelope:
+    """Extract structured fuel contract data from agreement documents."""
+    # TODO: Implement when fuel contract extractor is ready
+    raise HTTPException(status_code=501, detail="Fuel contract extraction not yet implemented")

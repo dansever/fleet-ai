@@ -11,7 +11,7 @@ def save_temp_file(file: UploadFile) -> str:
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as tmp:
             shutil.copyfileobj(file.file, tmp)
-            logger.info(f"📁 Saved temp file: {tmp.name}")
+            logger.info(f"📁 Saved temp file")
             return tmp.name
     except Exception as e:
         logger.error(f"❌ Failed to save temp file: {str(e)}")
@@ -22,7 +22,7 @@ def cleanup_temp_file(path: str) -> None:
     try:
         if os.path.exists(path):
             os.remove(path)
-            logger.info(f"🧹 Cleaned up temp file: {path}")
+            logger.info(f"🧹 Cleaned up temp file")
         else:
             logger.warning(f"⚠️ Temp file not found for cleanup: {path}")
     except Exception as e:

@@ -35,20 +35,13 @@ def process_document_extraction(
 
     try:
         validate_file_type(file, allowed_extensions, allowed_mime_types)
-
         temp_path = save_temp_file(file)
-        logger.info(f"📄 {log_label} saved to temporary location: {temp_path}")
-
         agent = get_llama_extractor(
             agent_name=agent_name,
             system_prompt=system_prompt,
             data_schema=schema_class,
-            # Default values..
         )
-        logger.info(f"🤖 {log_label} agent initialized")
-
         result = agent.extract(temp_path)
-
         return ResponseEnvelope(
             data=result.data,
             meta=Meta(
@@ -64,4 +57,3 @@ def process_document_extraction(
     finally:
         if temp_path:
             cleanup_temp_file(temp_path)
-            logger.info(f"🧹 Temporary file cleaned up: {temp_path}")

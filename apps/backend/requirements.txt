@@ -28,3 +28,7 @@ PyJWT[crypto]
 sqlalchemy
 asyncpg
 psycopg2-binary
+
+python-multipart
+
+pandas

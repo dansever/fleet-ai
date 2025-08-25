@@ -1,13 +1,11 @@
 from pydantic import BaseModel, Field
 from decimal import Decimal
-from typing import Optional, List
 from datetime import date
-from enum import Enum
 from app.schemas.vendor import Vendor
 
 class FuelBid(BaseModel):
     """Fuel bid information extracted from supplier proposals"""
-    
+        
     # supplier
     vendor: Vendor = Field(...,description="Information about the supplier submitting this bid.")
     
@@ -16,9 +14,9 @@ class FuelBid(BaseModel):
     supplier_comments: str | None = Field(None,description="Additional comments or notes from the supplier about their bid.")
     bid_submitted_at: str | None = Field(None,description="Date when the bid was submitted, in YYYY-MM-DD format.")
     ai_summary: str | None = Field(None,description=(
-        "Summary of this fuel bid in 4 sentences or fewer, "
-        "focus only on the critical commercial and technical terms"
-        "Avoid verbose phrasing."
+        "Summary of this fuel bid in 4 sentences or fewer."
+        "Focus on the critical commercial and technical terms. Include all the details that are relevant to the bid - terms, pricing, units of measure, notes, etc."
+        "Avoid verbose phrasing. Be concise and to the point."
         )
     )
     

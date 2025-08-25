@@ -52,13 +52,7 @@ def get_llama_extractor(
     if not LLAMA_ORGANIZATION_ID:
         raise ValueError("LLAMA_ORGANIZATION_ID environment variable is not set")
     
-    if DEBUG_MODE_FLAG:
-        logger.info(
-            "LlamaExtract config: target=%s mode=%s chunk_mode=%s reasoning=%s cite=%s invalidate_cache=%s",
-            extraction_target, extraction_mode, chunk_mode, use_reasoning, cite_sources, invalidate_cache
-        )    
-
-    logger.info("Initializing LlamaExtract client with project_id: %s", LLAMA_EXTRACT_PROJECT_ID)
+    logger.info("Initializing LlamaExtract client")
     
     # Initialize the LlamaExtract client
     extractor = LlamaExtract(
@@ -100,8 +94,6 @@ def get_llama_extractor(
         # Extensions (see Extensions page for details)
         use_reasoning=use_reasoning,
         cite_sources=cite_sources,
-        chunk_mode=chunk_mode,
-        invalidate_cache=invalidate_cache
     )
 
     try:
