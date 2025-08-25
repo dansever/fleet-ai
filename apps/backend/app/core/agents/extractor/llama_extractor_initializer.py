@@ -51,9 +51,7 @@ def get_llama_extractor(
         raise ValueError("LLAMA_EXTRACT_PROJECT_ID environment variable is not set")
     if not LLAMA_ORGANIZATION_ID:
         raise ValueError("LLAMA_ORGANIZATION_ID environment variable is not set")
-    
-    logger.info("Initializing LlamaExtract client")
-    
+        
     # Initialize the LlamaExtract client
     extractor = LlamaExtract(
         api_key=LLAMA_CLOUD_API_KEY,
@@ -69,16 +67,13 @@ def get_llama_extractor(
             if UPDATE_EXTRACTOR_SCHEMA_FLAG:
                 agent.data_schema = data_schema
                 agent.save()
-                logger.info(f"Updated schema for agent: {agent_name}")
+                logger.info(f"Updated schema for: {agent_name}")
             return agent
     except ApiError as e:
         if e.status_code != 404:
-            logger.error(f"Error getting agent {agent_name}: {e}")
+            logger.error(f"Error getting {agent_name}: {e}")
             raise e  # Only suppress "not found" errors
 
-    # Create a new agent
-    logger.info(f"Creating new LlamaExtract agent: {agent_name}")
-    
     # Create extraction configuration
     config = ExtractConfig(
         # Basic options
@@ -97,7 +92,7 @@ def get_llama_extractor(
     )
 
     try:
-        # Create extraction agent with configuration
+        # Create new extraction agent 
         agent = extractor.create_agent(
             name=agent_name,
             data_schema=data_schema,

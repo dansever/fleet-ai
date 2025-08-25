@@ -7,7 +7,7 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
-@router.post("/fuel/bids/extract", response_model=ResponseEnvelope)
+@router.post("/bids/extract", response_model=ResponseEnvelope)
 async def extract_fuel_bid_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -32,7 +32,7 @@ async def extract_fuel_bid_from_document(
         )
 
 
-@router.post("/fuel/contracts/extract", response_model=ResponseEnvelope)
+@router.post("/contracts/extract", response_model=ResponseEnvelope)
 async def extract_fuel_contract_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:

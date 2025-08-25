@@ -6,7 +6,7 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
-@router.post("/technical/quotes/extract", response_model=ResponseEnvelope)
+@router.post("/quotes/extract", response_model=ResponseEnvelope)
 async def extract_quote_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -34,7 +34,7 @@ async def extract_quote_from_document(
             detail="Internal server error during quote extraction"
         )
 
-@router.post("/technical/rfqs/extract", response_model=ResponseEnvelope)
+@router.post("/rfqs/extract", response_model=ResponseEnvelope)
 async def extract_rfq_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -62,7 +62,7 @@ async def extract_rfq_from_document(
             detail="Internal server error during RFQ extraction"
         )
 
-@router.post("/technical/parts/extract", response_model=ResponseEnvelope)
+@router.post("/parts/extract", response_model=ResponseEnvelope)
 async def extract_parts_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:

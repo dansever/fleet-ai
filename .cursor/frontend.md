@@ -469,111 +469,196 @@ const [errors, setErrors] = useState<ErrorState>({
 
 ## Date & Time Handling
 
-### Database Schema
+### Database Schema Types
 
-**All timestamps use this pattern:**
+**Two distinct field types with different handling:**
 
 ```typescript
-timestamp('column_name', { withTimezone: true });
-
-// Required audit fields (auto-managed):
+// 1. TIMESTAMPS (with timezone) - for precise moments in time
 timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 timestamp('updated_at', { withTimezone: true }).notNull().defaultNow();
+timestamp('sent_at', { withTimezone: true }); // when RFQ was sent
+timestamp('received_at', { withTimezone: true }); // when quote was received
+timestamp('decision_at', { withTimezone: true }); // when decision was made
 
-// Optional business dates (nullable):
-timestamp('bidding_starts', { withTimezone: true });
+// 2. DATES (calendar dates only) - for business dates without time
+date('effective_from'); // contract start date
+date('effective_to'); // contract end date
+date('bidding_starts'); // bidding period start
+date('bidding_ends'); // bidding period end
+date('invoice_date'); // invoice date
+date('bid_submitted_at'); // bid submission date
 ```
 
-### Standardized Flow
+### Data Flow Patterns
+
+**For TIMESTAMP fields (precise moments):**
 
 ```
-User Input (DatePicker) → Component State (Date) → API Call (ISO String) → Database (TIMESTAMPTZ) → Display (formatDate)
+DateTimePicker → Date object → ISO string → TIMESTAMPTZ → formatDate with time
+```
+
+**For DATE fields (calendar dates):**
+
+```
+DatePicker → Date object → YYYY-MM-DD string → DATE → formatDate date-only
 ```
 
 ### Component State Pattern
 
+**For TIMESTAMP fields:**
+
 ```typescript
-// ✅ CORRECT: Store dates as Date objects or null
+// ✅ CORRECT: Store as Date objects for precise moments
 const [formData, setFormData] = useState({
-  startDate: record?.startDate ? new Date(record.startDate) : null,
-  endDate: record?.endDate ? new Date(record.endDate) : null,
+  sentAt: record?.sentAt ? new Date(record.sentAt) : null,
+  receivedAt: record?.receivedAt ? new Date(record.receivedAt) : null,
+});
+```
+
+**For DATE fields:**
+
+```typescript
+// ✅ CORRECT: Store as Date objects for calendar dates
+const [formData, setFormData] = useState({
+  effectiveFrom: record?.effectiveFrom ? new Date(record.effectiveFrom) : null,
+  effectiveTo: record?.effectiveTo ? new Date(record.effectiveTo) : null,
+  biddingStarts: record?.biddingStarts ? new Date(record.biddingStarts) : null,
 });
 
 // ❌ INCORRECT: Don't store as strings
 const [formData, setFormData] = useState({
-  startDate: record?.startDate || null, // Could be string - wrong!
+  effectiveFrom: record?.effectiveFrom || null, // Could be string - wrong!
 });
 ```
 
 ### Form Submission Pattern
 
+**For TIMESTAMP fields (precise moments):**
+
 ```typescript
-// ✅ CORRECT: Serialize dates before API calls
-import { serializeFuelTenderDates } from '@/lib/utils/date-helpers';
-
-const handleSave = async () => {
-  const serializedData = serializeFuelTenderDates(formData);
-  await createRecord(serializedData);
-};
-
-// Or manually:
+// ✅ CORRECT: Send as ISO strings with time
 const payload = {
   ...formData,
-  startDate: formData.startDate?.toISOString() || null,
-  endDate: formData.endDate?.toISOString() || null,
+  sentAt: formData.sentAt?.toISOString() || null, // "2025-01-15T14:30:00.000Z"
+  receivedAt: formData.receivedAt?.toISOString() || null,
+  decisionAt: formData.decisionAt?.toISOString() || null,
+};
+```
+
+**For DATE fields (calendar dates only):**
+
+```typescript
+// ✅ CORRECT: Send as YYYY-MM-DD strings (date-only)
+const payload = {
+  ...formData,
+  effectiveFrom: formData.effectiveFrom?.toISOString().split('T')[0] || null, // "2025-01-15"
+  effectiveTo: formData.effectiveTo?.toISOString().split('T')[0] || null,
+  biddingStarts: formData.biddingStarts?.toISOString().split('T')[0] || null,
+  biddingEnds: formData.biddingEnds?.toISOString().split('T')[0] || null,
+  invoiceDate: formData.invoiceDate?.toISOString().split('T')[0] || null,
+};
+
+// ✅ ALTERNATIVE: Use utility function for cleaner code
+import { formatDateForAPI } from '@/lib/utils/date-helpers';
+
+const payload = {
+  ...formData,
+  effectiveFrom: formatDateForAPI(formData.effectiveFrom),
+  effectiveTo: formatDateForAPI(formData.effectiveTo),
 };
 ```
 
 ### API Route Pattern
 
 ```typescript
-// ✅ CORRECT: Let Drizzle handle date conversion automatically
+// ✅ CORRECT: Drizzle handles both types automatically
 export async function POST(request: NextRequest) {
-  const body = await request.json(); // ISO strings from client
+  const body = await request.json();
 
-  // Drizzle automatically converts ISO strings to Date objects for TIMESTAMPTZ columns
-  const result = await createRecord(body); // No manual conversion needed!
+  // For TIMESTAMP fields: Drizzle converts ISO strings to TIMESTAMPTZ
+  // For DATE fields: Drizzle converts YYYY-MM-DD strings to DATE
+  // No manual conversion needed for either type!
+
+  const result = await createRecord(body);
   return NextResponse.json(result);
 }
 
 // ❌ INCORRECT: Don't manually convert dates
 const data = {
   ...body,
-  startDate: body.startDate ? new Date(body.startDate) : null, // Unnecessary!
+  effectiveFrom: body.effectiveFrom ? new Date(body.effectiveFrom) : null, // Unnecessary!
+  sentAt: new Date(body.sentAt), // Unnecessary and breaks null handling!
 };
 ```
 
 ### Display Pattern
 
+**For TIMESTAMP fields (show date + time):**
+
 ```typescript
-// ✅ CORRECT: Use formatDate for display
 import { formatDate } from '@/lib/core/formatters';
 
+// Shows: "Jan 15, 2025, 2:30 PM"
 <div>{formatDate(record.createdAt)}</div>
-<td>{formatDate(record.startDate)}</td>
+<div>{formatDate(record.sentAt)}</div>
+<div>{formatDate(record.receivedAt)}</div>
+```
 
-// ✅ CORRECT: Convert to Date for DatePicker
+**For DATE fields (show date only):**
+
+```typescript
+// Shows: "Jan 15, 2025" (no time)
+<div>{formatDate(record.effectiveFrom)}</div>
+<div>{formatDate(record.biddingStarts)}</div>
+<div>{formatDate(record.invoiceDate)}</div>
+```
+
+**For Form Inputs:**
+
+```typescript
+// Both types use Date objects in components
 <DatePicker
-  value={record.startDate ? new Date(record.startDate) : undefined}
-  onChange={(date) => handleChange('startDate', date)}
+  value={record.effectiveFrom ? new Date(record.effectiveFrom) : undefined}
+  onChange={(date) => handleChange('effectiveFrom', date)}
+/>
+
+<DateTimePicker
+  value={record.sentAt ? new Date(record.sentAt) : undefined}
+  onChange={(date) => handleChange('sentAt', date)}
 />
 ```
 
 ### KeyValuePair with Dates
 
+**For DATE fields:**
+
 ```typescript
-// ✅ CORRECT: Pass Date objects directly
+// ✅ CORRECT: Pass Date objects directly for calendar dates
 <KeyValuePair
-  label="Start Date"
-  value={formData.startDate} // Already a Date object or null
+  label="Effective From"
+  value={formData.effectiveFrom} // Date object or null
   valueType="date"
   editMode={isEditing}
-  onChange={(value) => handleFieldChange('startDate', value)}
+  onChange={(value) => handleFieldChange('effectiveFrom', value)}
+/>
+```
+
+**For TIMESTAMP fields:**
+
+```typescript
+// ✅ CORRECT: Pass Date objects directly for precise moments
+<KeyValuePair
+  label="Sent At"
+  value={formData.sentAt} // Date object or null
+  valueType="datetime"     // Use "datetime" for timestamps
+  editMode={isEditing}
+  onChange={(value) => handleFieldChange('sentAt', value)}
 />
 
 // ❌ INCORRECT: Don't convert Date to Date
 <KeyValuePair
-  value={formData.startDate ? new Date(formData.startDate) : null} // Redundant!
+  value={formData.effectiveFrom ? new Date(formData.effectiveFrom) : null} // Redundant!
 />
 ```
 
@@ -583,42 +668,60 @@ import { formatDate } from '@/lib/core/formatters';
 // Available in @/lib/utils/date-helpers
 import {
   safeDate, // Safe conversion to Date or null
-  safeISOString, // Safe conversion to ISO string or null
-  serializeFuelTenderDates, // Specialized for fuel tenders
+  safeISOString, // Safe conversion to ISO string or null (for timestamps)
+  formatDateForAPI, // Safe conversion to YYYY-MM-DD string or null (for dates)
   createDateFilter, // Filter by date range
   sortByDate, // Sort arrays by date field
   getRelativeTime, // "2 hours ago" format
 } from '@/lib/utils/date-helpers';
 
-// Display formatting
+// Display formatting (works for both DATE and TIMESTAMP fields)
 import { formatDate } from '@/lib/core/formatters';
-formatDate(date); // "Jan 15, 2025"
-formatDate(date, { weekday: 'long' }); // "Tuesday"
+formatDate(dateField); // "Jan 15, 2025" (for DATE fields)
+formatDate(timestampField); // "Jan 15, 2025, 2:30 PM" (for TIMESTAMP fields)
 ```
 
 ### Common Mistakes to Avoid
 
 ```typescript
 // ❌ Don't do these:
-value={formData.date ? new Date(formData.date) : null} // Double conversion
-await apiCall(formData) // Sending Date objects to API
-const date = new Date(possiblyNullValue) // Not handling null
+value={formData.effectiveFrom ? new Date(formData.effectiveFrom) : null} // Double conversion
+await apiCall(formData) // Sending Date objects to API (need to serialize first)
+const date = new Date(possiblyNullValue) // Not handling null values
+effectiveFrom: formData.effectiveFrom?.toISOString() // Wrong for DATE fields (includes time)
 
 // ✅ Do these instead:
-value={formData.date} // Already correct type
-const serialized = serializeFuelTenderDates(formData)
-const date = possiblyNullValue ? new Date(possiblyNullValue) : null
+value={formData.effectiveFrom} // Already correct Date object type
+effectiveFrom: formatDateForAPI(formData.effectiveFrom) // YYYY-MM-DD for DATE fields
+sentAt: formData.sentAt?.toISOString() || null // ISO string for TIMESTAMP fields
+const date = possiblyNullValue ? new Date(possiblyNullValue) : null // Safe conversion
 ```
 
 ### Quick Reference
 
-| Scenario        | Pattern                      | Example                                         |
-| --------------- | ---------------------------- | ----------------------------------------------- |
-| Component State | Store as Date or null        | `useState({ date: new Date(value) \|\| null })` |
-| Form Submission | Serialize with toISOString() | `date?.toISOString() \|\| null`                 |
-| API Handling    | Let Drizzle convert          | No manual conversion needed                     |
-| Display         | Use formatDate()             | `formatDate(record.createdAt)`                  |
-| DatePicker      | Pass Date object             | `<DatePicker value={dateObj} />`                |
+| Field Type    | Component State             | Form Submission                 | Display                 | Input Component                      |
+| ------------- | --------------------------- | ------------------------------- | ----------------------- | ------------------------------------ |
+| **TIMESTAMP** | `new Date(value) \|\| null` | `date?.toISOString() \|\| null` | `formatDate(timestamp)` | `<DateTimePicker value={dateObj} />` |
+| **DATE**      | `new Date(value) \|\| null` | `formatDateForAPI(date)`        | `formatDate(date)`      | `<DatePicker value={dateObj} />`     |
+
+### Python Backend Integration
+
+**When sending to/from Python backend:**
+
+```typescript
+// ✅ CORRECT: Both types sent as strings
+const payload = {
+  // DATE fields → YYYY-MM-DD strings
+  effectiveFrom: formatDateForAPI(formData.effectiveFrom), // "2025-01-15"
+
+  // TIMESTAMP fields → ISO strings
+  sentAt: formData.sentAt?.toISOString() || null, // "2025-01-15T14:30:00.000Z"
+};
+
+// Python will receive and can parse both formats correctly
+// DATE: datetime.strptime(date_str, "%Y-%m-%d").date()
+// TIMESTAMP: datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+```
 
 ## Environment Configuration
 

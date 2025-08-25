@@ -1,42 +1,423 @@
-import { Badge } from '@/components/ui/badge';
+'use client';
+
 import type { Rfq } from '@/drizzle/types';
-import { formatDate } from '@/lib/core/formatters';
+import { serializeRfqDates } from '@/lib/utils/date-helpers';
+import { createRfq, updateRfq, type CreateRfqData } from '@/services/technical/rfq-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
+import { Pencil, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-export default function RfqDialog({ rfq }: { rfq: Rfq }) {
+export default function RfqDialog({
+  rfq,
+  onChange,
+  DialogType = 'view',
+  triggerClassName,
+  buttonSize = 'md',
+}: {
+  rfq: Rfq | null;
+  onChange: (rfq: Rfq) => void;
+  DialogType: 'add' | 'edit' | 'view';
+  triggerClassName?: string;
+  buttonSize?: 'sm' | 'md' | 'lg';
+}) {
+  const [formData, setFormData] = useState({
+    direction: rfq?.direction || null,
+    rfqNumber: rfq?.rfqNumber || null,
+    vendorName: rfq?.vendorName || null,
+    vendorAddress: rfq?.vendorAddress || null,
+    vendorContactName: rfq?.vendorContactName || null,
+    vendorContactEmail: rfq?.vendorContactEmail || null,
+    vendorContactPhone: rfq?.vendorContactPhone || null,
+    partNumber: rfq?.partNumber || null,
+    altPartNumber: rfq?.altPartNumber || null,
+    partDescription: rfq?.partDescription || null,
+    conditionCode: rfq?.conditionCode || null,
+    unitOfMeasure: rfq?.unitOfMeasure || null,
+    quantity: rfq?.quantity || null,
+    pricingType: rfq?.pricingType || null,
+    urgencyLevel: rfq?.urgencyLevel || null,
+    deliverTo: rfq?.deliverTo || null,
+    buyerComments: rfq?.buyerComments || null,
+    status: rfq?.status || 'pending',
+    sentAt: rfq?.sentAt || null,
+    receivedAt: rfq?.receivedAt || null,
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const isAdd = DialogType === 'add';
+  const isEdit = DialogType === 'edit';
+
+  // Update formData when rfq prop changes
+  useEffect(() => {
+    setFormData({
+      direction: rfq?.direction || null,
+      rfqNumber: rfq?.rfqNumber || null,
+      vendorName: rfq?.vendorName || null,
+      vendorAddress: rfq?.vendorAddress || null,
+      vendorContactName: rfq?.vendorContactName || null,
+      vendorContactEmail: rfq?.vendorContactEmail || null,
+      vendorContactPhone: rfq?.vendorContactPhone || null,
+      partNumber: rfq?.partNumber || null,
+      altPartNumber: rfq?.altPartNumber || null,
+      partDescription: rfq?.partDescription || null,
+      conditionCode: rfq?.conditionCode || null,
+      unitOfMeasure: rfq?.unitOfMeasure || null,
+      quantity: rfq?.quantity || null,
+      pricingType: rfq?.pricingType || null,
+      urgencyLevel: rfq?.urgencyLevel || null,
+      deliverTo: rfq?.deliverTo || null,
+      buyerComments: rfq?.buyerComments || null,
+      status: rfq?.status || 'pending',
+      sentAt: rfq?.sentAt || null,
+      receivedAt: rfq?.receivedAt || null,
+    });
+  }, [rfq]);
+
+  const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      let savedRfq: Rfq;
+
+      // Serialize dates to ISO strings before sending
+      const serializedFormData = serializeRfqDates(formData);
+
+      if (isAdd) {
+        // Create new RFQ (orgId and userId are handled server-side)
+        const createData: CreateRfqData = {
+          direction: serializedFormData.direction,
+          rfqNumber: serializedFormData.rfqNumber,
+          vendorName: serializedFormData.vendorName,
+          vendorAddress: serializedFormData.vendorAddress,
+          vendorContactName: serializedFormData.vendorContactName,
+          vendorContactEmail: serializedFormData.vendorContactEmail,
+          vendorContactPhone: serializedFormData.vendorContactPhone,
+          partNumber: serializedFormData.partNumber,
+          altPartNumber: serializedFormData.altPartNumber,
+          partDescription: serializedFormData.partDescription,
+          conditionCode: serializedFormData.conditionCode,
+          unitOfMeasure: serializedFormData.unitOfMeasure,
+          quantity: serializedFormData.quantity,
+          pricingType: serializedFormData.pricingType,
+          urgencyLevel: serializedFormData.urgencyLevel,
+          deliverTo: serializedFormData.deliverTo,
+          buyerComments: serializedFormData.buyerComments,
+          status: serializedFormData.status,
+          selectedQuoteId: null,
+          sentAt: serializedFormData.sentAt,
+          receivedAt: serializedFormData.receivedAt,
+        };
+        savedRfq = await createRfq(createData);
+        toast.success('RFQ created successfully');
+      } else {
+        // Update existing RFQ
+        if (!rfq?.id) {
+          throw new Error('RFQ ID is required for updates');
+        }
+        const updateData = {
+          direction: serializedFormData.direction,
+          rfqNumber: serializedFormData.rfqNumber,
+          vendorName: serializedFormData.vendorName,
+          vendorAddress: serializedFormData.vendorAddress,
+          vendorContactName: serializedFormData.vendorContactName,
+          vendorContactEmail: serializedFormData.vendorContactEmail,
+          vendorContactPhone: serializedFormData.vendorContactPhone,
+          partNumber: serializedFormData.partNumber,
+          altPartNumber: serializedFormData.altPartNumber,
+          partDescription: serializedFormData.partDescription,
+          conditionCode: serializedFormData.conditionCode,
+          unitOfMeasure: serializedFormData.unitOfMeasure,
+          quantity: serializedFormData.quantity,
+          pricingType: serializedFormData.pricingType,
+          urgencyLevel: serializedFormData.urgencyLevel,
+          deliverTo: serializedFormData.deliverTo,
+          buyerComments: serializedFormData.buyerComments,
+          status: serializedFormData.status,
+          sentAt: serializedFormData.sentAt,
+          receivedAt: serializedFormData.receivedAt,
+        };
+        savedRfq = await updateRfq(rfq.id, updateData);
+        toast.success('RFQ updated successfully');
+      }
+
+      // Call onChange to update parent with new data
+      onChange(savedRfq);
+    } catch (error) {
+      const action = isAdd ? 'create' : 'update';
+      toast.error(`Failed to ${action} RFQ`);
+      console.error(`Error ${action}ing RFQ:`, error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (isAdd) {
+      setFormData({
+        direction: null,
+        rfqNumber: null,
+        vendorName: null,
+        vendorAddress: null,
+        vendorContactName: null,
+        vendorContactEmail: null,
+        vendorContactPhone: null,
+        partNumber: null,
+        altPartNumber: null,
+        partDescription: null,
+        conditionCode: null,
+        unitOfMeasure: null,
+        quantity: null,
+        pricingType: null,
+        urgencyLevel: null,
+        deliverTo: null,
+        buyerComments: null,
+        status: 'pending',
+        sentAt: null,
+        receivedAt: null,
+      });
+    }
+  };
+
+  const triggerText = isAdd ? 'Add RFQ' : isEdit ? 'Edit' : `View ${rfq?.rfqNumber || 'RFQ'}`;
+  const dialogTitle = isAdd ? 'Add New RFQ' : rfq?.rfqNumber || 'RFQ Details';
+  const saveButtonText = isAdd ? 'Create RFQ' : 'Save Changes';
+
   return (
     <DetailDialog
-      trigger={<Button intent="primary" text="View Rfq" />}
-      title={rfq.rfqNumber ?? 'Rfq'}
-      onSave={() => {}}
-      onOpenChange={() => {}}
+      trigger={
+        <Button
+          intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+          text={triggerText}
+          icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
+          size={buttonSize}
+          className={triggerClassName}
+        />
+      }
+      headerGradient="from-purple-500 to-purple-500"
+      title={dialogTitle}
+      onSave={handleSave}
+      onCancel={handleCancel}
+      initialEditing={isEdit || isAdd}
+      saveButtonText={saveButtonText}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ContentSection
-          header="Information"
-          gradient="from-blue-500 to-green-500"
-          children={
-            <div className="flex flex-col justify-between">
-              <KeyValuePair label="Rfq Number" value={<Badge>{rfq.rfqNumber}</Badge>} />
-              <KeyValuePair label="Rfq Status" value={rfq.direction} />
-            </div>
-          }
-        />
-        <ContentSection
-          header="Location"
-          gradient="from-blue-500 to-green-500"
-          children={
-            <div className="flex flex-col justify-between">
-              <KeyValuePair label="Direction" value={rfq.direction} />
-              <KeyValuePair label="Created At" value={<Badge>{formatDate(rfq.createdAt)}</Badge>} />
-              <KeyValuePair label="Updated At" value={<Badge>{formatDate(rfq.updatedAt)}</Badge>} />
-            </div>
-          }
-        />
-      </div>
+      {(isEditing) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ContentSection
+            header="RFQ Information"
+            headerGradient="from-purple-500 to-purple-300"
+            children={
+              <div className="flex flex-col justify-between space-y-4">
+                <KeyValuePair
+                  label="Direction"
+                  value={formData.direction}
+                  valueType="select"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('direction', value)}
+                  name="direction"
+                  selectOptions={[
+                    { value: 'sent', label: 'Sent' },
+                    { value: 'received', label: 'Received' },
+                  ]}
+                />
+                <KeyValuePair
+                  label="RFQ Number"
+                  value={formData.rfqNumber}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('rfqNumber', value)}
+                  name="rfqNumber"
+                />
+                <KeyValuePair
+                  label="Status"
+                  value={formData.status}
+                  valueType="select"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('status', value)}
+                  name="status"
+                  selectOptions={[
+                    { value: 'pending', label: 'Pending' },
+                    { value: 'in_progress', label: 'In Progress' },
+                    { value: 'completed', label: 'Completed' },
+                    { value: 'cancelled', label: 'Cancelled' },
+                  ]}
+                />
+                <KeyValuePair
+                  label="Urgency Level"
+                  value={formData.urgencyLevel}
+                  valueType="select"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('urgencyLevel', value)}
+                  name="urgencyLevel"
+                  selectOptions={[
+                    { value: 'low', label: 'Low' },
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'high', label: 'High' },
+                    { value: 'urgent', label: 'Urgent' },
+                  ]}
+                />
+              </div>
+            }
+          />
+          <ContentSection
+            header="Vendor Information"
+            headerGradient="from-purple-500 to-purple-300"
+            children={
+              <div className="flex flex-col justify-between space-y-4">
+                <KeyValuePair
+                  label="Vendor Name"
+                  value={formData.vendorName}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('vendorName', value)}
+                  name="vendorName"
+                />
+                <KeyValuePair
+                  label="Vendor Address"
+                  value={formData.vendorAddress}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('vendorAddress', value)}
+                  name="vendorAddress"
+                />
+                <KeyValuePair
+                  label="Contact Name"
+                  value={formData.vendorContactName}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('vendorContactName', value)}
+                  name="vendorContactName"
+                />
+                <KeyValuePair
+                  label="Contact Email"
+                  value={formData.vendorContactEmail}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('vendorContactEmail', value)}
+                  name="vendorContactEmail"
+                />
+                <KeyValuePair
+                  label="Contact Phone"
+                  value={formData.vendorContactPhone}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('vendorContactPhone', value)}
+                  name="vendorContactPhone"
+                />
+              </div>
+            }
+          />
+          <ContentSection
+            header="Part Specifications"
+            headerGradient="from-purple-500 to-purple-300"
+            children={
+              <div className="flex flex-col justify-between space-y-4">
+                <KeyValuePair
+                  label="Part Number"
+                  value={formData.partNumber}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('partNumber', value)}
+                  name="partNumber"
+                />
+                <KeyValuePair
+                  label="Alt Part Number"
+                  value={formData.altPartNumber}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('altPartNumber', value)}
+                  name="altPartNumber"
+                />
+                <KeyValuePair
+                  label="Part Description"
+                  value={formData.partDescription}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('partDescription', value)}
+                  name="partDescription"
+                />
+                <KeyValuePair
+                  label="Condition Code"
+                  value={formData.conditionCode}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('conditionCode', value)}
+                  name="conditionCode"
+                />
+                <KeyValuePair
+                  label="Unit of Measure"
+                  value={formData.unitOfMeasure}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('unitOfMeasure', value)}
+                  name="unitOfMeasure"
+                />
+                <KeyValuePair
+                  label="Quantity"
+                  value={formData.quantity}
+                  valueType="number"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('quantity', value)}
+                  name="quantity"
+                />
+              </div>
+            }
+          />
+          <ContentSection
+            header="Commercial Terms & Timeline"
+            headerGradient="from-purple-500 to-purple-300"
+            children={
+              <div className="flex flex-col justify-between space-y-4">
+                <KeyValuePair
+                  label="Pricing Type"
+                  value={formData.pricingType}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('pricingType', value)}
+                  name="pricingType"
+                />
+                <KeyValuePair
+                  label="Deliver To"
+                  value={formData.deliverTo}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('deliverTo', value)}
+                  name="deliverTo"
+                />
+                <KeyValuePair
+                  label="Buyer Comments"
+                  value={formData.buyerComments}
+                  valueType="string"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('buyerComments', value)}
+                  name="buyerComments"
+                />
+                <KeyValuePair
+                  label="Sent At"
+                  value={formData.sentAt}
+                  valueType="date"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('sentAt', value)}
+                  name="sentAt"
+                />
+                <KeyValuePair
+                  label="Received At"
+                  value={formData.receivedAt}
+                  valueType="date"
+                  editMode={isEditing}
+                  onChange={(value) => handleFieldChange('receivedAt', value)}
+                  name="receivedAt"
+                />
+              </div>
+            }
+          />
+        </div>
+      )}
     </DetailDialog>
   );
 }

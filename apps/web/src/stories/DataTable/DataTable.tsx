@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { ChevronDownIcon, ChevronUpIcon, FilterIcon, SearchIcon } from 'lucide-react';
-import type React from 'react';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 export interface Column<T> {
   key: keyof T | string;
@@ -15,6 +14,7 @@ export interface Column<T> {
   filterable?: boolean;
   width?: string;
   align?: 'left' | 'center' | 'right';
+  normalizeAccessor?: (item: T) => React.ReactNode;
 }
 
 export interface DataTableProps<T> {
@@ -29,6 +29,7 @@ export interface DataTableProps<T> {
   className?: string;
   onRowClick?: (item: T) => void;
   rowClassName?: (item: T) => string;
+  showNormalizedRow?: boolean;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -45,6 +46,7 @@ export function DataTable<T extends Record<string, any>>({
   className = '',
   onRowClick,
   rowClassName,
+  showNormalizedRow = true,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -172,12 +174,12 @@ export function DataTable<T extends Record<string, any>>({
         <ScrollArea className="w-full max-w-full">
           <table className="min-w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200/50">
+              <tr className="border-b border-gray-2400/50">
                 {columns.map((column) => (
                   <th
                     key={String(column.key)}
-                    className={`px-6 py-4 text-left text-sm font-semibold text-gray-900 ${
-                      column.sortable ? 'cursor-pointer hover:bg-gray-50/50' : ''
+                    className={`px-6 py-4 text-left text-sm font-semibold text-gray-800 bg-secondary/30 ${
+                      column.sortable ? 'cursor-pointer hover:bg-secondary/40' : ''
                     } ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : ''}`}
                     style={{ width: column.width }}
                     onClick={() => column.sortable && handleSort(String(column.key))}
@@ -192,28 +194,66 @@ export function DataTable<T extends Record<string, any>>({
             </thead>
             <tbody>
               {paginatedData.map((item, index) => (
-                <tr
-                  key={index}
-                  className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors ${
-                    onRowClick ? 'cursor-pointer' : ''
-                  } ${rowClassName ? rowClassName(item) : ''}`}
-                  onClick={() => onRowClick?.(item)}
-                >
-                  {columns.map((column) => (
-                    <td
-                      key={String(column.key)}
-                      className={`px-6 py-4 text-sm text-gray-700 ${
-                        column.align === 'center'
-                          ? 'text-center'
-                          : column.align === 'right'
-                            ? 'text-right'
-                            : ''
-                      }`}
-                    >
-                      {column.accessor ? column.accessor(item) : item[column.key as keyof T]}
-                    </td>
-                  ))}
-                </tr>
+                <React.Fragment key={index}>
+                  {/* Original row */}
+                  <tr
+                    className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors ${
+                      onRowClick ? 'cursor-pointer' : ''
+                    } ${rowClassName ? rowClassName(item) : ''}`}
+                    onClick={() => onRowClick?.(item)}
+                  >
+                    {columns.map((column) => (
+                      <td
+                        key={String(column.key)}
+                        className={`px-6 py-4 text-sm text-gray-700 ${
+                          column.align === 'center'
+                            ? 'text-center'
+                            : column.align === 'right'
+                              ? 'text-right'
+                              : ''
+                        }`}
+                      >
+                        {column.accessor
+                          ? column.accessor(item)
+                          : (item as any)[column.key as keyof T]}
+                      </td>
+                    ))}
+                  </tr>
+
+                  {/* Normalized row */}
+                  {showNormalizedRow && (
+                    <tr className="border-b border-gray-100/50 bg-accent/20">
+                      {columns.map((column, i) => (
+                        <td
+                          key={`${String(column.key)}-normalized`}
+                          className={`px-6 py-2 text-xs text-gray-600 ${
+                            column.align === 'center'
+                              ? 'text-center'
+                              : column.align === 'right'
+                                ? 'text-right'
+                                : ''
+                          }`}
+                        >
+                          {/* Small prefix label only once per row if you like */}
+                          {i === 0 ? (
+                            <span className="inline-flex items-center gap-2">
+                              <span className="rounded bg-gray-200 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-700">
+                                normalized
+                              </span>
+                              <span className="font-mono text-blue-500">
+                                {column.normalizeAccessor?.(item)}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-xs font-mono text-blue-500">
+                              {column.normalizeAccessor?.(item)}
+                            </span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>

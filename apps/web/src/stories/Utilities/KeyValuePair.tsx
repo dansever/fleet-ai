@@ -1,7 +1,7 @@
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import type React from 'react';
-import { DatePicker, ModernInput, ModernSwitch, ModernTextarea } from '../Form/Form';
+import { DatePicker, ModernInput, ModernSelect, ModernSwitch, ModernTextarea } from '../Form/Form';
 
 // Key-Value Pair - For displaying structured information
 export const KeyValuePair = ({
@@ -14,16 +14,18 @@ export const KeyValuePair = ({
   editMode = false,
   onChange,
   name,
+  selectOptions,
 }: {
   label: string;
-  value: string | number | boolean | null;
-  valueType: 'string' | 'number' | 'boolean' | 'date' | 'null';
+  value: string | number | boolean | Date | null;
+  valueType: 'string' | 'number' | 'boolean' | 'date' | 'select' | 'null';
   className?: string;
   keyClassName?: string;
   valueClassName?: string;
   editMode?: boolean;
-  onChange?: (value: string | number | boolean) => void;
+  onChange?: (value: string | number | boolean | Date) => void;
   name?: string;
+  selectOptions?: { value: string; label: string }[];
 }) => (
   <div
     className={cn(
@@ -58,8 +60,8 @@ export const KeyValuePair = ({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             onChange?.(e.currentTarget.valueAsNumber)
           }
+          min={0}
           name={name}
-          className="max-w-3/5"
         />
       ) : valueType === 'boolean' ? (
         <ModernSwitch checked={value} onCheckedChange={(checked: boolean) => onChange?.(checked)} />
@@ -70,8 +72,15 @@ export const KeyValuePair = ({
           name={name}
           triggerClassName="max-w-2/4"
         />
+      ) : valueType === 'select' ? (
+        <ModernSelect
+          value={value as string}
+          onValueChange={(value: string) => onChange?.(value)}
+          options={selectOptions || []}
+          triggerClassName="max-w-3/5"
+        />
       ) : (
-        <div className="max-w-3/5">{value}</div>
+        <div className="max-w-3/5">{value instanceof Date ? formatDate(value) : value}</div>
       )
     ) : valueType === 'boolean' ? (
       <span
@@ -84,7 +93,9 @@ export const KeyValuePair = ({
     ) : valueType === 'date' ? (
       <div className="max-w-3/5">{formatDate(value as string)}</div>
     ) : (
-      <div className="max-w-4/5">{value as string | number}</div>
+      <div className="max-w-4/5">
+        {value instanceof Date ? formatDate(value) : (value as string | number)}
+      </div>
     )}
   </div>
 );

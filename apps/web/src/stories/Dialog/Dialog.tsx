@@ -93,7 +93,7 @@ export const DetailDialog = ({
           'min-w-[60vw] sm:min-w-[65vw] md:min-w-[70vw] lg:min-w-[75vw]',
           'max-h-[90vh] sm:max-h-[85vh] md:max-h-[80vh]',
           'rounded-xl sm:rounded-2xl md:rounded-3xl',
-          'border-0',
+          'border-0 flex flex-col',
           'p-0 overflow-hidden transition-all duration-300 ease-in-out',
           className,
         )}
@@ -141,7 +141,7 @@ export const DetailDialog = ({
         </DialogHeader>
 
         {/* Content area with better spacing for sections */}
-        <div className="p-2 max-h-[70vh] overflow-y-auto bg-gray-50" style={{ zIndex: 1 }}>
+        <div className="h-auto overflow-y-auto px-4 pb-4">
           {typeof children === 'function' ? children(isEditing) : children}
         </div>
       </DialogContent>

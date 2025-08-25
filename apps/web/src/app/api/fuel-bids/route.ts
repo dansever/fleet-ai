@@ -64,6 +64,9 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
+  console.log('INSIDE POST ROUTE');
+  console.log('tenderId', tenderId);
+  console.log('body', body);
 
   const fuelBid = await createFuelBid({ ...body, orgId, tenderId });
   return NextResponse.json(fuelBid);

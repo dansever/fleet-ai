@@ -17,7 +17,6 @@ export * from './enums';
 
 // Shared timestamps
 const createdAt = timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
-
 const updatedAt = timestamp('updated_at', { withTimezone: true }).notNull().defaultNow();
 
 /* -------------------- Organizations -------------------- */
@@ -29,6 +28,7 @@ export const organizationsTable = pgTable('organizations', {
   aiTokensUsed: integer('ai_tokens_used').default(0),
   totalQuotesProcessed: integer('total_quotes_processed').default(0),
   totalRfqsProcessed: integer('total_rfqs_processed').default(0),
+
   // Timestamps
   createdAt,
   updatedAt,
@@ -43,6 +43,7 @@ export const orgSettingsTable = pgTable(
     autoApprovalLimit: integer('auto_approval_limit').default(10000),
     aiInsightsEnabled: boolean('ai_insights_enabled').default(true),
     agentsEnabled: boolean('agents_enabled').default(true),
+
     // Timestamps
     createdAt,
     updatedAt,
@@ -70,6 +71,7 @@ export const usersTable = pgTable(
     aiTokensUsed: integer('ai_tokens_used').default(0),
     totalQuotesProcessed: integer('total_quotes_processed').default(0),
     totalRfqsProcessed: integer('total_rfqs_processed').default(0),
+
     // Timestamps
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
     createdAt,
@@ -128,6 +130,7 @@ export const vendorsTable = pgTable(
     name: text('name').notNull(),
     internalRating: integer('internal_rating'),
     notes: text('notes'),
+
     // Timestamps
     createdAt,
     updatedAt,
@@ -352,8 +355,8 @@ export const serviceContractsTable = pgTable(
     vendorContactPhone: text('vendor_contact_phone'),
 
     // Contract Period
-    effectiveFrom: timestamp('effective_from', { withTimezone: true }),
-    effectiveTo: timestamp('effective_to', { withTimezone: true }),
+    effectiveFrom: date('effective_from'),
+    effectiveTo: date('effective_to'),
 
     // Document Management
     pdfUrl: text('pdf_url'),
@@ -393,7 +396,7 @@ export const serviceContractInvoicesTable = pgTable(
 
     // Invoice Information
     invoiceNumber: text('invoice_number').notNull(),
-    invoiceDate: timestamp('invoice_date', { withTimezone: true }),
+    invoiceDate: date('invoice_date'),
 
     // Vendor Information
     vendorName: text('vendor_name'),
@@ -478,7 +481,7 @@ export const fuelBidsTable = pgTable(
     // Bid Information
     title: text('title'),
     round: integer('round'),
-    bidSubmittedAt: timestamp('bid_submitted_at', { withTimezone: true }),
+    bidSubmittedAt: date('bid_submitted_at'),
 
     // Vendor Information
     vendorName: text('vendor_name'),
@@ -583,8 +586,8 @@ export const fuelContracts = pgTable(
     includesAirportFees: boolean('includes_airport_fees'),
 
     // Contract Period
-    effectiveFrom: timestamp('effective_from', { withTimezone: true }),
-    effectiveTo: timestamp('effective_to', { withTimezone: true }),
+    effectiveFrom: date('effective_from'),
+    effectiveTo: date('effective_to'),
 
     // Document Management
     pdfUrl: text('pdf_url'),
@@ -631,7 +634,7 @@ export const fuelContractInvoices = pgTable(
 
     // Invoice Information
     invoiceNumber: text('invoice_number').notNull(),
-    invoiceDate: timestamp('invoice_date', { withTimezone: true }),
+    invoiceDate: date('invoice_date'),
 
     // Vendor Information
     vendorName: text('vendor_name'),
