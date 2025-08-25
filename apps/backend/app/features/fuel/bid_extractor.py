@@ -5,7 +5,7 @@ from app.shared.schemas.response import ResponseEnvelope
 from app.utils import get_logger
 from app.services.document_extraction_service import process_document_extraction
 from app.schemas.fuel_bid import FuelBid
-from app.config.agent_variables import FUEL_BID_LLAMA_EXTRACTOR_AGENT_NAME
+from .config import FUEL_BID_LLAMA_EXTRACTOR_AGENT_NAME
 
 logger = get_logger(__name__)
 

@@ -1,25 +1,33 @@
 from typing import Any, Type
-from llama_cloud import ExtractConfig
+from llama_cloud import ChunkMode, ExtractConfig, ExtractMode, ExtractTarget
 from llama_cloud_services import LlamaExtract
 from llama_cloud.core.api_error import ApiError
 from app.utils import get_logger
-from app.core.agents.document_extractor.config import LLAMA_CLOUD_API_KEY, LLAMA_EXTRACT_PROJECT_ID, LLAMA_ORGANIZATION_ID
+from app.config import (
+    LLAMA_CLOUD_API_KEY, 
+    LLAMA_EXTRACT_PROJECT_ID, 
+    LLAMA_ORGANIZATION_ID, 
+    UPDATE_EXTRACTOR_SCHEMA_FLAG,
+    DEBUG_MODE_FLAG
+)
 
 logger = get_logger(__name__)
 
-def initialize_llama_extractor_agent(
+def get_llama_extractor(
+    # Required parameters
     agent_name: str,
     system_prompt: str,
     data_schema: Type[Any],
-    extraction_target: str = "PER_DOC",
-    extraction_mode: str = "BALANCED",
+    # Default values are set to the values used in the LlamaExtract API
+    extraction_mode: ExtractMode = ExtractMode.BALANCED,
+    extraction_target: ExtractTarget = ExtractTarget.PER_DOC,
     use_reasoning: bool = False,
     cite_sources: bool = False,
-    chunk_mode: str = "SECTION",
+    chunk_mode: ChunkMode = ChunkMode.PAGE,
     invalidate_cache: bool = False
 ):
     """
-    Get or create a generic document extraction agent for LlamaExtract.
+    Return an existing LlamaExtract agent by name or create one if missing.
     
     Args:
         agent_name: Name of the agent to create
@@ -33,7 +41,7 @@ def initialize_llama_extractor_agent(
         invalidate_cache: Whether to invalidate cache (default: False)
     
     Returns:
-        The extraction agent
+        The LlamaExtract agent instance.
     """
     
     # Validate required environment variables
@@ -44,7 +52,13 @@ def initialize_llama_extractor_agent(
     if not LLAMA_ORGANIZATION_ID:
         raise ValueError("LLAMA_ORGANIZATION_ID environment variable is not set")
     
-    logger.info(f"Initializing LlamaExtract client with project_id: {LLAMA_EXTRACT_PROJECT_ID}")
+    if DEBUG_MODE_FLAG:
+        logger.info(
+            "LlamaExtract config: target=%s mode=%s chunk_mode=%s reasoning=%s cite=%s invalidate_cache=%s",
+            extraction_target, extraction_mode, chunk_mode, use_reasoning, cite_sources, invalidate_cache
+        )    
+
+    logger.info("Initializing LlamaExtract client with project_id: %s", LLAMA_EXTRACT_PROJECT_ID)
     
     # Initialize the LlamaExtract client
     extractor = LlamaExtract(
@@ -52,27 +66,38 @@ def initialize_llama_extractor_agent(
         organization_id=LLAMA_ORGANIZATION_ID,
         project_id=LLAMA_EXTRACT_PROJECT_ID,
     )
-
     logger.info(f"Initialized LlamaExtract client")
 
+    # Try to fetch an existing agent
     try:
         agent = extractor.get_agent(name=agent_name)
-        if agent:
-            # Update schema
-            agent.data_schema = data_schema
-            logger.info(f"Using existing LlamaExtract agent: {agent_name}")
+        if agent is not None:
+            if UPDATE_EXTRACTOR_SCHEMA_FLAG:
+                agent.data_schema = data_schema
+                agent.save()
+                logger.info(f"Updated schema for agent: {agent_name}")
             return agent
     except ApiError as e:
         if e.status_code != 404:
             logger.error(f"Error getting agent {agent_name}: {e}")
             raise e  # Only suppress "not found" errors
 
+    # Create a new agent
     logger.info(f"Creating new LlamaExtract agent: {agent_name}")
     
-    extract_config = ExtractConfig(
-        extraction_target=extraction_target,
-        extraction_mode=extraction_mode,
+    # Create extraction configuration
+    config = ExtractConfig(
+        # Basic options
+        extraction_mode=extraction_mode, # BALANCED, MULTIMODAL, MULTIMODAL, PREMIUM
+        extraction_target=extraction_target, # PER_DOC, PER_PAGE
         system_prompt=system_prompt,
+
+        # Advanced options
+        chunk_mode=chunk_mode,     # PAGE, SECTION
+        high_resolution_mode=True,     # Enable for better OCR
+        invalidate_cache=False,        # Set to True to bypass cache
+
+        # Extensions (see Extensions page for details)
         use_reasoning=use_reasoning,
         cite_sources=cite_sources,
         chunk_mode=chunk_mode,
@@ -80,10 +105,11 @@ def initialize_llama_extractor_agent(
     )
 
     try:
+        # Create extraction agent with configuration
         agent = extractor.create_agent(
             name=agent_name,
-            config=extract_config,
             data_schema=data_schema,
+            config=config,
         )
         logger.info(f"Created new LlamaExtract agent: {agent_name}")
         return agent
