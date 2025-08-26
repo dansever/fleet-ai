@@ -1,18 +1,23 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Rfq } from '@/drizzle/types';
+import { convertPydanticToRfq, PydanticRFQ } from '@/features/rfqs/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
+import { createRandomRfq } from '@/features/rfqs/utils';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
+import { createRfq, extractRfq } from '@/services/technical/rfq-client';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { FileText, RefreshCw, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 interface RfqListProps {
   rfqs: Rfq[];
@@ -20,6 +25,7 @@ interface RfqListProps {
   selectedRfq: Rfq | null;
   onRefresh: () => void;
   isLoading: boolean;
+  isRefreshing?: boolean;
   InsertAddRfqButton?: boolean;
   onAddRfq?: (rfq: Rfq) => void;
 }
@@ -30,6 +36,7 @@ export default function RfqList({
   selectedRfq,
   onRefresh,
   isLoading,
+  isRefreshing = false,
   InsertAddRfqButton = true,
   onAddRfq,
 }: RfqListProps) {
@@ -38,9 +45,34 @@ export default function RfqList({
   const [showAddRfqDialog, setShowAddRfqDialog] = useState(false);
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const [uploadRfqPopoverOpen, setUploadRfqPopoverOpen] = useState(false);
 
   const openAddRfqDialog = () => {
     setShowAddRfqDialog(true);
+  };
+
+  const handleSendRfq = async (file: File) => {
+    try {
+      const rfq = await extractRfq(file);
+      onAddRfq?.(rfq as Rfq);
+      onRefresh();
+      toast.success('RFQ extracted successfully');
+    } catch (error) {
+      toast.error('Error extracting RFQ');
+    }
+    setUploadRfqPopoverOpen(false);
+  };
+
+  const handleSendRfqFile = async (file: File) => {
+    try {
+      const result = await extractRfq(file);
+      const convertedRfq = convertPydanticToRfq(result as PydanticRFQ);
+      const newRfq = await createRfq(convertedRfq);
+      onAddRfq?.(newRfq);
+      toast.success('RFQ extracted successfully');
+    } catch (error) {
+      toast.error('Error extracting RFQ');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -90,7 +122,7 @@ export default function RfqList({
 
   // Filter and sort RFQs
   const filteredRfqs = useMemo(() => {
-    let filtered = rfqs.filter((rfq: Rfq) => {
+    const filtered = rfqs.filter((rfq: Rfq) => {
       // Apply search filter
       const matchesSearch =
         !searchTerm ||
@@ -129,18 +161,42 @@ export default function RfqList({
             <Button
               intent="ghost"
               icon={RefreshCw}
-              className={`${isLoading && 'animate-spin'}`}
+              size="sm"
+              className={`${isRefreshing ? 'animate-spin' : ''}`}
               disabled={isLoading}
               onClick={onRefresh}
             />
             {InsertAddRfqButton && (
               <>
                 <FileUploadPopover
-                  triggerButtonIntent="secondary"
-                  triggerButtonText="Add RFQ"
-                  onSend={() => {}}
-                  onSecondaryUploadButton={openAddRfqDialog}
-                />
+                  open={uploadRfqPopoverOpen}
+                  onOpenChange={setUploadRfqPopoverOpen}
+                  triggerButtonIntent="add"
+                  triggerButtonText="Upload RFQ"
+                  buttonSize="sm"
+                  onSend={handleSendRfqFile}
+                >
+                  <div className="flex flex-col gap-2 text-sm">
+                    <Button
+                      intent="secondary"
+                      text="Manually Add RFQ"
+                      size="sm"
+                      onClick={openAddRfqDialog}
+                    />
+                    <Button
+                      intent="ghost"
+                      text="Or generate random RFQ"
+                      size="sm"
+                      className="text-gray-500"
+                      onClick={async () => {
+                        const rfq = await createRandomRfq();
+                        onAddRfq?.(rfq);
+                        console.log('Time to close the popover');
+                        setUploadRfqPopoverOpen(false);
+                      }}
+                    />
+                  </div>
+                </FileUploadPopover>
               </>
             )}
           </div>
@@ -199,28 +255,10 @@ export default function RfqList({
             )}
           >
             {isLoading && filteredRfqs.length === 0 ? (
-              // Loading state - show skeleton items
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <ListItemCard
-                    isSelected={false}
-                    onClick={() => {}}
-                    icon={<FileText />}
-                    iconBackground="from-gray-300 to-gray-200"
-                  >
-                    <div className="flex flex-row gap-2">
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                      </div>
-                      <div className="flex flex-col gap-2 items-end">
-                        <div className="h-6 w-16 bg-gray-200 rounded"></div>
-                      </div>
-                    </div>
-                  </ListItemCard>
-                </div>
-              ))
+              // Loading state - use LoadingComponent
+              <div className="flex justify-center py-8">
+                <LoadingComponent size="sm" text="Loading RFQs..." />
+              </div>
             ) : filteredRfqs.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 <FileText className="h-8 w-8 mx-auto mb-2" />

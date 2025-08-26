@@ -43,9 +43,13 @@ export const Default: Story = {
       children: createElement(
         'div',
         { className: 'space-y-3' },
-        createElement(KeyValuePair, { label: 'Name', value: 'Fleet AI Platform' }),
-        createElement(KeyValuePair, { label: 'Version', value: '1.0.0' }),
-        createElement(KeyValuePair, { label: 'Status', value: true }),
+        createElement(KeyValuePair, {
+          label: 'Name',
+          value: 'Fleet AI Platform',
+          valueType: 'string',
+        }),
+        createElement(KeyValuePair, { label: 'Version', value: '1.0.0', valueType: 'string' }),
+        createElement(KeyValuePair, { label: 'Status', value: true, valueType: 'boolean' }),
       ),
     }),
 };
@@ -68,10 +72,22 @@ export const CustomHeader: Story = {
       children: createElement(
         'div',
         { className: 'space-y-3' },
-        createElement(KeyValuePair, { label: 'Flight Number', value: 'FL-001' }),
-        createElement(KeyValuePair, { label: 'Departure', value: 'JFK Airport' }),
-        createElement(KeyValuePair, { label: 'Arrival', value: 'LAX Airport' }),
-        createElement(KeyValuePair, { label: 'On Time', value: true }),
+        createElement(KeyValuePair, {
+          label: 'Flight Number',
+          value: 'FL-001',
+          valueType: 'string',
+        }),
+        createElement(KeyValuePair, {
+          label: 'Departure',
+          value: 'JFK Airport',
+          valueType: 'string',
+        }),
+        createElement(KeyValuePair, {
+          label: 'Arrival',
+          value: 'LAX Airport',
+          valueType: 'string',
+        }),
+        createElement(KeyValuePair, { label: 'On Time', value: true, valueType: 'boolean' }),
       ),
     }),
 };
@@ -101,9 +117,9 @@ export const HeaderWithButton: Story = {
         createElement(
           'div',
           { className: 'space-y-3' },
-          createElement(KeyValuePair, { label: 'Total RFQs', value: 24 }),
-          createElement(KeyValuePair, { label: 'Active Tenders', value: 8 }),
-          createElement(KeyValuePair, { label: 'Completed', value: 16 }),
+          createElement(KeyValuePair, { label: 'Total RFQs', value: 24, valueType: 'string' }),
+          createElement(KeyValuePair, { label: 'Active Tenders', value: 8, valueType: 'string' }),
+          createElement(KeyValuePair, { label: 'Completed', value: 16, valueType: 'string' }),
         ),
         createElement(
           'div',
@@ -162,18 +178,21 @@ export const ComplexHeader: Story = {
           value: 'Boeing 737-800',
           editMode: true,
           onChange: (value) => console.log('Aircraft Type changed:', value),
+          valueType: 'string',
         }),
         createElement(KeyValuePair, {
           label: 'Capacity',
           value: 189,
           editMode: true,
           onChange: (value) => console.log('Capacity changed:', value),
+          valueType: 'string',
         }),
         createElement(KeyValuePair, {
           label: 'Active',
           value: true,
           editMode: true,
           onChange: (value) => console.log('Active changed:', value),
+          valueType: 'boolean',
         }),
       ),
     }),
@@ -191,9 +210,13 @@ export const MultipleSections: Story = {
         children: createElement(
           'div',
           { className: 'space-y-3' },
-          createElement(KeyValuePair, { label: 'Company', value: 'Fleet AI Corp' }),
-          createElement(KeyValuePair, { label: 'Founded', value: 2024 }),
-          createElement(KeyValuePair, { label: 'Public', value: false }),
+          createElement(KeyValuePair, {
+            label: 'Company',
+            value: 'Fleet AI Corp',
+            valueType: 'string',
+          }),
+          createElement(KeyValuePair, { label: 'Founded', value: 2024, valueType: 'number' }),
+          createElement(KeyValuePair, { label: 'Public', value: false, valueType: 'boolean' }),
         ),
       }),
       createElement(ContentSection, {
@@ -211,9 +234,21 @@ export const MultipleSections: Story = {
         children: createElement(
           'div',
           { className: 'space-y-3' },
-          createElement(KeyValuePair, { label: 'Email', value: 'contact@fleetai.com' }),
-          createElement(KeyValuePair, { label: 'Phone', value: '+1 (555) 123-4567' }),
-          createElement(KeyValuePair, { label: 'Address', value: '123 Aviation Blvd, Sky City' }),
+          createElement(KeyValuePair, {
+            label: 'Email',
+            value: 'contact@fleetai.com',
+            valueType: 'string',
+          }),
+          createElement(KeyValuePair, {
+            label: 'Phone',
+            value: '+1 (555) 123-4567',
+            valueType: 'string',
+          }),
+          createElement(KeyValuePair, {
+            label: 'Address',
+            value: '123 Aviation Blvd, Sky City',
+            valueType: 'string',
+          }),
         ),
       }),
       createElement(ContentSection, {
@@ -234,8 +269,16 @@ export const MultipleSections: Story = {
           createElement(
             'div',
             { className: 'space-y-3' },
-            createElement(KeyValuePair, { label: 'Total Services', value: 12 }),
-            createElement(KeyValuePair, { label: '24/7 Support', value: true }),
+            createElement(KeyValuePair, {
+              label: 'Total Services',
+              value: 12,
+              valueType: 'number',
+            }),
+            createElement(KeyValuePair, {
+              label: '24/7 Support',
+              value: true,
+              valueType: 'boolean',
+            }),
           ),
           createElement(
             'div',

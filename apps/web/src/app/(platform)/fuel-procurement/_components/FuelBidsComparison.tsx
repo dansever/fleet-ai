@@ -304,7 +304,7 @@ export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBids
     return null;
   }
 
-  const handleSendFile = async (file: File) => {
+  const handleSendFuelBidFile = async (file: File) => {
     try {
       const result = await extractFuelBid(file);
       const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
@@ -343,8 +343,7 @@ export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBids
             <FileUploadPopover
               triggerButtonIntent="primary"
               triggerButtonText="New Bid"
-              onSend={handleSendFile}
-              onManualUpload={() => {}}
+              onSend={handleSendFuelBidFile}
             />
           </div>
         </div>

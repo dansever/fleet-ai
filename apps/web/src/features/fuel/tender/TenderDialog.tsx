@@ -166,92 +166,90 @@ export default function TenderDialog({
           <ContentSection
             header="Tender Information"
             headerGradient="from-orange-500 to-orange-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Title"
-                  value={formData.title}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('title', value)}
-                  name="title"
-                />
-                <KeyValuePair
-                  label="Description"
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('description', value)}
-                  name="description"
-                  value={formData.description}
-                />
-                <KeyValuePair
-                  label="Fuel Type"
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('fuelType', value)}
-                  name="fuelType"
-                  value={formData.fuelType}
-                />
-                <KeyValuePair
-                  label="Base Currency"
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('baseCurrency', value)}
-                  name="baseCurrency"
-                  value={formData.baseCurrency}
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Title"
+                value={formData.title}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('title', value)}
+                name="title"
+              />
+              <KeyValuePair
+                label="Description"
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('description', value)}
+                name="description"
+                value={formData.description}
+              />
+              <KeyValuePair
+                label="Fuel Type"
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('fuelType', value)}
+                name="fuelType"
+                value={formData.fuelType}
+              />
+              <KeyValuePair
+                label="Base Currency"
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('baseCurrency', value)}
+                name="baseCurrency"
+                value={formData.baseCurrency}
+              />
+            </div>
+          </ContentSection>
           <ContentSection
             header="Configuration & Timeline"
             headerGradient="from-orange-500 to-orange-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Base UOM"
-                  value={formData.baseUom}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('baseUom', value)}
-                  name="baseUom"
-                />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Base UOM"
+                value={formData.baseUom}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('baseUom', value)}
+                name="baseUom"
+              />
 
-                <KeyValuePair
-                  label="Bidding Starts"
-                  value={formData.biddingStarts}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('biddingStarts', value)}
-                  name="biddingStarts"
-                />
-                <KeyValuePair
-                  label="Bidding Ends"
-                  value={formData.biddingEnds}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('biddingEnds', value)}
-                  name="biddingEnds"
-                />
-                <KeyValuePair
-                  label="Delivery Starts"
-                  value={formData.deliveryStarts}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('deliveryStarts', value)}
-                  name="deliveryStarts"
-                />
-                <KeyValuePair
-                  label="Delivery Ends"
-                  value={formData.deliveryEnds}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('deliveryEnds', value)}
-                  name="deliveryEnds"
-                />
-              </div>
-            }
-          />
+              <KeyValuePair
+                label="Bidding Starts"
+                value={formData.biddingStarts}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('biddingStarts', value)}
+                name="biddingStarts"
+              />
+              <KeyValuePair
+                label="Bidding Ends"
+                value={formData.biddingEnds}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('biddingEnds', value)}
+                name="biddingEnds"
+              />
+              <KeyValuePair
+                label="Delivery Starts"
+                value={formData.deliveryStarts}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('deliveryStarts', value)}
+                name="deliveryStarts"
+              />
+              <KeyValuePair
+                label="Delivery Ends"
+                value={formData.deliveryEnds}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('deliveryEnds', value)}
+                name="deliveryEnds"
+              />
+            </div>
+          </ContentSection>
         </div>
       )}
     </DetailDialog>

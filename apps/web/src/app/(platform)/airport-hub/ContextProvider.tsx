@@ -8,6 +8,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 export type LoadingState = {
   airports: boolean;
   contracts: boolean;
+  isRefreshing: boolean; // Indicates if current loading is from a refresh action
 };
 
 export type ErrorState = {
@@ -78,6 +79,7 @@ export default function AirportHubProvider({
   const [loading, setLoading] = useState<LoadingState>({
     airports: false,
     contracts: false,
+    isRefreshing: false,
   });
 
   // Error states
@@ -130,7 +132,7 @@ export default function AirportHubProvider({
         return;
       }
 
-      setLoading((prev) => ({ ...prev, contracts: true }));
+      setLoading((prev) => ({ ...prev, contracts: true, isRefreshing: false }));
       setErrors((prev) => ({ ...prev, contracts: null }));
 
       try {
@@ -154,7 +156,7 @@ export default function AirportHubProvider({
         setServiceContracts([]);
         setSelectedServiceContract(null);
       } finally {
-        setLoading((prev) => ({ ...prev, contracts: false }));
+        setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
       }
     };
 
@@ -209,7 +211,7 @@ export default function AirportHubProvider({
       return updated;
     });
 
-    setLoading((prev) => ({ ...prev, contracts: true }));
+    setLoading((prev) => ({ ...prev, contracts: true, isRefreshing: true }));
     setErrors((prev) => ({ ...prev, contracts: null }));
 
     try {
@@ -238,7 +240,7 @@ export default function AirportHubProvider({
         contracts: error instanceof Error ? error.message : 'Failed to refresh service contracts',
       }));
     } finally {
-      setLoading((prev) => ({ ...prev, contracts: false }));
+      setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
     }
   }, [selectedAirport, selectedServiceContract]);
 

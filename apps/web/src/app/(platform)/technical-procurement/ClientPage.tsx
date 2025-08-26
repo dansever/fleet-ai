@@ -1,18 +1,27 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
+import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
+import { Quote } from '@/drizzle/types';
+import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
+import { createRandomQuote } from '@/features/quotes/utils';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
+import { createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { ConfirmationPopover } from '@/stories/Popover/Popover';
+import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { CalendarIcon, FileText, Plus, RefreshCw, TrashIcon } from 'lucide-react';
+import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { CopyableText } from '../_components/CopyableText';
 import { useTechnicalProcurement } from './ContextProvider';
+import QuotesComparison from './_components/QuotesComparison';
 import RfqList from './_components/RfqList';
 
 export default function TechnicalProcurementClientPage() {
@@ -25,11 +34,59 @@ export default function TechnicalProcurementClientPage() {
     isLoading,
     refreshSelectedRfqQuotes,
     isLoadingQuotes,
+    isRefreshing,
+    isRefreshingQuotes,
     updateRfq,
     addRfq,
+    addQuote,
+    deleteRfqAndSelectAdjacent,
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const [uploadQuotePopoverOpen, setUploadQuotePopoverOpen] = useState(false);
+
+  const handleDeleteRfq = async () => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+    try {
+      await deleteRfqAndSelectAdjacent(selectedRfq.id);
+      toast.success('RFQ deleted successfully');
+    } catch (error) {
+      console.error('Error deleting RFQ:', error);
+      toast.error('Error deleting RFQ');
+    }
+  };
+
+  // Handle file upload for quote extraction
+  const handleQuoteFileUpload = async (file: File) => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+
+    try {
+      toast.info('Extracting quote from file...');
+
+      // Extract quote data from file
+      const extractedData = await extractQuote(file);
+
+      // Convert to database format
+      const convertedQuote = convertPydanticToQuote(extractedData as any, selectedRfq.id);
+
+      // Create the quote in the database
+      const newQuote = await createQuote(convertedQuote);
+
+      // Add to local cache
+      addQuote(newQuote);
+
+      toast.success('Quote extracted and added successfully');
+    } catch (error) {
+      console.error('Error extracting quote:', error);
+      toast.error('Error extracting quote from file');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,6 +130,7 @@ export default function TechnicalProcurementClientPage() {
       onRfqSelect={(rfq) => setSelectedRfqId(rfq.id)}
       onRefresh={refreshData}
       isLoading={isLoading}
+      isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
       onAddRfq={addRfq}
     />
@@ -114,6 +172,23 @@ export default function TechnicalProcurementClientPage() {
     </div>
   );
 
+  // Show loading component when initially loading (no data yet)
+  if (isLoading && rfqs.length === 0) {
+    return (
+      <PageLayout
+        sidebarContent={sidebarContent}
+        headerContent={
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-xl font-semibold">Technical Procurement</h1>
+            <p className="text-sm text-muted-foreground">Loading RFQs...</p>
+          </div>
+        }
+        mainContent={<LoadingComponent text="Loading Technical Procurement data..." />}
+        sidebarWidth={isCollapsed ? '20rem' : '18rem'}
+      />
+    );
+  }
+
   // Main content
   const mainContent = selectedRfq ? (
     <div className="space-y-6">
@@ -146,9 +221,7 @@ export default function TechnicalProcurementClientPage() {
                       }
                       intent="danger"
                       title="Delete RFQ"
-                      onConfirm={() => {}}
-                      open={false}
-                      onOpenChange={() => {}}
+                      onConfirm={handleDeleteRfq}
                     />
                   </div>
                 </div>
@@ -188,15 +261,12 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.partDescription || ''}
                   valueType="string"
                 />
-                <KeyValuePair
-                  label="Quantity"
-                  value={
-                    <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                      {selectedRfq.quantity || ''}
-                    </Badge>
-                  }
-                  valueType="number"
-                />
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-sm text-muted-foreground">Quantity</span>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                    {selectedRfq.quantity || ''}
+                  </Badge>
+                </div>
               </ContentSection>
               {/* Timeline */}
               <ContentSection
@@ -223,17 +293,18 @@ export default function TechnicalProcurementClientPage() {
                 />
 
                 <KeyValuePair
-                  label="Contact Name"
+                  label="Contact"
                   value={selectedRfq.vendorContactName || ''}
                   valueType="string"
                 />
+                {selectedRfq.vendorContactEmail && (
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-sm text-muted-foreground">Email</span>
+                    <CopyableText text={selectedRfq.vendorContactEmail} />
+                  </div>
+                )}
                 <KeyValuePair
-                  label="Contact Email"
-                  value={selectedRfq.vendorContactEmail || ''}
-                  valueType="string"
-                />
-                <KeyValuePair
-                  label="Contact Phone"
+                  label="Phone"
                   value={selectedRfq.vendorContactPhone || ''}
                   valueType="string"
                 />
@@ -248,14 +319,14 @@ export default function TechnicalProcurementClientPage() {
                     <div className="p-2 bg-orange-600 rounded-xl">
                       <CalendarIcon className="w-5 h-5 text-white" />
                     </div>
-                    <h4>TBD</h4>
+                    <h4>General</h4>
                   </div>
                 }
               >
                 <KeyValuePair
                   keyClassName="max-w-1/2"
                   label="Urgency"
-                  value={selectedRfq.urgencyLevel || ''}
+                  value={getUrgencyLevelDisplay(selectedRfq.urgencyLevel)}
                   valueType="string"
                 />
                 <KeyValuePair
@@ -276,68 +347,72 @@ export default function TechnicalProcurementClientPage() {
         )}
       </div>
 
-      {/* Quotes Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Received Quotes</CardTitle>
-              <CardDescription>
-                {selectedRfqQuotes.length} quote{selectedRfqQuotes.length !== 1 ? 's' : ''} received
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                intent="ghost"
-                onClick={refreshSelectedRfqQuotes}
-                disabled={isLoadingQuotes}
-                icon={RefreshCw}
-                className={`${isLoadingQuotes && 'animate-spin'}`}
-              />
-              <Button intent="secondary" text="Add Quote" icon={Plus} />
+      <Card className="bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-xl rounded-3xl overflow-hidden">
+        <CardHeader className="flex items-start justify-between">
+          {/* Left Side - Title and Description */}
+          <div>
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              Technical Quotes Comparison
+            </CardTitle>
+            <p className="text-slate-600 mt-2 ml-12">
+              Compare and evaluate quotes for{' '}
+              <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
+            </p>
+            <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
+              <span>Total Quotes: {selectedRfqQuotes.length}</span>
+              {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
+                <span>
+                  Pending: {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
+                </span>
+              )}
+              {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
+                <span className="text-green-600">
+                  Accepted:{' '}
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
+                </span>
+              )}
             </div>
           </div>
+          {/* Right Side - Actions */}
+          <div className="flex gap-2">
+            <Button
+              intent="ghost"
+              onClick={refreshSelectedRfqQuotes}
+              disabled={isLoadingQuotes}
+              icon={RefreshCw}
+              className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
+            />
+            <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
+            <FileUploadPopover
+              open={uploadQuotePopoverOpen}
+              onOpenChange={setUploadQuotePopoverOpen}
+              triggerButtonIntent="add"
+              triggerButtonText="Upload Quote"
+              onSend={() => {}}
+            >
+              <div className="flex flex-col gap-2 text-sm">
+                <Button intent="secondary" text="Manually Add Quote" size="sm" onClick={() => {}} />
+                <Button
+                  intent="ghost"
+                  text="Or generate random Quote"
+                  size="sm"
+                  className="text-gray-500"
+                  onClick={async () => {
+                    const quote = await createRandomQuote(selectedRfq.id);
+                    addQuote(quote);
+                    console.log('Time to close the popover');
+                    setUploadQuotePopoverOpen(false);
+                  }}
+                />
+              </div>
+            </FileUploadPopover>
+          </div>
         </CardHeader>
-        <CardContent>
-          {isLoadingQuotes ? (
-            <div className="text-center text-muted-foreground py-8">
-              <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
-              <p>Loading quotes...</p>
-            </div>
-          ) : selectedRfqQuotes.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <FileText className="h-8 w-8 mx-auto mb-2" />
-              <p>No quotes received yet</p>
-              <p className="text-sm">Quotes will appear here once vendors respond</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {selectedRfqQuotes.map((quote) => (
-                <Card key={quote.id} className="border-l-4 border-l-blue-500">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-medium">Quote #{quote.id.slice(0, 8)}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Received: {formatDate(new Date(quote.createdAt))}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">Price: TBD</p>
-                        <p className="text-sm text-muted-foreground">Valid until: TBD</p>
-                      </div>
-                    </div>
-                    <Separator className="my-3" />
-                    <div className="flex gap-2">
-                      <Button intent="secondary" size="sm" text="View Details" />
-                      <Button intent="secondary" size="sm" text="Compare" />
-                      <Button intent="secondary" size="sm" text="Approve" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <CardContent className="p-0">
+          <QuotesComparison isRefreshing={isRefreshingQuotes} />
         </CardContent>
       </Card>
     </div>

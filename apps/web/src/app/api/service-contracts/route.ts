@@ -1,4 +1,5 @@
 import {
+  createServiceContract,
   getServiceContract,
   getServiceContractsByAirport,
 } from '@/db/service-contracts/db-actions';
@@ -46,3 +47,28 @@ export async function GET(request: NextRequest) {
 }
 
 // TODO: Add PUT, POST, DELETE
+
+export async function POST(request: NextRequest) {
+  try {
+    // Authorize user
+    const { dbUser, error } = await authorizeUser();
+    if (error || !dbUser) return jsonError('Unauthorized', 401);
+
+    // Get orgId
+    const orgId = dbUser.orgId;
+    if (!orgId) return jsonError('User has no organization', 403);
+
+    // Get query params
+    const { searchParams } = new URL(request.url);
+    const airportId = searchParams.get('airportId');
+
+    // Get body
+    const body = await request.json();
+    const contract = await createServiceContract({ ...body, airportId, orgId });
+
+    return NextResponse.json(contract);
+  } catch (error) {
+    console.error('Error creating service contract:', error);
+    return jsonError('Failed to create service contract', 500);
+  }
+}

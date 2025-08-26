@@ -1,6 +1,6 @@
-import { Quote } from '@/drizzle/types';
+import { NewQuote, Quote } from '@/drizzle/types';
 import { currencies } from '@/lib/constants/currencies';
-import { createQuote, CreateQuoteData } from '@/services/technical/quote-client';
+import { createQuote } from '@/services/technical/quote-client';
 
 export async function createRandomQuote(rfqId: Quote['id']): Promise<Partial<Quote>> {
   const randomNumber = Math.floor(Math.random() * 1000000);
@@ -12,8 +12,6 @@ export async function createRandomQuote(rfqId: Quote['id']): Promise<Partial<Quo
 
   const generatedQuote = {
     rfqId,
-    createdAt: new Date(),
-    updatedAt: new Date(),
     rfqNumber: `RFQ-${Math.floor(Math.random() * 1000000)}`,
     direction: randomNumber % 2 === 0 ? 'sent' : 'received',
     vendorName: vendorNames[randomNumber % vendorNames.length],
@@ -23,14 +21,14 @@ export async function createRandomQuote(rfqId: Quote['id']): Promise<Partial<Quo
     vendorContactPhone: `${randomNumber.toString().slice(0, 3)}-${randomNumber.toString().slice(3, 6)}-${randomNumber.toString().slice(6, 9)}`,
     status: 'pending',
     receivedAt: new Date(),
-    currency: randomCurrency,
-    unitPrice: `${unitPrice}`,
-    totalPrice: `${totalPrice}`,
+    currency: randomCurrency.code,
+    unitPrice: unitPrice,
+    totalPrice: totalPrice,
     partNumber: `PART-${randomNumber}`,
     quantity,
     unit: 'EA',
     notes: `Notes ${randomNumber}`,
-  } as unknown as CreateQuoteData;
+  } as unknown as Partial<NewQuote>;
   const res = await createQuote(generatedQuote);
   return res;
 }

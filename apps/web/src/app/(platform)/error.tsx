@@ -15,7 +15,7 @@ type ErrorProps = {
 function classifyError(error: Error & { code?: string }) {
   const msg = (error?.message || '').toUpperCase();
   const name = (error?.name || '').toUpperCase();
-  const code = (error as any)?.code?.toString().toUpperCase();
+  const code = error?.code?.toString().toUpperCase();
 
   // DB connectivity buckets
   const isDb =

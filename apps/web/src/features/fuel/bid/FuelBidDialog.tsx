@@ -226,281 +226,271 @@ export default function FuelBidDialog({
           <ContentSection
             header="Bid Information & Timeline"
             headerGradient="from-pink-600 to-pink-400"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Title"
-                  value={formData.title}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('title', value)}
-                  name="title"
-                />
-                <KeyValuePair
-                  label="Round"
-                  value={formData.round}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('round', value)}
-                  name="round"
-                />
-                <KeyValuePair
-                  label="Bid Submitted At"
-                  value={formData.bidSubmittedAt}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('bidSubmittedAt', value)}
-                  name="bidSubmittedAt"
-                />
-                <KeyValuePair
-                  label="Decision"
-                  value={formData.decision}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('decision', value)}
-                  name="decision"
-                />
-                <KeyValuePair
-                  label="Decision Notes"
-                  value={formData.decisionNotes}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('decisionNotes', value)}
-                  name="decisionNotes"
-                />
-                <KeyValuePair
-                  label="AI Summary"
-                  value={formData.aiSummary}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('aiSummary', value)}
-                  name="aiSummary"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Title"
+                value={formData.title}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('title', value)}
+                name="title"
+              />
+              <KeyValuePair
+                label="Round"
+                value={formData.round}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('round', value)}
+                name="round"
+              />
+              <KeyValuePair
+                label="Bid Submitted At"
+                value={formData.bidSubmittedAt}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('bidSubmittedAt', value)}
+                name="bidSubmittedAt"
+              />
+              <KeyValuePair
+                label="Decision"
+                value={formData.decision}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('decision', value)}
+                name="decision"
+              />
+              <KeyValuePair
+                label="Decision Notes"
+                value={formData.decisionNotes}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('decisionNotes', value)}
+                name="decisionNotes"
+              />
+              <KeyValuePair
+                label="AI Summary"
+                value={formData.aiSummary}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('aiSummary', value)}
+                name="aiSummary"
+              />
+            </div>
+          </ContentSection>
 
           {/* Vendor Information */}
-          <ContentSection
-            header="Vendor Information"
-            headerGradient="from-pink-600 to-pink-400"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Vendor Name"
-                  value={formData.vendorName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorName', value)}
-                  name="vendorName"
-                />
-                <KeyValuePair
-                  label="Vendor Address"
-                  value={formData.vendorAddress}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorAddress', value)}
-                  name="vendorAddress"
-                />
-                <KeyValuePair
-                  label="Contact Name"
-                  value={formData.vendorContactName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactName', value)}
-                  name="vendorContactName"
-                />
-                <KeyValuePair
-                  label="Contact Email"
-                  value={formData.vendorContactEmail}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactEmail', value)}
-                  name="vendorContactEmail"
-                />
-                <KeyValuePair
-                  label="Contact Phone"
-                  value={formData.vendorContactPhone}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactPhone', value)}
-                  name="vendorContactPhone"
-                />
-                <KeyValuePair
-                  label="Vendor Comments"
-                  value={formData.vendorComments}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorComments', value)}
-                  name="vendorComments"
-                />
-              </div>
-            }
-          />
+          <ContentSection header="Vendor Information" headerGradient="from-pink-600 to-pink-400">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Vendor Name"
+                value={formData.vendorName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorName', value)}
+                name="vendorName"
+              />
+              <KeyValuePair
+                label="Vendor Address"
+                value={formData.vendorAddress}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorAddress', value)}
+                name="vendorAddress"
+              />
+              <KeyValuePair
+                label="Contact Name"
+                value={formData.vendorContactName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactName', value)}
+                name="vendorContactName"
+              />
+              <KeyValuePair
+                label="Contact Email"
+                value={formData.vendorContactEmail}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactEmail', value)}
+                name="vendorContactEmail"
+              />
+              <KeyValuePair
+                label="Contact Phone"
+                value={formData.vendorContactPhone}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactPhone', value)}
+                name="vendorContactPhone"
+              />
+              <KeyValuePair
+                label="Vendor Comments"
+                value={formData.vendorComments}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorComments', value)}
+                name="vendorComments"
+              />
+            </div>
+          </ContentSection>
 
           {/* Pricing Structure & Terms */}
           <ContentSection
             header="Pricing Structure & Terms"
             headerGradient="from-pink-600 to-pink-400"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Price Type"
-                  value={formData.priceType}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('priceType', value)}
-                  name="priceType"
-                />
-                <KeyValuePair
-                  label="Currency"
-                  value={formData.currency}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('currency', value)}
-                  name="currency"
-                />
-                <KeyValuePair
-                  label="Unit of Measure"
-                  value={formData.uom}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('uom', value)}
-                  name="uom"
-                />
-                <KeyValuePair
-                  label="Payment Terms"
-                  value={formData.paymentTerms}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('paymentTerms', value)}
-                  name="paymentTerms"
-                />
-                <KeyValuePair
-                  label="Base Unit Price"
-                  value={formData.baseUnitPrice}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('baseUnitPrice', value)}
-                  name="baseUnitPrice"
-                />
-                <KeyValuePair
-                  label="Index Name"
-                  value={formData.indexName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('indexName', value)}
-                  name="indexName"
-                />
-                <KeyValuePair
-                  label="Index Location"
-                  value={formData.indexLocation}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('indexLocation', value)}
-                  name="indexLocation"
-                />
-                <KeyValuePair
-                  label="Differential"
-                  value={formData.differential}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('differential', value)}
-                  name="differential"
-                />
-                <KeyValuePair
-                  label="Differential Unit"
-                  value={formData.differentialUnit}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('differentialUnit', value)}
-                  name="differentialUnit"
-                />
-                <KeyValuePair
-                  label="Formula Notes"
-                  value={formData.formulaNotes}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('formulaNotes', value)}
-                  name="formulaNotes"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Price Type"
+                value={formData.priceType}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('priceType', value)}
+                name="priceType"
+              />
+              <KeyValuePair
+                label="Currency"
+                value={formData.currency}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('currency', value)}
+                name="currency"
+              />
+              <KeyValuePair
+                label="Unit of Measure"
+                value={formData.uom}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('uom', value)}
+                name="uom"
+              />
+              <KeyValuePair
+                label="Payment Terms"
+                value={formData.paymentTerms}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('paymentTerms', value)}
+                name="paymentTerms"
+              />
+              <KeyValuePair
+                label="Base Unit Price"
+                value={formData.baseUnitPrice}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('baseUnitPrice', value)}
+                name="baseUnitPrice"
+              />
+              <KeyValuePair
+                label="Index Name"
+                value={formData.indexName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('indexName', value)}
+                name="indexName"
+              />
+              <KeyValuePair
+                label="Index Location"
+                value={formData.indexLocation}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('indexLocation', value)}
+                name="indexLocation"
+              />
+              <KeyValuePair
+                label="Differential"
+                value={formData.differential}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('differential', value)}
+                name="differential"
+              />
+              <KeyValuePair
+                label="Differential Unit"
+                value={formData.differentialUnit}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('differentialUnit', value)}
+                name="differentialUnit"
+              />
+              <KeyValuePair
+                label="Formula Notes"
+                value={formData.formulaNotes}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('formulaNotes', value)}
+                name="formulaNotes"
+              />
+            </div>
+          </ContentSection>
 
           {/* Fees & Specifications */}
-          <ContentSection
-            header="Fees & Specifications"
-            headerGradient="from-pink-600 to-pink-400"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Into Plane Fee"
-                  value={formData.intoPlaneFee}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('intoPlaneFee', value)}
-                  name="intoPlaneFee"
-                />
-                <KeyValuePair
-                  label="Handling Fee"
-                  value={formData.handlingFee}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('handlingFee', value)}
-                  name="handlingFee"
-                />
-                <KeyValuePair
-                  label="Other Fee"
-                  value={formData.otherFee}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('otherFee', value)}
-                  name="otherFee"
-                />
-                <KeyValuePair
-                  label="Other Fee Description"
-                  value={formData.otherFeeDescription}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('otherFeeDescription', value)}
-                  name="otherFeeDescription"
-                />
-                <KeyValuePair
-                  label="Includes Taxes"
-                  value={formData.includesTaxes}
-                  valueType="boolean"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('includesTaxes', value)}
-                  name="includesTaxes"
-                />
-                <KeyValuePair
-                  label="Includes Airport Fees"
-                  value={formData.includesAirportFees}
-                  valueType="boolean"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('includesAirportFees', value)}
-                  name="includesAirportFees"
-                />
-                <KeyValuePair
-                  label="Density at 15°C"
-                  value={formData.densityAt15C}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('densityAt15C', value)}
-                  name="densityAt15C"
-                />
-                <KeyValuePair
-                  label="Normalized USD per USG"
-                  value={formData.normalizedUnitPriceUsdPerUsg}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('normalizedUnitPriceUsdPerUsg', value)}
-                  name="normalizedUnitPriceUsdPerUsg"
-                />
-              </div>
-            }
-          />
+          <ContentSection header="Fees & Specifications" headerGradient="from-pink-600 to-pink-400">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Into Plane Fee"
+                value={formData.intoPlaneFee}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('intoPlaneFee', value)}
+                name="intoPlaneFee"
+              />
+              <KeyValuePair
+                label="Handling Fee"
+                value={formData.handlingFee}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('handlingFee', value)}
+                name="handlingFee"
+              />
+              <KeyValuePair
+                label="Other Fee"
+                value={formData.otherFee}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('otherFee', value)}
+                name="otherFee"
+              />
+              <KeyValuePair
+                label="Other Fee Description"
+                value={formData.otherFeeDescription}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('otherFeeDescription', value)}
+                name="otherFeeDescription"
+              />
+              <KeyValuePair
+                label="Includes Taxes"
+                value={formData.includesTaxes}
+                valueType="boolean"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('includesTaxes', value)}
+                name="includesTaxes"
+              />
+              <KeyValuePair
+                label="Includes Airport Fees"
+                value={formData.includesAirportFees}
+                valueType="boolean"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('includesAirportFees', value)}
+                name="includesAirportFees"
+              />
+              <KeyValuePair
+                label="Density at 15°C"
+                value={formData.densityAt15C}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('densityAt15C', value)}
+                name="densityAt15C"
+              />
+              <KeyValuePair
+                label="Normalized USD per USG"
+                value={formData.normalizedUnitPriceUsdPerUsg}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('normalizedUnitPriceUsdPerUsg', value)}
+                name="normalizedUnitPriceUsdPerUsg"
+              />
+            </div>
+          </ContentSection>
         </div>
       )}
     </DetailDialog>

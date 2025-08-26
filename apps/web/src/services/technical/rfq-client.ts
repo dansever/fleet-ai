@@ -1,5 +1,5 @@
 import type { NewRfq, Rfq } from '@/drizzle/types';
-import { api } from '../api-client';
+import { api, backendApi } from '../api-client';
 
 // Client-side type for creating RFQs (orgId and userId are handled server-side)
 export type CreateRfqData = Omit<
@@ -29,7 +29,7 @@ export async function getRfqs(): Promise<Rfq[]> {
 /**
  * Create a new RFQ
  */
-export async function createRfq(data: Partial<CreateRfqData>): Promise<Rfq> {
+export async function createRfq(data: NewRfq): Promise<Rfq> {
   const res = await api.post('/api/rfqs', data);
   return res.data;
 }
@@ -37,7 +37,7 @@ export async function createRfq(data: Partial<CreateRfqData>): Promise<Rfq> {
 /**
  * Update an existing RFQ
  */
-export async function updateRfq(id: Rfq['id'], data: Partial<CreateRfqData>): Promise<Rfq> {
+export async function updateRfq(id: Rfq['id'], data: Partial<NewRfq>): Promise<Rfq> {
   const res = await api.put(`/api/rfqs?id=${id}`, data);
   return res.data;
 }
@@ -47,4 +47,21 @@ export async function updateRfq(id: Rfq['id'], data: Partial<CreateRfqData>): Pr
  */
 export async function deleteRfq(id: Rfq['id']): Promise<void> {
   await api.delete(`/api/rfqs?id=${id}`);
+}
+
+/**
+ * Extract RFQ from file
+ */
+export async function extractRfq(file: File): Promise<unknown> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await backendApi.post('/api/v1/technical/rfqs/extract', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  // The backend returns a ResponseEnvelope, so extract the data
+  return res.data.data;
 }

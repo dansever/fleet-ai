@@ -31,7 +31,7 @@ export const ModernInput = ({
   type?: string;
   className?: string;
   icon?: React.ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => (
   <div className="relative">
     {icon && <div className="absolute left-3 top-1/2 transform -translate-y-1/2">{icon}</div>}
@@ -57,7 +57,7 @@ export const SearchInput = ({
 }: {
   placeholder?: string;
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => (
   <div className="relative w-full">
     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -79,7 +79,7 @@ export const PasswordInput = ({
 }: {
   placeholder?: string;
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -111,7 +111,7 @@ export const ModernTextarea = ({
 }: {
   placeholder?: string;
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => (
   <Textarea
     placeholder={placeholder}
@@ -135,7 +135,7 @@ export const ModernSelect = ({
   placeholder?: string;
   options: { value: string; label: React.ReactNode }[];
   triggerClassName?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   const selected = options.find((opt) => opt.value === props.value);
 
@@ -167,7 +167,7 @@ export const ModernSwitch = ({
   ...props
 }: {
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => <Switch {...props} className="cursor-pointer scale-125" />;
 
 // DatePicker component with modern styling
@@ -184,7 +184,9 @@ export const DatePicker = ({
   onChange?: (value: string) => void;
   fromYear?: number;
   toYear?: number;
-  [key: string]: any;
+  triggerClassName?: string;
+  calendarClassName?: string;
+  [key: string]: unknown;
 }) => {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(value ? new Date(value) : undefined);

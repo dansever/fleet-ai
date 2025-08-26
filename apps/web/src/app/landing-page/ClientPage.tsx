@@ -60,7 +60,7 @@ export default function LandingPageClient() {
               <div className="space-y-2 pt-6">
                 <h3 className="font-bold">Platform-Specific Adaptation</h3>
                 <p className="text-sm text-muted-foreground">
-                  Automatically tailor content for each platform's unique style, format, and
+                  Automatically tailor content for each platform&lsquo;s unique style, format, and
                   audience expectations.
                 </p>
               </div>

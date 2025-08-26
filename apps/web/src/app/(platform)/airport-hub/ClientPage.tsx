@@ -7,6 +7,8 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { useState } from 'react';
 import AirportList from '../_components/AirportList';
 import { useAirportHub } from './ContextProvider';
+import ServiceContracts from './subpages/ServiceContracts';
+import ManageAirport from './subpages/manageAirport';
 
 type TabValue = 'service-contracts' | 'contacts-and-agreements';
 
@@ -16,6 +18,7 @@ export default function AirportHubClientPage() {
     setAirports,
     selectedAirport,
     setSelectedAirport,
+    addAirport,
     loading,
     errors,
     clearError,
@@ -43,6 +46,7 @@ export default function AirportHubClientPage() {
           onAirportSelect={setSelectedAirport}
           selectedAirport={selectedAirport}
           InsertAddAirportButton={true}
+          onAirportAdd={addAirport}
         />
       }
       headerContent={
@@ -76,24 +80,27 @@ function MainContentSection() {
   return (
     <Tabs
       tabs={[
-        { label: 'Service Contracts', value: 'service-contracts' },
-        { label: 'Contacts & Agreements', value: 'contacts-and-agreements' },
+        { label: 'Service Agreements', value: 'service-agreements' },
+        { label: 'Contacts & Providers', value: 'contacts-and-providers' },
+        { label: 'Manage Airport', value: 'manage-airport' },
       ]}
       selectedTab={selectedTab}
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
-      children={
-        <>
-          <TabsContent value="service-contracts">{/* <ServiceContractsPage /> */}</TabsContent>
-          <TabsContent value="contacts-and-agreements">
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <div className="text-center">
-                <h3 className="text-lg font-medium mb-2">Manage Contracts</h3>
-                <p className="text-sm">Contract management functionality coming soon...</p>
-              </div>
-            </div>
-          </TabsContent>
-        </>
-      }
-    />
+    >
+      <TabsContent value="service-agreements">
+        <ServiceContracts />
+      </TabsContent>
+      <TabsContent value="contacts-and-providers">
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">Manage Contracts</h3>
+            <p className="text-sm">Contract management functionality coming soon...</p>
+          </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="manage-airport">
+        <ManageAirport />
+      </TabsContent>
+    </Tabs>
   );
 }

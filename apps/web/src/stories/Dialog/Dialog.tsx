@@ -20,7 +20,7 @@ export interface DetailDialogProps {
   className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSave?: (data: any) => void;
+  onSave?: (data: unknown) => void;
   onCancel?: () => void;
   headerGradient?: string;
   initialEditing?: boolean;

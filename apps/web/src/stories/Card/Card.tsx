@@ -12,6 +12,23 @@ export interface BaseCardProps {
 }
 
 // Feature Card - For showcasing features or services
+export const BaseCard = ({
+  title,
+  description,
+  className,
+  children,
+}: {
+  title: string;
+  description: string;
+  className?: string;
+  children?: React.ReactNode;
+}) => (
+  <Card className={cn('rounded-3xl border-1 overflow-hidden', className)}>
+    <CardContent>{children}</CardContent>
+  </Card>
+);
+
+// Feature Card - For showcasing features or services
 export const FeatureCard = ({
   title,
   description,
@@ -45,6 +62,7 @@ export const ProjectCard = ({
   progress,
   isNew = false,
   className,
+  children,
 }: {
   title: string;
   description: string;
@@ -53,6 +71,7 @@ export const ProjectCard = ({
   progress?: number;
   isNew?: boolean;
   className?: string;
+  children?: React.ReactNode;
 }) => (
   <Card
     className={cn(
@@ -77,9 +96,7 @@ export const ProjectCard = ({
           <CardTitle className="text-lg font-bold">{title}</CardTitle>
           <CardDescription className="mt-1">{description}</CardDescription>
         </div>
-        <Badge variant="outline" className="rounded-full text-xs">
-          {category}
-        </Badge>
+        {children}
       </div>
     </CardHeader>
     {progress !== undefined && (
