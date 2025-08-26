@@ -18,6 +18,7 @@ interface AirportListProps {
   onAirportSelect: (airport: Airport) => void;
   selectedAirport: Airport | null;
   InsertAddAirportButton: boolean;
+  onAirportAdd?: (airport: Airport) => void;
 }
 
 export default function AirportList({
@@ -25,6 +26,7 @@ export default function AirportList({
   onAirportSelect,
   selectedAirport,
   InsertAddAirportButton = false,
+  onAirportAdd,
 }: AirportListProps) {
   const { map: countryMap, isLoading: countryMapLoading } = useCountryMap();
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,7 +86,18 @@ export default function AirportList({
         <div className="flex flex-row justify-between items-center">
           <h1 className="font-light italic">Airports</h1>
           {InsertAddAirportButton && (
-            <AirportDialog airport={null} DialogType="add" onChange={() => {}} buttonSize="sm" />
+            <AirportDialog
+              airport={null}
+              DialogType="add"
+              onChange={(newAirport) => {
+                if (onAirportAdd) {
+                  onAirportAdd(newAirport);
+                  // Automatically select the newly created airport
+                  onAirportSelect(newAirport);
+                }
+              }}
+              buttonSize="sm"
+            />
           )}
         </div>
         <p className="text-sm text-muted-foreground">{airports.length} Airports</p>

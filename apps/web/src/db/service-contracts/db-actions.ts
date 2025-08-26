@@ -51,12 +51,16 @@ export const updateServiceContract = async (
 };
 
 /**
- *
+ * Create a service contract
+ * @param airportId
  * @param data
  * @returns
  */
 export const createServiceContract = async (data: NewServiceContract): Promise<ServiceContract> => {
-  const result = await db.insert(serviceContractsTable).values(data).returning();
+  const result = await db
+    .insert(serviceContractsTable)
+    .values({ ...data })
+    .returning();
   return result[0];
 };
 

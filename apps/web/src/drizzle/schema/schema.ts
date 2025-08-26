@@ -12,7 +12,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { decisionEnum, OrderDirectionEnum, statusEnum } from './enums';
+import { ContractTypeEnum, decisionEnum, OrderDirectionEnum, statusEnum } from './enums';
 export * from './enums';
 
 // Shared timestamps
@@ -344,6 +344,7 @@ export const serviceContractsTable = pgTable(
 
     // Service Contract Information
     title: text('title').notNull(),
+    contractType: ContractTypeEnum('contract_type'),
     notes: text('notes'),
 
     // Vendor Information
