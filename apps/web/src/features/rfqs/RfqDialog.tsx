@@ -7,9 +7,9 @@ import {
   UrgencyLevel,
   urgencyLevelEnum,
 } from '@/drizzle/schema/enums';
-import type { NewRfq, Rfq } from '@/drizzle/types';
+import type { Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
-import { createRfq, updateRfq } from '@/services/technical/rfq-client';
+import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';
 import { Button, ButtonProps } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -105,7 +105,7 @@ export default function RfqDialog({
 
       if (isAdd) {
         // Create new RFQ (orgId and userId are handled server-side)
-        const createData: Partial<NewRfq> = {
+        const createData: CreateRfqData = {
           direction: serializedFormData.direction,
           rfqNumber: serializedFormData.rfqNumber,
           vendorName: serializedFormData.vendorName,
@@ -127,7 +127,7 @@ export default function RfqDialog({
           selectedQuoteId: null,
           sentAt: serializedFormData.sentAt,
         };
-        savedRfq = await createRfq(createData as NewRfq);
+        savedRfq = await createRfq(createData);
         toast.success('RFQ created successfully');
       } else {
         // Update existing RFQ
