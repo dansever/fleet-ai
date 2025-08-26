@@ -1,10 +1,11 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Rfq } from '@/drizzle/types';
-import { convertPydanticToRfq } from '@/features/rfqs/pydanticConverter';
+import { convertPydanticToRfq, PydanticRFQ } from '@/features/rfqs/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { createRandomRfq } from '@/features/rfqs/utils';
 import { formatDate } from '@/lib/core/formatters';
@@ -24,6 +25,7 @@ interface RfqListProps {
   selectedRfq: Rfq | null;
   onRefresh: () => void;
   isLoading: boolean;
+  isRefreshing?: boolean;
   InsertAddRfqButton?: boolean;
   onAddRfq?: (rfq: Rfq) => void;
 }
@@ -34,6 +36,7 @@ export default function RfqList({
   selectedRfq,
   onRefresh,
   isLoading,
+  isRefreshing = false,
   InsertAddRfqButton = true,
   onAddRfq,
 }: RfqListProps) {
@@ -51,7 +54,7 @@ export default function RfqList({
   const handleSendRfq = async (file: File) => {
     try {
       const rfq = await extractRfq(file);
-      onAddRfq?.(rfq);
+      onAddRfq?.(rfq as Rfq);
       onRefresh();
       toast.success('RFQ extracted successfully');
     } catch (error) {
@@ -63,7 +66,7 @@ export default function RfqList({
   const handleSendRfqFile = async (file: File) => {
     try {
       const result = await extractRfq(file);
-      const convertedRfq = convertPydanticToRfq(result);
+      const convertedRfq = convertPydanticToRfq(result as PydanticRFQ);
       const newRfq = await createRfq(convertedRfq);
       onAddRfq?.(newRfq);
       toast.success('RFQ extracted successfully');
@@ -159,7 +162,7 @@ export default function RfqList({
               intent="ghost"
               icon={RefreshCw}
               size="sm"
-              className={`${isLoading && 'animate-spin'}`}
+              className={`${isRefreshing ? 'animate-spin' : ''}`}
               disabled={isLoading}
               onClick={onRefresh}
             />
@@ -252,28 +255,10 @@ export default function RfqList({
             )}
           >
             {isLoading && filteredRfqs.length === 0 ? (
-              // Loading state - show skeleton items
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <ListItemCard
-                    isSelected={false}
-                    onClick={() => {}}
-                    icon={<FileText />}
-                    iconBackground="from-gray-300 to-gray-200"
-                  >
-                    <div className="flex flex-row gap-2">
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                      </div>
-                      <div className="flex flex-col gap-2 items-end">
-                        <div className="h-6 w-16 bg-gray-200 rounded"></div>
-                      </div>
-                    </div>
-                  </ListItemCard>
-                </div>
-              ))
+              // Loading state - use LoadingComponent
+              <div className="flex justify-center py-8">
+                <LoadingComponent size="sm" text="Loading RFQs..." />
+              </div>
             ) : filteredRfqs.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 <FileText className="h-8 w-8 mx-auto mb-2" />

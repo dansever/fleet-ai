@@ -7,7 +7,7 @@ import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { Pencil, Plus } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -16,15 +16,21 @@ export default function QuoteDialog({
   rfqId,
   onChange,
   DialogType = 'view',
-  triggerClassName,
-  buttonSize = 'md',
+  triggerButtonIntent = 'info',
+  triggerButtonText,
+  triggerButtonIcon,
+  TriggerButtonSize = 'md',
+  triggerButtonClassName,
 }: {
   quote: Quote | null;
   rfqId?: Rfq['id']; // Required when isNew is true
   onChange: (quote: Quote) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerClassName?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
+  triggerButtonIntent?: 'add' | 'primary' | 'secondary' | 'danger' | 'info' | 'success' | 'warning';
+  triggerButtonText?: string;
+  triggerButtonIcon?: LucideIcon;
+  TriggerButtonSize?: 'sm' | 'md' | 'lg';
+  triggerButtonClassName?: string;
 }) {
   const [formData, setFormData] = useState({
     rfqNumber: quote?.rfqNumber || null,
@@ -254,11 +260,6 @@ export default function QuoteDialog({
     }
   };
 
-  const triggerText = isAdd
-    ? 'Add Quote'
-    : isEdit
-      ? 'Edit'
-      : `View ${quote?.partNumber || 'Quote'}`;
   const dialogTitle = isAdd ? 'Add New Quote' : quote?.partNumber || 'Quote Details';
   const saveButtonText = isAdd ? 'Create Quote' : 'Save Changes';
 
@@ -266,11 +267,11 @@ export default function QuoteDialog({
     <DetailDialog
       trigger={
         <Button
-          intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
-          text={triggerText}
-          icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
-          size={buttonSize}
-          className={triggerClassName}
+          intent={triggerButtonIntent}
+          text={triggerButtonText}
+          icon={triggerButtonIcon}
+          size={TriggerButtonSize}
+          className={triggerButtonClassName}
         />
       }
       headerGradient="from-green-500 to-green-500"

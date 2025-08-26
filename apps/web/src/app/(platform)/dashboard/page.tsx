@@ -1,31 +1,31 @@
-import { db } from '@/drizzle/db';
-import { airportsTable } from '@/drizzle/schema/schema';
+import { getAirportsByOrgId } from '@/db/airports/db-actions';
+import { getRfqsByOrg } from '@/db/rfqs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { eq } from 'drizzle-orm';
-import { redirect } from 'next/navigation';
 import DashboardClientPage from './ClientPage';
 
 export default async function DashboardPage() {
   const { dbUser, error } = await authorizeUser();
-
-  if (error || !dbUser || !dbUser.orgId) {
-    redirect('/sign-in');
+  if (error || !dbUser) {
+    return <div>Error: {error}</div>;
+  }
+  if (!dbUser.orgId) {
+    return <div>Error: User has no organization</div>;
   }
 
-  const airports = await db
-    .select()
-    .from(airportsTable)
-    .where(eq(airportsTable.orgId, dbUser.orgId));
+  // Fetch RFQs and quotes in parallel
+  const [rfqs, airports] = await Promise.all([
+    getRfqsByOrg(dbUser.orgId),
+    getAirportsByOrgId(dbUser.orgId),
+  ]);
 
   return (
     <PageLayout
       sidebarContent={null}
-      headerContent={<h1>Dashboard</h1>}
+      headerContent={<h1>Hello {dbUser?.displayName}</h1>}
       mainContent={
         <div>
-          {airports.map((airport) => airport.name)}
-          <DashboardClientPage />
+          <DashboardClientPage airports={airports} rfqs={rfqs} />
         </div>
       }
     />

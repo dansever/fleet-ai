@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { getStatusDisplay } from '@/drizzle/schema/enums';
 import { Quote } from '@/drizzle/types';
+import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
@@ -26,7 +27,6 @@ import { CopyableText } from '../../_components/CopyableText';
 import { useTechnicalProcurement } from '../ContextProvider';
 
 interface QuotesComparisonProps {
-  onRefresh?: () => void;
   isRefreshing?: boolean;
 }
 
@@ -106,7 +106,15 @@ const quoteColumns: Column<Quote>[] = [
         />
         <div className="grid grid-cols-2 gap-2">
           <ConfirmationPopover
-            trigger={<Button intent="danger" icon={Trash} size="sm" onClick={() => {}} />}
+            trigger={
+              <Button
+                intent="secondary"
+                icon={Trash}
+                size="sm"
+                onClick={() => {}}
+                className="hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+              />
+            }
             intent="danger"
             title="Delete Quote"
             description="Are you sure you want to delete this quote?"
@@ -114,7 +122,14 @@ const quoteColumns: Column<Quote>[] = [
               console.log('delete quote');
             }}
           />
-          <Button intent="info" icon={Eye} size="sm" onClick={() => {}} />
+          <QuoteDialog
+            quote={quote}
+            onChange={() => {}}
+            DialogType="view"
+            triggerButtonIntent="secondary"
+            triggerButtonIcon={Eye}
+            TriggerButtonSize="sm"
+          />
         </div>
       </div>
     ),
@@ -337,8 +352,8 @@ const quoteColumns: Column<Quote>[] = [
   },
 ];
 
-export default function QuotesComparison() {
-  const { selectedRfq, selectedRfqQuotes } = useTechnicalProcurement();
+export default function QuotesComparison({ isRefreshing = false }: QuotesComparisonProps) {
+  const { selectedRfq, selectedRfqQuotes, isLoadingQuotes } = useTechnicalProcurement();
 
   if (!selectedRfq) {
     return (
@@ -353,27 +368,60 @@ export default function QuotesComparison() {
     );
   }
 
-  return selectedRfqQuotes.length === 0 ? (
-    <div className="flex items-center justify-center py-16">
-      <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <FileText className="w-8 h-8 text-blue-500" />
+  // Show loading message when initially loading quotes (no existing data) and NOT refreshing
+  if (isLoadingQuotes && selectedRfqQuotes.length === 0 && !isRefreshing) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <FileText className="w-8 h-8 text-blue-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Loading quotes...</h3>
+          <p className="text-slate-600 mb-4">Fetching quote data for comparison</p>
         </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No quotes yet</h3>
-        <p className="text-slate-600 mb-4">Upload quote documents to start comparing offers</p>
       </div>
-    </div>
-  ) : (
-    <div className="p-6">
-      <DataTable
-        data={selectedRfqQuotes}
-        columns={quoteColumns}
-        searchable={true}
-        filterable={true}
-        pagination={true}
-        pageSize={10}
-        onRowClick={() => {}}
-      />
+    );
+  }
+
+  // Show "no quotes" message only when not loading/refreshing and no quotes exist
+  if (selectedRfqQuotes.length === 0 && !isLoadingQuotes && !isRefreshing) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 text-blue-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">No quotes yet</h3>
+          <p className="text-slate-600 mb-4">Upload quote documents to start comparing offers</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show table with subtle refreshing indicator
+  return (
+    <div className="p-6 relative">
+      {isRefreshing && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full shadow-md">
+            <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            Refreshing quotes...
+          </div>
+        </div>
+      )}
+      <div
+        className={`${isRefreshing ? 'opacity-50' : 'opacity-100'} transition-opacity duration-200`}
+      >
+        <DataTable
+          data={selectedRfqQuotes}
+          columns={quoteColumns}
+          searchable={true}
+          filterable={true}
+          pagination={true}
+          pageSize={10}
+          onRowClick={() => {}}
+        />
+      </div>
     </div>
   );
 }

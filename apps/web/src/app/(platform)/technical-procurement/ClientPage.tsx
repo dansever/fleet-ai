@@ -1,5 +1,6 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -15,7 +16,7 @@ import { ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { CalendarIcon, FileText, Package, RefreshCw, TrashIcon } from 'lucide-react';
+import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { CopyableText } from '../_components/CopyableText';
@@ -33,6 +34,8 @@ export default function TechnicalProcurementClientPage() {
     isLoading,
     refreshSelectedRfqQuotes,
     isLoadingQuotes,
+    isRefreshing,
+    isRefreshingQuotes,
     updateRfq,
     addRfq,
     addQuote,
@@ -70,7 +73,7 @@ export default function TechnicalProcurementClientPage() {
       const extractedData = await extractQuote(file);
 
       // Convert to database format
-      const convertedQuote = convertPydanticToQuote(extractedData, selectedRfq.id);
+      const convertedQuote = convertPydanticToQuote(extractedData as any, selectedRfq.id);
 
       // Create the quote in the database
       const newQuote = await createQuote(convertedQuote);
@@ -127,6 +130,7 @@ export default function TechnicalProcurementClientPage() {
       onRfqSelect={(rfq) => setSelectedRfqId(rfq.id)}
       onRefresh={refreshData}
       isLoading={isLoading}
+      isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
       onAddRfq={addRfq}
     />
@@ -167,6 +171,23 @@ export default function TechnicalProcurementClientPage() {
       <p className="text-sm text-muted-foreground">Select an RFQ to view details</p>
     </div>
   );
+
+  // Show loading component when initially loading (no data yet)
+  if (isLoading && rfqs.length === 0) {
+    return (
+      <PageLayout
+        sidebarContent={sidebarContent}
+        headerContent={
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-xl font-semibold">Technical Procurement</h1>
+            <p className="text-sm text-muted-foreground">Loading RFQs...</p>
+          </div>
+        }
+        mainContent={<LoadingComponent text="Loading Technical Procurement data..." />}
+        sidebarWidth={isCollapsed ? '20rem' : '18rem'}
+      />
+    );
+  }
 
   // Main content
   const mainContent = selectedRfq ? (
@@ -240,15 +261,12 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.partDescription || ''}
                   valueType="string"
                 />
-                <KeyValuePair
-                  label="Quantity"
-                  value={
-                    <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                      {selectedRfq.quantity || ''}
-                    </Badge>
-                  }
-                  valueType="number"
-                />
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-sm text-muted-foreground">Quantity</span>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                    {selectedRfq.quantity || ''}
+                  </Badge>
+                </div>
               </ContentSection>
               {/* Timeline */}
               <ContentSection
@@ -279,15 +297,12 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.vendorContactName || ''}
                   valueType="string"
                 />
-                <KeyValuePair
-                  label="Email"
-                  value={
-                    selectedRfq.vendorContactEmail && (
-                      <CopyableText text={selectedRfq.vendorContactEmail} />
-                    )
-                  }
-                  valueType="string"
-                />
+                {selectedRfq.vendorContactEmail && (
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-sm text-muted-foreground">Email</span>
+                    <CopyableText text={selectedRfq.vendorContactEmail} />
+                  </div>
+                )}
                 <KeyValuePair
                   label="Phone"
                   value={selectedRfq.vendorContactPhone || ''}
@@ -368,8 +383,9 @@ export default function TechnicalProcurementClientPage() {
               onClick={refreshSelectedRfqQuotes}
               disabled={isLoadingQuotes}
               icon={RefreshCw}
-              className={`${isLoadingQuotes && 'animate-spin'}`}
+              className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
             />
+            <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
             <FileUploadPopover
               open={uploadQuotePopoverOpen}
               onOpenChange={setUploadQuotePopoverOpen}
@@ -396,7 +412,7 @@ export default function TechnicalProcurementClientPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <QuotesComparison />
+          <QuotesComparison isRefreshing={isRefreshingQuotes} />
         </CardContent>
       </Card>
     </div>

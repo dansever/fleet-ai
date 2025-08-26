@@ -80,17 +80,17 @@ function MainContentSection() {
   return (
     <Tabs
       tabs={[
-        { label: 'Service Contracts', value: 'service-contracts' },
-        { label: 'Contacts & Agreements', value: 'contacts-and-agreements' },
+        { label: 'Service Agreements', value: 'service-agreements' },
+        { label: 'Contacts & Providers', value: 'contacts-and-providers' },
         { label: 'Manage Airport', value: 'manage-airport' },
       ]}
       selectedTab={selectedTab}
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
     >
-      <TabsContent value="service-contracts">
+      <TabsContent value="service-agreements">
         <ServiceContracts />
       </TabsContent>
-      <TabsContent value="contacts-and-agreements">
+      <TabsContent value="contacts-and-providers">
         <div className="flex flex-col items-center justify-center h-64 text-gray-500">
           <div className="text-center">
             <h3 className="text-lg font-medium mb-2">Manage Contracts</h3>

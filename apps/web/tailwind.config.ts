@@ -86,6 +86,13 @@ const config: Config = {
           border: 'var(--sidebar-border)',
           ring: 'var(--sidebar-ring)',
         },
+        chart: {
+          '1': 'var(--color-chart-1)',
+          '2': 'var(--color-chart-2)',
+          '3': 'var(--color-chart-3)',
+          '4': 'var(--color-chart-4)',
+          '5': 'var(--color-chart-5)',
+        },
       },
       fontFamily: {
         sans: ['var(--font-roboto)', ...defaultTheme.fontFamily.sans],

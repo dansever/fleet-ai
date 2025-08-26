@@ -29,6 +29,11 @@ export interface TechnicalProcurementContextValue {
   isLoadingRfqs: boolean;
   isLoadingQuotes: boolean;
   isLoading: boolean;
+
+  // Refreshing states
+  isRefreshingRfqs: boolean;
+  isRefreshingQuotes: boolean;
+  isRefreshing: boolean;
 }
 
 const TechnicalProcurementContext = createContext<TechnicalProcurementContextValue | null>(null);
@@ -56,12 +61,19 @@ export function TechnicalProcurementContextProvider({
 
   // Loading states
   const [isLoadingRfqs, setIsLoadingRfqs] = useState(false);
+  const [isRefreshingRfqs, setIsRefreshingRfqs] = useState(false);
 
   // Computed values
   const selectedRfq = selectedRfqId ? rfqs.find((rfq) => rfq.id === selectedRfqId) || null : null;
   const selectedRfqQuotes = selectedRfqId ? quotesCache.get(selectedRfqId) || [] : [];
   const isLoadingQuotes = selectedRfqId ? loadingQuotesForRfq.has(selectedRfqId) : false;
   const isLoading = isLoadingRfqs || isLoadingQuotes;
+
+  // Refreshing states - only true when we have existing data and are fetching new data
+  const isRefreshingQuotes = selectedRfqId
+    ? loadingQuotesForRfq.has(selectedRfqId) && quotesCache.has(selectedRfqId)
+    : false;
+  const isRefreshing = isRefreshingRfqs || isRefreshingQuotes;
 
   // Helper function to select adjacent RFQ when current one is removed
   const findAdjacentRfqId = (rfqList: Rfq[], removedRfqId: string): string | null => {
@@ -124,7 +136,15 @@ export function TechnicalProcurementContextProvider({
 
   // Actions
   const refreshRfqs = async () => {
-    setIsLoadingRfqs(true);
+    // Use refreshing state if we already have data, otherwise use loading state
+    const hasExistingData = rfqs.length > 0;
+
+    if (hasExistingData) {
+      setIsRefreshingRfqs(true);
+    } else {
+      setIsLoadingRfqs(true);
+    }
+
     try {
       const freshRfqs = await getRfqs();
       setRfqs(freshRfqs);
@@ -137,7 +157,11 @@ export function TechnicalProcurementContextProvider({
     } catch (error) {
       console.error('Failed to refresh RFQs:', error);
     } finally {
-      setIsLoadingRfqs(false);
+      if (hasExistingData) {
+        setIsRefreshingRfqs(false);
+      } else {
+        setIsLoadingRfqs(false);
+      }
     }
   };
 
@@ -148,17 +172,10 @@ export function TechnicalProcurementContextProvider({
     setLoadingQuotesForRfq((prev) => new Set([...prev, selectedRfqId]));
 
     try {
-      // Remove from cache to force refresh
-      setQuotesCache((prev) => {
-        const newCache = new Map(prev);
-        newCache.delete(selectedRfqId);
-        return newCache;
-      });
-
-      // Fetch fresh quotes directly (bypass cache check)
+      // Fetch fresh quotes directly (don't clear cache until we have new data)
       const quotes = await getQuotesByRfq(selectedRfqId);
 
-      // Cache the results
+      // Update cache with fresh results
       setQuotesCache((prev) => new Map(prev).set(selectedRfqId, quotes));
     } catch (error) {
       console.error(`Failed to refresh quotes for RFQ ${selectedRfqId}:`, error);
@@ -285,6 +302,9 @@ export function TechnicalProcurementContextProvider({
     isLoadingRfqs,
     isLoadingQuotes,
     isLoading,
+    isRefreshingRfqs,
+    isRefreshingQuotes,
+    isRefreshing,
   };
 
   return (

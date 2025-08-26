@@ -353,6 +353,252 @@ export async function getAirportsByOrg(orgId: string): Promise<Airport[]> {
 
 ## State Management
 
+### Loading vs Refreshing State Pattern
+
+**Critical Distinction: Loading vs Refreshing**
+
+The application differentiates between two types of data fetching states:
+
+- **Loading** (`isLoading`): Initial data fetch when no data exists
+- **Refreshing** (`isRefreshing`): Updating existing data while keeping it visible
+
+This pattern ensures better UX by maintaining data visibility during refresh operations.
+
+### Context Provider State Architecture
+
+**Dual State Management Pattern**
+
+```typescript
+export interface ContextValue {
+  // Loading states (initial data fetch)
+  isLoadingRfqs: boolean;
+  isLoadingQuotes: boolean;
+  isLoading: boolean; // Combined loading state
+
+  // Refreshing states (updating existing data)
+  isRefreshingRfqs: boolean;
+  isRefreshingQuotes: boolean;
+  isRefreshing: boolean; // Combined refreshing state
+}
+```
+
+**State Logic Implementation**
+
+```typescript
+// Loading states - for initial data fetch
+const [isLoadingRfqs, setIsLoadingRfqs] = useState(false);
+const [isRefreshingRfqs, setIsRefreshingRfqs] = useState(false);
+
+// Computed refreshing state - only true when we have existing data AND are fetching
+const isRefreshingQuotes = selectedRfqId
+  ? loadingQuotesForRfq.has(selectedRfqId) && quotesCache.has(selectedRfqId)
+  : false;
+
+// Combined states
+const isLoading = isLoadingRfqs || isLoadingQuotes;
+const isRefreshing = isRefreshingRfqs || isRefreshingQuotes;
+```
+
+### Smart Refresh Pattern
+
+**Context Provider Refresh Logic**
+
+```typescript
+const refreshRfqs = async () => {
+  // Use refreshing state if we already have data, otherwise use loading state
+  const hasExistingData = rfqs.length > 0;
+
+  if (hasExistingData) {
+    setIsRefreshingRfqs(true); // Show refresh indicator, keep data visible
+  } else {
+    setIsLoadingRfqs(true); // Show loading screen, no data to display
+  }
+
+  try {
+    const freshRfqs = await getRfqs();
+    setRfqs(freshRfqs);
+  } finally {
+    if (hasExistingData) {
+      setIsRefreshingRfqs(false);
+    } else {
+      setIsLoadingRfqs(false);
+    }
+  }
+};
+```
+
+**Cache-Preserving Refresh**
+
+```typescript
+const refreshSelectedRfqQuotes = async () => {
+  if (!selectedRfqId) return;
+
+  // Start loading immediately
+  setLoadingQuotesForRfq((prev) => new Set([...prev, selectedRfqId]));
+
+  try {
+    // ✅ CRITICAL: Don't clear cache until we have new data
+    // This keeps existing data visible during refresh
+    const quotes = await getQuotesByRfq(selectedRfqId);
+
+    // Update cache with fresh results
+    setQuotesCache((prev) => new Map(prev).set(selectedRfqId, quotes));
+  } finally {
+    setLoadingQuotesForRfq((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(selectedRfqId);
+      return newSet;
+    });
+  }
+};
+```
+
+### Component Loading State Handling
+
+**Page-Level Loading Component**
+
+```typescript
+export default function ClientPage() {
+  const { rfqs, isLoading, isRefreshing } = useContext();
+
+  // Show full page loading when initially loading (no data yet)
+  if (isLoading && rfqs.length === 0) {
+    return (
+      <PageLayout
+        sidebarContent={sidebarContent}
+        headerContent={<div>Loading...</div>}
+        mainContent={<LoadingComponent text="Loading data..." />}
+        sidebarWidth="20rem"
+      />
+    );
+  }
+
+  // Normal page with data (may show refresh indicators)
+  return <PageLayout ... />;
+}
+```
+
+**Refresh Button Pattern**
+
+```typescript
+// ✅ CORRECT: Only animate during refresh, not initial loading
+<Button
+  intent="ghost"
+  onClick={refreshData}
+  disabled={isLoading}
+  icon={RefreshCw}
+  className={`${isRefreshing ? 'animate-spin' : ''}`} // Only spin when refreshing
+/>
+
+// ❌ INCORRECT: Spins during both loading and refreshing
+<Button
+  className={`${isLoading && 'animate-spin'}`} // Wrong - spins during initial load too
+/>
+```
+
+**Table Refresh Pattern**
+
+```typescript
+export default function DataTable({ isRefreshing = false }) {
+  const { data, isLoadingData } = useContext();
+
+  // Show loading message only when initially loading AND not refreshing
+  if (isLoadingData && data.length === 0 && !isRefreshing) {
+    return <LoadingMessage text="Loading data..." />;
+  }
+
+  // Show "no data" message only when not loading/refreshing
+  if (data.length === 0 && !isLoadingData && !isRefreshing) {
+    return <NoDataMessage />;
+  }
+
+  // Show table with optional refresh indicator
+  return (
+    <div className="relative">
+      {isRefreshing && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full shadow-md">
+            <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            Refreshing data...
+          </div>
+        </div>
+      )}
+      <div className={`${isRefreshing ? 'opacity-50' : 'opacity-100'} transition-opacity duration-200`}>
+        <DataTable data={data} />
+      </div>
+    </div>
+  );
+}
+```
+
+**Sidebar List Pattern**
+
+```typescript
+export default function SidebarList({ isLoading, isRefreshing }) {
+  return (
+    <div>
+      <Button
+        icon={RefreshCw}
+        className={`${isRefreshing ? 'animate-spin' : ''}`} // Only spin when refreshing
+        disabled={isLoading} // Disable during any loading
+        onClick={onRefresh}
+      />
+
+      {isLoading && items.length === 0 ? (
+        <LoadingComponent size="sm" text="Loading items..." />
+      ) : items.length === 0 ? (
+        <NoItemsMessage />
+      ) : (
+        items.map(item => <ListItem key={item.id} item={item} />)
+      )}
+    </div>
+  );
+}
+```
+
+### Component Prop Patterns
+
+**Context Provider to Component Communication**
+
+```typescript
+// Context provides both states
+const contextValue = {
+  isLoading, // Initial data fetch
+  isRefreshing, // Updating existing data
+  isLoadingSpecific, // Specific resource loading
+  isRefreshingSpecific, // Specific resource refreshing
+};
+
+// Components receive what they need
+<DataTable
+  data={data}
+  isRefreshing={isRefreshingData} // Only refreshing state for table
+/>
+
+<RefreshButton
+  onClick={refresh}
+  isLoading={isLoading} // For disabled state
+  isRefreshing={isRefreshing} // For animation
+/>
+```
+
+### State Flow Diagram
+
+```
+Initial Page Load:
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│ No Data     │ -> │ isLoading    │ -> │ Data Loaded │
+│ Show Loading│    │ = true       │    │ Show Data   │
+└─────────────┘    └──────────────┘    └─────────────┘
+
+Refresh Operation:
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│ Data Exists │ -> │ isRefreshing │ -> │ Data Updated│
+│ Keep Visible│    │ = true       │    │ Remove      │
+│             │    │ Show Spinner │    │ Indicator   │
+└─────────────┘    └──────────────┘    └─────────────┘
+```
+
 ### Context Provider Best Practices
 
 **Loading States**
@@ -379,6 +625,7 @@ type ErrorState = {
 - Optimistic updates for better UX
 - Cache management to avoid unnecessary refetches
 - Proper error recovery and rollback
+- Maintain data visibility during refresh operations
 
 ### Custom Hooks
 

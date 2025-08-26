@@ -41,8 +41,8 @@ export default function ServiceContracts() {
         <Button
           intent="ghost"
           icon={RefreshCw}
-          className={`${loading.contractsRefresh && 'animate-spin'}`}
-          disabled={loading.contractsRefresh}
+          className={`${loading.contracts && loading.isRefreshing && 'animate-spin'}`}
+          disabled={loading.contracts && loading.isRefreshing}
           onClick={refreshServiceContracts}
         />
         <FileUploadPopover
@@ -71,18 +71,15 @@ export default function ServiceContracts() {
         </FileUploadPopover>
       </div>
 
-      {/* Loading State - Only show when loading contracts for airport selection, not refresh */}
-      {loading.contracts && !loading.contractsRefresh && (
-        <LoadingComponent size="md" text="Loading service contracts..." />
-      )}
+      {/* Loading State - Only show when loading contracts for initial load or airport selection, not refresh */}
+      {loading.contracts && !loading.isRefreshing && <LoadingComponent size="md" />}
 
       {/* Display contracts grouped by type - Hide only during initial loading, keep visible during refresh */}
       {serviceContracts.length > 0 &&
-        !(loading.contracts && !loading.contractsRefresh) &&
+        !(loading.contracts && !loading.isRefreshing) &&
         contractTypes.map((contractType) => {
           const contractsOfType = groupedContracts[contractType];
           if (!contractsOfType || contractsOfType.length === 0) return null;
-
           return (
             <div key={contractType} className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
@@ -112,6 +109,7 @@ export default function ServiceContracts() {
                       triggerIntent="secondary"
                       triggerText="View"
                       triggerIcon={Eye}
+                      onChange={() => {}}
                     />
                   </ProjectCard>
                 ))}
@@ -121,7 +119,7 @@ export default function ServiceContracts() {
         })}
 
       {/* Show message if no contracts - Only show when not doing initial loading */}
-      {serviceContracts.length === 0 && !(loading.contracts && !loading.contractsRefresh) && (
+      {serviceContracts.length === 0 && !(loading.contracts && !loading.isRefreshing) && (
         <div className="text-center py-12 text-gray-500">
           <p>No service contracts found for this airport.</p>
           <p className="text-sm mt-1">Upload a contract or generate a random one to get started.</p>
