@@ -1,4 +1,4 @@
-import { NewQuote } from '@/drizzle/types';
+import { CreateQuoteData } from '@/services/technical/quote-client';
 
 // Pydantic schema interfaces matching the backend Quote and QuoteSchema
 interface PydanticVendor {
@@ -69,7 +69,7 @@ interface PydanticQuoteSchema {
 export function convertPydanticToQuote(
   pydanticQuoteSchema: PydanticQuoteSchema,
   rfqId: string,
-): NewQuote {
+): CreateQuoteData {
   // For now, we'll take the first quote from the array
   // In the future, we might want to handle multiple quotes differently
   const pydanticQuote = pydanticQuoteSchema.quotes[0];
@@ -79,7 +79,7 @@ export function convertPydanticToQuote(
     throw new Error('No quotes found in the extracted data');
   }
 
-  const newQuote: NewQuote = {
+  const CreateQuoteData: CreateQuoteData = {
     // System fields
     rfqId,
 
@@ -137,5 +137,5 @@ export function convertPydanticToQuote(
 
   console.log('✅ Converted Pydantic Quote --> New Quote');
 
-  return newQuote;
+  return CreateQuoteData;
 }
