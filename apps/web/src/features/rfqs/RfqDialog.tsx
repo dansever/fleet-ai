@@ -234,204 +234,197 @@ export default function RfqDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ContentSection
-            header="RFQ Information"
-            headerGradient="from-purple-500 to-purple-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Direction"
-                  value={formData.direction}
-                  valueType="select"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('direction', value)}
-                  name="direction"
-                  selectOptions={[
-                    { value: 'sent', label: 'Sent' },
-                    { value: 'received', label: 'Received' },
-                  ]}
-                />
-                <KeyValuePair
-                  label="RFQ Number"
-                  value={formData.rfqNumber}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('rfqNumber', value)}
-                  name="rfqNumber"
-                />
-                <KeyValuePair
-                  label="Status"
-                  value={formData.status}
-                  valueType="select"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('status', value)}
-                  name="status"
-                  selectOptions={[
-                    { value: 'pending', label: 'Pending' },
-                    { value: 'in_progress', label: 'In Progress' },
-                    { value: 'completed', label: 'Completed' },
-                    { value: 'cancelled', label: 'Cancelled' },
-                  ]}
-                />
-                <KeyValuePair
-                  label="Urgency Level"
-                  value={formData.urgencyLevel}
-                  valueType="select"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('urgencyLevel', value)}
-                  name="urgencyLevel"
-                  selectOptions={Object.values(urgencyLevelEnum.enumValues).map((level) => ({
-                    value: level,
-                    label: getUrgencyLevelDisplay(level as UrgencyLevel),
-                  }))}
-                />
-              </div>
-            }
-          />
+          <ContentSection header="RFQ Information" headerGradient="from-purple-500 to-purple-300">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Direction"
+                value={formData.direction}
+                valueType="select"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('direction', value)}
+                name="direction"
+                selectOptions={[
+                  { value: 'sent', label: 'Sent' },
+                  { value: 'received', label: 'Received' },
+                ]}
+              />
+              <KeyValuePair
+                label="RFQ Number"
+                value={formData.rfqNumber}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('rfqNumber', value)}
+                name="rfqNumber"
+              />
+              <KeyValuePair
+                label="Status"
+                value={formData.status}
+                valueType="select"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('status', value)}
+                name="status"
+                selectOptions={[
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'in_progress', label: 'In Progress' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' },
+                ]}
+              />
+              <KeyValuePair
+                label="Urgency Level"
+                value={formData.urgencyLevel}
+                valueType="select"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('urgencyLevel', value)}
+                name="urgencyLevel"
+                selectOptions={Object.values(urgencyLevelEnum.enumValues).map((level) => ({
+                  value: level,
+                  label: getUrgencyLevelDisplay(level as UrgencyLevel),
+                }))}
+              />
+            </div>
+          </ContentSection>
           <ContentSection
             header="Vendor Information"
             headerGradient="from-purple-500 to-purple-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Vendor Name"
-                  value={formData.vendorName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorName', value)}
-                  name="vendorName"
-                />
-                <KeyValuePair
-                  label="Vendor Address"
-                  value={formData.vendorAddress}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorAddress', value)}
-                  name="vendorAddress"
-                />
-                <KeyValuePair
-                  label="Contact Name"
-                  value={formData.vendorContactName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactName', value)}
-                  name="vendorContactName"
-                />
-                <KeyValuePair
-                  label="Contact Email"
-                  value={formData.vendorContactEmail}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactEmail', value)}
-                  name="vendorContactEmail"
-                />
-                <KeyValuePair
-                  label="Contact Phone"
-                  value={formData.vendorContactPhone}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactPhone', value)}
-                  name="vendorContactPhone"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Vendor Name"
+                value={formData.vendorName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorName', value)}
+                name="vendorName"
+              />
+              <KeyValuePair
+                label="Vendor Address"
+                value={formData.vendorAddress}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorAddress', value)}
+                name="vendorAddress"
+              />
+              <KeyValuePair
+                label="Contact Name"
+                value={formData.vendorContactName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactName', value)}
+                name="vendorContactName"
+              />
+              <KeyValuePair
+                label="Contact Email"
+                value={formData.vendorContactEmail}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactEmail', value)}
+                name="vendorContactEmail"
+              />
+              <KeyValuePair
+                label="Contact Phone"
+                value={formData.vendorContactPhone}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactPhone', value)}
+                name="vendorContactPhone"
+              />
+            </div>
+          </ContentSection>
           <ContentSection
             header="Part Specifications"
             headerGradient="from-purple-500 to-purple-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Part Number"
-                  value={formData.partNumber}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('partNumber', value)}
-                  name="partNumber"
-                />
-                <KeyValuePair
-                  label="Alt Part Number"
-                  value={formData.altPartNumber}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('altPartNumber', value)}
-                  name="altPartNumber"
-                />
-                <KeyValuePair
-                  label="Part Description"
-                  value={formData.partDescription}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('partDescription', value)}
-                  name="partDescription"
-                />
-                <KeyValuePair
-                  label="Condition Code"
-                  value={formData.conditionCode}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('conditionCode', value)}
-                  name="conditionCode"
-                />
-                <KeyValuePair
-                  label="Unit of Measure"
-                  value={formData.unitOfMeasure}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('unitOfMeasure', value)}
-                  name="unitOfMeasure"
-                />
-                <KeyValuePair
-                  label="Quantity"
-                  value={formData.quantity}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('quantity', value)}
-                  name="quantity"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Part Number"
+                value={formData.partNumber}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('partNumber', value)}
+                name="partNumber"
+              />
+              <KeyValuePair
+                label="Alt Part Number"
+                value={formData.altPartNumber}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('altPartNumber', value)}
+                name="altPartNumber"
+              />
+              <KeyValuePair
+                label="Part Description"
+                value={formData.partDescription}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('partDescription', value)}
+                name="partDescription"
+              />
+              <KeyValuePair
+                label="Condition Code"
+                value={formData.conditionCode}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('conditionCode', value)}
+                name="conditionCode"
+              />
+              <KeyValuePair
+                label="Unit of Measure"
+                value={formData.unitOfMeasure}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('unitOfMeasure', value)}
+                name="unitOfMeasure"
+              />
+              <KeyValuePair
+                label="Quantity"
+                value={formData.quantity}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('quantity', value)}
+                name="quantity"
+              />
+            </div>
+          </ContentSection>
           <ContentSection
             header="Commercial Terms & Timeline"
             headerGradient="from-purple-500 to-purple-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Pricing Type"
-                  value={formData.pricingType}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('pricingType', value)}
-                  name="pricingType"
-                />
-                <KeyValuePair
-                  label="Deliver To"
-                  value={formData.deliverTo}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('deliverTo', value)}
-                  name="deliverTo"
-                />
-                <KeyValuePair
-                  label="Buyer Comments"
-                  value={formData.buyerComments}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('buyerComments', value)}
-                  name="buyerComments"
-                />
-                <KeyValuePair
-                  label="Sent At"
-                  value={formData.sentAt}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('sentAt', value)}
-                  name="sentAt"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Pricing Type"
+                value={formData.pricingType}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('pricingType', value)}
+                name="pricingType"
+              />
+              <KeyValuePair
+                label="Deliver To"
+                value={formData.deliverTo}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('deliverTo', value)}
+                name="deliverTo"
+              />
+              <KeyValuePair
+                label="Buyer Comments"
+                value={formData.buyerComments}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('buyerComments', value)}
+                name="buyerComments"
+              />
+              <KeyValuePair
+                label="Sent At"
+                value={formData.sentAt}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('sentAt', value)}
+                name="sentAt"
+              />
+            </div>
+          </ContentSection>
         </div>
       )}
     </DetailDialog>

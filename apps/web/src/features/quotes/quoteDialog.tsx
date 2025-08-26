@@ -2,7 +2,7 @@
 
 import type { Quote, Rfq } from '@/drizzle/types';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';
-import { createQuote, updateQuote, type CreateQuoteData } from '@/services/technical/quote-client';
+import { createQuote, updateQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -59,7 +59,6 @@ export default function QuoteDialog({
     taggedDate: quote?.taggedDate || null,
     vendorComments: quote?.vendorComments || null,
     status: quote?.status || 'pending',
-    receivedAt: quote?.receivedAt || null,
   });
   const [isSaving, setIsSaving] = useState(false);
   const isAdd = DialogType === 'add';
@@ -100,7 +99,6 @@ export default function QuoteDialog({
       taggedDate: quote?.taggedDate || null,
       vendorComments: quote?.vendorComments || null,
       status: quote?.status || 'pending',
-      receivedAt: quote?.receivedAt || null,
     });
   }, [quote]);
 
@@ -158,7 +156,7 @@ export default function QuoteDialog({
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
           status: serializedFormData.status,
-          receivedAt: serializedFormData.receivedAt,
+          createdAt: serializedFormData.createdAt,
         };
         savedQuote = await createQuote(createData);
         toast.success('Quote created successfully');
@@ -252,7 +250,6 @@ export default function QuoteDialog({
         taggedDate: null,
         vendorComments: null,
         status: 'pending',
-        receivedAt: null,
       });
     }
   };
@@ -285,320 +282,302 @@ export default function QuoteDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ContentSection
-            header="Quote Information"
-            headerGradient="from-green-500 to-green-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="RFQ Number"
-                  value={formData.rfqNumber}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('rfqNumber', value)}
-                  name="rfqNumber"
-                />
-                <KeyValuePair
-                  label="Direction"
-                  value={formData.direction}
-                  valueType="select"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('direction', value)}
-                  name="direction"
-                  selectOptions={[
-                    { value: 'sent', label: 'Sent' },
-                    { value: 'received', label: 'Received' },
-                  ]}
-                />
-                <KeyValuePair
-                  label="Status"
-                  value={formData.status}
-                  valueType="select"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('status', value)}
-                  name="status"
-                  selectOptions={[
-                    { value: 'pending', label: 'Pending' },
-                    { value: 'in_progress', label: 'In Progress' },
-                    { value: 'completed', label: 'Completed' },
-                    { value: 'cancelled', label: 'Cancelled' },
-                  ]}
-                />
-                <KeyValuePair
-                  label="Received At"
-                  value={formData.receivedAt}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('receivedAt', value)}
-                  name="receivedAt"
-                />
-              </div>
-            }
-          />
-          <ContentSection
-            header="Vendor Information"
-            headerGradient="from-green-500 to-green-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Vendor Name"
-                  value={formData.vendorName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorName', value)}
-                  name="vendorName"
-                />
-                <KeyValuePair
-                  label="Vendor Address"
-                  value={formData.vendorAddress}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorAddress', value)}
-                  name="vendorAddress"
-                />
-                <KeyValuePair
-                  label="Contact Name"
-                  value={formData.vendorContactName}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactName', value)}
-                  name="vendorContactName"
-                />
-                <KeyValuePair
-                  label="Contact Email"
-                  value={formData.vendorContactEmail}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactEmail', value)}
-                  name="vendorContactEmail"
-                />
-                <KeyValuePair
-                  label="Contact Phone"
-                  value={formData.vendorContactPhone}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorContactPhone', value)}
-                  name="vendorContactPhone"
-                />
-              </div>
-            }
-          />
-          <ContentSection
-            header="Part Details"
-            headerGradient="from-green-500 to-green-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Part Number"
-                  value={formData.partNumber}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('partNumber', value)}
-                  name="partNumber"
-                />
-                <KeyValuePair
-                  label="Serial Number"
-                  value={formData.serialNumber}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('serialNumber', value)}
-                  name="serialNumber"
-                />
-                <KeyValuePair
-                  label="Part Description"
-                  value={formData.partDescription}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('partDescription', value)}
-                  name="partDescription"
-                />
-                <KeyValuePair
-                  label="Part Condition"
-                  value={formData.partCondition}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('partCondition', value)}
-                  name="partCondition"
-                />
-                <KeyValuePair
-                  label="Unit of Measure"
-                  value={formData.unitOfMeasure}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('unitOfMeasure', value)}
-                  name="unitOfMeasure"
-                />
-                <KeyValuePair
-                  label="Quantity"
-                  value={formData.quantity}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('quantity', value)}
-                  name="quantity"
-                />
-              </div>
-            }
-          />
+          <ContentSection header="Quote Information" headerGradient="from-green-500 to-green-300">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="RFQ Number"
+                value={formData.rfqNumber}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('rfqNumber', value)}
+                name="rfqNumber"
+              />
+              <KeyValuePair
+                label="Direction"
+                value={formData.direction}
+                valueType="select"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('direction', value)}
+                name="direction"
+                selectOptions={[
+                  { value: 'sent', label: 'Sent' },
+                  { value: 'received', label: 'Received' },
+                ]}
+              />
+              <KeyValuePair
+                label="Status"
+                value={formData.status}
+                valueType="select"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('status', value)}
+                name="status"
+                selectOptions={[
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'in_progress', label: 'In Progress' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' },
+                ]}
+              />
+              <KeyValuePair
+                label="Received At"
+                value={formData.createdAt}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('createdAt', value)}
+                name="createdAt"
+              />
+            </div>
+          </ContentSection>
+          <ContentSection header="Vendor Information" headerGradient="from-green-500 to-green-300">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Vendor Name"
+                value={formData.vendorName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorName', value)}
+                name="vendorName"
+              />
+              <KeyValuePair
+                label="Vendor Address"
+                value={formData.vendorAddress}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorAddress', value)}
+                name="vendorAddress"
+              />
+              <KeyValuePair
+                label="Contact Name"
+                value={formData.vendorContactName}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactName', value)}
+                name="vendorContactName"
+              />
+              <KeyValuePair
+                label="Contact Email"
+                value={formData.vendorContactEmail}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactEmail', value)}
+                name="vendorContactEmail"
+              />
+              <KeyValuePair
+                label="Contact Phone"
+                value={formData.vendorContactPhone}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorContactPhone', value)}
+                name="vendorContactPhone"
+              />
+            </div>
+          </ContentSection>
+          <ContentSection header="Part Details" headerGradient="from-green-500 to-green-300">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Part Number"
+                value={formData.partNumber}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('partNumber', value)}
+                name="partNumber"
+              />
+              <KeyValuePair
+                label="Serial Number"
+                value={formData.serialNumber}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('serialNumber', value)}
+                name="serialNumber"
+              />
+              <KeyValuePair
+                label="Part Description"
+                value={formData.partDescription}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('partDescription', value)}
+                name="partDescription"
+              />
+              <KeyValuePair
+                label="Part Condition"
+                value={formData.partCondition}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('partCondition', value)}
+                name="partCondition"
+              />
+              <KeyValuePair
+                label="Unit of Measure"
+                value={formData.unitOfMeasure}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('unitOfMeasure', value)}
+                name="unitOfMeasure"
+              />
+              <KeyValuePair
+                label="Quantity"
+                value={formData.quantity}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('quantity', value)}
+                name="quantity"
+              />
+            </div>
+          </ContentSection>
           <ContentSection
             header="Pricing & Commercial Terms"
             headerGradient="from-green-500 to-green-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Price"
-                  value={formData.price}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('price', value)}
-                  name="price"
-                />
-                <KeyValuePair
-                  label="Currency"
-                  value={formData.currency}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('currency', value)}
-                  name="currency"
-                />
-                <KeyValuePair
-                  label="Pricing Type"
-                  value={formData.pricingType}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('pricingType', value)}
-                  name="pricingType"
-                />
-                <KeyValuePair
-                  label="Pricing Method"
-                  value={formData.pricingMethod}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('pricingMethod', value)}
-                  name="pricingMethod"
-                />
-                <KeyValuePair
-                  label="Core Due"
-                  value={formData.coreDue}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('coreDue', value)}
-                  name="coreDue"
-                />
-                <KeyValuePair
-                  label="Core Change"
-                  value={formData.coreChange}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('coreChange', value)}
-                  name="coreChange"
-                />
-              </div>
-            }
-          />
-          <ContentSection
-            header="Delivery & Terms"
-            headerGradient="from-green-500 to-green-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Payment Terms"
-                  value={formData.paymentTerms}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('paymentTerms', value)}
-                  name="paymentTerms"
-                />
-                <KeyValuePair
-                  label="Min Order Qty"
-                  value={formData.minimumOrderQuantity}
-                  valueType="number"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('minimumOrderQuantity', value)}
-                  name="minimumOrderQuantity"
-                />
-                <KeyValuePair
-                  label="Lead Time"
-                  value={formData.leadTime}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('leadTime', value)}
-                  name="leadTime"
-                />
-                <KeyValuePair
-                  label="Delivery Terms"
-                  value={formData.deliveryTerms}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('deliveryTerms', value)}
-                  name="deliveryTerms"
-                />
-                <KeyValuePair
-                  label="Warranty"
-                  value={formData.warranty}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('warranty', value)}
-                  name="warranty"
-                />
-                <KeyValuePair
-                  label="Quote Expiration"
-                  value={formData.quoteExpirationDate}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('quoteExpirationDate', value)}
-                  name="quoteExpirationDate"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Price"
+                value={formData.price}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('price', value)}
+                name="price"
+              />
+              <KeyValuePair
+                label="Currency"
+                value={formData.currency}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('currency', value)}
+                name="currency"
+              />
+              <KeyValuePair
+                label="Pricing Type"
+                value={formData.pricingType}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('pricingType', value)}
+                name="pricingType"
+              />
+              <KeyValuePair
+                label="Pricing Method"
+                value={formData.pricingMethod}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('pricingMethod', value)}
+                name="pricingMethod"
+              />
+              <KeyValuePair
+                label="Core Due"
+                value={formData.coreDue}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('coreDue', value)}
+                name="coreDue"
+              />
+              <KeyValuePair
+                label="Core Change"
+                value={formData.coreChange}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('coreChange', value)}
+                name="coreChange"
+              />
+            </div>
+          </ContentSection>
+          <ContentSection header="Delivery & Terms" headerGradient="from-green-500 to-green-300">
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Payment Terms"
+                value={formData.paymentTerms}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('paymentTerms', value)}
+                name="paymentTerms"
+              />
+              <KeyValuePair
+                label="Min Order Qty"
+                value={formData.minimumOrderQuantity}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('minimumOrderQuantity', value)}
+                name="minimumOrderQuantity"
+              />
+              <KeyValuePair
+                label="Lead Time"
+                value={formData.leadTime}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('leadTime', value)}
+                name="leadTime"
+              />
+              <KeyValuePair
+                label="Delivery Terms"
+                value={formData.deliveryTerms}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('deliveryTerms', value)}
+                name="deliveryTerms"
+              />
+              <KeyValuePair
+                label="Warranty"
+                value={formData.warranty}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('warranty', value)}
+                name="warranty"
+              />
+              <KeyValuePair
+                label="Quote Expiration"
+                value={formData.quoteExpirationDate}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('quoteExpirationDate', value)}
+                name="quoteExpirationDate"
+              />
+            </div>
+          </ContentSection>
           <ContentSection
             header="Compliance & Traceability"
             headerGradient="from-green-500 to-green-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                <KeyValuePair
-                  label="Trace To"
-                  value={formData.traceTo}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('traceTo', value)}
-                  name="traceTo"
-                />
-                <KeyValuePair
-                  label="Tag Type"
-                  value={formData.tagType}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('tagType', value)}
-                  name="tagType"
-                />
-                <KeyValuePair
-                  label="Tagged By"
-                  value={formData.taggedBy}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('taggedBy', value)}
-                  name="taggedBy"
-                />
-                <KeyValuePair
-                  label="Tagged Date"
-                  value={formData.taggedDate}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('taggedDate', value)}
-                  name="taggedDate"
-                />
-                <KeyValuePair
-                  label="Vendor Comments"
-                  value={formData.vendorComments}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('vendorComments', value)}
-                  name="vendorComments"
-                />
-              </div>
-            }
-          />
+          >
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
+                label="Trace To"
+                value={formData.traceTo}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('traceTo', value)}
+                name="traceTo"
+              />
+              <KeyValuePair
+                label="Tag Type"
+                value={formData.tagType}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('tagType', value)}
+                name="tagType"
+              />
+              <KeyValuePair
+                label="Tagged By"
+                value={formData.taggedBy}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('taggedBy', value)}
+                name="taggedBy"
+              />
+              <KeyValuePair
+                label="Tagged Date"
+                value={formData.taggedDate}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('taggedDate', value)}
+                name="taggedDate"
+              />
+              <KeyValuePair
+                label="Vendor Comments"
+                value={formData.vendorComments}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorComments', value)}
+                name="vendorComments"
+              />
+            </div>
+          </ContentSection>
         </div>
       )}
     </DetailDialog>

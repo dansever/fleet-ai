@@ -119,7 +119,7 @@ export default function RfqList({
 
   // Filter and sort RFQs
   const filteredRfqs = useMemo(() => {
-    let filtered = rfqs.filter((rfq: Rfq) => {
+    const filtered = rfqs.filter((rfq: Rfq) => {
       // Apply search filter
       const matchesSearch =
         !searchTerm ||

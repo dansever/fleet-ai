@@ -140,89 +140,82 @@ export default function AirportDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ContentSection
-            header="Information"
-            headerGradient="from-blue-500 to-blue-300"
-            children={
-              <div className="flex flex-col justify-between space-y-4">
-                {isEditing && isAdd ? (
-                  <AirportAutocomplete
-                    label="Search Airport"
-                    placeholder="Type airport name to search..."
-                    value={formData.name}
-                    onChange={(value) => handleFieldChange('name', value)}
-                    onSelect={handleAirportSelect}
-                    required
-                  />
-                ) : (
-                  <KeyValuePair
-                    label="Airport Name"
-                    value={formData.name}
-                    valueType="string"
-                    editMode={isEditing}
-                    onChange={(value) => handleFieldChange('name', value)}
-                    name="name"
-                  />
-                )}
+          <ContentSection header="Information" headerGradient="from-blue-500 to-blue-300">
+            <div className="flex flex-col justify-between space-y-4">
+              {isEditing && isAdd ? (
+                <AirportAutocomplete
+                  label="Search Airport"
+                  placeholder="Type airport name to search..."
+                  value={formData.name}
+                  onChange={(value) => handleFieldChange('name', value)}
+                  onSelect={handleAirportSelect}
+                  required
+                />
+              ) : (
                 <KeyValuePair
-                  label="IATA"
+                  label="Airport Name"
+                  value={formData.name}
                   valueType="string"
                   editMode={isEditing}
-                  onChange={(value) => handleFieldChange('iata', value)}
-                  name="iata"
-                  value={formData.iata}
+                  onChange={(value) => handleFieldChange('name', value)}
+                  name="name"
                 />
-                <KeyValuePair
-                  label="ICAO"
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('icao', value)}
-                  name="icao"
-                  value={formData.icao}
-                />
-                <KeyValuePair
-                  label="Hub"
-                  valueType="boolean"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('isHub', value)}
-                  name="isHub"
-                  value={formData.isHub}
-                />
-              </div>
-            }
-          />
-          <ContentSection
-            header="Location"
-            headerGradient="from-blue-500 to-blue-300"
-            children={
-              <div className="flex flex-col justify-between">
-                <KeyValuePair
-                  label="City"
-                  value={formData.city}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('city', value)}
-                  name="city"
-                />
-                <KeyValuePair
-                  label="State"
-                  value={formData.state}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('state', value)}
-                  name="state"
-                />
-                <KeyValuePair
-                  label="Country"
-                  value={formData.country}
-                  valueType="string"
-                  editMode={isEditing}
-                  onChange={(value) => handleFieldChange('country', value)}
-                  name="country"
-                />
-              </div>
-            }
-          />
+              )}
+              <KeyValuePair
+                label="IATA"
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('iata', value)}
+                name="iata"
+                value={formData.iata}
+              />
+              <KeyValuePair
+                label="ICAO"
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('icao', value)}
+                name="icao"
+                value={formData.icao}
+              />
+              <KeyValuePair
+                label="Hub"
+                valueType="boolean"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('isHub', value)}
+                name="isHub"
+                value={formData.isHub}
+              />
+            </div>
+          </ContentSection>
+
+          <ContentSection header="Location" headerGradient="from-blue-500 to-blue-300">
+            <div className="flex flex-col justify-between">
+              <KeyValuePair
+                label="City"
+                value={formData.city}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('city', value)}
+                name="city"
+              />
+              <KeyValuePair
+                label="State"
+                value={formData.state}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('state', value)}
+                name="state"
+              />
+              <KeyValuePair
+                label="Country"
+                value={formData.country}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('country', value)}
+                name="country"
+              />
+            </div>
+          </ContentSection>
         </div>
       )}
     </DetailDialog>

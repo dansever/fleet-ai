@@ -12,7 +12,7 @@ export async function createRandomServiceContract(
   const randomType =
     ContractTypeEnum.enumValues[Math.floor(Math.random() * ContractTypeEnum.enumValues.length)];
 
-  const generatedServiceContract: Partial<CreateServiceContractData> = {
+  const generatedServiceContract: CreateServiceContractData = {
     title: `Service Contract ${randomNumber}`,
     contractType: randomType,
     notes: `Notes for Service Contract ${randomNumber}`,

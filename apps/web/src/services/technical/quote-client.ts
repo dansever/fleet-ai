@@ -43,7 +43,7 @@ export async function deleteQuote(id: Quote['id']): Promise<void> {
 /**
  * Extract quote from file
  */
-export async function extractQuote(file: File): Promise<any> {
+export async function extractQuote(file: File): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
 

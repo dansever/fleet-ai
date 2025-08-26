@@ -52,7 +52,7 @@ export async function deleteRfq(id: Rfq['id']): Promise<void> {
 /**
  * Extract RFQ from file
  */
-export async function extractRfq(file: File): Promise<any> {
+export async function extractRfq(file: File): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
 

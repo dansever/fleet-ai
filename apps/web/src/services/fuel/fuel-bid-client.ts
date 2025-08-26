@@ -54,7 +54,7 @@ export async function deleteFuelBid(id: string): Promise<void> {
 /**
  * Extract fuel bid from file
  */
-export async function extractFuelBid(file: File): Promise<any> {
+export async function extractFuelBid(file: File): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
 

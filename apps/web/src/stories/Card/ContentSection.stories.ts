@@ -43,9 +43,13 @@ export const Default: Story = {
       children: createElement(
         'div',
         { className: 'space-y-3' },
-        createElement(KeyValuePair, { label: 'Name', value: 'Fleet AI Platform' }),
-        createElement(KeyValuePair, { label: 'Version', value: '1.0.0' }),
-        createElement(KeyValuePair, { label: 'Status', value: true }),
+        createElement(KeyValuePair, {
+          label: 'Name',
+          value: 'Fleet AI Platform',
+          valueType: 'string',
+        }),
+        createElement(KeyValuePair, { label: 'Version', value: '1.0.0', valueType: 'string' }),
+        createElement(KeyValuePair, { label: 'Status', value: true, valueType: 'boolean' }),
       ),
     }),
 };

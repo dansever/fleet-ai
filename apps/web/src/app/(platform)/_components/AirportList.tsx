@@ -48,7 +48,7 @@ export default function AirportList({
 
   // Filter and sort airports
   const filteredAirports = useMemo(() => {
-    let filtered = airports.filter((airport: Airport) => {
+    const filtered = airports.filter((airport: Airport) => {
       // Apply search filter
       const matchesSearch =
         !searchTerm ||

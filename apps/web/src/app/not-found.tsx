@@ -22,7 +22,7 @@ export default function NotFound() {
           <div className="mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">Page Not Found</h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              Oops! The page you're looking for seems to have taken flight. It might have been
+              Oops! The page you&lsquo;re looking for seems to have taken flight. It might have been
               moved, deleted, or you entered the wrong URL.
             </p>
           </div>

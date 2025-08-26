@@ -86,24 +86,21 @@ function MainContentSection() {
       ]}
       selectedTab={selectedTab}
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
-      children={
-        <>
-          <TabsContent value="service-contracts">
-            <ServiceContracts />
-          </TabsContent>
-          <TabsContent value="contacts-and-agreements">
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <div className="text-center">
-                <h3 className="text-lg font-medium mb-2">Manage Contracts</h3>
-                <p className="text-sm">Contract management functionality coming soon...</p>
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="manage-airport">
-            <ManageAirport />
-          </TabsContent>
-        </>
-      }
-    />
+    >
+      <TabsContent value="service-contracts">
+        <ServiceContracts />
+      </TabsContent>
+      <TabsContent value="contacts-and-agreements">
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">Manage Contracts</h3>
+            <p className="text-sm">Contract management functionality coming soon...</p>
+          </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="manage-airport">
+        <ManageAirport />
+      </TabsContent>
+    </Tabs>
   );
 }

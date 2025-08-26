@@ -33,16 +33,15 @@ export const ConfirmationPopover = ({
   onOpenChange,
   popoverContentAlign = 'end',
 }: ConfirmationPopoverProps) => {
-  if (intent && !['danger', 'warning', 'info'].includes(intent)) {
-    return `Invalid intent: ${intent}`;
-  }
-
-  const isControlled = open !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const isControlled = open !== undefined;
   const actualOpen = isControlled ? open! : internalOpen;
   const setOpen = (v: boolean) => (isControlled ? onOpenChange?.(v) : setInternalOpen(v));
 
-  const [submitting, setSubmitting] = useState(false);
+  if (intent && !['danger', 'warning', 'info'].includes(intent)) {
+    return `Invalid intent: ${intent}`;
+  }
 
   const handleConfirm = async () => {
     try {
@@ -255,50 +254,45 @@ export const FileUploadPopover = ({
                   </div>
                 }
                 headerGradient="from-blue-500 to-purple-600"
-                children={
-                  <div className="space-y-2">
-                    <div
-                      className={cn(
-                        'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
-                        isDragOver
-                          ? 'border-blue-400 bg-blue-50'
-                          : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
-                      )}
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <div className="space-y-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
-                          <Upload className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            {isDragOver
-                              ? 'Drop your file here'
-                              : 'Click to upload or drag and drop'}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Maximum file size: {maxSize}MB
-                          </p>
-                        </div>
+              >
+                <div className="space-y-2">
+                  <div
+                    className={cn(
+                      'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+                      isDragOver
+                        ? 'border-blue-400 bg-blue-50'
+                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
+                    )}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="space-y-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+                        <Upload className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {isDragOver ? 'Drop your file here' : 'Click to upload or drag and drop'}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Maximum file size: {maxSize}MB</p>
                       </div>
                     </div>
-
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept={accept}
-                      onChange={handleFileInputChange}
-                      className="hidden"
-                    />
-
-                    {/* Support render-prop children so callers can close the popover from inside */}
-                    {typeof children === 'function' ? children({ close }) : children}
                   </div>
-                }
-              />
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={accept}
+                    onChange={handleFileInputChange}
+                    className="hidden"
+                  />
+
+                  {/* Support render-prop children so callers can close the popover from inside */}
+                  {typeof children === 'function' ? children({ close }) : children}
+                </div>
+              </ContentSection>
             </>
           ) : (
             <>

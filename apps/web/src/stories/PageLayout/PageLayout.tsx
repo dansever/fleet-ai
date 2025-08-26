@@ -32,7 +32,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
             width: 'var(--sidebar-w)',
             transition: 'width 240ms ease',
             // Drive width via CSS var so React prop changes animate
-            ['--sidebar-w' as any]: sidebarWidth,
+            ['--sidebar-w' as string]: sidebarWidth,
             // Helps the browser plan for width changes
             willChange: 'width',
           }}

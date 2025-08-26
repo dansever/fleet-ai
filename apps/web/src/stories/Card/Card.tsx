@@ -45,6 +45,7 @@ export const ProjectCard = ({
   progress,
   isNew = false,
   className,
+  children,
 }: {
   title: string;
   description: string;
@@ -53,6 +54,7 @@ export const ProjectCard = ({
   progress?: number;
   isNew?: boolean;
   className?: string;
+  children?: React.ReactNode;
 }) => (
   <Card
     className={cn(
@@ -77,9 +79,7 @@ export const ProjectCard = ({
           <CardTitle className="text-lg font-bold">{title}</CardTitle>
           <CardDescription className="mt-1">{description}</CardDescription>
         </div>
-        <Badge variant="outline" className="rounded-full text-xs">
-          {category}
-        </Badge>
+        {children}
       </div>
     </CardHeader>
     {progress !== undefined && (

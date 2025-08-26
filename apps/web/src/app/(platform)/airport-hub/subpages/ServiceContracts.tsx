@@ -1,12 +1,13 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
 import { ServiceContract } from '@/drizzle/types';
+import ServiceContractDialog from '@/features/service-contracts/ServiceContractDialog';
 import { createRandomServiceContract } from '@/features/service-contracts/utils';
 import { Button } from '@/stories/Button/Button';
 import { ProjectCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { calculateProgress } from '@/utils/dateUtils';
-import { RefreshCw } from 'lucide-react';
+import { Eye, RefreshCw } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
 export default function ServiceContracts() {
@@ -98,13 +99,21 @@ export default function ServiceContracts() {
                     key={contract.id}
                     title={contract.title}
                     description={contract.title}
-                    category={getContractTypeDisplay(contract.contractType)}
+                    category={contract.contractType || ''}
                     progress={
                       contract.effectiveTo && contract.effectiveFrom
                         ? calculateProgress(contract.effectiveFrom, contract.effectiveTo)
                         : undefined
                     }
-                  />
+                  >
+                    <ServiceContractDialog
+                      serviceContract={contract}
+                      DialogType="view"
+                      triggerIntent="secondary"
+                      triggerText="View"
+                      triggerIcon={Eye}
+                    />
+                  </ProjectCard>
                 ))}
               </div>
             </div>

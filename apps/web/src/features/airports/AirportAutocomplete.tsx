@@ -237,7 +237,7 @@ export default function AirportAutocomplete(props: AirportAutocompleteProps) {
       {isOpen && value.length >= 2 && suggestions.length === 0 && !isLoading && (
         <Card className="bg-white absolute z-50 w-full mt-1 shadow-lg border">
           <CardContent className="p-3 text-center text-sm text-muted-foreground">
-            No airports found for "{value}"
+            No airports found for &quot;{value}&quot;
           </CardContent>
         </Card>
       )}
