@@ -29,7 +29,7 @@ export async function getRfqs(): Promise<Rfq[]> {
 /**
  * Create a new RFQ
  */
-export async function createRfq(data: NewRfq): Promise<Rfq> {
+export async function createRfq(data: CreateRfqData): Promise<Rfq> {
   const res = await api.post('/api/rfqs', data);
   return res.data;
 }

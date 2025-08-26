@@ -9,7 +9,7 @@ export async function createRandomRfq(): Promise<Rfq> {
   const priceTypes = ['Fixed', 'Exchange'];
   const conditionCodes = ['AN', 'SV', 'FN', 'AR', 'BR'];
 
-  const generatedRfq: Partial<CreateRfqData> = {
+  const generatedRfq: CreateRfqData = {
     rfqNumber: `RFQ-${Math.floor(Math.random() * 100)}`,
     partNumber: `PART-${randomNumber}`,
     altPartNumber: `ALT-${randomNumber}`,
