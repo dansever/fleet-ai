@@ -76,7 +76,7 @@ export default function TechnicalProcurementClientPage() {
       const convertedQuote = convertPydanticToQuote(extractedData as any, selectedRfq.id);
 
       // Create the quote in the database
-      const newQuote = await createQuote(convertedQuote);
+      const newQuote = await createQuote({ ...convertedQuote, sentAt: null });
 
       // Add to local cache
       addQuote(newQuote);
