@@ -4,6 +4,7 @@ import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
+import { TabsContent } from '@/components/ui/tabs';
 import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
 import { Quote } from '@/drizzle/types';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
@@ -15,6 +16,7 @@ import { Button } from '@/stories/Button/Button';
 import { BaseCard, ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -336,77 +338,99 @@ export default function TechnicalProcurementClientPage() {
         )}
       </div>
 
-      <BaseCard
-        title="Technical Quotes Comparison"
-        description="Compare and evaluate quotes for {selectedRfq?.rfqNumber}"
+      <Tabs
+        tabs={[
+          { label: 'Quotes', value: 'quotes' },
+          { label: 'Logistics', value: 'logistics' },
+        ]}
+        selectedTab="quotes"
+        onTabChange={() => {}}
       >
-        <CardHeader className="flex items-start justify-between">
-          {/* Left Side - Title and Description */}
-          <div>
-            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                <Package className="w-6 h-6 text-white" />
+        <TabsContent value="quotes">
+          <BaseCard
+            title="Technical Quotes Comparison"
+            description="Compare and evaluate quotes for {selectedRfq?.rfqNumber}"
+          >
+            <CardHeader className="flex items-start justify-between">
+              {/* Left Side - Title and Description */}
+              <div>
+                <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  Technical Quotes Comparison
+                </CardTitle>
+                <p className="text-slate-600 mt-2 ml-12">
+                  Compare and evaluate quotes for{' '}
+                  <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
+                </p>
+                <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
+                  <span>Total Quotes: {selectedRfqQuotes.length}</span>
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
+                    <span>
+                      Pending:{' '}
+                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
+                    </span>
+                  )}
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
+                    <span className="text-green-600">
+                      Accepted:{' '}
+                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
+                    </span>
+                  )}
+                </div>
               </div>
-              Technical Quotes Comparison
-            </CardTitle>
-            <p className="text-slate-600 mt-2 ml-12">
-              Compare and evaluate quotes for{' '}
-              <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
-            </p>
-            <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
-              <span>Total Quotes: {selectedRfqQuotes.length}</span>
-              {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
-                <span>
-                  Pending: {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
-                </span>
-              )}
-              {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
-                <span className="text-green-600">
-                  Accepted:{' '}
-                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
-                </span>
-              )}
-            </div>
-          </div>
-          {/* Right Side - Actions */}
-          <div className="flex gap-2">
-            <Button
-              intent="ghost"
-              onClick={refreshSelectedRfqQuotes}
-              disabled={isLoadingQuotes}
-              icon={RefreshCw}
-              className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
-            />
-            <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
-            <FileUploadPopover
-              open={uploadQuotePopoverOpen}
-              onOpenChange={setUploadQuotePopoverOpen}
-              triggerButtonIntent="add"
-              triggerButtonText="Upload Quote"
-              onSend={() => {}}
-            >
-              <div className="flex flex-col gap-2 text-sm">
-                <Button intent="secondary" text="Manually Add Quote" size="sm" onClick={() => {}} />
+              {/* Right Side - Actions */}
+              <div className="flex gap-2">
                 <Button
                   intent="ghost"
-                  text="Or generate random Quote"
-                  size="sm"
-                  className="text-gray-500"
-                  onClick={async () => {
-                    const quote = await createRandomQuote(selectedRfq.id);
-                    addQuote(quote);
-                    console.log('Time to close the popover');
-                    setUploadQuotePopoverOpen(false);
-                  }}
+                  onClick={refreshSelectedRfqQuotes}
+                  disabled={isLoadingQuotes}
+                  icon={RefreshCw}
+                  className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
                 />
+                <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
+                <FileUploadPopover
+                  open={uploadQuotePopoverOpen}
+                  onOpenChange={setUploadQuotePopoverOpen}
+                  triggerButtonIntent="add"
+                  triggerButtonText="Upload Quote"
+                  onSend={() => {}}
+                >
+                  <div className="flex flex-col gap-2 text-sm">
+                    <Button
+                      intent="secondary"
+                      text="Manually Add Quote"
+                      size="sm"
+                      onClick={() => {}}
+                    />
+                    <Button
+                      intent="ghost"
+                      text="Or generate random Quote"
+                      size="sm"
+                      className="text-gray-500"
+                      onClick={async () => {
+                        const quote = await createRandomQuote(selectedRfq.id);
+                        addQuote(quote);
+                        console.log('Time to close the popover');
+                        setUploadQuotePopoverOpen(false);
+                      }}
+                    />
+                  </div>
+                </FileUploadPopover>
               </div>
-            </FileUploadPopover>
+            </CardHeader>
+            <CardContent>
+              <QuotesComparison isRefreshing={isRefreshingQuotes} />
+            </CardContent>
+          </BaseCard>
+        </TabsContent>
+        <TabsContent value="logistics">
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Coming Soon</p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <QuotesComparison isRefreshing={isRefreshingQuotes} />
-        </CardContent>
-      </BaseCard>
+        </TabsContent>
+      </Tabs>
     </div>
   ) : (
     // No RFQ selected
