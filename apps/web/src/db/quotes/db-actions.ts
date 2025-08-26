@@ -1,7 +1,7 @@
 import { db } from '@/drizzle/db';
 import { quotesTable } from '@/drizzle/schema/schema';
 import { NewQuote, Quote, Rfq } from '@/drizzle/types';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 /**
  * Get a quote by its id
@@ -44,4 +44,18 @@ export async function createQuote(data: NewQuote): Promise<Quote> {
  */
 export async function deleteQuote(id: Quote['id']): Promise<void> {
   await db.delete(quotesTable).where(eq(quotesTable.id, id)).returning();
+}
+
+/**
+ * Get quotes by organization for analysis
+ */
+export async function getQuotesByOrgForAnalysis(
+  orgId: string,
+  rfqId: Quote['rfqId'],
+): Promise<Quote[]> {
+  const quotes = await db
+    .select()
+    .from(quotesTable)
+    .where(and(eq(quotesTable.rfqId, rfqId), eq(quotesTable.orgId, orgId)));
+  return quotes;
 }

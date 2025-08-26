@@ -1,7 +1,8 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException, Query
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
 from app.features.technical import extract_quote, extract_rfq
+from app.services.quote_analysis_service import QuoteAnalysisService
 
 logger = get_logger(__name__)
 

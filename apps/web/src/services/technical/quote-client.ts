@@ -68,3 +68,13 @@ export async function extractQuote(file: File): Promise<unknown> {
   // The backend returns a ResponseEnvelope, so extract the data
   return res.data.data;
 }
+
+/**
+ * Analyze quotes
+ * @param rfqId
+ * @returns
+ */
+export async function analyzeQuotes(rfqId: Quote['rfqId']): Promise<unknown> {
+  const res = await backendApi.post(`/api/v1/technical/quotes/analyze?rfqId=${rfqId}`);
+  return res.data;
+}

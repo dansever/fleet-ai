@@ -18,3 +18,6 @@ EXTRACTOR_ALLOWED_MIME_TYPES = (
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
+
+# LLM Provider
+ACTIVE_LLM_PROVIDER = "gemini"

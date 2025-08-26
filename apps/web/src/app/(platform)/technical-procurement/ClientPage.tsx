@@ -23,6 +23,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { CopyableText } from '../_components/CopyableText';
 import { useTechnicalProcurement } from './ContextProvider';
+import QuoteAnalysis from './_components/QuoteAnalysis';
 import QuotesComparison from './_components/QuotesComparison';
 import RfqList from './_components/RfqList';
 
@@ -341,6 +342,7 @@ export default function TechnicalProcurementClientPage() {
       <Tabs
         tabs={[
           { label: 'Quotes', value: 'quotes' },
+          { label: 'Analysis', value: 'analysis' },
           { label: 'Logistics', value: 'logistics' },
         ]}
         selectedTab="quotes"
@@ -424,6 +426,9 @@ export default function TechnicalProcurementClientPage() {
               <QuotesComparison isRefreshing={isRefreshingQuotes} />
             </CardContent>
           </BaseCard>
+        </TabsContent>
+        <TabsContent value="analysis">
+          <QuoteAnalysis isRefreshing={isRefreshingQuotes} />
         </TabsContent>
         <TabsContent value="logistics">
           <div className="flex items-center justify-center h-full">

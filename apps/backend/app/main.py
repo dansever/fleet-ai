@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.utils import get_logger
+from app.database import get_db_connection
+from app.database.connection import close_db_connection
 
 logger = get_logger(__name__)
 
@@ -32,6 +34,22 @@ def create_app() -> FastAPI:
     async def health_check():
         """Health check endpoint"""
         return {"status": "healthy", "service": "fleet-ai-backend"}
+    
+    @app.on_event("startup")
+    async def startup_event():
+        """Initialize database connection on startup"""
+        try:
+            await get_db_connection()
+            logger.info("🚀 Application startup completed")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize database connection: {e}")
+            raise
+    
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        """Clean up database connections on shutdown"""
+        await close_db_connection()
+        logger.info("🛑 Application shutdown completed")
     
     return app
 
