@@ -1,4 +1,4 @@
-import { NewFuelBid } from '@/drizzle/types';
+import { CreateFuelBidData } from '@/services/fuel/fuel-bid-client';
 
 // Type definition for the Pydantic FuelBid object from backend
 interface PydanticFuelBid {
@@ -38,27 +38,27 @@ interface PydanticFuelBid {
 }
 
 /**
- * Converts a Pydantic FuelBid object from the backend to a NewFuelBid object
- * that can be inserted into the database.
+ * Converts a Pydantic FuelBid object from the backend to a CreateFuelBidData object
+ * that can be sent to the client API.
  *
  * @param pydanticBid - The FuelBid object from the backend
  * @param tenderId - The ID of the fuel tender this bid belongs to
  * @param round - Optional round number for the bid
- * @returns NewFuelBid object ready for database insertion
+ * @returns CreateFuelBidData object ready for API submission
  */
 export function convertPydanticToFuelBid(
   pydanticBid: any,
   tenderId: string,
   round?: number,
-): NewFuelBid {
-  const newBid: NewFuelBid = {
+): CreateFuelBidData {
+  const createFuelBidData: CreateFuelBidData = {
     // Required system fields
     tenderId,
 
     // Bid Information
     title: pydanticBid.title,
     round: round || 1,
-    bidSubmittedAt: pydanticBid.bid_submitted_at,
+    bidSubmittedAt: pydanticBid.bid_submitted_at, // ISO string for API transport
 
     // Vendor Information (flattened from nested vendor object)
     vendorName: pydanticBid.vendor.name,
@@ -96,12 +96,17 @@ export function convertPydanticToFuelBid(
 
     // Technical
     densityAt15C: pydanticBid.density_at_15c?.toString() || null,
+    normalizedUnitPriceUsdPerUsg: null, // Will be calculated server-side
 
     // AI Processing
     aiSummary: pydanticBid.ai_summary,
+
+    // Decision Tracking - will be handled server-side
+    decision: null,
+    decisionNotes: null,
   };
 
-  console.log('✅Converted Pydantic Bid --> New FuelBid');
+  console.log('✅Converted Pydantic Bid --> CreateFuelBidData');
 
-  return newBid;
+  return createFuelBidData;
 }
