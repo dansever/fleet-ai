@@ -1,11 +1,13 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { getStatusDisplay } from '@/drizzle/schema/enums';
 import { Quote } from '@/drizzle/types';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
+import { deleteQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
@@ -23,6 +25,7 @@ import {
   Truck,
   XCircle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { CopyableText } from '../../_components/CopyableText';
 import { useTechnicalProcurement } from '../ContextProvider';
 
@@ -82,7 +85,7 @@ const getStatusBadge = (status: string | null) => {
   }
 };
 
-const quoteColumns: Column<Quote>[] = [
+const createQuoteColumns = (onDeleteQuote: (quoteId: string) => Promise<void>): Column<Quote>[] => [
   {
     key: 'actions',
     header: 'Actions',
@@ -118,9 +121,7 @@ const quoteColumns: Column<Quote>[] = [
             intent="danger"
             title="Delete Quote"
             description="Are you sure you want to delete this quote?"
-            onConfirm={() => {
-              console.log('delete quote');
-            }}
+            onConfirm={() => onDeleteQuote(quote.id)}
           />
           <QuoteDialog
             quote={quote}
@@ -353,7 +354,35 @@ const quoteColumns: Column<Quote>[] = [
 ];
 
 export default function QuotesComparison({ isRefreshing = false }: QuotesComparisonProps) {
-  const { selectedRfq, selectedRfqQuotes, isLoadingQuotes } = useTechnicalProcurement();
+  const {
+    selectedRfq,
+    selectedRfqQuotes,
+    isLoadingQuotes,
+    refreshSelectedRfqQuotes,
+    deleteQuote: removeQuoteFromCache,
+  } = useTechnicalProcurement();
+
+  // Handle quote deletion with optimistic updates
+  const handleQuoteDelete = async (quoteId: string) => {
+    try {
+      // Optimistic update: remove from cache immediately
+      removeQuoteFromCache(quoteId);
+
+      // Delete from server
+      await deleteQuote(quoteId);
+
+      toast.success('Quote deleted successfully');
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      toast.error('Failed to delete quote');
+
+      // If deletion failed, refresh to restore the correct state
+      await refreshSelectedRfqQuotes();
+    }
+  };
+
+  // Create columns with the delete handler
+  const quoteColumns = createQuoteColumns(handleQuoteDelete);
 
   if (!selectedRfq) {
     return (
@@ -370,17 +399,7 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
 
   // Show loading message when initially loading quotes (no existing data) and NOT refreshing
   if (isLoadingQuotes && selectedRfqQuotes.length === 0 && !isRefreshing) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <FileText className="w-8 h-8 text-blue-500" />
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Loading quotes...</h3>
-          <p className="text-slate-600 mb-4">Fetching quote data for comparison</p>
-        </div>
-      </div>
-    );
+    return <LoadingComponent text="Loading quotes..." />;
   }
 
   // Show "no quotes" message only when not loading/refreshing and no quotes exist
@@ -400,28 +419,14 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
 
   // Show table with subtle refreshing indicator
   return (
-    <div className="p-6 relative">
-      {isRefreshing && (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full shadow-md">
-            <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            Refreshing quotes...
-          </div>
-        </div>
-      )}
-      <div
-        className={`${isRefreshing ? 'opacity-50' : 'opacity-100'} transition-opacity duration-200`}
-      >
-        <DataTable
-          data={selectedRfqQuotes}
-          columns={quoteColumns}
-          searchable={true}
-          filterable={true}
-          pagination={true}
-          pageSize={10}
-          onRowClick={() => {}}
-        />
-      </div>
-    </div>
+    <DataTable
+      data={selectedRfqQuotes}
+      columns={quoteColumns}
+      searchable={true}
+      filterable={true}
+      pagination={true}
+      pageSize={10}
+      onRowClick={() => {}}
+    />
   );
 }

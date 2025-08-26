@@ -1,5 +1,12 @@
 'use client';
 
+import {
+  getStatusDisplay,
+  OrderDirection,
+  orderDirectionDisplayMap,
+  OrderDirectionEnum,
+  statusEnum,
+} from '@/drizzle/schema/enums';
 import type { Quote, Rfq } from '@/drizzle/types';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';
 import { createQuote, CreateQuoteData, updateQuote } from '@/services/technical/quote-client';
@@ -299,10 +306,10 @@ export default function QuoteDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('direction', value)}
                 name="direction"
-                selectOptions={[
-                  { value: 'sent', label: 'Sent' },
-                  { value: 'received', label: 'Received' },
-                ]}
+                selectOptions={Object.values(OrderDirectionEnum.enumValues).map((direction) => ({
+                  value: direction,
+                  label: orderDirectionDisplayMap[direction as OrderDirection],
+                }))}
               />
               <KeyValuePair
                 label="Status"
@@ -311,12 +318,10 @@ export default function QuoteDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('status', value)}
                 name="status"
-                selectOptions={[
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'in_progress', label: 'In Progress' },
-                  { value: 'completed', label: 'Completed' },
-                  { value: 'cancelled', label: 'Cancelled' },
-                ]}
+                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                  value: status,
+                  label: getStatusDisplay(status),
+                }))}
               />
             </div>
           </ContentSection>

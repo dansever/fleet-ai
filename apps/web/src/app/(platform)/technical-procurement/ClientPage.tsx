@@ -2,7 +2,7 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
 import { Quote } from '@/drizzle/types';
@@ -12,7 +12,7 @@ import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { BaseCard, ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
@@ -105,23 +105,6 @@ export default function TechnicalProcurementClientPage() {
     }
   };
 
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'sent':
-        return 'Sent';
-      case 'quoted':
-        return 'Quoted';
-      case 'approved':
-        return 'Approved';
-      case 'rejected':
-        return 'Rejected';
-      default:
-        return status;
-    }
-  };
-
   // Sidebar content - RFQ List
   const sidebarContent = (
     <RfqList
@@ -147,7 +130,7 @@ export default function TechnicalProcurementClientPage() {
           <span>
             Status:{' '}
             <Badge className={getStatusColor(selectedRfq.status || 'pending')}>
-              {getStatusDisplay(selectedRfq.status || 'pending')}
+              {selectedRfq.status || 'pending'}
             </Badge>
           </span>
           <span>Created: {formatDate(new Date(selectedRfq.createdAt))}</span>
@@ -325,6 +308,12 @@ export default function TechnicalProcurementClientPage() {
               >
                 <KeyValuePair
                   keyClassName="max-w-1/2"
+                  label="Status"
+                  value={selectedRfq.status || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
                   label="Urgency"
                   value={getUrgencyLevelDisplay(selectedRfq.urgencyLevel)}
                   valueType="string"
@@ -347,7 +336,10 @@ export default function TechnicalProcurementClientPage() {
         )}
       </div>
 
-      <Card className="bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-xl rounded-3xl overflow-hidden">
+      <BaseCard
+        title="Technical Quotes Comparison"
+        description="Compare and evaluate quotes for {selectedRfq?.rfqNumber}"
+      >
         <CardHeader className="flex items-start justify-between">
           {/* Left Side - Title and Description */}
           <div>
@@ -411,10 +403,10 @@ export default function TechnicalProcurementClientPage() {
             </FileUploadPopover>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <QuotesComparison isRefreshing={isRefreshingQuotes} />
         </CardContent>
-      </Card>
+      </BaseCard>
     </div>
   ) : (
     // No RFQ selected

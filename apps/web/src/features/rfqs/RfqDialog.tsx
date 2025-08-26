@@ -1,6 +1,12 @@
 'use client';
 
-import { getUrgencyLevelDisplay, UrgencyLevel, urgencyLevelEnum } from '@/drizzle/schema/enums';
+import {
+  getStatusDisplay,
+  getUrgencyLevelDisplay,
+  statusEnum,
+  UrgencyLevel,
+  urgencyLevelEnum,
+} from '@/drizzle/schema/enums';
 import type { NewRfq, Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
 import { createRfq, updateRfq } from '@/services/technical/rfq-client';
@@ -263,12 +269,10 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('status', value)}
                 name="status"
-                selectOptions={[
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'in_progress', label: 'In Progress' },
-                  { value: 'completed', label: 'Completed' },
-                  { value: 'cancelled', label: 'Cancelled' },
-                ]}
+                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                  value: status,
+                  label: getStatusDisplay(status),
+                }))}
               />
               <KeyValuePair
                 label="Urgency Level"
