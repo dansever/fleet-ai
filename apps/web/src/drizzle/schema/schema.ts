@@ -245,6 +245,7 @@ export const quotesTable = pgTable(
   {
     // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), //fk to orgs table
     rfqId: uuid('rfq_id').notNull(), //fk to rfqs table
 
     // Quote Identification
@@ -302,6 +303,11 @@ export const quotesTable = pgTable(
   },
   (table) => [
     foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_quotes_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [table.rfqId],
       foreignColumns: [rfqsTable.id],
       name: 'fk_quotes_rfq_id',
@@ -327,6 +333,10 @@ export const rfqsRelations = relations(rfqsTable, ({ one, many }) => ({
 }));
 
 export const quotesRelations = relations(quotesTable, ({ one }) => ({
+  organization: one(organizationsTable, {
+    fields: [quotesTable.orgId],
+    references: [organizationsTable.id],
+  }),
   rfq: one(rfqsTable, {
     fields: [quotesTable.rfqId],
     references: [rfqsTable.id],

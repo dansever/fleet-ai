@@ -61,13 +61,15 @@ export async function POST(request: NextRequest) {
     const { dbUser, error } = await authorizeUser();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
+    // Get orgId from request body
     if (!dbUser.orgId) return jsonError('User has no organization', 403);
+    const dbOrgId = dbUser.orgId;
 
     // Get request body
     const body = await request.json();
 
     // Create quote
-    const newQuote = await createQuote(body);
+    const newQuote = await createQuote({ ...body, orgId: dbOrgId });
 
     return NextResponse.json(newQuote);
   } catch (error) {

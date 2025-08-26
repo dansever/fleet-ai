@@ -2,7 +2,7 @@
 
 import type { Quote, Rfq } from '@/drizzle/types';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';
-import { createQuote, updateQuote } from '@/services/technical/quote-client';
+import { createQuote, CreateQuoteData, updateQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -162,7 +162,6 @@ export default function QuoteDialog({
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
           status: serializedFormData.status,
-          createdAt: serializedFormData.createdAt,
         };
         savedQuote = await createQuote(createData);
         toast.success('Quote created successfully');
@@ -318,14 +317,6 @@ export default function QuoteDialog({
                   { value: 'completed', label: 'Completed' },
                   { value: 'cancelled', label: 'Cancelled' },
                 ]}
-              />
-              <KeyValuePair
-                label="Received At"
-                value={formData.createdAt}
-                valueType="date"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('createdAt', value)}
-                name="createdAt"
               />
             </div>
           </ContentSection>

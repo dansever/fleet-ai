@@ -1,6 +1,18 @@
 import type { NewQuote, Quote } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
 
+// Client-side type for creating Quotes (orgId and userId are handled server-side)
+export type CreateQuoteData = Omit<
+  NewQuote,
+  'orgId' | 'id' | 'createdAt' | 'updatedAt' | 'sentAt'
+> & {
+  // ISO string for API transport (null becomes undefined for optional fields)
+  sentAt?: string | null;
+};
+
+// Client-side type for updating Quotes
+export type UpdateQuoteData = Partial<CreateQuoteData>;
+
 /**
  * Get a quote by ID
  */
@@ -20,7 +32,7 @@ export async function getQuotesByRfq(rfqId: Quote['rfqId']): Promise<Quote[]> {
 /**
  * Create a new quote
  */
-export async function createQuote(data: Partial<NewQuote>): Promise<Quote> {
+export async function createQuote(data: CreateQuoteData): Promise<Quote> {
   const res = await api.post('/api/quotes', data);
   return res.data;
 }
@@ -28,7 +40,7 @@ export async function createQuote(data: Partial<NewQuote>): Promise<Quote> {
 /**
  * Update an existing quote
  */
-export async function updateQuote(id: Quote['id'], data: Partial<NewQuote>): Promise<Quote> {
+export async function updateQuote(id: Quote['id'], data: UpdateQuoteData): Promise<Quote> {
   const res = await api.put(`/api/quotes?id=${id}`, data);
   return res.data;
 }
