@@ -1,4 +1,4 @@
-import type { FuelBid, NewFuelBid } from '@/drizzle/types';
+import type { FuelBid, FuelTender, NewFuelBid } from '@/drizzle/types';
 import { api, backendApi } from '../api-client';
 
 // Client-side type for creating Fuel Bids (server handles system fields)
@@ -40,8 +40,11 @@ export async function getFuelBidsByOrg(): Promise<FuelBid[]> {
 /**
  * Create a new fuel bid
  */
-export async function createFuelBid(data: CreateFuelBidData): Promise<FuelBid> {
-  const res = await api.post('/api/fuel-bids', data);
+export async function createFuelBid(
+  data: CreateFuelBidData,
+  tenderId: FuelTender['id'],
+): Promise<FuelBid> {
+  const res = await api.post(`/api/fuel-bids?tenderId=${tenderId}`, data);
   return res.data;
 }
 
