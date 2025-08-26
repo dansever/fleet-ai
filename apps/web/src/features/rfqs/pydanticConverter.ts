@@ -14,7 +14,7 @@ interface PydanticPart {
   tagged_date: string | null;
 }
 
-interface PydanticRFQ {
+export interface PydanticRFQ {
   // Identifiers
   rfq_number: string | null;
 

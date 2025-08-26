@@ -308,8 +308,8 @@ export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBids
     try {
       const result = await extractFuelBid(file);
       const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
-      const newdBid = await createFuelBid(convertedBid, selectedTender.id);
-      addFuelBid(newdBid);
+      const createdBid = await createFuelBid(convertedBid, selectedTender.id);
+      addFuelBid(createdBid);
       toast.success('Fuel bid extracted successfully');
     } catch (error) {
       toast.error('Error extracting fuel bid');

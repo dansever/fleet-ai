@@ -47,7 +47,7 @@ interface PydanticFuelBid {
  * @returns NewFuelBid object ready for database insertion
  */
 export function convertPydanticToFuelBid(
-  pydanticBid: PydanticFuelBid,
+  pydanticBid: any,
   tenderId: string,
   round?: number,
 ): NewFuelBid {
