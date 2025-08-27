@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { Plane, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import type React from 'react';
 
 export interface BaseCardProps {
@@ -26,23 +26,30 @@ export const BaseCard = ({
 export const FeatureCard = ({
   title,
   description,
-  icon = <Plane className="w-6 h-6" />,
+  icon = null,
   gradient = 'from-violet-600 to-blue-600',
   className,
+  buttonChildren,
+  bodyChildren,
 }: {
   title: string;
   description: string;
   icon?: React.ReactNode;
   gradient?: string;
   className?: string;
+  buttonChildren?: React.ReactNode;
+  bodyChildren?: React.ReactNode;
 }) => (
   <Card className={cn('rounded-3xl border-0 overflow-hidden p-0', className)}>
     <div className={cn('p-6 text-white bg-gradient-to-r', gradient)}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-white/20 rounded-2xl">{icon}</div>
-        <h3 className="text-xl font-bold">{title}</h3>
+      <div className="flex items-center gap-3 mb-4 justify-between">
+        <div className="flex flex-row gap-2 items-center">
+          {icon && <div className="p-2 bg-white/20 rounded-2xl">{icon}</div>}
+          <h3 className="text-xl font-bold">{title}</h3>
+        </div>
+        {buttonChildren}
       </div>
-      <p className="text-white/80">{description}</p>
+      {bodyChildren && <p className="text-white/80">{bodyChildren}</p>}
     </div>
   </Card>
 );

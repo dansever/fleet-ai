@@ -74,7 +74,11 @@ export async function extractQuote(file: File): Promise<unknown> {
  * @param rfqId
  * @returns
  */
-export async function analyzeQuotes(rfqId: Quote['rfqId']): Promise<unknown> {
-  const res = await backendApi.post(`/api/v1/technical/quotes/analyze?rfqId=${rfqId}`);
+export async function compareQuotes(rfqId: Quote['rfqId']): Promise<unknown> {
+  const res = await backendApi.post(
+    '/api/v1/quotes/compare',
+    null, // no body
+    { params: { rfqId } }, // query parameter
+  );
   return res.data;
 }

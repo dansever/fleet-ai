@@ -3,7 +3,7 @@
 from fastapi import File, UploadFile
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
-from app.services.document_extraction_service import process_document_extraction
+from app.services import process_document_extraction
 from .config import QUOTE_CONFIG
 import os
 import json

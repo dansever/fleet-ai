@@ -11,7 +11,7 @@ import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import { createRandomQuote } from '@/features/quotes/utils';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
-import { createQuote, extractQuote } from '@/services/technical/quote-client';
+import { compareQuotes, createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
@@ -43,6 +43,8 @@ export default function TechnicalProcurementClientPage() {
     addRfq,
     addQuote,
     deleteRfqAndSelectAdjacent,
+    quoteComparisonResult,
+    setQuoteComparisonResult,
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
@@ -88,6 +90,21 @@ export default function TechnicalProcurementClientPage() {
     } catch (error) {
       console.error('Error extracting quote:', error);
       toast.error('Error extracting quote from file');
+    }
+  };
+
+  const handleAnalyzeQuotes = async () => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+    try {
+      const res = await compareQuotes(selectedRfq.id);
+      setQuoteComparisonResult(res as unknown as JSON);
+      toast.success('Quotes analyzed successfully');
+    } catch (error) {
+      console.error('Error analyzing quotes:', error);
+      toast.error('Error analyzing quotes');
     }
   };
 
@@ -391,7 +408,12 @@ export default function TechnicalProcurementClientPage() {
                   icon={RefreshCw}
                   className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
                 />
-                <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
+                <Button
+                  intent="primary"
+                  icon={Sparkles}
+                  text="Analyze"
+                  onClick={handleAnalyzeQuotes}
+                />
                 <FileUploadPopover
                   open={uploadQuotePopoverOpen}
                   onOpenChange={setUploadQuotePopoverOpen}

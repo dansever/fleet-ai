@@ -1,4 +1,5 @@
 import {
+  BarChart,
   Fuel,
   LayoutDashboard,
   Package,
@@ -24,6 +25,13 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       url: '/dashboard',
       icon: LayoutDashboard,
       isReady: true,
+    },
+    {
+      title: 'Analytics',
+      description: 'Analytics',
+      url: '/analytics',
+      icon: BarChart,
+      isReady: false,
     },
   ],
   procurement: [

@@ -1,3 +1,3 @@
-from .run_llm import run_llm_prompt
+from .basic import basic_llm_call
 
-__all__ = ['run_llm_prompt']
+__all__ = ['basic_llm_call']
