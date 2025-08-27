@@ -2,7 +2,7 @@ from fastapi import UploadFile, HTTPException
 from typing import Type
 from app.utils import get_logger, save_temp_file, cleanup_temp_file, validate_file_type
 from app.core.agents.extractor import get_llama_extractor
-from app.shared.schemas import ResponseEnvelope, Meta
+from app.shared.schemas import ResponseEnvelope
 
 logger = get_logger(__name__)
 
@@ -55,9 +55,8 @@ def process_document_extraction(
 
         return ResponseEnvelope(
             data=result.data,
-            meta=Meta(
-                usage=result.extraction_metadata.get("usage", {}) if result.extraction_metadata else None
-            )
+            message=f"Extraction completed successfully for {log_label}",
+            success=True
         )
 
     except HTTPException:

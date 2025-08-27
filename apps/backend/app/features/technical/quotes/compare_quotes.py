@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from app.db.operations import get_quotes_by_rfq_id
 from app.shared.schemas import ResponseEnvelope
-from app.services.ai.client import get_ai_client
+from app.services.ai import get_openai_client
 import json
 
 from decimal import Decimal
@@ -153,16 +153,14 @@ Rules:
 
   try:
       # Initialize AI client using centralized function
-      ai_client = get_ai_client()
+      ai_client = get_openai_client()
       
       # Use the new AI client structure
-      result = ai_client.response(
-          response_schema=QuoteComparisonResult,
+      result = ai_client.generate(
           prompt=prompt,
-          system_message=system_message,
+          system=system_message,
           temperature=0.3
       )
-      print(result)
       return result
       
   except Exception as e:

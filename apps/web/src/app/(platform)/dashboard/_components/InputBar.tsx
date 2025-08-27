@@ -4,20 +4,20 @@ import { simpleLLM } from '@/services/ai/llm-client';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
+import { LLMResponse } from '@/types/llm';
 import { Bot, RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
 
 export default function InputBar() {
   const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState<string | null>(null);
+  const [response, setResponse] = useState<LLMResponse<string> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAskAI = async () => {
     try {
       setIsLoading(true);
       const result = await simpleLLM(prompt);
-      // console.log(result.data.data); // this is the response
-      // setResponse(result.data.data);
+      setResponse(result?.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -34,6 +34,12 @@ export default function InputBar() {
           className="flex-1 min-h-10"
           value={prompt}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt(e.target.value)}
+          onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault(); // prevents newline
+              handleAskAI();
+            }
+          }}
         />
         <Button
           intent="primary"
@@ -45,7 +51,7 @@ export default function InputBar() {
       </div>
       <FeatureCard
         title="AI Response"
-        description={response || 'No response yet'}
+        description={response?.content || 'No response yet'}
         icon={<Bot />}
         gradient="linear-to-r from-blue-500 to-pink-300"
         className="flex-1 min-h-10"
@@ -57,7 +63,7 @@ export default function InputBar() {
             className={`${isLoading && 'animate-spin'}`}
           />
         }
-        // bodyChildren={<p className="text-white/80">{response}</p>}
+        bodyChildren={<span className="text-white/80">{response?.content}</span>}
       ></FeatureCard>
     </div>
   );
