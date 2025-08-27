@@ -1,24 +1,21 @@
-# Google Cloud SDK
+## Google Cloud SDK
 
-## Authenticate with a user identity which authorizes gcloud to access Google Cloud Platform.
+#### Authenticate with a user identity which authorizes gcloud to access Google Cloud Platform: `gcloud auth login`
 
-gcloud auth login
+####List all credentialed accounts: `gcloud auth list`
 
-## List all credentialed accounts.
-
-gcloud auth list
-To run a python script - PYTHONPATH=. python backend/agents/....
-
-## Start FastAPI server in root folder:
+## Start FastAPI server:
 
 🟩 PowerShell:
-cd backend
+
+```
+cd apps/backend
 .\start.ps1
+```
 
-## Clean pycache folders
+🟩 Git Bash:
 
-git-bash on Windows:
-Get-ChildItem -Recurse -Filter **pycache** | Remove-Item -Recurse -Force
-
-Powershell:
-Get-ChildItem -Recurse -Directory -Filter "**pycache**" | Remove-Item -Recurse -Force
+```
+cd aps/backend
+.\start.sh
+```
