@@ -444,9 +444,6 @@ export default function TechnicalProcurementClientPage() {
                 </FileUploadPopover>
               </div>
             </CardHeader>
-            <div>
-              <p>{JSON.stringify(quoteComparisonResult)}</p>
-            </div>
             <CardContent>
               <QuotesComparison isRefreshing={isRefreshingQuotes} />
             </CardContent>

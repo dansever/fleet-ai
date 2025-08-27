@@ -80,5 +80,5 @@ export async function compareQuotes(rfqId: Quote['rfqId']): Promise<unknown> {
     null, // no body
     { params: { rfqId } }, // query parameter
   );
-  return res.data.data?.data;
+  return res.data;
 }

@@ -19,8 +19,9 @@ async def compare_quotes_endpoint(
     """
     Compare quotes and provide insights and recommendations.
     """
-    comparison_result = await compare_quotes(db,rfqId)
+    result = await compare_quotes(db,rfqId)
     return ResponseEnvelope(
+        data=result,
         success=True,
         message="Quotes compared successfully",
-        data=comparison_result)
+        )

@@ -56,7 +56,7 @@ export async function extractRfq(file: File): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await backendApi.post('/api/v1/technical/rfqs/extract', formData, {
+  const res = await backendApi.post('/api/v1/extract/rfq', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

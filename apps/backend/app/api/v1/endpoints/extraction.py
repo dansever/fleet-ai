@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/extract", tags=["extraction"])
 
 # POST /api/v1/extract/quotes - Extract quotes
-@router.post("/quotes", response_model=ResponseEnvelope)
+@router.post("/quote", response_model=ResponseEnvelope)
 async def extract_quote_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -34,7 +34,7 @@ async def extract_quote_from_document(
         )
 
 
-@router.post("/rfqs", response_model=ResponseEnvelope)
+@router.post("/rfq", response_model=ResponseEnvelope)
 async def extract_rfq_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -58,7 +58,7 @@ async def extract_rfq_from_document(
             detail="Internal server error during RFQ extraction"
         )
 
-@router.post("/fuel/bids", response_model=ResponseEnvelope)
+@router.post("/fuel/bid", response_model=ResponseEnvelope)
 async def extract_fuel_bid_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -82,7 +82,7 @@ async def extract_fuel_bid_from_document(
             detail="Internal server error during fuel bid extraction"
         )
 
-@router.post("/fuel/contracts", response_model=ResponseEnvelope)
+@router.post("/fuel/contract", response_model=ResponseEnvelope)
 async def extract_fuel_contract_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:
@@ -96,7 +96,7 @@ async def extract_fuel_contract_from_document(
     raise HTTPException(status_code=501, detail="Fuel contract extraction not yet implemented")
 
 
-@router.post("/service-contracts", response_model=ResponseEnvelope)
+@router.post("/service-contract", response_model=ResponseEnvelope)
 async def extract_service_contract_from_document(
     file: UploadFile = File(...)
 ) -> ResponseEnvelope:

@@ -8,3 +8,10 @@ export async function simpleLLM(prompt: string): Promise<ResponseEnvelope<LLMRes
   });
   return res.data;
 }
+
+export async function simpleLLM2(prompt: string): Promise<any> {
+  const res = await backendApi.post<any>('/api/v1/llm/basic', {
+    prompt,
+  });
+  return res;
+}
