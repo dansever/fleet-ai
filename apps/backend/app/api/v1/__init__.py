@@ -4,5 +4,6 @@ Contains all v1 API endpoints and routing configuration.
 """
 
 from .router import api_router
+from .endpoints import quotes
 
-__all__ = ["api_router"]
+__all__ = ["api_router" , "quotes"]

@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { analyzeQuotes } from '@/services/technical/quote-client';
+import { compareQuotes } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ContentSection } from '@/stories/Card/Card';
 import { QuoteAnalysisResponse } from '@/types/quote-analysis';
@@ -48,12 +48,12 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
     try {
       toast.info('Analyzing quotes with AI...');
 
-      const result = await analyzeQuotes(selectedRfq.id);
+      const result = (await compareQuotes(selectedRfq.id)) as unknown as AnalysisResult;
 
       // Extract data from the ResponseEnvelope structure
-      const analysisData = result.data as AnalysisResult;
-      setAnalysisResult(analysisData);
-
+      const comparisonData = result;
+      setAnalysisResult(comparisonData);
+      console.log('comparisonData:', comparisonData);
       toast.success('Quote analysis completed successfully');
     } catch (error) {
       console.error('Error analyzing quotes:', error);

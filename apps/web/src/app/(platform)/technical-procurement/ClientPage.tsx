@@ -11,7 +11,7 @@ import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import { createRandomQuote } from '@/features/quotes/utils';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
-import { analyzeQuotes, createQuote, extractQuote } from '@/services/technical/quote-client';
+import { compareQuotes, createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
@@ -43,6 +43,8 @@ export default function TechnicalProcurementClientPage() {
     addRfq,
     addQuote,
     deleteRfqAndSelectAdjacent,
+    quoteComparisonResult,
+    setQuoteComparisonResult,
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
@@ -98,8 +100,8 @@ export default function TechnicalProcurementClientPage() {
     }
     try {
       toast.info('Analyzing quotes...');
-      const res = await analyzeQuotes(selectedRfq.id);
-      console.log(res);
+      const res = await compareQuotes(selectedRfq.id);
+      setQuoteComparisonResult(res as unknown as JSON);
       toast.success('Quotes analyzed successfully');
     } catch (error) {
       console.error('Error analyzing quotes:', error);
@@ -443,6 +445,9 @@ export default function TechnicalProcurementClientPage() {
                 </FileUploadPopover>
               </div>
             </CardHeader>
+            <div>
+              <p>{JSON.stringify(quoteComparisonResult?.raw)}</p>
+            </div>
             <CardContent>
               <QuotesComparison isRefreshing={isRefreshingQuotes} />
             </CardContent>

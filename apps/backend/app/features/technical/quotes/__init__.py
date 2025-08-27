@@ -1,5 +1,7 @@
-from .analyze_quotes import analyze_quotes
+from .analyze import analyze_quotes
+from .compare_quotes import compare_quotes
 
 all = [
-    "analyze_quotes"
+    "analyze_quotes",
+    "compare_quotes"
 ]

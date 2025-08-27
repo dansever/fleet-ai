@@ -55,13 +55,6 @@ class AIResponse(BaseModel):
     result: Optional[str] = None
     error: Optional[str] = None
 
-
-
-
-
-
-
-
 # Core AI endpoints
 @router.post("/analyze-text", response_model=AIResponse)
 async def analyze_text_endpoint(request: TextAnalysisRequest):

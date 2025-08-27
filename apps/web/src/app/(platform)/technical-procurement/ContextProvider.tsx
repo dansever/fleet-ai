@@ -13,6 +13,8 @@ export interface TechnicalProcurementContextValue {
   // Computed data
   selectedRfq: Rfq | null;
   selectedRfqQuotes: Quote[];
+  quoteComparisonResult: JSON | null;
+  setQuoteComparisonResult: (result: JSON | null) => void;
 
   // Actions
   setSelectedRfqId: (id: string | null) => void;
@@ -55,6 +57,8 @@ export function TechnicalProcurementContextProvider({
   const [selectedRfqId, setSelectedRfqId] = useState<string | null>(
     initialRfqs.length > 0 ? initialRfqs[0].id : null,
   );
+
+  const [quoteComparisonResult, setQuoteComparisonResult] = useState<JSON | null>(null);
 
   // Quote caching - Map of rfqId -> quotes
   const [quotesCache, setQuotesCache] = useState<Map<string, Quote[]>>(new Map());
@@ -302,6 +306,8 @@ export function TechnicalProcurementContextProvider({
     // Computed data
     selectedRfq,
     selectedRfqQuotes,
+    quoteComparisonResult,
+    setQuoteComparisonResult,
 
     // Actions
     setSelectedRfqId,
