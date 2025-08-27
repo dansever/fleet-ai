@@ -1,4 +1,4 @@
-import { NewRfq } from '@/drizzle/types';
+import { CreateRfqData } from '@/services/technical/rfq-client';
 
 // Pydantic schema interfaces matching the backend RFQ schema
 interface PydanticPart {
@@ -14,7 +14,7 @@ interface PydanticPart {
   tagged_date: string | null;
 }
 
-interface PydanticRFQ {
+export interface PydanticRFQ {
   // Identifiers
   rfq_number: string | null;
 
@@ -30,18 +30,18 @@ interface PydanticRFQ {
 }
 
 /**
- * Converts a Pydantic RFQ object from the backend to a NewRfq object
- * that can be inserted into the database.
+ * Converts a Pydantic RFQ object from the backend to a CreateRfqData object
+ * that can be sent to the client API.
  *
  * @param pydanticRfq - The RFQ object from the backend
- * @returns NewRfq object ready for database insertion
+ * @returns CreateRfqData object ready for API submission
  */
-export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): NewRfq {
+export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): CreateRfqData {
   if (!pydanticRfq) {
     throw new Error('No RFQ data found in the extracted data');
   }
 
-  const newRfq: Partial<NewRfq> = {
+  const createRfqData: CreateRfqData = {
     // RFQ Identification
     direction: 'received', // Uploaded RFQs are always received
     rfqNumber: pydanticRfq.rfq_number,
@@ -69,14 +69,13 @@ export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): NewRfq {
 
     // Workflow Management
     status: 'pending',
-    statusHistory: [],
     selectedQuoteId: null,
 
-    // Timestamps - will be set by the database
+    // Timestamps - will be set by the database (ISO string for API transport)
     sentAt: null,
   };
 
-  console.log('✅ Converted Pydantic RFQ --> New RFQ');
+  console.log('✅ Converted Pydantic RFQ --> CreateRfqData');
 
-  return newRfq as NewRfq;
+  return createRfqData;
 }

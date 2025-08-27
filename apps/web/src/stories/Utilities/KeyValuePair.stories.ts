@@ -114,11 +114,19 @@ export const MultipleItems: Story = {
     createElement(
       'div',
       { className: 'space-y-0' },
-      createElement(KeyValuePair, { label: 'Flight Number', value: 'AA-1234' }),
-      createElement(KeyValuePair, { label: 'Departure Time', value: '14:30 UTC' }),
-      createElement(KeyValuePair, { label: 'Duration', value: 385 }),
-      createElement(KeyValuePair, { label: 'On Schedule', value: true }),
-      createElement(KeyValuePair, { label: 'Gate', value: 'B12' }),
+      createElement(KeyValuePair, {
+        label: 'Flight Number',
+        value: 'AA-1234',
+        valueType: 'string',
+      }),
+      createElement(KeyValuePair, {
+        label: 'Departure Time',
+        value: '14:30 UTC',
+        valueType: 'string',
+      }),
+      createElement(KeyValuePair, { label: 'Duration', value: 385, valueType: 'number' }),
+      createElement(KeyValuePair, { label: 'On Schedule', value: true, valueType: 'boolean' }),
+      createElement(KeyValuePair, { label: 'Gate', value: 'B12', valueType: 'string' }),
     ),
 };
 
@@ -131,29 +139,34 @@ export const MixedEditModes: Story = {
       createElement(KeyValuePair, {
         label: 'Airline Code',
         value: 'FL',
+        valueType: 'string',
         editMode: false,
       }),
       createElement(KeyValuePair, {
         label: 'Flight Number',
         value: '001',
+        valueType: 'string',
         editMode: true,
         onChange: (value) => console.log('Flight number:', value),
       }),
       createElement(KeyValuePair, {
         label: 'Passengers',
         value: 156,
+        valueType: 'number',
         editMode: true,
         onChange: (value) => console.log('Passengers:', value),
       }),
       createElement(KeyValuePair, {
         label: 'Catering Required',
         value: true,
+        valueType: 'boolean',
         editMode: true,
         onChange: (value) => console.log('Catering:', value),
       }),
       createElement(KeyValuePair, {
         label: 'Status',
         value: false,
+        valueType: 'boolean',
         editMode: false,
       }),
     ),
@@ -168,16 +181,19 @@ export const CustomStyling: Story = {
       createElement(KeyValuePair, {
         label: 'Priority Level',
         value: 'High',
+        valueType: 'string',
         className: 'bg-red-50 rounded-lg px-3',
       }),
       createElement(KeyValuePair, {
         label: 'Urgency',
         value: 'Medium',
+        valueType: 'string',
         className: 'bg-yellow-50 rounded-lg px-3',
       }),
       createElement(KeyValuePair, {
         label: 'Complexity',
         value: 'Low',
+        valueType: 'string',
         className: 'bg-green-50 rounded-lg px-3',
       }),
     ),

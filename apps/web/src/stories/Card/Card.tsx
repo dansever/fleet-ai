@@ -13,8 +13,6 @@ export interface BaseCardProps {
 
 // Feature Card - For showcasing features or services
 export const BaseCard = ({
-  title,
-  description,
   className,
   children,
 }: {
@@ -22,11 +20,7 @@ export const BaseCard = ({
   description: string;
   className?: string;
   children?: React.ReactNode;
-}) => (
-  <Card className={cn('rounded-3xl border-1 overflow-hidden', className)}>
-    <CardContent>{children}</CardContent>
-  </Card>
-);
+}) => <Card className={cn('rounded-3xl border-1 overflow-hidden', className)}>{children}</Card>;
 
 // Feature Card - For showcasing features or services
 export const FeatureCard = ({

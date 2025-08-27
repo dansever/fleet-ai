@@ -2,8 +2,9 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
+import { TabsContent } from '@/components/ui/tabs';
 import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
 import { Quote } from '@/drizzle/types';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
@@ -12,15 +13,17 @@ import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { BaseCard, ContentSection } from '@/stories/Card/Card';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { CopyableText } from '../_components/CopyableText';
 import { useTechnicalProcurement } from './ContextProvider';
+import QuoteAnalysis from './_components/QuoteAnalysis';
 import QuotesComparison from './_components/QuotesComparison';
 import RfqList from './_components/RfqList';
 
@@ -76,7 +79,7 @@ export default function TechnicalProcurementClientPage() {
       const convertedQuote = convertPydanticToQuote(extractedData as any, selectedRfq.id);
 
       // Create the quote in the database
-      const newQuote = await createQuote(convertedQuote);
+      const newQuote = await createQuote({ ...convertedQuote, sentAt: null });
 
       // Add to local cache
       addQuote(newQuote);
@@ -105,23 +108,6 @@ export default function TechnicalProcurementClientPage() {
     }
   };
 
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'sent':
-        return 'Sent';
-      case 'quoted':
-        return 'Quoted';
-      case 'approved':
-        return 'Approved';
-      case 'rejected':
-        return 'Rejected';
-      default:
-        return status;
-    }
-  };
-
   // Sidebar content - RFQ List
   const sidebarContent = (
     <RfqList
@@ -147,7 +133,7 @@ export default function TechnicalProcurementClientPage() {
           <span>
             Status:{' '}
             <Badge className={getStatusColor(selectedRfq.status || 'pending')}>
-              {getStatusDisplay(selectedRfq.status || 'pending')}
+              {selectedRfq.status || 'pending'}
             </Badge>
           </span>
           <span>Created: {formatDate(new Date(selectedRfq.createdAt))}</span>
@@ -325,6 +311,12 @@ export default function TechnicalProcurementClientPage() {
               >
                 <KeyValuePair
                   keyClassName="max-w-1/2"
+                  label="Status"
+                  value={selectedRfq.status || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
                   label="Urgency"
                   value={getUrgencyLevelDisplay(selectedRfq.urgencyLevel)}
                   valueType="string"
@@ -347,74 +339,103 @@ export default function TechnicalProcurementClientPage() {
         )}
       </div>
 
-      <Card className="bg-gradient-to-br from-white to-slate-50 border-slate-200 shadow-xl rounded-3xl overflow-hidden">
-        <CardHeader className="flex items-start justify-between">
-          {/* Left Side - Title and Description */}
-          <div>
-            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                <Package className="w-6 h-6 text-white" />
+      <Tabs
+        tabs={[
+          { label: 'Quotes', value: 'quotes' },
+          { label: 'Analysis', value: 'analysis' },
+          { label: 'Logistics', value: 'logistics' },
+        ]}
+        selectedTab="quotes"
+        onTabChange={() => {}}
+      >
+        <TabsContent value="quotes">
+          <BaseCard
+            title="Technical Quotes Comparison"
+            description="Compare and evaluate quotes for {selectedRfq?.rfqNumber}"
+          >
+            <CardHeader className="flex items-start justify-between">
+              {/* Left Side - Title and Description */}
+              <div>
+                <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  Technical Quotes Comparison
+                </CardTitle>
+                <p className="text-slate-600 mt-2 ml-12">
+                  Compare and evaluate quotes for{' '}
+                  <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
+                </p>
+                <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
+                  <span>Total Quotes: {selectedRfqQuotes.length}</span>
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
+                    <span>
+                      Pending:{' '}
+                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
+                    </span>
+                  )}
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
+                    <span className="text-green-600">
+                      Accepted:{' '}
+                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
+                    </span>
+                  )}
+                </div>
               </div>
-              Technical Quotes Comparison
-            </CardTitle>
-            <p className="text-slate-600 mt-2 ml-12">
-              Compare and evaluate quotes for{' '}
-              <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
-            </p>
-            <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
-              <span>Total Quotes: {selectedRfqQuotes.length}</span>
-              {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
-                <span>
-                  Pending: {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
-                </span>
-              )}
-              {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
-                <span className="text-green-600">
-                  Accepted:{' '}
-                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
-                </span>
-              )}
-            </div>
-          </div>
-          {/* Right Side - Actions */}
-          <div className="flex gap-2">
-            <Button
-              intent="ghost"
-              onClick={refreshSelectedRfqQuotes}
-              disabled={isLoadingQuotes}
-              icon={RefreshCw}
-              className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
-            />
-            <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
-            <FileUploadPopover
-              open={uploadQuotePopoverOpen}
-              onOpenChange={setUploadQuotePopoverOpen}
-              triggerButtonIntent="add"
-              triggerButtonText="Upload Quote"
-              onSend={() => {}}
-            >
-              <div className="flex flex-col gap-2 text-sm">
-                <Button intent="secondary" text="Manually Add Quote" size="sm" onClick={() => {}} />
+              {/* Right Side - Actions */}
+              <div className="flex gap-2">
                 <Button
                   intent="ghost"
-                  text="Or generate random Quote"
-                  size="sm"
-                  className="text-gray-500"
-                  onClick={async () => {
-                    const quote = await createRandomQuote(selectedRfq.id);
-                    addQuote(quote);
-                    console.log('Time to close the popover');
-                    setUploadQuotePopoverOpen(false);
-                  }}
+                  onClick={refreshSelectedRfqQuotes}
+                  disabled={isLoadingQuotes}
+                  icon={RefreshCw}
+                  className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
                 />
+                <Button intent="primary" icon={Sparkles} text="Analyze" onClick={() => {}} />
+                <FileUploadPopover
+                  open={uploadQuotePopoverOpen}
+                  onOpenChange={setUploadQuotePopoverOpen}
+                  triggerButtonIntent="add"
+                  triggerButtonText="Upload Quote"
+                  onSend={() => {}}
+                >
+                  <div className="flex flex-col gap-2 text-sm">
+                    <Button
+                      intent="secondary"
+                      text="Manually Add Quote"
+                      size="sm"
+                      onClick={() => {}}
+                    />
+                    <Button
+                      intent="ghost"
+                      text="Or generate random Quote"
+                      size="sm"
+                      className="text-gray-500"
+                      onClick={async () => {
+                        const quote = await createRandomQuote(selectedRfq.id);
+                        addQuote(quote);
+                        console.log('Time to close the popover');
+                        setUploadQuotePopoverOpen(false);
+                      }}
+                    />
+                  </div>
+                </FileUploadPopover>
               </div>
-            </FileUploadPopover>
+            </CardHeader>
+            <CardContent>
+              <QuotesComparison isRefreshing={isRefreshingQuotes} />
+            </CardContent>
+          </BaseCard>
+        </TabsContent>
+        <TabsContent value="analysis">
+          <QuoteAnalysis isRefreshing={isRefreshingQuotes} />
+        </TabsContent>
+        <TabsContent value="logistics">
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Coming Soon</p>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <QuotesComparison isRefreshing={isRefreshingQuotes} />
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   ) : (
     // No RFQ selected

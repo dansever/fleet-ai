@@ -1,5 +1,17 @@
-import type { FuelBid, FuelTender, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
+import type { FuelBid, FuelTender, NewFuelBid } from '@/drizzle/types';
 import { api, backendApi } from '../api-client';
+
+// Client-side type for creating Fuel Bids (server handles system fields)
+export type CreateFuelBidData = Omit<
+  NewFuelBid,
+  'id' | 'createdAt' | 'updatedAt' | 'decisionByUserId' | 'decisionAt'
+> & {
+  // ISO string for API transport (null becomes undefined for optional fields)
+  bidSubmittedAt?: string | null;
+};
+
+// Client-side type for updating Fuel Bids
+export type UpdateFuelBidData = Partial<CreateFuelBidData>;
 
 /**
  * Get a fuel bid by ID
@@ -29,7 +41,7 @@ export async function getFuelBidsByOrg(): Promise<FuelBid[]> {
  * Create a new fuel bid
  */
 export async function createFuelBid(
-  data: NewFuelBid,
+  data: CreateFuelBidData,
   tenderId: FuelTender['id'],
 ): Promise<FuelBid> {
   const res = await api.post(`/api/fuel-bids?tenderId=${tenderId}`, data);
@@ -39,7 +51,7 @@ export async function createFuelBid(
 /**
  * Update an existing fuel bid
  */
-export async function updateFuelBid(id: string, data: UpdateFuelBid): Promise<FuelBid> {
+export async function updateFuelBid(id: string, data: UpdateFuelBidData): Promise<FuelBid> {
   const res = await api.put(`/api/fuel-bids?id=${id}`, data);
   return res.data;
 }
@@ -54,7 +66,7 @@ export async function deleteFuelBid(id: string): Promise<void> {
 /**
  * Extract fuel bid from file
  */
-export async function extractFuelBid(file: File): Promise<unknown> {
+export async function extractFuelBid(file: File): Promise<any> {
   const formData = new FormData();
   formData.append('file', file);
 

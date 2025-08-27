@@ -31,12 +31,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# --- Local env files ---
+# --- env files ---
 .env
 .env.local
-.env*.local
-.env.production.local
-.env.development.local
+.env.production
 
 # --- Vercel ---
 .vercel
@@ -55,9 +53,8 @@ postgres_data/
 .cache/
 **/.cache/
 
-
 # --- Google AI ---
-google-credentials.json
+**/google-credentials.json
 
 # --- Clerk ---
 .clerk/

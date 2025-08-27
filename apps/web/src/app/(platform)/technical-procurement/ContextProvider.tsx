@@ -23,6 +23,7 @@ export interface TechnicalProcurementContextValue {
   updateRfq: (updatedRfq: Rfq) => void;
   addRfq: (newRfq: Rfq) => void;
   addQuote: (newQuote: Partial<Quote>) => void;
+  deleteQuote: (quoteId: string) => void;
   deleteRfqAndSelectAdjacent: (rfqId: string) => Promise<void>;
 
   // Loading states
@@ -231,6 +232,21 @@ export function TechnicalProcurementContextProvider({
     });
   };
 
+  const deleteQuote = (quoteId: string) => {
+    // Remove the quote from all RFQ caches
+    setQuotesCache((prev) => {
+      const newCache = new Map(prev);
+
+      // Iterate through all RFQ caches and remove the quote
+      for (const [rfqId, quotes] of newCache.entries()) {
+        const filteredQuotes = quotes.filter((quote) => quote.id !== quoteId);
+        newCache.set(rfqId, filteredQuotes);
+      }
+
+      return newCache;
+    });
+  };
+
   const deleteRfqAndSelectAdjacent = async (rfqId: string) => {
     try {
       // Delete from the server
@@ -296,6 +312,7 @@ export function TechnicalProcurementContextProvider({
     updateRfq,
     addRfq,
     addQuote,
+    deleteQuote,
     deleteRfqAndSelectAdjacent,
 
     // Loading states

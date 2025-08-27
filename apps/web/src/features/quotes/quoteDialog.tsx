@@ -1,8 +1,15 @@
 'use client';
 
+import {
+  getStatusDisplay,
+  OrderDirection,
+  orderDirectionDisplayMap,
+  OrderDirectionEnum,
+  statusEnum,
+} from '@/drizzle/schema/enums';
 import type { Quote, Rfq } from '@/drizzle/types';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';
-import { createQuote, updateQuote } from '@/services/technical/quote-client';
+import { createQuote, CreateQuoteData, updateQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -162,7 +169,6 @@ export default function QuoteDialog({
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
           status: serializedFormData.status,
-          createdAt: serializedFormData.createdAt,
         };
         savedQuote = await createQuote(createData);
         toast.success('Quote created successfully');
@@ -300,10 +306,10 @@ export default function QuoteDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('direction', value)}
                 name="direction"
-                selectOptions={[
-                  { value: 'sent', label: 'Sent' },
-                  { value: 'received', label: 'Received' },
-                ]}
+                selectOptions={Object.values(OrderDirectionEnum.enumValues).map((direction) => ({
+                  value: direction,
+                  label: orderDirectionDisplayMap[direction as OrderDirection],
+                }))}
               />
               <KeyValuePair
                 label="Status"
@@ -312,20 +318,10 @@ export default function QuoteDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('status', value)}
                 name="status"
-                selectOptions={[
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'in_progress', label: 'In Progress' },
-                  { value: 'completed', label: 'Completed' },
-                  { value: 'cancelled', label: 'Cancelled' },
-                ]}
-              />
-              <KeyValuePair
-                label="Received At"
-                value={formData.createdAt}
-                valueType="date"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('createdAt', value)}
-                name="createdAt"
+                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                  value: status,
+                  label: getStatusDisplay(status),
+                }))}
               />
             </div>
           </ContentSection>

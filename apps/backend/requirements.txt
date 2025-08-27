@@ -27,8 +27,14 @@ PyJWT[crypto]
 
 sqlalchemy
 asyncpg
+psycopg
 psycopg2-binary
 
 python-multipart
 
 pandas
+
+google-genai
+openai
+
+sqlacodegen

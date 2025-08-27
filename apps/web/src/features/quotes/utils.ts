@@ -1,6 +1,6 @@
-import { NewQuote, Quote } from '@/drizzle/types';
+import { Quote } from '@/drizzle/types';
 import { currencies } from '@/lib/constants/currencies';
-import { createQuote } from '@/services/technical/quote-client';
+import { createQuote, CreateQuoteData } from '@/services/technical/quote-client';
 
 export async function createRandomQuote(rfqId: Quote['id']): Promise<Partial<Quote>> {
   const randomNumber = Math.floor(Math.random() * 1000000);
@@ -28,7 +28,7 @@ export async function createRandomQuote(rfqId: Quote['id']): Promise<Partial<Quo
     quantity,
     unit: 'EA',
     notes: `Notes ${randomNumber}`,
-  } as unknown as Partial<NewQuote>;
+  } as unknown as CreateQuoteData;
   const res = await createQuote(generatedQuote);
   return res;
 }

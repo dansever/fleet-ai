@@ -7,6 +7,11 @@ export const OrderDirectionEnum = pgEnum('order_direction', [
 ]);
 export type OrderDirection = (typeof OrderDirectionEnum.enumValues)[number];
 
+export const orderDirectionDisplayMap: Record<OrderDirection, string> = {
+  sent: 'Sent',
+  received: 'Received',
+};
+
 // --------------------  Status Enum --------------------
 export const statusEnum = pgEnum('status', [
   'draft',

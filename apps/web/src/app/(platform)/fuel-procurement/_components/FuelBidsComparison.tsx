@@ -1,13 +1,14 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FuelBid, NewFuelBid } from '@/drizzle/types';
 import FuelBidDialog from '@/features/fuel/bid/FuelBidDialog';
 import { convertPydanticToFuelBid } from '@/features/fuel/bid/pydanticConverter';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
 import { createFuelBid, extractFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
+import { BaseCard } from '@/stories/Card/Card';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { CheckCircle, Clock, FileText, RefreshCw, Star, XCircle } from 'lucide-react';
@@ -308,8 +309,8 @@ export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBids
     try {
       const result = await extractFuelBid(file);
       const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
-      const newdBid = await createFuelBid(convertedBid, selectedTender.id);
-      addFuelBid(newdBid);
+      const createdBid = await createFuelBid(convertedBid, selectedTender.id);
+      addFuelBid(createdBid);
       toast.success('Fuel bid extracted successfully');
     } catch (error) {
       toast.error('Error extracting fuel bid');
@@ -317,35 +318,35 @@ export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBids
   };
 
   return (
-    <Card className="bg-gradient-to-br from-white to-slate-100 border-slate-200 shadow-2xl rounded-3xl">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <FileText className="w-6 h-6 text-blue-500" />
-              Fuel Bids
-            </CardTitle>
-            <p className="text-slate-600 mt-1">
-              Compare and evaluate fuel bids for {selectedTender?.title}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {onRefresh && (
-              <Button
-                intent="secondary"
-                icon={RefreshCw}
-                text="Refresh"
-                onClick={onRefresh}
-                disabled={isRefreshing}
-                className={isRefreshing ? 'animate-spin' : ''}
-              />
-            )}
-            <FileUploadPopover
-              triggerButtonIntent="primary"
-              triggerButtonText="New Bid"
-              onSend={handleSendFuelBidFile}
+    <BaseCard
+      title="Fuel Bids"
+      description="Compare and evaluate fuel bids for {selectedTender?.title}"
+    >
+      <CardHeader className="flex items-center justify-between">
+        <div>
+          <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <FileText className="w-6 h-6 text-blue-500" />
+            Fuel Bids
+          </CardTitle>
+          <p className="text-slate-600 mt-1">
+            Compare and evaluate fuel bids for {selectedTender?.title}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {onRefresh && (
+            <Button
+              intent="ghost"
+              icon={RefreshCw}
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className={isRefreshing ? 'animate-spin' : ''}
             />
-          </div>
+          )}
+          <FileUploadPopover
+            triggerButtonIntent="add"
+            triggerButtonText="Upload Bid"
+            onSend={handleSendFuelBidFile}
+          />
         </div>
       </CardHeader>
       <CardContent>
@@ -359,6 +360,6 @@ export default function FuelBidsComparison({ onRefresh, isRefreshing }: FuelBids
           onRowClick={() => {}}
         />
       </CardContent>
-    </Card>
+    </BaseCard>
   );
 }

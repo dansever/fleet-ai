@@ -10,11 +10,9 @@ const meta: Meta<typeof FileUploadPopover> = {
   },
   argTypes: {
     onSend: { action: 'onSend' },
-    onManualUpload: { action: 'onManualUpload' },
   },
   args: {
     onSend: () => {},
-    onManualUpload: () => {},
     accept: '*/*',
     maxSize: 10,
     className: '',
@@ -29,7 +27,6 @@ type Story = StoryObj<typeof meta>;
 export const FileUpload: Story = {
   args: {
     onSend: () => {},
-    onManualUpload: () => {},
     accept: '*/*',
     maxSize: 10,
     className: '',

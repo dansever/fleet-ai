@@ -1,9 +1,15 @@
 'use client';
 
-import { getUrgencyLevelDisplay, UrgencyLevel, urgencyLevelEnum } from '@/drizzle/schema/enums';
-import type { NewRfq, Rfq } from '@/drizzle/types';
+import {
+  getStatusDisplay,
+  getUrgencyLevelDisplay,
+  statusEnum,
+  UrgencyLevel,
+  urgencyLevelEnum,
+} from '@/drizzle/schema/enums';
+import type { Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
-import { createRfq, updateRfq } from '@/services/technical/rfq-client';
+import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';
 import { Button, ButtonProps } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -99,7 +105,7 @@ export default function RfqDialog({
 
       if (isAdd) {
         // Create new RFQ (orgId and userId are handled server-side)
-        const createData: Partial<NewRfq> = {
+        const createData: CreateRfqData = {
           direction: serializedFormData.direction,
           rfqNumber: serializedFormData.rfqNumber,
           vendorName: serializedFormData.vendorName,
@@ -121,7 +127,7 @@ export default function RfqDialog({
           selectedQuoteId: null,
           sentAt: serializedFormData.sentAt,
         };
-        savedRfq = await createRfq(createData as NewRfq);
+        savedRfq = await createRfq(createData);
         toast.success('RFQ created successfully');
       } else {
         // Update existing RFQ
@@ -263,12 +269,10 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('status', value)}
                 name="status"
-                selectOptions={[
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'in_progress', label: 'In Progress' },
-                  { value: 'completed', label: 'Completed' },
-                  { value: 'cancelled', label: 'Cancelled' },
-                ]}
+                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                  value: status,
+                  label: getStatusDisplay(status),
+                }))}
               />
               <KeyValuePair
                 label="Urgency Level"
