@@ -4,8 +4,7 @@ All AI services should inherit from this base class.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
-from pydantic import BaseModel
+from typing import Dict, Any, Optional
 from app.shared.schemas.ai import LLMResponse, LLMRequest
 
 

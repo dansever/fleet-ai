@@ -1,6 +1,6 @@
 import asyncpg
 from typing import Dict, List, Any, Optional
-from app.database import get_db_connection
+from app.db import get_db_connection
 from app.utils import get_logger
 from app.core.ai.base import LLMServiceBase
 
