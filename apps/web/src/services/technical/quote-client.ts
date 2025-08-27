@@ -69,12 +69,19 @@ export async function extractQuote(file: File): Promise<unknown> {
   return res.data.data;
 }
 
+type ResponseEnvelope<T> = { success: boolean; message?: string; data?: T };
+type LLMData = { analysis: unknown };
+
 /**
  * Analyze quotes
  * @param rfqId
  * @returns
  */
 export async function analyzeQuotes(rfqId: Quote['rfqId']): Promise<unknown> {
-  const res = await backendApi.post(`/api/v1/technical/quotes/analyze?rfqId=${rfqId}`);
-  return res.data;
+  const res = await backendApi.post<ResponseEnvelope<LLMData>>(
+    '/api/v1/quotes/analyze',
+    null, // no body
+    { params: { rfqId } }, // query parameter
+  );
+  return res.data.data?.analysis;
 }

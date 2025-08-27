@@ -84,7 +84,7 @@ async def get_clerk_session(session_token: str) -> Optional[dict]:
         return None
 
 
-async def get_google_access_token_from_clerk(user_id: str) -> Optional[str]:
+async def get_clerk_google_access_token(user_id: str) -> Optional[str]:
     """
     Retrieves the Google OAuth access token for a given Clerk user.
     Returns None if the Google account is not connected or token not found.
@@ -120,7 +120,7 @@ async def get_google_access_token_from_clerk(user_id: str) -> Optional[str]:
         return None
 
 
-async def get_microsoft_access_token_from_clerk(user_id: str) -> Optional[str]:
+async def get_clerk_microsoft_access_token(user_id: str) -> Optional[str]:
     """
     Retrieves the Microsoft OAuth access token for a given Clerk user.
     Returns None if the Microsoft account is not connected or token not found.

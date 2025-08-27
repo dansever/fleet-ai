@@ -1,10 +1,12 @@
 # API endpoints package
-from .fuel_extraction import router as fuel_extraction_router
-from .technical_extraction import router as technical_extraction_router
-from .ground_services_extraction import router as ground_services_extraction_router
+from .extraction import router as extraction_router
+from .quotes import router as quotes_router
+from .llm import router as llm_router
+from .ai import router as ai_router
 
 __all__ = [
-  "fuel_extraction_router", 
-  "technical_extraction_router", 
-  "ground_services_extraction_router"
+  "extraction_router",
+  "quotes_router",
+  "llm_router",
+  "ai_router"
 ]

@@ -9,20 +9,20 @@
   --radius: 0.625rem;
 
   /* ========= THEME COLORS ========= */
-  --background: white;
-  --foreground: var(--primary);
+  --background: #faf9f6;
+  --foreground: #2c2c2c;
 
-  --card: white;
-  --card-foreground: var(--primary);
+  --card: var(--background);
+  --card-foreground: var(--foreground);
 
-  --popover: white;
-  --popover-foreground: var(--primary);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
 
   --primary: #213555;
-  --primary-foreground: white;
+  --primary-foreground: #faf9f6;
 
   --secondary: #3a6d8c;
-  --secondary-foreground: white;
+  --secondary-foreground: #faf9f6;
 
   --muted: #e9efec;
   --muted-foreground: var(--primary);

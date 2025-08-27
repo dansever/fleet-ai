@@ -1,32 +1,44 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import fuel_extraction_router, technical_extraction_router, ground_services_extraction_router
+from app.api.v1.endpoints import extraction_router, quotes_router, llm_router, ai_router
 
 api_router = APIRouter()
 
-# ======= Fuel procurement extraction endpoints =======
-# POST /api/v1/fuel/bids/extract - Extract fuel bids
-# POST /api/v1/fuel/contracts/extract - Extract fuel contracts
-# POST /api/v1/fuel/tender/extract - Extract fuel tender
+# ======= Document extraction endpoints =======
+# POST /api/v1/extraction/extract/quotes - Extract quotes
+# POST /api/v1/extraction/extract/rfqs - Extract RFQs  
+# POST /api/v1/extraction/extract/fuel/bids - Extract fuel bids
+# POST /api/v1/extraction/extract/fuel/contracts - Extract fuel contracts
+# POST /api/v1/extraction/extract/service-contracts - Extract service contracts
 api_router.include_router(
-    fuel_extraction_router,
-    prefix="/fuel",
-    tags=["fuel-extraction"]
+    extraction_router,
+    prefix="/extraction",
+    tags=["extraction"]
 )
 
-# ======= Technical procurement extraction endpoints =======
-# POST /api/v1/technical/quotes/extract - Extract technical quotes
-# POST /api/v1/technical/rfqs/extract - Extract technical RFQs
-# POST /api/v1/technical/parts/extract - Extract technical parts
+# ======= Quote analysis endpoints =======
+# POST /api/v1/quotes/analyze - Analyze quotes for RFQ
 api_router.include_router(
-    technical_extraction_router,
-    prefix="/technical",
-    tags=["technical-extraction"]
+    quotes_router,
+    tags=["quotes"]
 )
 
-# ======= Ground services extraction endpoints =======
-# POST /api/v1/ground-services/contracts/extract - Extract ground services contracts
+# ======= LLM testing endpoints =======
+# POST /api/v1/llm/test - Test LLM functionality
 api_router.include_router(
-    ground_services_extraction_router,
-    prefix="/ground-services",
-    tags=["ground-services-extraction"]
+    llm_router,
+    tags=["llm"]
+)
+
+# ======= AI Services endpoints =======
+# POST /api/v1/ai/analyze-text - Text analysis
+# POST /api/v1/ai/extract-insights - Data insights
+# POST /api/v1/ai/compare-items - Item comparison
+# POST /api/v1/ai/generate-recommendations - Business recommendations
+# POST /api/v1/ai/assess-risk - Risk assessment
+# POST /api/v1/ai/analyze-quotes - Quote analysis
+# GET /api/v1/ai/health - AI health check
+# GET /api/v1/ai/capabilities - Available capabilities
+api_router.include_router(
+    ai_router,
+    tags=["ai-services"]
 )

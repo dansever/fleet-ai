@@ -9,9 +9,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Airport, Rfq } from '@/drizzle/types';
-import { Button } from '@/stories/Button/Button';
 import { BaseCard, StatsCard } from '@/stories/Card/Card';
-import { ModernTextarea } from '@/stories/Form/Form';
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -19,13 +17,13 @@ import {
   ArrowUpRight,
   Award,
   BarChart3,
-  Bot,
   DollarSign,
   Target,
 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ActivityFeed } from './_components/ActivityFeed';
 import { CatagorySpendingPie } from './_components/CatagorySpendingPie';
+import InputBar from './_components/InputBar';
 import { RiskAndCompliance } from './_components/RiskAndCompliance';
 
 export default function DashboardClientPage({
@@ -108,10 +106,7 @@ export default function DashboardClientPage({
   return (
     <div className="grid grid-cols-6 gap-4">
       {/* Search and AI Button */}
-      <div className="col-span-6 flex flex-row gap-2">
-        <ModernTextarea placeholder="Search" rows={10} className="flex-1 min-h-10" />
-        <Button intent="primary" icon={Bot} text="Ask AI" />
-      </div>
+      <InputBar />
 
       {/* Executive KPI Metrics */}
       <div className="col-span-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

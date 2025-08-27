@@ -3,9 +3,9 @@ LLM provider router and registry.
 Manages different LLM providers and routes requests to the appropriate one.
 """
 
-from typing import Dict, Optional, Type, Any
+from typing import Dict, Optional, Any
 from app.core.ai.llm.provider import LLMProvider
-from app.config.config import ACTIVE_LLM_PROVIDER
+from app.config import ACTIVE_LLM_PROVIDER
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -109,8 +109,8 @@ async def initialize_providers() -> None:
 async def _auto_register_providers():
     """Auto-register available providers."""
     try:
-        from app.services.llm.providers.gemini_service import GeminiProvider
-        from app.services.llm.providers.openai_service import OpenAIProvider
+        from app.core.ai.llm.providers.gemini_service import GeminiProvider
+        from app.core.ai.llm.providers.openai_service import OpenAIProvider
         
         # Register Gemini provider
         gemini_provider = GeminiProvider()
