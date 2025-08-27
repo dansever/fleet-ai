@@ -99,7 +99,6 @@ export default function TechnicalProcurementClientPage() {
       return;
     }
     try {
-      toast.info('Analyzing quotes...');
       const res = await compareQuotes(selectedRfq.id);
       setQuoteComparisonResult(res as unknown as JSON);
       toast.success('Quotes analyzed successfully');
@@ -446,7 +445,7 @@ export default function TechnicalProcurementClientPage() {
               </div>
             </CardHeader>
             <div>
-              <p>{JSON.stringify(quoteComparisonResult?.raw)}</p>
+              <p>{JSON.stringify(quoteComparisonResult?.data)}</p>
             </div>
             <CardContent>
               <QuotesComparison isRefreshing={isRefreshingQuotes} />

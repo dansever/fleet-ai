@@ -5,6 +5,7 @@ T = TypeVar("T")
 
 class Meta(BaseModel):
     """Metadata for API responses"""
+    model: str | None = None
     usage: dict[str, Any] | None = None
 
 class ResponseEnvelope(BaseModel, Generic[T]):

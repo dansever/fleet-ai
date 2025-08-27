@@ -1,9 +1,9 @@
-from app.core.ai.ai_client import compare_items, get_ai_client
 from app.db.utils import clean_records
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from app.db.operations import get_quotes_by_rfq_id
 from app.shared.schemas import ResponseEnvelope
+from app.services.ai.client import get_ai_client
 import json
 
 from decimal import Decimal
@@ -13,11 +13,11 @@ from uuid import UUID as _UUID
 from pydantic import BaseModel, Field
 from typing import Annotated
 
-class ComparisonResult(BaseModel):
-  comparison_analysis: str
-  items: list[dict]
-  winner: dict
-  summary: str
+class QuoteComparisonResult(BaseModel):
+  comparison_analysis: str | None = None
+  items: list[dict] | None = None
+  winner: dict | None = None
+  summary: str | None = None
 
 # ---------- JSON sanitizers ----------
 def to_jsonable(value):
@@ -38,20 +38,28 @@ def sanitize_obj(obj):
         return [sanitize_obj(v) for v in obj]
     return to_jsonable(obj)
 
+# ---------- Quote comparison ----------
 
-async def compare_quotes(db: AsyncSession, rfq_id: UUID) -> dict:
+async def compare_quotes(db: AsyncSession, rfq_id: UUID) -> QuoteComparisonResult:
   """
   Compare quotes for an RFQ and provide insights and recommendations.
   """
   quotes = await get_quotes_by_rfq_id(db, rfq_id)
   if not quotes:
-    return ResponseEnvelope(success=True, data={"analysis": "No quotes found for this RFQ."})
+    # Return a default result when no quotes are found
+    return QuoteComparisonResult(
+      comparison_analysis="No quotes found for this RFQ.",
+      items=[],
+      winner={"quote_id": "none", "reason": "No quotes available", "confidence": 0},
+      summary="No quotes were found for the specified RFQ."
+    )
     
   focus_fields = ["rfq_number", "vendor_name", "part_number", "serial_number", "part_description", "condition_code",
   "unit_of_measure", "quantity", "price", "currency", "pricing_type", "pricing_method", "core_due", "core_change",
   "payment_terms", "minimum_order_quantity", "lead_time", "delivery_terms", "warranty", "quote_expiration_date",
   "certifications", "trace_to", "tag_type", "tagged_by", "tagged_date", "vendor_comments"
   ]
+
   cleaned_quotes = clean_records(quotes, fields=focus_fields)
 
   # Ensure each item has a stable identifier
@@ -88,71 +96,80 @@ async def compare_quotes(db: AsyncSession, rfq_id: UUID) -> dict:
           "tagged_date": q.get("tagged_date"),
           "vendor_comments": q.get("vendor_comments"),
       }
-      items_for_model.append(sanitize_obj(item))  # append inside loop
+      items_for_model.append(sanitize_obj(item))
 
   # Criteria names match scorecard keys
   criteria = ["price", "delivery", "lead_time", "quality", "service"]
 
-  # Strict JSON schema instruction
-  schema_text = """
-Return ONLY a single JSON object with this exact structure:
+  # Direct schema instruction that matches QuoteComparisonResult exactly
+  schema_text = f"""
+Analyze the quotes and return a JSON object with this EXACT structure:
 
-{
-"comparison_analysis": "string",
-"items": [
-  {
-    "quote_id": "string",
-    "strengths": ["string"],
-    "weaknesses": ["string"],
-    "scorecard": {
-      "price": number,
-      "delivery": number,
-      "lead_time": number,
-      "quality": number,
-      "service": number,
-      "total": number
-    }
-  }
-],
-"winner": {
-  "quote_id": "string",
-  "reason": "string",
-  "confidence": number
-},
-"summary": "string"
-}
+{{
+  "comparison_analysis": "Detailed analysis comparing the quotes across {', '.join(criteria)} criteria",
+  "items": [
+    {{
+      "quote_id": "string from the quote data",
+      "strengths": ["list of key strengths"],
+      "weaknesses": ["list of key weaknesses"], 
+      "scorecard": {{
+        "price": number_0_to_10,
+        "delivery": number_0_to_10,
+        "lead_time": number_0_to_10,
+        "quality": number_0_to_10,
+        "service": number_0_to_10,
+        "total": sum_of_all_scores
+      }}
+    }}
+  ],
+  "winner": {{
+    "quote_id": "must match one of the items quote_id values",
+    "reason": "clear explanation of why this quote won",
+    "confidence": number_0_to_10
+  }},
+  "summary": "concise summary of the comparison and recommendation"
+}}
 
 Rules:
-- Use numbers between 0 and 10 for all scorecard fields. Higher is better.
-- total must equal the sum of the numeric criteria fields.
-- winner.quote_id must match one of the items[].quote_id.
-- Output JSON only, no markdown, no commentary.
+- All scorecard numbers must be 0-10, higher is better
+- total must equal sum of price + delivery + lead_time + quality + service
+- winner.quote_id must exactly match one of the items[].quote_id values
+- Return ONLY valid JSON, no markdown or commentary
 """
 
-  quotes_json = json.dumps(items_for_model, ensure_ascii=False)  # already sanitized
+  quotes_json = json.dumps(items_for_model, ensure_ascii=False)
 
   prompt = (
-      "Compare the following quotes and produce a structured result for easy parsing.\n\n"
+      "Compare the following quotes and produce a structured analysis.\n\n"
       f"Criteria to compare: {', '.join(criteria)}\n\n"
-      f"Quotes JSON:\n{quotes_json}\n\n"
+      f"Quotes data:\n{quotes_json}\n\n"
       f"{schema_text}"
   )
 
   system_message = (
-      "You are an expert quotes analyst. Be precise and objective. "
-      "If data is missing, say 'unknown'. Do not invent values."
+      "You are an expert quotes analyst. Analyze objectively and return exactly the requested JSON structure. "
+      "If data is missing, use 'unknown'. Do not invent values. Ensure all required fields are present."
   )
 
-  ai_client = get_ai_client()
-  result_text = await ai_client.generate_response(
-      prompt,
-      system_message,
-      response_format="json"  # enable if your provider supports strict JSON mode
-  )
-
-  # Parse and return strict JSON. Fall back to envelope if not JSON.
   try:
-      parsed = json.loads(result_text)
-      return parsed
-  except Exception:
-      return ResponseEnvelope(success=True, data={"raw": result_text})
+      # Initialize AI client using centralized function
+      ai_client = get_ai_client()
+      
+      # Use the new AI client structure
+      result = ai_client.response(
+          response_schema=QuoteComparisonResult,
+          prompt=prompt,
+          system_message=system_message,
+          temperature=0.3
+      )
+      print(result)
+      return result
+      
+  except Exception as e:
+      # Fallback for any AI processing error
+      return QuoteComparisonResult(
+          comparison_analysis=f"AI analysis failed: {str(e)}",
+          items=[],
+          winner={"quote_id": "error", "reason": "AI processing error", "confidence": 0},
+          summary=f"Error during AI analysis: {str(e)}"
+      )

@@ -69,16 +69,13 @@ export async function extractQuote(file: File): Promise<unknown> {
   return res.data.data;
 }
 
-type ResponseEnvelope<T> = { success: boolean; message?: string; data?: T };
-type LLMData = { analysis: unknown };
-
 /**
  * Analyze quotes
  * @param rfqId
  * @returns
  */
 export async function compareQuotes(rfqId: Quote['rfqId']): Promise<unknown> {
-  const res = await backendApi.post<ResponseEnvelope<LLMData>>(
+  const res = await backendApi.post(
     '/api/v1/quotes/compare',
     null, // no body
     { params: { rfqId } }, // query parameter

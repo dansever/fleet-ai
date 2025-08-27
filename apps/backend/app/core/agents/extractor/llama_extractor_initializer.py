@@ -4,12 +4,9 @@ from llama_cloud_services import LlamaExtract
 from llama_cloud.core.api_error import ApiError
 from app.utils import get_logger
 from app.config import (
-    LLAMA_CLOUD_API_KEY, 
-    LLAMA_EXTRACT_PROJECT_ID, 
-    LLAMA_ORGANIZATION_ID, 
-    UPDATE_EXTRACTOR_SCHEMA_FLAG,
-    DEBUG_MODE_FLAG
+    ai_config
 )
+
 
 logger = get_logger(__name__)
 
@@ -45,18 +42,18 @@ def get_llama_extractor(
     """
     
     # Validate required environment variables
-    if not LLAMA_CLOUD_API_KEY:
+    if not ai_config.llama.cloud_api_key:
         raise ValueError("LLAMA_CLOUD_API_KEY environment variable is not set")
-    if not LLAMA_EXTRACT_PROJECT_ID:
+    if not ai_config.llama.extract_project_id:
         raise ValueError("LLAMA_EXTRACT_PROJECT_ID environment variable is not set")
-    if not LLAMA_ORGANIZATION_ID:
+    if not ai_config.llama.organization_id:
         raise ValueError("LLAMA_ORGANIZATION_ID environment variable is not set")
         
     # Initialize the LlamaExtract client
     extractor = LlamaExtract(
-        api_key=LLAMA_CLOUD_API_KEY,
-        organization_id=LLAMA_ORGANIZATION_ID,
-        project_id=LLAMA_EXTRACT_PROJECT_ID,
+        api_key=ai_config.llama.cloud_api_key,
+        organization_id=ai_config.llama.organization_id,
+        project_id=ai_config.llama.extract_project_id,
     )
     logger.info(f"Initialized LlamaExtract client")
 

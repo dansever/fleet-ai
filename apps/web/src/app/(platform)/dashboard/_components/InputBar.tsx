@@ -16,7 +16,8 @@ export default function InputBar() {
     try {
       setIsLoading(true);
       const result = await simpleLLM(prompt);
-      setResponse(result as string);
+      // console.log(result.data.data); // this is the response
+      // setResponse(result.data.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -56,7 +57,7 @@ export default function InputBar() {
             className={`${isLoading && 'animate-spin'}`}
           />
         }
-        bodyChildren={<p className="text-white/80">{response || 'No response yet'}</p>}
+        // bodyChildren={<p className="text-white/80">{response}</p>}
       ></FeatureCard>
     </div>
   );

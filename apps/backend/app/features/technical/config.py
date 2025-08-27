@@ -1,5 +1,5 @@
 from app.schemas import RFQ, Quote
-from app.config import EXTRACTOR_ALLOWED_EXTENSIONS, EXTRACTOR_ALLOWED_MIME_TYPES
+from app.config import ai_config
 
 
 # ============================== RFQ ==============================
@@ -16,8 +16,8 @@ RFQ_CONFIG = {
     "system_prompt": RFQ_EXTRACTOR_SYSTEM_PROMPT,
     "schema_class": RFQ,
     "log_label": "RFQ",
-    "allowed_extensions": EXTRACTOR_ALLOWED_EXTENSIONS,
-    "allowed_mime_types": EXTRACTOR_ALLOWED_MIME_TYPES,
+    "allowed_extensions": ai_config.allowed_extensions,
+    "allowed_mime_types": ai_config.allowed_mime_types,
 }
 
 # ============================== QUOTE ==============================
@@ -35,7 +35,7 @@ QUOTE_CONFIG = {
     "system_prompt": QUOTE_EXTRACTOR_SYSTEM_PROMPT,
     "schema_class": Quote,
     "log_label": "Quote",
-    "allowed_extensions": EXTRACTOR_ALLOWED_EXTENSIONS,
-    "allowed_mime_types": EXTRACTOR_ALLOWED_MIME_TYPES,
+    "allowed_extensions": ai_config.allowed_extensions,
+    "allowed_mime_types": ai_config.allowed_mime_types,
 }
 
