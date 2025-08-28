@@ -13,7 +13,7 @@ export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: Ta
   <TabsUI
     defaultValue={selectedTab}
     onValueChange={onTabChange}
-    className={cn('w-full gap-4', className)}
+    className={cn('w-full gap-4 p-2', className)}
   >
     <TabsList className="w-full flex bg-muted/50 rounded-2xl p-1.5 h-12 gap-2">
       {tabs.map((tab) => (
@@ -31,7 +31,6 @@ export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: Ta
         </TabsTrigger>
       ))}
     </TabsList>
-    {/* Let consumers pass their own <TabsContent> */}
     {children}
   </TabsUI>
 );

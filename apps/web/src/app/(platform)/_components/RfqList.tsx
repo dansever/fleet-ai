@@ -161,9 +161,9 @@ export default function RfqList({
             <Button
               intent="ghost"
               icon={RefreshCw}
-              size="sm"
-              className={`${isRefreshing ? 'animate-spin' : ''}`}
-              disabled={isLoading}
+              size="md"
+              className={`${isRefreshing ? 'animate-spin hover:bg-transparent' : ''}`}
+              disabled={isLoading || isRefreshing}
               onClick={onRefresh}
             />
             {InsertAddRfqButton && (
@@ -172,8 +172,8 @@ export default function RfqList({
                   open={uploadRfqPopoverOpen}
                   onOpenChange={setUploadRfqPopoverOpen}
                   triggerButtonIntent="add"
-                  triggerButtonText="Upload RFQ"
-                  buttonSize="sm"
+                  triggerButtonText="RFQ"
+                  buttonSize="md"
                   onSend={handleSendRfqFile}
                 >
                   <div className="flex flex-col gap-2 text-sm">

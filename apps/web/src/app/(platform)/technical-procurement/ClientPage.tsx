@@ -141,7 +141,7 @@ export default function TechnicalProcurementClientPage() {
 
   // Header content
   const headerContent = selectedRfq ? (
-    <div className="flex items-start justify-between w-full">
+    <div className="flex items-center justify-between w-full">
       <div>
         <h1 className="text-xl font-semibold mb-1">
           {selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`}
@@ -162,7 +162,7 @@ export default function TechnicalProcurementClientPage() {
         <RfqDialog
           rfq={selectedRfq}
           onChange={() => {}}
-          triggerText="View"
+          triggerText="View Details"
           triggerIntent="secondary"
           DialogType="view"
         />

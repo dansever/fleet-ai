@@ -151,7 +151,7 @@ export const contactsTable = pgTable(
     // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
-    vendorId: uuid('vendor_id'), //fk to vendors table
+    airportId: uuid('airport_id'), //fk to airports table
 
     // Contact Information
     name: text('name'),
@@ -159,8 +159,9 @@ export const contactsTable = pgTable(
     phone: text('phone'),
 
     // Professional Information
-    role: text('role'),
+    company: text('company'),
     department: text('department'),
+    role: text('role'),
 
     // Timestamps
     createdAt,
@@ -173,9 +174,9 @@ export const contactsTable = pgTable(
       name: 'fk_contacts_org_id',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [table.vendorId],
-      foreignColumns: [vendorsTable.id],
-      name: 'fk_contacts_vendor_id',
+      columns: [table.airportId],
+      foreignColumns: [airportsTable.id],
+      name: 'fk_contacts_airport_id',
     }).onDelete('cascade'),
   ],
 );

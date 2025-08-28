@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
-import { Home, Plane, Search, X } from 'lucide-react';
+import { Home, Plane, Plus, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface AirportListProps {
@@ -89,6 +89,9 @@ export default function AirportList({
             <AirportDialog
               airport={null}
               DialogType="add"
+              triggerButtonIntent="add"
+              TriggerButtonText="Add"
+              TriggerButtonIcon={Plus}
               onChange={(newAirport) => {
                 if (onAirportAdd) {
                   onAirportAdd(newAirport);
@@ -96,7 +99,7 @@ export default function AirportList({
                   onAirportSelect(newAirport);
                 }
               }}
-              buttonSize="sm"
+              TriggerButtonSize="md"
             />
           )}
         </div>

@@ -6,11 +6,19 @@ export const OrderDirectionEnum = pgEnum('order_direction', [
   'received', // Order we receive from customers/airlines
 ]);
 export type OrderDirection = (typeof OrderDirectionEnum.enumValues)[number];
-
 export const orderDirectionDisplayMap: Record<OrderDirection, string> = {
   sent: 'Sent',
   received: 'Received',
 };
+export function getOrderDirectionDisplay(
+  orderDirection: OrderDirection | string | null | undefined,
+): string {
+  if (!orderDirection) return 'Unknown';
+  return (
+    orderDirectionDisplayMap[orderDirection as OrderDirection] ||
+    orderDirection.charAt(0).toUpperCase() + orderDirection.slice(1)
+  );
+}
 
 // --------------------  Status Enum --------------------
 export const statusEnum = pgEnum('status', [
@@ -22,7 +30,6 @@ export const statusEnum = pgEnum('status', [
   'closed',
 ]);
 export type Status = (typeof statusEnum.enumValues)[number];
-
 export const statusDisplayMap: Record<Status, string> = {
   draft: 'Draft',
   pending: 'Pending',
@@ -31,7 +38,6 @@ export const statusDisplayMap: Record<Status, string> = {
   rejected: 'Rejected',
   closed: 'Closed',
 };
-
 export function getStatusDisplay(status: Status | string | null | undefined): string {
   if (!status) return 'Unknown';
   return statusDisplayMap[status as Status] || status.charAt(0).toUpperCase() + status.slice(1);
@@ -45,14 +51,12 @@ export const decisionEnum = pgEnum('decision', [
   'shortlisted',
 ]);
 export type Decision = (typeof decisionEnum.enumValues)[number];
-
 export const decisionDisplayMap: Record<Decision, string> = {
   undecided: 'Undecided',
   accepted: 'Accepted',
   rejected: 'Rejected',
   shortlisted: 'Shortlisted',
 };
-
 export function getDecisionDisplay(decision: Decision | string | null | undefined): string {
   if (!decision) return 'Unknown';
   return (
@@ -71,7 +75,6 @@ export const ContractTypeEnum = pgEnum('contract_type', [
   'other',
 ]);
 export type ContractType = (typeof ContractTypeEnum.enumValues)[number];
-
 export const contractTypeDisplayMap: Record<ContractType, string> = {
   fuel_and_ground_ops: 'Fuel and Ground Ops',
   catering_and_onboard_services: 'Catering and Onboard Services',

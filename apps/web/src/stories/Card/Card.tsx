@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { TrendingUp } from 'lucide-react';
+import Image from 'next/image';
 import type React from 'react';
 
 export interface BaseCardProps {
@@ -27,7 +28,7 @@ export const FeatureCard = ({
   title,
   description,
   icon = null,
-  gradient = 'from-violet-600 to-blue-600',
+  gradient = 'from-violet-800 to-blue-700',
   className,
   buttonChildren,
   bodyChildren,
@@ -49,7 +50,7 @@ export const FeatureCard = ({
         </div>
         {buttonChildren}
       </div>
-      {bodyChildren && <p className="text-white/80">{bodyChildren}</p>}
+      {bodyChildren && <div className="text-white/80">{bodyChildren}</div>}
     </div>
   </Card>
 );
@@ -58,35 +59,49 @@ export const FeatureCard = ({
 export const ProjectCard = ({
   title,
   description,
-  image,
+  imagePath,
   category,
   progress,
-  isNew = false,
+  badgeText = null,
+  badgeColor = 'bg-gradient-to-r from-pink-500 to-red-500',
   className,
   children,
 }: {
   title: string;
   description: string;
-  image?: string;
+  imagePath?: string;
   category: string;
   progress?: number;
-  isNew?: boolean;
+  badgeText?: string | null;
+  badgeColor?: string;
   className?: string;
   children?: React.ReactNode;
 }) => (
   <Card
     className={cn(
       'rounded-3xl overflow-hidden hover:shadow-lg transition-shadow',
-      image && 'pt-0',
+      imagePath && 'pt-0',
       className,
     )}
   >
-    {image && (
+    {imagePath && (
       <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative">
-        <img src={image || '/placeholder.svg'} alt={title} className="w-full h-full object-cover" />
-        {isNew && (
-          <Badge className="absolute top-3 right-3 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-xl">
-            New
+        <Image
+          src={imagePath ?? '/placeholder.svg'}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="100vw"
+          priority
+        />
+        {badgeText && (
+          <Badge
+            className={cn(
+              'absolute top-3 right-3 text-white rounded-xl',
+              badgeColor ?? 'bg-gradient-to-r from-pink-500 to-red-500',
+            )}
+          >
+            {badgeText}
           </Badge>
         )}
       </div>

@@ -96,6 +96,10 @@ export const KeyValuePair = ({
       </span>
     ) : valueType === 'date' ? (
       <div className="max-w-3/5">{formatDate(value as string)}</div>
+    ) : valueType === 'select' ? (
+      <div className={cn('max-w-7/10', valueClassName)}>
+        {selectOptions?.find((o) => o.value === value)?.label ?? (value as string | number)}
+      </div>
     ) : (
       <div className={cn('max-w-7/10', valueClassName)}>
         {value instanceof Date ? formatDate(value) : (value as string | number)}

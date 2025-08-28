@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSidebar } from '@/components/ui/sidebar';
-import { getStatusDisplay } from '@/drizzle/schema/enums';
+import { getStatusDisplay, UrgencyLevel, urgencyLevelDisplayMap } from '@/drizzle/schema/enums';
 import { Rfq } from '@/drizzle/types';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
@@ -20,6 +20,7 @@ import {
   FileText,
   Package,
   Send,
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 import RfqList from '../_components/RfqList';
@@ -179,7 +180,7 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
 
   // Header content
   const headerContent = selectedRfq ? (
-    <div className="flex items-start justify-between w-full">
+    <div className="flex items-center justify-between w-full">
       <div>
         <h1 className="text-xl font-semibold mb-1">
           {selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`}
@@ -224,7 +225,7 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
         }
         headerGradient="from-emerald-500 to-emerald-500"
       >
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <KeyValuePair
             label="Part Number"
             value={selectedRfq.partNumber || 'N/A'}
@@ -239,7 +240,7 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
           <KeyValuePair label="Quantity" value={selectedRfq.quantity || 'N/A'} valueType="string" />
           <KeyValuePair
             label="Urgency Level"
-            value={selectedRfq.urgencyLevel || 'Standard'}
+            value={urgencyLevelDisplayMap[selectedRfq.urgencyLevel as UrgencyLevel]}
             valueType="string"
           />
           <KeyValuePair
@@ -357,9 +358,19 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
       <ContentSection
         className="col-span-full"
         header={
-          <div className="flex items-center gap-2">
-            <Calculator className="w-5 h-5" />
-            <span className="font-semibold">Quote Generator</span>
+          <div className="flex flex-row items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <Calculator className="w-5 h-5" />
+              <span className="font-semibold">Quote Generator</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                intent="secondary"
+                className="bg-white/20 text-white "
+                icon={Sparkles}
+                text="Auto Generate"
+              />
+            </div>
           </div>
         }
         headerGradient="from-blue-500 via-violet-500 to-purple-600"
