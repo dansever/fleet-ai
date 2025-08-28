@@ -61,7 +61,7 @@ def get_llama_extractor(
     try:
         agent = extractor.get_agent(name=agent_name)
         if agent is not None:
-            if UPDATE_EXTRACTOR_SCHEMA_FLAG:
+            if ai_config.features.update_extractor_schema:
                 agent.data_schema = data_schema
                 agent.save()
                 logger.info(f"Updated schema for: {agent_name}")

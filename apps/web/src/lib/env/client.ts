@@ -12,7 +12,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: z.string().default('/dashboard'),
     NEXT_PUBLIC_CLERK_FRONTEND_API_URL: z.string().url('Invalid Clerk frontend API URL'),
 
-    // Environment & Debug
+    // App Configuration
     NEXT_PUBLIC_APP_URL: z.string().url('Invalid app URL').default('http://localhost:3000'),
     NEXT_PUBLIC_DEBUG_MODE: z
       .string()
@@ -41,8 +41,6 @@ export const env = createEnv({
     // App Configuration
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_DEBUG_MODE: process.env.NEXT_PUBLIC_DEBUG_MODE,
-
-    // Backend API
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
 
     // Azure Integration

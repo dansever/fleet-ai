@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { fuelBidsTable } from '@/drizzle/schema/schema';
 import { FuelBid, FuelTender, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';

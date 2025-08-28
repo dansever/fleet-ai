@@ -1,5 +1,5 @@
 import { createUser, deleteUser } from '@/db/users/db-actions';
-import { env } from '@/lib/env/server';
+import { serverEnv } from '@/lib/env/server';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const payload = await req.json();
   const body = JSON.stringify(payload);
 
-  const wh = new Webhook(env.CLERK_WEBHOOK_SECRET);
+  const wh = new Webhook(serverEnv.CLERK_WEBHOOK_SECRET);
   let event: WebhookEvent;
 
   try {

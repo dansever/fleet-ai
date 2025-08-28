@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { vendorsTable } from '@/drizzle/schema/schema';
 import { NewVendor, Organization, UpdateVendor, Vendor } from '@/drizzle/types';
 import { and, eq } from 'drizzle-orm';

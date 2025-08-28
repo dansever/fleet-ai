@@ -1,5 +1,5 @@
+import RuntimeDbCheck from '@/components/runtime-db-check';
 import { Toaster } from '@/components/ui/sonner';
-import { assertDbReady } from '@/drizzle/db';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
@@ -20,12 +20,12 @@ export const viewport: Viewport = {
 
 const manrope = Manrope({ subsets: ['latin'] });
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  await assertDbReady();
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning lang="en">
       <body className={manrope.className}>
         <ClerkProvider>
+          <RuntimeDbCheck />
           {children}
           <Toaster richColors position="bottom-right" />
         </ClerkProvider>

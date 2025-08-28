@@ -240,5 +240,5 @@ class OpenAIClient:
 
 
 def get_openai_client() -> OpenAIClient:
-    """Convenience initializer that always returns a ready-to-use OpenAI client"""
+    """Convenience initializer that returns a ready-to-use OpenAI client"""
     return OpenAIClient()
