@@ -102,6 +102,38 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
 
           <div className="mb-8">
             <p className="text-slate-600 text-lg leading-relaxed">{ui.subtitle}</p>
+
+            {/* Error details section */}
+            <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-700 mb-2">Error Details:</h3>
+              <div className="text-left space-y-1">
+                {error.name && (
+                  <p className="text-sm text-slate-600">
+                    <span className="font-medium">Type:</span> {error.name}
+                  </p>
+                )}
+                {error.message && (
+                  <p className="text-sm text-slate-600">
+                    <span className="font-medium">Message:</span> {error.message}
+                  </p>
+                )}
+                {error.digest && (
+                  <p className="text-sm text-slate-600">
+                    <span className="font-medium">Reference ID:</span> {error.digest}
+                  </p>
+                )}
+                {process.env.NODE_ENV === 'development' && error.stack && (
+                  <details className="mt-2">
+                    <summary className="text-sm font-medium text-slate-700 cursor-pointer hover:text-slate-900">
+                      Stack Trace (Development)
+                    </summary>
+                    <pre className="mt-2 text-xs text-slate-500 bg-slate-100 p-2 rounded overflow-auto max-h-32">
+                      {error.stack}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
