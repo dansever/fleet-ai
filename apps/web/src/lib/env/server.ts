@@ -28,15 +28,18 @@ export const serverEnv = createEnv({
 
 // Single resolved DB URL for Node code
 export function getResolvedDatabaseUrl(): string {
+  // CI/Prod host-injected first
   if (serverEnv.DATABASE_URL) return serverEnv.DATABASE_URL;
 
+  // Local toggle
   const local = serverEnv.DATABASE_URL_LOCAL;
   const supa = serverEnv.DATABASE_URL_SUPABASE;
-
+  // Local toggle
   if (!local || !supa) {
     throw new Error(
       'DATABASE_URL not set. For local dev set DATABASE_URL_LOCAL and DATABASE_URL_SUPABASE in .env.local',
     );
   }
+  // Local toggle
   return serverEnv.DB_TARGET === 'supabase' ? supa : local;
 }
