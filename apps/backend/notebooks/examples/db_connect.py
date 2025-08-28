@@ -1,6 +1,7 @@
 # (.venv) PS C:\Users\danse\Projects\FleetAI V1\fleet-ai\apps\backend> 
-# py -m app.notebooks.examples.db_connect 
-
+# py -m notebooks.examples.db_connect 
+import importlib
+import app.db.repr_patch as repr_patch
 import sys
 import os
 import asyncio
@@ -28,33 +29,15 @@ async def test_airports():
         airports = await get_airports_by_org(session, org_id)
         
         print(f"Found {len(airports)} airports for org {org_id}")
-        for airport in airports:
-            print(f"- {airport.name} ({airport.iata})")
         
-        break  # Exit the async generator
-
-
-async def test_raw_queries():
-    """Test raw SQL queries using asyncpg"""
-    print("\n=== Testing Raw SQL Queries ===")
-    
-    from app.db import get_db_connection
-    
-    pool = await get_db_connection()
-    
-    async with pool.acquire() as conn:
-        # Example: Get all airports
-        airports = await conn.fetch("SELECT * FROM airports LIMIT 5")
-        print(f"Raw query found {len(airports)} airports")
-        
-        for airport in airports:
-            print(f"- {airport['name']} ({airport['iata']})")
+        return airports
 
 async def main():
     """Run all tests"""
     try:
-        await test_airports()
-        await test_raw_queries()
+        airports = await test_airports()
+        print(airports[0].to_dict())
+        
     except Exception as e:
         print(f"Error: {e}")
         import traceback
