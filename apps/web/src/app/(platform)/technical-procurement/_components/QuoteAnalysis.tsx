@@ -11,7 +11,6 @@ import {
   CheckCircle,
   DollarSign,
   FileText,
-  Loader2,
   Sparkles,
   TrendingUp,
 } from 'lucide-react';
@@ -110,16 +109,9 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
             intent="primary"
             size="sm"
             className="flex items-center gap-2"
-            text={isAnalyzing ? 'Analyzing...' : 'Analyze Quotes'}
-            icon={
-              isAnalyzing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )
-            }
+            text={'Analyze Quotes'}
+            icon={Sparkles}
           />
-
           {analysisResult && (
             <Button onClick={clearAnalysis} intent="secondary" size="sm" text="Clear Analysis" />
           )}
