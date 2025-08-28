@@ -27,6 +27,14 @@ export async function getRfqs(): Promise<Rfq[]> {
 }
 
 /**
+ * Get RFQs by direction (sent or received)
+ */
+export async function getRfqsByDirection(direction: 'sent' | 'received'): Promise<Rfq[]> {
+  const res = await api.get(`/api/rfqs?direction=${direction}`);
+  return res.data;
+}
+
+/**
  * Create a new RFQ
  */
 export async function createRfq(data: CreateRfqData): Promise<Rfq> {

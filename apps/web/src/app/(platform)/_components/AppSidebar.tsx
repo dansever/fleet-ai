@@ -16,14 +16,14 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { useUser } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import ClientUserButton from './ClientUserButton';
-import { sidebarTabs } from './SidebarTabs';
+import { sidebarTabs } from './AppSidebarTabs';
 
 const SIDEBAR_MENU_BUTTON_SIZES = {
   md: 'text-base pl-3 pr-1 py-5',
@@ -257,5 +257,30 @@ export function AppSidebar({
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+function ClientUserButton({ showName }: { showName: boolean }) {
+  const { isSignedIn, isLoaded } = useUser();
+
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <div className="h-8 w-8 flex items-center justify-center">
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </div>
+    );
+  }
+
+  return (
+    <UserButton
+      showName={showName}
+      appearance={{
+        elements: {
+          userButtonBox: {
+            flexDirection: 'row-reverse',
+          },
+        },
+      }}
+    />
   );
 }

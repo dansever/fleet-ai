@@ -1,4 +1,4 @@
-import { getRfqsByOrg } from '@/db/rfqs/db-actions';
+import { getRfqsByOrgAndDirection } from '@/db/rfqs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import TechnicalProcurementClientPage from './ClientPage';
 import { TechnicalProcurementContextProvider } from './ContextProvider';
@@ -13,7 +13,7 @@ export default async function TechnicalProcurementPage() {
   }
 
   // Fetch RFQs and quotes in parallel
-  const [rfqs] = await Promise.all([getRfqsByOrg(dbUser.orgId)]);
+  const [rfqs] = await Promise.all([getRfqsByOrgAndDirection(dbUser.orgId, 'sent')]);
 
   return (
     <TechnicalProcurementContextProvider initialRfqs={rfqs} hasServerData={true}>

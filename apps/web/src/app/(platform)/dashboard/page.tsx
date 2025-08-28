@@ -1,5 +1,5 @@
 import { getAirportsByOrgId } from '@/db/airports/db-actions';
-import { getRfqsByOrg } from '@/db/rfqs/db-actions';
+import { getRfqsByOrgAndDirection } from '@/db/rfqs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import DashboardClientPage from './ClientPage';
@@ -15,7 +15,7 @@ export default async function DashboardPage() {
 
   // Fetch RFQs and quotes in parallel
   const [rfqs, airports] = await Promise.all([
-    getRfqsByOrg(dbUser.orgId),
+    getRfqsByOrgAndDirection(dbUser.orgId, 'sent'),
     getAirportsByOrgId(dbUser.orgId),
   ]);
 

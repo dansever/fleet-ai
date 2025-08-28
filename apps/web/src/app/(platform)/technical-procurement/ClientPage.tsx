@@ -21,11 +21,11 @@ import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CopyableText } from '../_components/CopyableText';
+import { CopyableText } from '../../../components/miscellaneous/CopyableText';
+import RfqList from '../_components/RfqList';
 import { useTechnicalProcurement } from './ContextProvider';
 import QuoteAnalysis from './_components/QuoteAnalysis';
 import QuotesComparison from './_components/QuotesComparison';
-import RfqList from './_components/RfqList';
 
 export default function TechnicalProcurementClientPage() {
   const {

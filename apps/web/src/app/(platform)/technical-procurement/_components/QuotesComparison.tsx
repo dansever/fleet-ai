@@ -26,7 +26,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { CopyableText } from '../../_components/CopyableText';
+import { CopyableText } from '../../../../components/miscellaneous/CopyableText';
 import { useTechnicalProcurement } from '../ContextProvider';
 
 interface QuotesComparisonProps {
