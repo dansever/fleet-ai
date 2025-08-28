@@ -97,7 +97,7 @@ export const KeyValuePair = ({
     ) : valueType === 'date' ? (
       <div className="max-w-3/5">{formatDate(value as string)}</div>
     ) : (
-      <div className="max-w-7/10">
+      <div className={cn('max-w-7/10', valueClassName)}>
         {value instanceof Date ? formatDate(value) : (value as string | number)}
       </div>
     )}

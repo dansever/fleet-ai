@@ -264,12 +264,11 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.partDescription || ''}
                   valueType="string"
                 />
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-sm text-muted-foreground">Quantity</span>
-                  <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                    {selectedRfq.quantity || ''}
-                  </Badge>
-                </div>
+                <KeyValuePair
+                  label="Quantity"
+                  value={selectedRfq.quantity || ''}
+                  valueType="number"
+                />
               </ContentSection>
               {/* Timeline */}
               <ContentSection
