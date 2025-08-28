@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { organizationsTable } from '@/drizzle/schema/schema';
 import { NewOrganization, Organization } from '@/drizzle/types';
 import { eq, sql } from 'drizzle-orm';

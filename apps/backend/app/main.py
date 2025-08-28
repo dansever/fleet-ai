@@ -4,14 +4,10 @@ from app.api.v1.router import api_router
 from app.utils import get_logger
 from app.db import get_db_connection, close_db_connection
 from app.db.models_auto import Base 
-from app.db.models_repr import enable_pretty_repr
 import os
 
 # Initialize logger
 logger = get_logger(__name__)
-
-# Enable pretty repr for all models
-enable_pretty_repr(Base)
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application"""

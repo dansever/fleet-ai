@@ -1,6 +1,6 @@
 'use client';
 
-import { simpleLLM2 } from '@/services/ai/llm-client';
+import { simpleLLM } from '@/services/ai/llm-client';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
@@ -16,9 +16,9 @@ export default function InputBar() {
   const handleAskAI = async () => {
     try {
       setIsLoading(true);
-      const result = await simpleLLM2(prompt);
-      console.log(result);
-      setResponse(result);
+      const result = await simpleLLM(prompt);
+      console.log(result.data);
+      setResponse(result.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -65,7 +65,7 @@ export default function InputBar() {
           />
         }
         bodyChildren={<span className="text-white/80">{response?.content}</span>}
-      ></FeatureCard>
+      />
     </div>
   );
 }

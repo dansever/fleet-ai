@@ -9,13 +9,10 @@
     "check": "pnpm run typecheck && pnpm run lint && pnpm run build",
     "clean": "rimraf \"**/.next\" \"**/.turbo\"",
     "rebuild": "pnpm run clean && pnpm install && pnpm run build",
-    "db:generate": "dotenv -e apps/web/.env.local -- drizzle-kit generate --config=drizzle.config.ts",
-    "db:migrate:local": "dotenv -e apps/web/.env.local -- drizzle-kit migrate --config=drizzle.config.ts",
-    "db:migrate:prod": "dotenv -e apps/web/.env.production -- drizzle-kit migrate --config=drizzle.config.ts",
-    "db:push:local": "dotenv -e apps/web/.env.local -- drizzle-kit push --config=drizzle.config.ts",
-    "db:push:prod": "dotenv -e apps/web/.env.production -- drizzle-kit push --config=drizzle.config.ts",
-    "studio:local": "dotenv -e apps/web/.env.local -- drizzle-kit studio --config=drizzle.config.ts",
-    "studio:remote": "dotenv -e apps/web/.env.production -- drizzle-kit studio --config=drizzle.config.ts"
+    "db:generate": "dotenv -e apps/web/.env.local -- drizzle-kit generate",
+    "db:migrate": "dotenv -e apps/web/.env.local -- drizzle-kit migrate",
+    "db:push": "dotenv -e apps/web/.env.local -- drizzle-kit push",
+    "studio": "dotenv -e apps/web/.env.local -- drizzle-kit studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.3",

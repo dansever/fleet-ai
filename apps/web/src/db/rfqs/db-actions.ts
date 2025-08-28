@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { rfqsTable } from '@/drizzle/schema/schema';
 import { NewRfq, Organization, Rfq, UpdateRfq, User } from '@/drizzle/types';
 import { and, desc, eq, gte } from 'drizzle-orm';

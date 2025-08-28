@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { fuelTendersTable } from '@/drizzle/schema/schema';
 import type { FuelTender, NewFuelTender, UpdateFuelTender } from '@/drizzle/types';
 import { desc, eq } from 'drizzle-orm';

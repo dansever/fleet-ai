@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { usersTable } from '@/drizzle/schema/schema';
 import { NewUser, Organization, User } from '@/drizzle/types';
 import { eq, sql } from 'drizzle-orm';

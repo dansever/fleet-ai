@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { orgSettingsTable } from '@/drizzle/schema/schema';
 import { NewOrgSettings, OrgSettings, UpdateOrgSettings } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';

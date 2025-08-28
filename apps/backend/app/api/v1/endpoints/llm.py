@@ -1,9 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from app.utils.logger import get_logger
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from app.shared.schemas import ResponseEnvelope
 from app.features.llm import basic_llm_call
-from app.shared.schemas import LLMResponse, Usage
 
 logger = get_logger(__name__)
 
@@ -19,6 +18,6 @@ async def basic_llm_endpoint(request: BasicLLMRequest) -> ResponseEnvelope:
     result = await basic_llm_call(prompt=request.prompt)
     return ResponseEnvelope(
         data=result,
-        success=True,
-        message="LLM call completed successfully"
+        success=result.success,
+        message="LLM call completed"
     )

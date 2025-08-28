@@ -22,6 +22,6 @@ async def compare_quotes_endpoint(
     result = await compare_quotes(db,rfqId)
     return ResponseEnvelope(
         data=result,
-        success=True,
-        message="Quotes compared successfully",
+        success=result.success,
+        message="Quotes compared successfully"
         )

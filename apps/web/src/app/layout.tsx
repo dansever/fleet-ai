@@ -1,5 +1,5 @@
 import { Toaster } from '@/components/ui/sonner';
-import { assertDbReady } from '@/drizzle/db';
+import { assertDbReady } from '@/drizzle';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';

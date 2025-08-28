@@ -1,4 +1,4 @@
-import { db } from '@/drizzle/db';
+import { db } from '@/drizzle';
 import { serviceContractsTable } from '@/drizzle/schema/schema';
 import { NewServiceContract, ServiceContract } from '@/drizzle/types';
 import { desc, eq } from 'drizzle-orm';

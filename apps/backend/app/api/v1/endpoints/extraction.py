@@ -19,19 +19,12 @@ async def extract_quote_from_document(
     Accepts PDF and DOCX files and returns structured quote information
     including parts, pricing, delivery terms, and supplier details.
     """
-    try:
-        logger.info(f"📄 Received quote extraction request for file: {file.filename}")
-        result = extract_quote(file)
-        logger.info("✅ Quote extraction completed successfully")
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"❌ Unexpected error in quote extraction endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500, 
-            detail="Internal server error during quote extraction"
-        )
+    result = await extract_quote(file)
+    return ResponseEnvelope(
+        data=result.data,
+        success=result.success,
+        message="Quote extraction task completed"
+    )
 
 
 @router.post("/rfq", response_model=ResponseEnvelope)
@@ -44,19 +37,12 @@ async def extract_rfq_from_document(
     Accepts PDF and DOCX files and returns structured RFQ information
     including parts, pricing, delivery terms, and supplier details.
     """
-    try:
-        logger.info(f"📄 Received RFQ extraction request for file: {file.filename}")
-        result = extract_rfq(file)
-        logger.info("✅ RFQ extraction completed successfully")
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"❌ Unexpected error in RFQ extraction endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500, 
-            detail="Internal server error during RFQ extraction"
-        )
+    result = await extract_rfq(file)
+    return ResponseEnvelope(
+        data=result.data,
+        success=result.success,
+        message="RFQ extraction task completed"
+    )
 
 @router.post("/fuel/bid", response_model=ResponseEnvelope)
 async def extract_fuel_bid_from_document(
@@ -68,19 +54,12 @@ async def extract_fuel_bid_from_document(
     Accepts PDF and DOCX files and returns structured fuel bid information
     including supplier details, pricing, terms, and technical specifications.
     """
-    try:
-        logger.info(f"📄 Received fuel bid extraction request for file: {file.filename}")
-        result = extract_fuel_bid(file)
-        logger.info("✅ Fuel bid extraction completed successfully")
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"❌ Unexpected error in fuel bid extraction endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500, 
-            detail="Internal server error during fuel bid extraction"
-        )
+    result = await extract_fuel_bid(file)
+    return ResponseEnvelope(
+        data=result.data,
+        success=result.success,
+        message="Fuel bid extraction task completed"
+    )
 
 @router.post("/fuel/contract", response_model=ResponseEnvelope)
 async def extract_fuel_contract_from_document(
@@ -106,15 +85,5 @@ async def extract_service_contract_from_document(
     Accepts PDF and DOCX files and returns structured contract information
     including services, rates, terms, and provider details.
     """
-    try:
-        logger.info(f"📄 Received service contract extraction request for file: {file.filename}")
-        # TODO: Implement when ground services extractor is ready
-        raise HTTPException(status_code=501, detail="Service contract extraction not yet implemented")
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"❌ Unexpected error in service contract extraction endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500, 
-            detail="Internal server error during service contract extraction"
-        )
+    # TODO: Implement when ground services extractor is ready
+    raise HTTPException(status_code=501, detail="Service contract extraction not yet implemented")
