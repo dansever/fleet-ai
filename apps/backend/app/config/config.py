@@ -31,7 +31,7 @@ class GeminiModel(str, Enum):
 # ---------- Provider settings ----------
 class OpenAISettings(BaseModel):
     api_key: Optional[str] = None
-    active_model: OpenAIModel = OpenAIModel.gpt_5_mini
+    active_model: OpenAIModel = OpenAIModel.gpt_5_nano
 
 class GeminiSettings(BaseModel):
     api_key: Optional[str] = None

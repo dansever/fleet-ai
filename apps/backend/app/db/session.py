@@ -27,6 +27,7 @@ AsyncSessionLocal = sessionmaker(
 )
 
 # Dependency for route injection
+# For FastAPI dependency injection (AsyncSession)
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
@@ -35,7 +36,7 @@ async def get_db():
 _connection_pool: Optional[asyncpg.Pool] = None
 
 async def get_db_connection() -> asyncpg.Pool:
-    """Get database connection pool for direct database operations"""
+    """Get database connection pool for direct database operations (asyncpg.Pool)"""
     global _connection_pool
     
     if _connection_pool is None:

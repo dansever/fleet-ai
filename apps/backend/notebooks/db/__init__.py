@@ -1,1 +1,0 @@
-# Database notebooks module initialization
