@@ -1,0 +1,27 @@
+{
+  "rfq_number": "RS225",
+  "vendor": {
+    "name": "Avion-Systems",
+    "address": "3245 Meridian Parkway, Weston, FL 33331, United States",
+    "contact_name": "Ron Sever",
+    "contact_email": "rsever@avion-systems.com",
+    "contact_phone": "1-954-762-7990"
+  },
+  "part": {
+    "part_number": "8061-536",
+    "alt_part_number": null,
+    "serial_number": null,
+    "description": "HMU",
+    "condition_code": null,
+    "certifications": [],
+    "tag_type": null,
+    "tagged_by": null,
+    "tagged_date": null,
+    "trace_to": null
+  },
+  "priority": "Routine",
+  "quantity_requested": 1,
+  "unit_of_measure": null,
+  "price_type": "Outright",
+  "buyer_comments": "PLEASE ADVISE PRICE AND AVAILABILITY. KINDLY MENTION TAG DATE/TRACE!"
+}

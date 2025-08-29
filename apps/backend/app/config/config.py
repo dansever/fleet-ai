@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 # ---------- Static ----------
 MIME_TYPE_PDF = "application/pdf"
 MAX_ENTITIES_PER_BATCH = 20
-EXTRACTOR_ALLOWED_EXTENSIONS: Tuple[str, ...] = (".pdf", ".docx")
+EXTRACTOR_ALLOWED_EXTENSIONS: Tuple[str, ...] = (".pdf", ".docx", ".doc")
 EXTRACTOR_ALLOWED_MIME_TYPES: Tuple[str, ...] = (
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

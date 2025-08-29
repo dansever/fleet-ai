@@ -1,4 +1,4 @@
-from app.db.utils import clean_records
+from app.utils.io.file_helpers import validate_file_type
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from app.db.operations import get_quotes_by_rfq_id
@@ -131,8 +131,7 @@ async def compare_quotes(db: AsyncSession, rfq_id: UUID) -> QuoteComparisonResul
     if not quotes:
         return _default_empty_result("No quotes found for this RFQ.")
 
-    cleaned_quotes = clean_records(quotes, fields=FOCUS_FIELDS)
-    items_for_model = _build_items_for_model(cleaned_quotes)
+    items_for_model = _build_items_for_model(quotes)
 
     system_message = (
         "You are an expert quotes analyst. Be objective and conservative. "

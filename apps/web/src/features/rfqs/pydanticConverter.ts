@@ -1,18 +1,5 @@
 import { CreateRfqData } from '@/services/technical/rfq-client';
-
-// Pydantic schema interfaces matching the backend RFQ schema
-interface PydanticPart {
-  part_number: string | null;
-  alt_part_number: string | null;
-  serial_number: string | null;
-  description: string | null;
-  condition_code: string | null;
-  certifications: string[] | null;
-  trace_to: string | null;
-  tag_type: string | null;
-  tagged_by: string | null;
-  tagged_date: string | null;
-}
+import { PydanticPart, PydanticVendor } from '../pydantic-models/shared-pydantic-models';
 
 export interface PydanticRFQ {
   // Identifiers
@@ -20,6 +7,9 @@ export interface PydanticRFQ {
 
   // Part information
   part: PydanticPart;
+
+  // Vendor information
+  vendor: PydanticVendor;
 
   // Request details
   priority: string | null;
@@ -43,15 +33,14 @@ export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): CreateRfqData {
 
   const createRfqData: CreateRfqData = {
     // RFQ Identification
-    direction: 'received', // Uploaded RFQs are always received
     rfqNumber: pydanticRfq.rfq_number,
 
     // Vendor Information - will be empty for received RFQs initially
-    vendorName: null,
-    vendorAddress: null,
-    vendorContactName: null,
-    vendorContactEmail: null,
-    vendorContactPhone: null,
+    vendorName: pydanticRfq.vendor.name,
+    vendorAddress: pydanticRfq.vendor.address,
+    vendorContactName: pydanticRfq.vendor.contact_name,
+    vendorContactEmail: pydanticRfq.vendor.contact_email,
+    vendorContactPhone: pydanticRfq.vendor.contact_phone,
 
     // Part Specifications (from part object)
     partNumber: pydanticRfq.part.part_number,

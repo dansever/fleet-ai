@@ -19,7 +19,7 @@ async def extract_quote_from_document(
     Accepts PDF and DOCX files and returns structured quote information
     including parts, pricing, delivery terms, and supplier details.
     """
-    result = await extract_quote(file)
+    result = extract_quote(file)
     return ResponseEnvelope(
         data=result.data,
         success=result.success,
@@ -37,7 +37,7 @@ async def extract_rfq_from_document(
     Accepts PDF and DOCX files and returns structured RFQ information
     including parts, pricing, delivery terms, and supplier details.
     """
-    result = await extract_rfq(file)
+    result = extract_rfq(file)
     return ResponseEnvelope(
         data=result.data,
         success=result.success,
@@ -54,7 +54,7 @@ async def extract_fuel_bid_from_document(
     Accepts PDF and DOCX files and returns structured fuel bid information
     including supplier details, pricing, terms, and technical specifications.
     """
-    result = await extract_fuel_bid(file)
+    result = extract_fuel_bid(file)
     return ResponseEnvelope(
         data=result.data,
         success=result.success,

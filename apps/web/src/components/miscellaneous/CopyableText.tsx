@@ -36,7 +36,7 @@ export function CopyableText({ text, className }: CopyableTextProps) {
       <span className="flex-1 truncate">{text}</span>
 
       {/* Icon should never shrink, always visible */}
-      <Copy className="h-4 w-4 transition group-hover:scale-105 shrink-0" />
+      {text && <Copy className="h-4 w-4 transition group-hover:scale-105 shrink-0" />}
     </button>
   );
 }

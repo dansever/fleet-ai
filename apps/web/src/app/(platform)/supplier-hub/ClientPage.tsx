@@ -48,6 +48,7 @@ export default function SupplierHubClientPage() {
     selectedRfq,
     setSelectedRfq,
     addRfq,
+    updateRfq,
     loading,
     errors,
   } = useSupplierHub();
@@ -100,8 +101,8 @@ export default function SupplierHubClientPage() {
     if (!selectedRfq) return '';
 
     const rfqNumber = selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`;
-    const partNumber = selectedRfq.partNumber || 'N/A';
-    const partDescription = selectedRfq.partDescription || 'N/A';
+    const partNumber = selectedRfq.partNumber;
+    const partDescription = selectedRfq.partDescription;
     const validUntilDate = new Date(quoteForm.validUntil).toLocaleDateString();
 
     return `Subject: Quote Response for ${rfqNumber} - ${partNumber}
@@ -113,7 +114,7 @@ Thank you for your RFQ regarding the following part:
 RFQ Number: ${rfqNumber}
 Part Number: ${partNumber}
 Part Description: ${partDescription}
-Requested Quantity: ${selectedRfq.quantity || 'N/A'}
+Requested Quantity: ${selectedRfq.quantity}
 
 QUOTE DETAILS:
 - Quoted Quantity: ${quoteForm.quantity}
@@ -174,7 +175,8 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
       onRefresh={() => refreshIncomingRfqs(true)}
       isRefreshing={loading.isRefreshing}
       isLoading={loading.incomingRfqs}
-      onAddRfq={addRfq}
+      onCreatedRfq={refreshIncomingRfqs}
+      addedRfqDirection={'received'}
     />
   );
 
@@ -197,7 +199,9 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
       <div className="flex gap-2">
         <RfqDialog
           rfq={selectedRfq}
-          onChange={() => {}}
+          onChange={(updatedRfq) => {
+            updateRfq(updatedRfq);
+          }}
           triggerText="View Details"
           triggerIntent="secondary"
           DialogType="view"
@@ -213,10 +217,9 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
 
   // Main content
   const mainContent = selectedRfq ? (
-    <div className="grid grid-cols-6 gap-4">
+    <div className="grid grid-cols-5 gap-4">
       {/* RFQ Details Section */}
       <ContentSection
-        className="col-span-2"
         header={
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -224,50 +227,76 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
           </div>
         }
         headerGradient="from-emerald-500 to-emerald-500"
+        className="col-span-3"
       >
-        <div className="flex flex-col gap-2">
-          <KeyValuePair
-            label="Part Number"
-            value={selectedRfq.partNumber || 'N/A'}
-            valueType="string"
-          />
-          <KeyValuePair
-            label="Alt. Part Number"
-            value={selectedRfq.altPartNumber || 'N/A'}
-            valueType="string"
-          />
-
-          <KeyValuePair label="Quantity" value={selectedRfq.quantity || 'N/A'} valueType="string" />
-          <KeyValuePair
-            label="Urgency Level"
-            value={urgencyLevelDisplayMap[selectedRfq.urgencyLevel as UrgencyLevel]}
-            valueType="string"
-          />
-          <KeyValuePair
-            label="Part Description"
-            value={selectedRfq.partDescription || 'N/A'}
-            valueType="string"
-          />
-          <KeyValuePair
-            label="Required By"
-            value={selectedRfq.sentAt ? formatDate(new Date(selectedRfq.sentAt)) : 'N/A'}
-            valueType="string"
-          />
-        </div>
-        {selectedRfq.buyerComments && (
-          <div className="mt-4">
+        <div className="grid grid-cols-2 gap-6">
+          {/* General RFQ Details */}
+          <div>
+            <h4 className="font-medium text-gray-900 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-green-600" />
+              RFQ Details
+            </h4>
+            <KeyValuePair label="Part Number" value={selectedRfq.partNumber} valueType="string" />
             <KeyValuePair
-              label="Buyer Comments"
-              value={selectedRfq.buyerComments}
+              label="Alt. Part Number"
+              value={selectedRfq.altPartNumber}
+              valueType="string"
+            />
+            <KeyValuePair label="Quantity" value={selectedRfq.quantity} valueType="string" />
+            <KeyValuePair
+              label="Unit of Measure"
+              value={selectedRfq.unitOfMeasure}
+              valueType="string"
+            />
+            <KeyValuePair
+              label="Urgency Level"
+              value={urgencyLevelDisplayMap[selectedRfq.urgencyLevel as UrgencyLevel]}
+              valueType="string"
+            />
+            <KeyValuePair
+              label="Part Description"
+              value={selectedRfq.partDescription}
+              valueType="string"
+            />
+            <KeyValuePair
+              label="Date Sent"
+              value={selectedRfq.sentAt && formatDate(new Date(selectedRfq.sentAt))}
               valueType="string"
             />
           </div>
-        )}
+
+          {/* Vendor Information */}
+          <div>
+            <h4 className="font-medium text-gray-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-blue-600" />
+              Vendor Information
+            </h4>
+            <KeyValuePair label="Name" value={selectedRfq.vendorName} valueType="string" />
+            <KeyValuePair label="Address" value={selectedRfq.vendorAddress} valueType="string" />
+            <KeyValuePair
+              label="Contact Name"
+              value={selectedRfq.vendorContactName}
+              valueType="string"
+            />
+            <KeyValuePair label="Email" value={selectedRfq.vendorContactEmail} valueType="email" />
+            <KeyValuePair
+              label=" Phone"
+              value={selectedRfq.vendorContactPhone}
+              valueType="string"
+            />
+          </div>
+          <KeyValuePair
+            className="col-span-full"
+            label="Buyer Comments"
+            valueClassName="justify-start w-full"
+            value={selectedRfq.buyerComments}
+            valueType="string"
+          />
+        </div>
       </ContentSection>
 
       {/* Inventory Status Section */}
       <ContentSection
-        className="col-span-4"
         header={
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5" />
@@ -275,45 +304,37 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
           </div>
         }
         headerGradient="from-emerald-500 to-emerald-400"
+        className="col-span-2"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {/* Availability Status */}
-          <div className="space-y-3">
+          <div>
             <h4 className="font-medium text-gray-900 flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-green-600" />
               Availability
             </h4>
-            <div className="space-y-2">
-              <KeyValuePair
-                label="In Stock"
-                value={mockInventoryData.availableQuantity}
-                valueType="number"
-              />
-              <KeyValuePair
-                label="Condition"
-                value={mockInventoryData.condition}
-                valueType="string"
-              />
-              <KeyValuePair
-                label="Location"
-                value={mockInventoryData.location}
-                valueType="string"
-              />
-              <KeyValuePair
-                label="Lead Time"
-                value={mockInventoryData.leadTime}
-                valueType="string"
-              />
-            </div>
+
+            <KeyValuePair
+              label="In Stock"
+              value={mockInventoryData.availableQuantity}
+              valueType="number"
+            />
+            <KeyValuePair
+              label="Condition"
+              value={mockInventoryData.condition}
+              valueType="string"
+            />
+            <KeyValuePair label="Location" value={mockInventoryData.location} valueType="string" />
+            <KeyValuePair label="Lead Time" value={mockInventoryData.leadTime} valueType="string" />
           </div>
 
           {/* Pricing Information */}
-          <div className="space-y-3">
+          <div>
             <h4 className="font-medium text-gray-900 flex items-center gap-2">
               <DollarSign className="w-4 h-4 text-green-600" />
               Internal Pricing
             </h4>
-            <div className="space-y-2">
+            <div>
               <KeyValuePair
                 label="Internal Cost"
                 value={`$${mockInventoryData.internalCost.toLocaleString()}`}
@@ -338,7 +359,7 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
           </div>
 
           {/* Certifications */}
-          <div className="space-y-3 col-span-full">
+          <div>
             <h4 className="font-medium text-gray-900 flex items-center gap-2">
               <Building2 className="w-4 h-4 text-blue-600" />
               Certifications

@@ -7,7 +7,6 @@ from app.config import (
     ai_config
 )
 
-
 logger = get_logger(__name__)
 
 def get_llama_extractor(
@@ -60,43 +59,42 @@ def get_llama_extractor(
     # Try to fetch an existing agent
     try:
         agent = extractor.get_agent(name=agent_name)
-        if agent is not None:
+        if agent:
+            logger.info(f"Found existing agent: {agent_name}")
             if ai_config.features.update_extractor_schema:
-                agent.data_schema = data_schema
-                agent.save()
-                logger.info(f"Updated schema for: {agent_name}")
+                if agent.data_schema != data_schema:
+                    agent.data_schema = data_schema
+                    agent.save()
+                    logger.info(f"Updated schema for: {agent_name}")
             return agent
     except ApiError as e:
         if e.status_code != 404:
             logger.error(f"Error getting {agent_name}: {e}")
-            raise e  # Only suppress "not found" errors
+            raise
 
     # Create extraction configuration
     config = ExtractConfig(
-        # Basic options
-        extraction_mode=extraction_mode, # BALANCED, MULTIMODAL, MULTIMODAL, PREMIUM
-        extraction_target=extraction_target, # PER_DOC, PER_PAGE
+        extraction_mode=extraction_mode,
+        extraction_target=extraction_target,
         system_prompt=system_prompt,
-
-        # Advanced options
-        chunk_mode=chunk_mode,     # PAGE, SECTION
-        high_resolution_mode=True,     # Enable for better OCR
-        invalidate_cache=False,        # Set to True to bypass cache
-
-        # Extensions (see Extensions page for details)
+        chunk_mode=chunk_mode,
+        high_resolution_mode=True,
+        invalidate_cache=invalidate_cache,
         use_reasoning=use_reasoning,
         cite_sources=cite_sources,
     )
 
     try:
-        # Create new extraction agent 
         agent = extractor.create_agent(
             name=agent_name,
             data_schema=data_schema,
             config=config,
         )
-        logger.info(f"Created new LlamaExtract agent: {agent_name}")
+        logger.info(f"Created new agent: {agent_name}")
         return agent
+    except ApiError as e:
+        logger.error(f"API error creating {agent_name}: {e}")
+        raise
     except Exception as e:
-        logger.error(f"Error creating agent {agent_name}: {e}")
+        logger.error(f"Unexpected error creating {agent_name}: {e}")
         raise

@@ -21,7 +21,6 @@ import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CopyableText } from '../../../components/miscellaneous/CopyableText';
 import RfqList from '../_components/RfqList';
 import { useTechnicalProcurement } from './ContextProvider';
 import QuoteAnalysis from './_components/QuoteAnalysis';
@@ -45,6 +44,7 @@ export default function TechnicalProcurementClientPage() {
     deleteRfqAndSelectAdjacent,
     quoteComparisonResult,
     setQuoteComparisonResult,
+    refreshRfqs,
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
@@ -135,7 +135,8 @@ export default function TechnicalProcurementClientPage() {
       isLoading={isLoading}
       isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
-      onAddRfq={addRfq}
+      addedRfqDirection={'received'}
+      onCreatedRfq={refreshRfqs}
     />
   );
 
@@ -299,12 +300,11 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.vendorContactName || ''}
                   valueType="string"
                 />
-                {selectedRfq.vendorContactEmail && (
-                  <div className="flex justify-between items-center py-1">
-                    <span className="text-sm text-muted-foreground">Email</span>
-                    <CopyableText text={selectedRfq.vendorContactEmail} />
-                  </div>
-                )}
+                <KeyValuePair
+                  label="Email"
+                  value={selectedRfq.vendorContactEmail || ''}
+                  valueType="email"
+                />
                 <KeyValuePair
                   label="Phone"
                   value={selectedRfq.vendorContactPhone || ''}

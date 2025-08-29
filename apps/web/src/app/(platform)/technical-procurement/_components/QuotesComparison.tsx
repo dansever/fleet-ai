@@ -103,7 +103,7 @@ const createQuoteColumns = (
           disabled={acceptedQuoteId === quote.id || acceptingQuoteId === quote.id}
           size="sm"
           onClick={() => onAcceptQuote(quote.id)}
-          className="disabled:opacity-100 disabled:pointer-events-none w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200"
+          className="disabled:opacity-100 disabled:pointer-arrow w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200"
         />
 
         <QuoteDialog

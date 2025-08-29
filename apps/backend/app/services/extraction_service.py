@@ -13,8 +13,8 @@ def process_document_extraction(
     system_prompt: str,
     schema_class: Type,
     log_label: str = "Document",
-    allowed_extensions: tuple[str, ...] = ai_config.features.allowed_extensions,
-    allowed_mime_types: tuple[str, ...] = ai_config.features.allowed_mime_types
+    allowed_extensions: tuple[str, ...] = ai_config.allowed_extensions,
+    allowed_mime_types: tuple[str, ...] = ai_config.allowed_mime_types
 ) -> ResponseEnvelope:
     """
     Generic document extraction handler.

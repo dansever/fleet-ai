@@ -27,7 +27,8 @@ interface RfqListProps {
   isLoading: boolean;
   isRefreshing?: boolean;
   InsertAddRfqButton?: boolean;
-  onAddRfq?: (rfq: Rfq) => void;
+  onCreatedRfq?: () => void;
+  addedRfqDirection?: 'received' | 'sent';
 }
 
 export default function RfqList({
@@ -38,7 +39,8 @@ export default function RfqList({
   isLoading,
   isRefreshing = false,
   InsertAddRfqButton = true,
-  onAddRfq,
+  onCreatedRfq,
+  addedRfqDirection = 'sent',
 }: RfqListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -51,44 +53,15 @@ export default function RfqList({
     setShowAddRfqDialog(true);
   };
 
-  const handleSendRfq = async (file: File) => {
-    try {
-      const rfq = await extractRfq(file);
-      onAddRfq?.(rfq as Rfq);
-      onRefresh();
-      toast.success('RFQ extracted successfully');
-    } catch (error) {
-      toast.error('Error extracting RFQ');
-    }
-    setUploadRfqPopoverOpen(false);
-  };
-
   const handleSendRfqFile = async (file: File) => {
     try {
       const result = await extractRfq(file);
       const convertedRfq = convertPydanticToRfq(result as PydanticRFQ);
-      const newRfq = await createRfq(convertedRfq);
-      onAddRfq?.(newRfq);
+      const newRfq = await createRfq({ ...convertedRfq, direction: addedRfqDirection });
+      onCreatedRfq?.();
       toast.success('RFQ extracted successfully');
     } catch (error) {
       toast.error('Error extracting RFQ');
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'quoted':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'approved':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -190,7 +163,7 @@ export default function RfqList({
                       className="text-gray-500"
                       onClick={async () => {
                         const rfq = await createRandomRfq();
-                        onAddRfq?.(rfq);
+                        onCreatedRfq?.();
                         console.log('Time to close the popover');
                         setUploadRfqPopoverOpen(false);
                       }}
@@ -291,10 +264,7 @@ export default function RfqList({
                     </div>
                     {/* Right side: badges */}
                     <div className="flex flex-col gap-2 items-end">
-                      <Badge
-                        variant="secondary"
-                        className={`text-xs ${getStatusColor(rfq.status || 'pending')}`}
-                      >
+                      <Badge variant="secondary" className={`text-xs ${rfq.status || 'pending'}`}>
                         {getStatusDisplay(rfq.status || 'pending')}
                       </Badge>
                       {rfq.quantity && (
@@ -316,7 +286,7 @@ export default function RfqList({
         rfq={null}
         DialogType="add"
         onChange={(rfq) => {
-          onAddRfq?.(rfq);
+          onCreatedRfq?.();
           setShowAddRfqDialog(false);
         }}
         buttonSize="sm"
