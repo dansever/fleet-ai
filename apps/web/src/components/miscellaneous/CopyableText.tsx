@@ -29,10 +29,13 @@ export function CopyableText({ text, className }: CopyableTextProps) {
     <button
       type="button"
       onClick={handleCopy}
-      className={cn('group flex items-center gap-1 min-w-0 cursor-pointer', className)}
+      className={cn('group flex w-full items-center gap-1 cursor-pointer', className)}
       title={text ?? ''}
     >
-      <span className="truncate flex-1">{text}</span>
+      {/* Text should take all leftover space and truncate */}
+      <span className="flex-1 truncate">{text}</span>
+
+      {/* Icon should never shrink, always visible */}
       <Copy className="h-4 w-4 transition group-hover:scale-105 shrink-0" />
     </button>
   );

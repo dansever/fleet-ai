@@ -1,0 +1,110 @@
+Here's a comprehensive prompt you can use to conduct code reviews and implement improvements for other directories:
+
+---
+
+## Code Review & Implementation Prompt
+
+**Task**: Conduct a comprehensive code review and implement critical improvements for the [DIRECTORY_NAME] directory.
+
+### Phase 1: Code Review Analysis
+
+Please analyze the following aspects of the codebase:
+
+1. **Architecture & State Management**
+   - Context provider patterns and efficiency
+   - State management complexity and optimization opportunities
+   - Component separation of concerns
+
+2. **API Integration & Error Handling**
+   - Consistency of error response formats across API routes
+   - Proper error boundaries and fallback UI
+   - Type safety in API client functions
+
+3. **Component Structure & Reusability**
+   - Component size and complexity
+   - Reusability patterns
+   - Missing memoization opportunities
+
+4. **Data Flow & Caching**
+   - Cache management and memory leak prevention
+   - Data fetching patterns
+   - Optimistic updates implementation
+
+5. **Type Safety & Interface Consistency**
+   - Any types that should be properly typed
+   - Missing null checks and validation
+   - Interface consistency across components
+
+6. **Performance Optimizations**
+   - Unnecessary re-renders
+   - Large component files that need splitting
+   - Missing virtualization for large datasets
+
+7. **Code Organization & Maintainability**
+   - File structure and naming conventions
+   - Unused files or code
+   - Documentation gaps
+
+### Phase 2: Implementation Priority
+
+**🔴 High Priority (Critical Issues)**
+- Fix API error response consistency
+- Implement cache cleanup mechanisms
+- Add error boundaries
+- Fix memory leaks
+
+**🟡 Medium Priority (Performance & UX)**
+- Optimize context performance with useMemo
+- Extract large components
+- Add React.memo to prevent unnecessary re-renders
+- Implement optimistic updates
+
+**�� Low Priority (Code Quality)**
+- Improve type safety
+- Add documentation
+- Clean up unused files
+- Fix linting errors
+
+### Phase 3: Implementation Requirements
+
+For each improvement:
+
+1. **Create a TODO list** to track progress
+2. **Implement changes systematically** starting with critical issues
+3. **Test each change** to ensure no regressions
+4. **Fix all linting errors** introduced by changes
+5. **Provide a summary** of improvements made
+
+### Phase 4: Deliverables
+
+Please provide:
+
+1. **Detailed code review findings** with specific line numbers and examples
+2. **Priority-ranked recommendations** with impact assessment
+3. **Complete implementation** of all critical and high-priority fixes
+4. **Performance metrics** showing improvements achieved
+5. **Final code quality score** (before/after)
+
+### Example Implementation Pattern
+
+```typescript
+// Before: Performance issue
+const value = { /* large object */ }; // Recreated on every render
+
+// After: Optimized
+const value = useMemo(() => ({ /* large object */ }), [dependencies]);
+```
+
+### Success Criteria
+
+- All critical issues resolved
+- Performance improvements measurable
+- Code is lint-free and type-safe
+- Maintainable and well-organized structure
+- Comprehensive error handling
+
+**Target**: Achieve 8.5+/10 code quality score with significant performance improvements.
+
+---
+
+**Usage**: Replace `[DIRECTORY_NAME]` with your target directory (e.g., "airport-hub", "quotes", "rfqs") and provide this prompt to get a comprehensive code review and implementation for any directory in your project.

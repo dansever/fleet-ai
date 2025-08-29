@@ -2,7 +2,7 @@ import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
 import { ServiceContract } from '@/drizzle/types';
 import ServiceContractDialog from '@/features/service-contracts/ServiceContractDialog';
-import { createRandomServiceContract } from '@/features/service-contracts/utils';
+import { createRandomServiceContract } from '@/features/service-contracts/createRandomServiceContract';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, ProjectCard, StatsCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';

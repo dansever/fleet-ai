@@ -560,7 +560,7 @@ export const fuelBidsTable = pgTable(
 );
 
 // -------------------- Fuel Contracts --------------------
-export const fuelContracts = pgTable(
+export const fuelContractsTable = pgTable(
   'fuel_contracts',
   {
     // System Fields
@@ -635,7 +635,7 @@ export const fuelContracts = pgTable(
 );
 
 // -------------------- Fuel Contract Invoices --------------------
-export const fuelContractInvoices = pgTable(
+export const fuelContractInvoicesTable = pgTable(
   'fuel_contract_invoices',
   {
     // System Fields
@@ -666,7 +666,7 @@ export const fuelContractInvoices = pgTable(
   (table) => [
     foreignKey({
       columns: [table.fuelContractId],
-      foreignColumns: [fuelContracts.id],
+      foreignColumns: [fuelContractsTable.id],
       name: 'fk_fuel_contract_invoices_fuel_contract_id',
     }).onDelete('cascade'),
   ],

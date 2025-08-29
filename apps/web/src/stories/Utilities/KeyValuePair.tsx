@@ -1,3 +1,4 @@
+import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import type React from 'react';
@@ -18,7 +19,7 @@ export const KeyValuePair = ({
 }: {
   label: string;
   value: string | number | boolean | Date | null;
-  valueType: 'string' | 'number' | 'boolean' | 'date' | 'select' | 'null';
+  valueType: 'string' | 'number' | 'boolean' | 'date' | 'select' | 'email' | 'null';
   className?: string;
   keyClassName?: string;
   valueClassName?: string;
@@ -46,7 +47,7 @@ export const KeyValuePair = ({
     </span>
 
     {editMode ? (
-      valueType === 'string' ? (
+      valueType === 'string' || valueType === 'email' ? (
         <ModernTextarea
           value={value ? value : ''}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
@@ -97,11 +98,15 @@ export const KeyValuePair = ({
     ) : valueType === 'date' ? (
       <div className="max-w-3/5">{formatDate(value as string)}</div>
     ) : valueType === 'select' ? (
-      <div className={cn('max-w-7/10', valueClassName)}>
+      <div className={cn('max-w-[70%]', valueClassName)}>
         {selectOptions?.find((o) => o.value === value)?.label ?? (value as string | number)}
       </div>
+    ) : valueType === 'email' ? (
+      <div className={cn('max-w-[70%]', valueClassName)}>
+        <CopyableText text={value as string} />
+      </div>
     ) : (
-      <div className={cn('max-w-7/10', valueClassName)}>
+      <div className={cn('max-w-[70%]', valueClassName)}>
         {value instanceof Date ? formatDate(value) : (value as string | number)}
       </div>
     )}

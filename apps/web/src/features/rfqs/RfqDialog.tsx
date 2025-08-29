@@ -320,7 +320,7 @@ export default function RfqDialog({
               <KeyValuePair
                 label="Contact Email"
                 value={formData.vendorContactEmail}
-                valueType="string"
+                valueType="email"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('vendorContactEmail', value)}
                 name="vendorContactEmail"

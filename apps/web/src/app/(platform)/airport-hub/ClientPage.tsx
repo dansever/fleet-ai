@@ -10,8 +10,8 @@ import { useState } from 'react';
 import AirportList from '../_components/AirportList';
 import { useAirportHub } from './ContextProvider';
 import ContactsAndProviders from './subpages/ContactsAndProviders';
+import ManageAirport from './subpages/ManageAirport';
 import ServiceContracts from './subpages/ServiceContracts';
-import ManageAirport from './subpages/manageAirport';
 
 type TabValue = 'service-agreements' | 'contacts-and-providers' | 'manage-airport';
 

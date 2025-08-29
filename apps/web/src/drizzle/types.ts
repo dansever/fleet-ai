@@ -3,8 +3,8 @@ import {
   airportsTable,
   contactsTable,
   fuelBidsTable,
-  fuelContractInvoices,
-  fuelContracts,
+  fuelContractInvoicesTable,
+  fuelContractsTable,
   fuelTendersTable,
   organizationsTable,
   orgSettingsTable,
@@ -77,11 +77,11 @@ export type NewFuelBid = InferInsertModel<typeof fuelBidsTable>;
 export type UpdateFuelBid = Partial<NewFuelBid>;
 
 // ==================== FUEL CONTRACTS ====================
-export type FuelContract = InferSelectModel<typeof fuelContracts>;
-export type NewFuelContract = InferInsertModel<typeof fuelContracts>;
+export type FuelContract = InferSelectModel<typeof fuelContractsTable>;
+export type NewFuelContract = InferInsertModel<typeof fuelContractsTable>;
 export type UpdateFuelContract = Partial<NewFuelContract>;
 
 // ==================== FUEL CONTRACT INVOICES ====================
-export type FuelContractInvoice = InferSelectModel<typeof fuelContractInvoices>;
-export type NewFuelContractInvoice = InferInsertModel<typeof fuelContractInvoices>;
+export type FuelContractInvoice = InferSelectModel<typeof fuelContractInvoicesTable>;
+export type NewFuelContractInvoice = InferInsertModel<typeof fuelContractInvoicesTable>;
 export type UpdateFuelContractInvoice = Partial<NewFuelContractInvoice>;

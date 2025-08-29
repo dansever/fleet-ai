@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/stories/Button/Button';
 import { ContentSection, StatsCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';

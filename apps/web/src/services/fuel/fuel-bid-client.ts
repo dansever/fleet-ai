@@ -63,10 +63,37 @@ export async function deleteFuelBid(id: string): Promise<void> {
   await api.delete(`/api/fuel-bids?id=${id}`);
 }
 
+// Type for the extracted fuel bid data from backend
+export interface ExtractedFuelBidData {
+  vendorName?: string;
+  vendorContactName?: string;
+  vendorContactEmail?: string;
+  vendorContactPhone?: string;
+  baseUnitPrice?: number;
+  currency?: string;
+  uom?: string;
+  priceType?: string;
+  indexName?: string;
+  indexLocation?: string;
+  differential?: string;
+  differentialUnit?: string;
+  formulaNotes?: string;
+  intoPlaneFee?: number;
+  handlingFee?: number;
+  otherFee?: number;
+  otherFeeDescription?: string;
+  paymentTerms?: string;
+  includesTaxes?: boolean;
+  includesAirportFees?: boolean;
+  densityAt15C?: number;
+  vendorComments?: string;
+  [key: string]: unknown; // Allow for additional fields
+}
+
 /**
  * Extract fuel bid from file
  */
-export async function extractFuelBid(file: File): Promise<any> {
+export async function extractFuelBid(file: File): Promise<ExtractedFuelBidData> {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -77,5 +104,5 @@ export async function extractFuelBid(file: File): Promise<any> {
   });
 
   // The backend returns a ResponseEnvelope, so extract the data
-  return res.data.data;
+  return res.data.data as ExtractedFuelBidData;
 }

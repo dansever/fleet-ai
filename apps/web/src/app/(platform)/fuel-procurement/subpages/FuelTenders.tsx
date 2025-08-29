@@ -11,12 +11,12 @@ import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { AlertCircle, CalendarIcon, TrashIcon } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
 import FuelBidsComparison from '../_components/FuelBidsComparison';
 
-export default function FuelTendersPage() {
+const FuelTendersPage = memo(function FuelTendersPage() {
   const {
     selectedAirport,
     airportTenders,
@@ -64,7 +64,7 @@ export default function FuelTendersPage() {
 
   if (!selectedAirport) return null;
 
-  const currentTender = selectedTender || airportTenders[0];
+  const currentTender = selectedTender || (airportTenders.length > 0 ? airportTenders[0] : null);
 
   return (
     <div className="min-h-screen p-4">
@@ -343,4 +343,6 @@ export default function FuelTendersPage() {
       </div>
     </div>
   );
-}
+});
+
+export default FuelTendersPage;
