@@ -21,21 +21,11 @@ export function getOrderDirectionDisplay(
 }
 
 // --------------------  Status Enum --------------------
-export const statusEnum = pgEnum('status', [
-  'draft',
-  'pending',
-  'in_progress',
-  'completed',
-  'rejected',
-  'closed',
-]);
+export const statusEnum = pgEnum('status', ['pending', 'in_progress', 'closed']);
 export type Status = (typeof statusEnum.enumValues)[number];
 export const statusDisplayMap: Record<Status, string> = {
-  draft: 'Draft',
   pending: 'Pending',
   in_progress: 'In Progress',
-  completed: 'Completed',
-  rejected: 'Rejected',
   closed: 'Closed',
 };
 export function getStatusDisplay(status: Status | string | null | undefined): string {
@@ -46,16 +36,16 @@ export function getStatusDisplay(status: Status | string | null | undefined): st
 // -------------------- Decision Enum --------------------
 export const decisionEnum = pgEnum('decision', [
   'undecided',
-  'accepted',
-  'rejected',
   'shortlisted',
+  'rejected',
+  'accepted',
 ]);
 export type Decision = (typeof decisionEnum.enumValues)[number];
 export const decisionDisplayMap: Record<Decision, string> = {
   undecided: 'Undecided',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
   shortlisted: 'Shortlisted',
+  rejected: 'Rejected',
+  accepted: 'Accepted',
 };
 export function getDecisionDisplay(decision: Decision | string | null | undefined): string {
   if (!decision) return 'Unknown';

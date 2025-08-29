@@ -8,6 +8,7 @@ import {
   statusEnum,
 } from '@/drizzle/schema/enums';
 import type { Quote, Rfq } from '@/drizzle/types';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';
 import { createQuote, CreateQuoteData, updateQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
@@ -437,10 +438,14 @@ export default function QuoteDialog({
               <KeyValuePair
                 label="Currency"
                 value={formData.currency}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('currency', value)}
                 name="currency"
+                selectOptions={Object.entries(CURRENCY_MAP).map(([key, value]) => ({
+                  label: value.name,
+                  value: key,
+                }))}
               />
               <KeyValuePair
                 label="Pricing Type"

@@ -3,6 +3,8 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
+import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
 import { deleteFuelTender } from '@/services/fuel/fuel-tender-client';
 import { Button } from '@/stories/Button/Button';
@@ -217,10 +219,17 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                   />
                   <KeyValuePair
                     label="Currency"
-                    value={currentTender.baseCurrency}
+                    value={CURRENCY_MAP[currentTender.baseCurrency || '']}
                     valueType="string"
                   />
-                  <KeyValuePair label="Base UOM" value={currentTender.baseUom} valueType="string" />
+                  <KeyValuePair
+                    label="Base UOM"
+                    value={
+                      BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
+                      ''
+                    }
+                    valueType="string"
+                  />
                 </ContentSection>
 
                 {/* Timeline */}

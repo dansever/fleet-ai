@@ -2,7 +2,7 @@
 
 import { Quote, Rfq } from '@/drizzle/types';
 import { getQuotesByRfq } from '@/services/technical/quote-client';
-import { deleteRfq, getRfqs } from '@/services/technical/rfq-client';
+import { deleteRfq, getRfq, getRfqs } from '@/services/technical/rfq-client';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 export interface TechnicalProcurementContextValue {
@@ -17,16 +17,21 @@ export interface TechnicalProcurementContextValue {
   setQuoteComparisonResult: (result: JSON | null) => void;
 
   // Actions
-  setSelectedRfqId: (id: string | null) => void;
   refreshRfqs: () => Promise<void>;
+  refreshSelectedRfq: () => Promise<void>;
   refreshSelectedRfqQuotes: () => Promise<void>;
   refreshData: () => Promise<void>;
-  clearQuotesCache: () => void;
-  updateRfq: (updatedRfq: Rfq) => void;
+
+  // RFQ actions
+  setSelectedRfqId: (id: string | null) => void;
   addRfq: (newRfq: Rfq) => void;
-  addQuote: (newQuote: Partial<Quote>) => void;
-  deleteQuote: (quoteId: string) => void;
+  updateRfq: (updatedRfq: Rfq) => void;
   deleteRfqAndSelectAdjacent: (rfqId: string) => Promise<void>;
+
+  // Quote actions
+  addQuote: (newQuote: Partial<Quote>) => void;
+  updateQuote: (updatedQuote: Quote) => void;
+  deleteQuote: (quoteId: string) => void;
 
   // Loading states
   isLoadingRfqs: boolean;
@@ -170,6 +175,12 @@ export function TechnicalProcurementContextProvider({
     }
   };
 
+  const refreshSelectedRfq = async () => {
+    if (!selectedRfqId) return;
+    const freshRfq = await getRfq(selectedRfqId);
+    setRfqs((prev) => prev.map((rfq) => (rfq.id === selectedRfqId ? freshRfq : rfq)));
+  };
+
   const refreshSelectedRfqQuotes = async () => {
     if (!selectedRfqId) return;
 
@@ -232,6 +243,23 @@ export function TechnicalProcurementContextProvider({
       const updatedQuotes = [newQuote as Quote, ...existingQuotes];
       newCache.set(newQuote.rfqId!, updatedQuotes);
 
+      return newCache;
+    });
+  };
+
+  const updateQuote = (updatedQuote: Quote) => {
+    if (!updatedQuote.rfqId) {
+      console.error('Cannot update quote without rfqId');
+      return;
+    }
+
+    setQuotesCache((prev) => {
+      const newCache = new Map(prev);
+      const existingQuotes = newCache.get(updatedQuote.rfqId) || [];
+      const updatedQuotes = existingQuotes.map((q) =>
+        q.id === updatedQuote.id ? updatedQuote : q,
+      );
+      newCache.set(updatedQuote.rfqId, updatedQuotes);
       return newCache;
     });
   };
@@ -311,13 +339,14 @@ export function TechnicalProcurementContextProvider({
 
     // Actions
     setSelectedRfqId,
+    addQuote,
+    updateQuote,
     refreshRfqs,
+    refreshSelectedRfq,
     refreshSelectedRfqQuotes,
     refreshData,
-    clearQuotesCache,
     updateRfq,
     addRfq,
-    addQuote,
     deleteQuote,
     deleteRfqAndSelectAdjacent,
 

@@ -1,4 +1,5 @@
 import { Airport, FuelContract } from '@/drizzle/types';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { createFuelContract, CreateFuelContractData } from '@/services/fuel/fuel-contract-client';
 
 const VENDOR_NAMES = [
@@ -12,14 +13,14 @@ const VENDOR_NAMES = [
   'Elite Fuel Services',
 ];
 const FUEL_TYPES = ['Jet A-1', 'Jet A', 'Avgas 100LL', 'Diesel'];
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD'];
 const PRICE_TYPES = ['fixed', 'index_formula', 'floating'];
 
 export async function createRandomFuelContract(airportId: Airport['id']): Promise<FuelContract> {
   // Generate random contract data
   const randomVendor = VENDOR_NAMES[Math.floor(Math.random() * VENDOR_NAMES.length)];
   const randomFuelType = FUEL_TYPES[Math.floor(Math.random() * FUEL_TYPES.length)];
-  const randomCurrency = CURRENCIES[Math.floor(Math.random() * CURRENCIES.length)];
+  const randomCurrency =
+    Object.keys(CURRENCY_MAP)[Math.floor(Math.random() * Object.keys(CURRENCY_MAP).length)];
   const randomPriceType = PRICE_TYPES[Math.floor(Math.random() * PRICE_TYPES.length)];
 
   const basePrice = Math.random() * 3 + 1.5; // Random price between 1.5 and 4.5

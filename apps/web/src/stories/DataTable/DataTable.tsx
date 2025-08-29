@@ -253,7 +253,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     {/* Original row */}
                     <tr
                       className={`border-b border-gray-100/50 hover:bg-gray-50/30 ransition-colors ${
-                        onRowClick ? 'cursor-pointer' : ''
+                        onRowClick ? '' : ''
                       } ${rowClassName ? rowClassName(item) : ''}`}
                       onClick={() => onRowClick?.(item)}
                     >

@@ -195,7 +195,7 @@ export default function TechnicalProcurementClientPage() {
   // Main content
   const mainContent = selectedRfq ? (
     <div className="space-y-6">
-      <div className="">
+      <div>
         {/* RFQ Details */}
         {selectedRfq && (
           <ContentSection
@@ -390,10 +390,10 @@ export default function TechnicalProcurementClientPage() {
                       {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
                     </span>
                   )}
-                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'closed').length > 0 && (
                     <span className="text-green-600">
                       Accepted:{' '}
-                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
+                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'closed').length}
                     </span>
                   )}
                 </div>

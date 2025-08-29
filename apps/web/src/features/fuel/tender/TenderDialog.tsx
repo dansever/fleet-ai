@@ -1,6 +1,8 @@
 'use client';
 
 import type { FuelTender } from '@/drizzle/types';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
+import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { serializeFuelTenderDates } from '@/lib/utils/date-helpers';
 import {
   createFuelTender,
@@ -194,11 +196,15 @@ export default function TenderDialog({
               />
               <KeyValuePair
                 label="Base Currency"
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('baseCurrency', value)}
                 name="baseCurrency"
                 value={formData.baseCurrency}
+                selectOptions={Object.entries(CURRENCY_MAP).map(([key, value]) => ({
+                  label: value,
+                  value: key,
+                }))}
               />
             </div>
           </ContentSection>
@@ -210,10 +216,14 @@ export default function TenderDialog({
               <KeyValuePair
                 label="Base UOM"
                 value={formData.baseUom}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('baseUom', value)}
                 name="baseUom"
+                selectOptions={BASE_UOM_OPTIONS.map((uom) => ({
+                  label: uom.label,
+                  value: uom.value,
+                }))}
               />
 
               <KeyValuePair
