@@ -4,12 +4,13 @@ This document provides an overview of the PostgreSQL database schema for the Fle
 
 ## Schema Overview
 
-The database is organized into four main domains:
+The database is organized into five main domains:
 
 1. **Core** - Organizations, users, airports, and foundational entities
 2. **Suppliers & Contacts** - Vendor management and contact information
 3. **Technical Procurement** - RFQ/Quote workflows for parts and services
-4. **Procurement Contract Management** - Contract management and invoice reconciliation
+4. **Fuel Tender & Bidding** - Competitive fuel procurement through tenders and bids
+5. **Procurement Contract Management** - Contract management and invoice reconciliation
 
 ---
 
@@ -37,7 +38,7 @@ The database is organized into four main domains:
 **Relationships**:
 
 - Belongs to `organizations`
-- Referenced by `contracts`, `invoices`, `ops_evidence`
+- Referenced by `contracts`, `invoices`, `ops_evidence`, `fuel_tenders`
 
 ---
 
@@ -50,7 +51,7 @@ The database is organized into four main domains:
 **Relationships**:
 
 - Belongs to `organizations`
-- Referenced by `contracts`, `invoices`, `contacts`
+- Referenced by `contracts`, `invoices`, `contacts`, `fuel_bids`
 
 ### `contacts`
 
@@ -84,6 +85,31 @@ The database is organized into four main domains:
 
 - Responds to `rfqs`
 - Belongs to `organizations`
+
+---
+
+## Fuel Tender & Bidding
+
+### `fuel_tenders`
+
+**Purpose**: Competitive fuel procurement tenders issued by airlines  
+**Key Fields**: `title`, `fuelType`, `biddingStarts`, `biddingEnds`, `deliveryStarts`, `deliveryEnds`, `winningBidId`  
+**Relationships**:
+
+- Belongs to `organizations` and `airports`
+- Receives multiple `fuel_bids`
+- Can select one winning `fuel_bid`
+
+### `fuel_bids`
+
+**Purpose**: Vendor responses to fuel tenders with detailed pricing  
+**Key Fields**: `priceType`, `baseUnitPrice`, `indexName`, `differential`, `intoPlaneFee`, `decision`  
+**Pricing Types**: `fixed` (set price) or `index_formula` (Platts/Argus-linked)  
+**Relationships**:
+
+- Responds to `fuel_tenders`
+- Links to `vendors` (optional)
+- Decision tracked by `users`
 
 ---
 
@@ -222,3 +248,33 @@ INSERT INTO contract_rules (
 ```
 
 This unified approach handles all contract types while preserving fuel-specific pricing complexity.
+
+---
+
+## Fuel Tender Example
+
+The fuel tender/bidding workflow enables competitive fuel procurement:
+
+```sql
+-- Fuel Tender
+INSERT INTO fuel_tenders (
+  title, fuelType, biddingStarts, biddingEnds, ...
+) VALUES (
+  'LAX Jet A-1 Supply Q1 2024', 'Jet A-1',
+  '2024-01-01', '2024-01-15', ...
+);
+
+-- Fuel Bid with Index Pricing
+INSERT INTO fuel_bids (
+  tenderId, priceType, indexName, differential, intoPlaneFee, ...
+) VALUES (
+  tender_id,
+  'index_formula',
+  'Platts Jet A-1 Med',
+  '+0.05', -- 5 cents above index
+  '0.12',  -- $0.12 per gallon into-plane fee
+  ...
+);
+```
+
+This enables airlines to run competitive fuel auctions and convert winning bids into fuel contracts.

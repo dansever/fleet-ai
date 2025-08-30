@@ -21,7 +21,11 @@ export const BaseCard = ({
   description: string;
   className?: string;
   children?: React.ReactNode;
-}) => <Card className={cn('rounded-3xl border-1 overflow-hidden', className)}>{children}</Card>;
+}) => (
+  <Card className={cn('rounded-3xl shadow-none border-0 overflow-hidden', className)}>
+    {children}
+  </Card>
+);
 
 // Feature Card - For showcasing features or services
 export const FeatureCard = ({
@@ -46,7 +50,7 @@ export const FeatureCard = ({
       <div className="flex items-center gap-3 mb-4 justify-between">
         <div className="flex flex-row gap-2 items-center">
           {icon && <div className="p-2 bg-white/20 rounded-2xl">{icon}</div>}
-          <h3 className="text-xl font-bold">{title}</h3>
+          <h3>{title}</h3>
         </div>
         {buttonChildren}
       </div>
@@ -145,11 +149,11 @@ export const StatsCard = ({
   trend?: 'up' | 'down' | 'neutral';
   className?: string;
 }) => (
-  <Card className={cn('rounded-3xl p-6', className)}>
+  <Card className={cn('rounded-3xl p-6 border-0 shadow-none', className)}>
     <div className="flex items-center justify-between">
       <div>
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className="text-3xl font-bold mt-2">{value}</p>
+        <h2 className="mt-2">{value}</h2>
         {change && (
           <p
             className={cn(
@@ -165,7 +169,7 @@ export const StatsCard = ({
           </p>
         )}
       </div>
-      <div className="p-3 bg-gradient-to-br from-violet-100 to-blue-100 rounded-2xl">{icon}</div>
+      <div className="p-2 bg-gradient-to-br from-violet-50 to-blue-50 rounded-2xl">{icon}</div>
     </div>
   </Card>
 );
@@ -196,7 +200,7 @@ export const ProfileCard = ({
           .join('')}
       </AvatarFallback>
     </Avatar>
-    <h3 className="text-xl font-bold">{name}</h3>
+    <h3>{name}</h3>
     <p className="text-muted-foreground mb-3">{role}</p>
     {bio && <p className="text-sm text-muted-foreground mb-4">{bio}</p>}
     {stats && (

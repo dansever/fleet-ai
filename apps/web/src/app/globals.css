@@ -9,10 +9,10 @@
   --radius: 0.625rem;
 
   /* ========= THEME COLORS ========= */
-  --background: #faf9f6;
+  --background: #f7f7fb;
   --foreground: #2c2c2c;
 
-  --card: var(--background);
+  --card: white;
   --card-foreground: var(--foreground);
 
   --popover: var(--background);
@@ -47,15 +47,15 @@
   --chart-5: 27 87% 67%;
 
   /* ========= SEMANTIC COLORS ========= */
-  --sidebar: var(--background);
+  --sidebar: white;
   --sidebar-background: 0 0% 98%;
   --sidebar-foreground: 240 5.3% 26.1%;
   --sidebar-primary: 240 5.9% 10%;
   --sidebar-primary-foreground: 0 0% 98%;
   --sidebar-accent: 240 4.8% 95.9%;
   --sidebar-accent-foreground: 240 5.9% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-border: white;
+  --sidebar-ring: white;
 }
 
 @theme {
@@ -318,19 +318,19 @@
 
   /* ========= HEADINGS & TEXT ========= */
   h1 {
-    @apply text-3xl font-semibold py-1;
+    @apply text-2xl font-bold py-1;
   }
   h2 {
-    @apply text-2xl font-semibold py-1;
+    @apply text-xl font-semibold py-1;
   }
   h3 {
-    @apply text-xl font-medium;
-  }
-  h4 {
     @apply text-lg font-medium;
   }
+  h4 {
+    @apply text-base font-normal;
+  }
   p {
-    @apply text-base;
+    @apply text-sm;
   }
 }
 
