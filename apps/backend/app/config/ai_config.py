@@ -1,6 +1,6 @@
-# config/ai.py
+# backend/app/config/ai_config.py
 from enum import Enum
-from typing import Tuple, Optional
+from typing import Tuple
 import os
 from pydantic import BaseModel, Field
 
@@ -30,17 +30,17 @@ class GeminiModel(str, Enum):
 
 # ---------- Provider settings ----------
 class OpenAISettings(BaseModel):
-    api_key: Optional[str] = None
+    api_key: str | None = None
     active_model: OpenAIModel = OpenAIModel.gpt_5_nano
 
 class GeminiSettings(BaseModel):
-    api_key: Optional[str] = None
+    api_key: str | None = None
     active_model: GeminiModel = GeminiModel.flash
 
 class LlamaSettings(BaseModel):
-    cloud_api_key: Optional[str] = None
-    extract_project_id: Optional[str] = None
-    organization_id: Optional[str] = None
+    cloud_api_key: str | None = None
+    extract_project_id: str | None = None
+    organization_id: str | None = None
 
 # ---------- Feature flags ----------
 class FeatureFlags(BaseModel):
@@ -50,7 +50,7 @@ class FeatureFlags(BaseModel):
 # ---------- Top-level config ----------
 class AIConfig(BaseModel):
     active_llm_provider: LLMProvider = LLMProvider.openai
-    active_llm_model: Optional[str] = None
+    active_llm_model: str | None = None
     
     openai: OpenAISettings = OpenAISettings()
     gemini: GeminiSettings = GeminiSettings()
@@ -93,7 +93,7 @@ class AIConfig(BaseModel):
         )
 
     @property
-    def active_api_key(self) -> Optional[str]:
+    def active_api_key(self) -> str | None:
         return (
             self.openai.api_key
             if self.active_llm_provider == LLMProvider.openai

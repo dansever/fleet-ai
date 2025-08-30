@@ -35,17 +35,19 @@ export function getStatusDisplay(status: Status | string | null | undefined): st
 
 // -------------------- Decision Enum --------------------
 export const decisionEnum = pgEnum('decision', [
-  'undecided',
+  'open',
   'shortlisted',
   'rejected',
   'accepted',
+  'disputed',
 ]);
 export type Decision = (typeof decisionEnum.enumValues)[number];
 export const decisionDisplayMap: Record<Decision, string> = {
-  undecided: 'Undecided',
+  open: 'Open',
   shortlisted: 'Shortlisted',
   rejected: 'Rejected',
   accepted: 'Accepted',
+  disputed: 'Disputed',
 };
 export function getDecisionDisplay(decision: Decision | string | null | undefined): string {
   if (!decision) return 'Unknown';
@@ -56,22 +58,31 @@ export function getDecisionDisplay(decision: Decision | string | null | undefine
 
 // --------------------  Contract Type Enum --------------------
 export const ContractTypeEnum = pgEnum('contract_type', [
-  'fuel_and_ground_ops',
-  'catering_and_onboard_services',
-  'technical_and_infrastructure',
-  'airport_services',
-  'commercial_services',
-  'security_and_compliance',
+  'fuel', // fuel supply, into-plane, SAF
+  'ground_handling', // ramp, GPU, pushback, cleaning, deicing ops
+  'catering', // catering, onboard services, waste removal
+  'technical_mro_parts', // line maintenance, components, tooling
+  'airport_and_nav_charges', // airport fees, ANSP route/overflight charges
+  'security_compliance', // screening, regulated agent, audits
+  'it_data_comms', // SITA, nav data, SaaS, connectivity
+  'logistics_freight', // AOG courier, freight forwarding, customs broker
+  'training_and_crew', // simulator hours, crew training, licensing
+  'insurance_and_finance', // liability, hull insurance, leasing fees
   'other',
 ]);
+
 export type ContractType = (typeof ContractTypeEnum.enumValues)[number];
 export const contractTypeDisplayMap: Record<ContractType, string> = {
-  fuel_and_ground_ops: 'Fuel and Ground Ops',
-  catering_and_onboard_services: 'Catering and Onboard Services',
-  technical_and_infrastructure: 'Technical and Infrastructure',
-  airport_services: 'Airport Services',
-  commercial_services: 'Commercial Services',
-  security_and_compliance: 'Security and Compliance',
+  fuel: 'Fuel',
+  ground_handling: 'Ground Handling',
+  catering: 'Catering',
+  technical_mro_parts: 'Technical MRO Parts',
+  airport_and_nav_charges: 'Airport and Nav Charges',
+  security_compliance: 'Security and Compliance',
+  it_data_comms: 'IT Data Comms',
+  logistics_freight: 'Logistics Freight',
+  training_and_crew: 'Training and Crew',
+  insurance_and_finance: 'Insurance and Finance',
   other: 'Other',
 };
 

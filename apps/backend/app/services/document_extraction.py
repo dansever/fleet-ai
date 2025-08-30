@@ -1,7 +1,8 @@
+# app/services/document_extraction.py
 from fastapi import UploadFile, HTTPException
 from typing import Type
 from app.utils import get_logger, save_temp_file, cleanup_temp_file, validate_file_type
-from app.core.agents.extractor import get_llama_extractor
+from app.ai.extractors import get_llama_extractor_client
 from app.shared.schemas import ResponseEnvelope
 from app.config import ai_config
 
@@ -38,14 +39,17 @@ def process_document_extraction(
         logger.info(f"🔍 {log_label} saved file to temporary location")
         logger.info(f"🔍 Starting {log_label} extraction...")
 
-        agent = get_llama_extractor(
+        client = get_llama_extractor_client()
+        agent = client.get_or_create_agent(
             agent_name=agent_name,
             system_prompt=system_prompt,
             data_schema=schema_class,
         )
+
         logger.info(f"🤖 {log_label} agent initialized")
 
         result = agent.extract(temp_path)
+        
         logger.info(f"📄 {log_label} extraction completed")
 
         return ResponseEnvelope(

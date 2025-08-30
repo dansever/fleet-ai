@@ -5,7 +5,7 @@ This demonstrates the flexibility and modularity of the new implementation.
 
 from typing import List
 from pydantic import BaseModel
-from app.services.ai.openai_client import OpenAIClient
+from app.ai.providers.openai_client import OpenAIClient
 from app.shared.schemas.llm_schemas import (
     LLMParams, 
     LLMMessage, 
@@ -95,12 +95,12 @@ async def example_usage():
         }
     ]
     
-    response6 = client.generate(
+    response5 = client.generate(
         prompt="What's the weather like in New York?",
         tools=tools,
         tool_choice="auto"
     )
-    print(f"Tool response: {response6.content}")
+    print(f"Tool response: {response5.content}")
 
 if __name__ == "__main__":
     import asyncio

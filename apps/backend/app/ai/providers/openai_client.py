@@ -1,25 +1,14 @@
+# app/ai/providers/openai_client.py
 from __future__ import annotations
 from typing import Type, Dict, Any, List, Optional, AsyncIterator
 from pydantic import BaseModel
 from openai import OpenAI
-from typing import Protocol
-from app.config import AIConfig
+from app.config import ai_config
 from app.shared.schemas.llm_schemas import (
     LLMParams, 
     LLMResponse, 
     Usage, 
-    LLMMessage, 
-    ModelProvider, 
-    MessageRole
 )
-
-class LLMAdapter(Protocol):
-    """Adapter interface for different providers"""
-    def generate(self, schema: Optional[Type[BaseModel]], params: LLMParams) -> LLMResponse:
-        ...
-
-    def stream_generate(self, schema: Optional[Type[BaseModel]], params: LLMParams) -> AsyncIterator[LLMResponse]:
-        ...
 
 
 class OpenAIClient:
@@ -31,17 +20,14 @@ class OpenAIClient:
         default_max_tokens: int | None = None,
         default_top_p: float | None = None,
     ):
-        config = AIConfig()
 
-        self.api_key = api_key or config.openai.api_key
+        self.api_key = api_key or ai_config.openai.api_key
         if not self.api_key:
             raise ValueError("OpenAI API key not configured")
-
-        self.default_model = default_model or config.active_model_id
+        self.default_model = default_model or ai_config.active_model_id
         self.default_temperature = default_temperature
         self.default_max_tokens = default_max_tokens
         self.default_top_p = default_top_p
-
         self.client = OpenAI(api_key=self.api_key)
 
     def _prepare_messages(self, params: LLMParams) -> List[Dict[str, Any]]:
@@ -49,11 +35,11 @@ class OpenAIClient:
         messages = []
         
         # Handle system message if provided
-        if params.system and not params.messages:
+        if params.system:
             messages.append({"role": "system", "content": params.system})
         
         # Add conversation messages
-        for msg in params.messages:
+        for msg in (params.messages or []):
             message_dict = {"role": msg.role.value, "content": msg.content}
             if msg.name:
                 message_dict["name"] = msg.name
@@ -124,7 +110,7 @@ class OpenAIClient:
 
         try:
             if schema:
-                # Use function calling for structured output
+                # Use JSON response_format for structured output
                 response = self.client.chat.completions.create(
                     **openai_params,
                     response_format={"type": "json_object"}
@@ -132,7 +118,7 @@ class OpenAIClient:
                 content = response.choices[0].message.content
                 # Parse JSON content into schema
                 if content:
-                    parsed_content = schema.model_validate_json(content)
+                    schema.model_validate_json(content)  # validate only, keep content string
                 else:
                     raise ValueError("Empty response from OpenAI")
             else:
@@ -192,47 +178,42 @@ class OpenAIClient:
 
         try:
             stream = self.client.chat.completions.create(**openai_params)
-            
+
             accumulated_content = ""
+            last_chunk = None
             for chunk in stream:
+                last_chunk = chunk
                 if chunk.choices[0].delta.content:
                     accumulated_content += chunk.choices[0].delta.content
-                    
-                    # Create a partial response for streaming
+
                     partial_usage = Usage(
                         input_tokens=chunk.usage.prompt_tokens if chunk.usage else 0,
                         output_tokens=chunk.usage.completion_tokens if chunk.usage else 0,
                         total_tokens=chunk.usage.total_tokens if chunk.usage else 0,
                     )
-                    
+
                     yield LLMResponse(
                         content=accumulated_content,
                         usage=partial_usage,
-                        model=chunk.model,
+                        model=getattr(chunk, "model", self.default_model),
                     )
-            
-            # Final response with complete content
+
             if schema and accumulated_content:
                 try:
-                    parsed_content = schema.model_validate_json(accumulated_content)
-                    final_content = parsed_content
+                    schema.model_validate_json(accumulated_content)  # validate only
                 except Exception:
-                    # If schema parsing fails, return raw content
-                    final_content = accumulated_content
-            else:
-                final_content = accumulated_content
+                    pass  # keep raw accumulated_content
 
-            # Get final usage from the last chunk
             final_usage = Usage(
-                input_tokens=chunk.usage.prompt_tokens if chunk.usage else 0,
-                output_tokens=chunk.usage.completion_tokens if chunk.usage else 0,
-                total_tokens=chunk.usage.total_tokens if chunk.usage else 0,
+                input_tokens=last_chunk.usage.prompt_tokens if last_chunk and last_chunk.usage else 0,
+                output_tokens=last_chunk.usage.completion_tokens if last_chunk and last_chunk.usage else 0,
+                total_tokens=last_chunk.usage.total_tokens if last_chunk and last_chunk.usage else 0,
             )
-            
+
             yield LLMResponse(
-                content=final_content,
+                content=accumulated_content,
                 usage=final_usage,
-                model=chunk.model,
+                model=getattr(last_chunk, "model", self.default_model),
             )
 
         except Exception as e:
