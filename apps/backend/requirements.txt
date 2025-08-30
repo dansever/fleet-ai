@@ -39,3 +39,9 @@ google-genai
 openai
 
 sqlacodegen
+
+pytesseract
+pillow
+
+strands-agents 
+strands-agents-tools

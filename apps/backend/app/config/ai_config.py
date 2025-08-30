@@ -7,7 +7,11 @@ from pydantic import BaseModel, Field
 # ---------- Static ----------
 MIME_TYPE_PDF = "application/pdf"
 MAX_ENTITIES_PER_BATCH = 20
-EXTRACTOR_ALLOWED_EXTENSIONS: Tuple[str, ...] = (".pdf", ".docx", ".doc")
+EXTRACTOR_ALLOWED_EXTENSIONS: Tuple[str, ...] = (
+    ".pdf", 
+    ".docx", 
+    ".doc",
+)
 EXTRACTOR_ALLOWED_MIME_TYPES: Tuple[str, ...] = (
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -42,6 +46,9 @@ class LlamaSettings(BaseModel):
     extract_project_id: str | None = None
     organization_id: str | None = None
 
+class TavilySettings(BaseModel):
+    api_key: str | None = None
+
 # ---------- Feature flags ----------
 class FeatureFlags(BaseModel):
     update_extractor_schema: bool = False
@@ -55,6 +62,7 @@ class AIConfig(BaseModel):
     openai: OpenAISettings = OpenAISettings()
     gemini: GeminiSettings = GeminiSettings()
     llama: LlamaSettings = LlamaSettings()
+    tavily: TavilySettings = TavilySettings()
     features: FeatureFlags = FeatureFlags()
     
     allowed_extensions: Tuple[str, ...] = EXTRACTOR_ALLOWED_EXTENSIONS
@@ -69,6 +77,7 @@ class AIConfig(BaseModel):
         self.llama.cloud_api_key = os.getenv("LLAMA_CLOUD_API_KEY")
         self.llama.extract_project_id = os.getenv("LLAMA_EXTRACT_PROJECT_ID")
         self.llama.organization_id = os.getenv("LLAMA_ORGANIZATION_ID")
+        self.tavily.api_key = os.getenv("TAVILY_API_KEY")
         
         # Load provider and model
         provider = os.getenv("ACTIVE_LLM_PROVIDER")
