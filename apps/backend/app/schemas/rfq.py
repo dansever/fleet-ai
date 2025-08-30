@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 from app.schemas.part import Part
+from app.schemas.vendor import Vendor
 
 # One extracted RFQ
 class RFQ(BaseModel):
@@ -18,6 +19,8 @@ class RFQ(BaseModel):
         description="Unique identifier for the RFQ. This may appear in the document as 'RFQ ID', 'RFQ No.', or simply 'RFQ'. Extract the value exactly as shown, regardless of format.",
         example="RS225, AVA-123, M-1234, Jan25-AB3, etc.")
     
+    vendor: Vendor = Field(description="The vendor who sent the RFQ. This may appear in the document as under 'From', 'Vendor Name', 'Buyer'")
+
     # Requested part information
     part: Part = Field(description="The part information")
     

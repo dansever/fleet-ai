@@ -7,7 +7,7 @@ import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { Plus } from 'lucide-react';
+import { Eye, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AirportAutocomplete from './AirportAutocomplete';
@@ -17,14 +17,18 @@ export default function AirportDialog({
   airport,
   DialogType = 'view',
   triggerButtonIntent = 'secondary',
+  TriggerButtonText = 'View Airport',
+  TriggerButtonIcon = Eye,
   onChange,
-  buttonSize = 'md',
+  TriggerButtonSize = 'md',
 }: {
   airport: Airport | null;
   DialogType: 'add' | 'edit' | 'view';
   triggerButtonIntent?: 'primary' | 'secondary' | 'ghost' | 'add';
+  TriggerButtonText?: string;
+  TriggerButtonIcon?: LucideIcon;
   onChange: (airport: Airport) => void;
-  buttonSize?: 'sm' | 'md' | 'lg';
+  TriggerButtonSize?: 'sm' | 'md' | 'lg';
 }) {
   const { map: countryMap } = useCountryMap();
   const isAdd = DialogType === 'add';
@@ -117,7 +121,6 @@ export default function AirportDialog({
     }
   };
 
-  const triggerText = isAdd ? 'Add Airport' : `View ${airport?.iata || 'Airport'}`;
   const dialogTitle = isAdd ? 'Add New Airport' : airport?.name || 'Airport Details';
   const saveButtonText = isAdd ? 'Upload to Database' : 'Save';
 
@@ -126,9 +129,9 @@ export default function AirportDialog({
       trigger={
         <Button
           intent={triggerButtonIntent}
-          text={triggerText}
-          icon={isAdd ? Plus : undefined}
-          size={buttonSize}
+          text={TriggerButtonText}
+          icon={TriggerButtonIcon}
+          size={TriggerButtonSize}
         />
       }
       headerGradient="from-blue-500 to-blue-500"

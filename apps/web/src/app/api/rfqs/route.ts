@@ -1,9 +1,8 @@
 import {
   createRfq,
   deleteRfq,
-  getRecentOrgRfqs,
   getRfqById,
-  getRfqsByOrg,
+  getRfqsByOrgAndDirection,
   getUserRfqs,
   updateRfq,
 } from '@/db/rfqs/db-actions';
@@ -33,7 +32,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const userId = searchParams.get('userId');
-    const days = searchParams.get('days');
+    const direction = searchParams.get('direction');
 
     // Get specific RFQ by ID
     if (id) {
@@ -52,14 +51,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(rfqs);
     }
 
-    // Get recent RFQs (default = last 7 days)
-    if (days) {
-      const rfqs = await getRecentOrgRfqs(orgId, parseInt(days, 7));
+    if (direction && ['received', 'sent'].includes(direction)) {
+      const rfqs = await getRfqsByOrgAndDirection(orgId, direction as 'received' | 'sent');
       return NextResponse.json(rfqs);
     }
 
-    // Default: Get all RFQs for organization
-    const rfqs = await getRfqsByOrg(orgId);
+    // Default: Get all sent RFQs for organization
+    const rfqs = await getRfqsByOrgAndDirection(orgId);
     return NextResponse.json(rfqs);
   } catch (error) {
     console.error('Error fetching RFQs:', error);

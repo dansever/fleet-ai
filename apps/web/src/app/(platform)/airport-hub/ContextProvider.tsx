@@ -1,19 +1,22 @@
 'use client';
 
-import { Airport, ServiceContract, User } from '@/drizzle/types';
+import { Airport, Contact, ServiceContract, User } from '@/drizzle/types';
 import { getServiceContractsByAirport } from '@/services/contracts/service-contract-client';
 import { getAirports } from '@/services/core/airport-client';
+import { getContactsByAirport } from '@/services/vendors/contact-client';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type LoadingState = {
   airports: boolean;
   contracts: boolean;
+  contacts: boolean;
   isRefreshing: boolean; // Indicates if current loading is from a refresh action
 };
 
 export type ErrorState = {
   airports: string | null;
   contracts: string | null;
+  contacts: string | null;
   general: string | null;
 };
 
@@ -43,6 +46,18 @@ export type AirportHubContextType = {
   addServiceContract: (newContract: ServiceContract) => void;
   removeServiceContract: (contractId: string) => void;
 
+  // Contacts
+  contacts: Contact[];
+  setContacts: (contacts: Contact[]) => void;
+  selectedContact: Contact | null;
+  setSelectedContact: (contact: Contact | null) => void;
+
+  // Refresh, Update, Add, Remove contacts
+  refreshContacts: () => Promise<void>;
+  updateContact: (updatedContact: Contact) => void;
+  addContact: (newContact: Contact) => void;
+  removeContact: (contactId: string) => void;
+
   // Loading and error states
   loading: LoadingState;
   errors: ErrorState;
@@ -69,16 +84,22 @@ export default function AirportHubProvider({
   const [selectedServiceContract, setSelectedServiceContract] = useState<ServiceContract | null>(
     null,
   );
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   // Cache to avoid refetching service contracts for the same airport
   const [serviceContractsCache, setServiceContractsCache] = useState<
     Record<string, ServiceContract[]>
   >({});
 
+  // Cache to avoid refetching contacts for the same airport
+  const [contactsCache, setContactsCache] = useState<Record<string, Contact[]>>({});
+
   // Loading states
   const [loading, setLoading] = useState<LoadingState>({
     airports: false,
     contracts: false,
+    contacts: false,
     isRefreshing: false,
   });
 
@@ -86,6 +107,7 @@ export default function AirportHubProvider({
   const [errors, setErrors] = useState<ErrorState>({
     airports: null,
     contracts: null,
+    contacts: null,
     general: null,
   });
 
@@ -162,6 +184,56 @@ export default function AirportHubProvider({
 
     loadServiceContracts();
   }, [selectedAirport, serviceContractsCache]); // Depend on selectedAirport and serviceContractsCache
+
+  /**
+   * Load contacts for the selected airport (only when airport changes)
+   */
+  useEffect(() => {
+    if (!selectedAirport) {
+      setContacts([]);
+      setSelectedContact(null);
+      return;
+    }
+
+    const loadContacts = async () => {
+      // Check cache first
+      if (contactsCache[selectedAirport.id]) {
+        const cachedContacts = contactsCache[selectedAirport.id];
+        setContacts(cachedContacts);
+        setSelectedContact(cachedContacts.length > 0 ? cachedContacts[0] : null);
+        return;
+      }
+
+      setLoading((prev) => ({ ...prev, contacts: true, isRefreshing: false }));
+      setErrors((prev) => ({ ...prev, contacts: null }));
+
+      try {
+        const contacts = await getContactsByAirport(selectedAirport.id);
+        setContacts(contacts);
+
+        // Cache the contacts for this airport
+        setContactsCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]: contacts,
+        }));
+
+        // Always set first contact as selected when loading contacts for a new airport
+        setSelectedContact(contacts.length > 0 ? contacts[0] : null);
+      } catch (error) {
+        console.error('Error loading contacts:', error);
+        setErrors((prev) => ({
+          ...prev,
+          contacts: error instanceof Error ? error.message : 'Failed to load contacts',
+        }));
+        setContacts([]);
+        setSelectedContact(null);
+      } finally {
+        setLoading((prev) => ({ ...prev, contacts: false, isRefreshing: false }));
+      }
+    };
+
+    loadContacts();
+  }, [selectedAirport, contactsCache]); // Depend on selectedAirport and contactsCache
 
   /**
    * Refresh airports
@@ -345,6 +417,120 @@ export default function AirportHubProvider({
   );
 
   /**
+   * Refresh contacts for the currently selected airport (clears cache)
+   */
+  const refreshContacts = useCallback(async () => {
+    if (!selectedAirport) return;
+
+    // Clear cache for this airport to force fresh data
+    setContactsCache((prev) => {
+      const updated = { ...prev };
+      delete updated[selectedAirport.id];
+      return updated;
+    });
+
+    setLoading((prev) => ({ ...prev, contacts: true, isRefreshing: true }));
+    setErrors((prev) => ({ ...prev, contacts: null }));
+
+    try {
+      const contacts = await getContactsByAirport(selectedAirport.id);
+      setContacts(contacts);
+
+      // Update cache with fresh data
+      setContactsCache((prev) => ({
+        ...prev,
+        [selectedAirport.id]: contacts,
+      }));
+
+      // Preserve the currently selected contact if it still exists, otherwise select first
+      if (selectedContact) {
+        const updatedSelectedContact = contacts.find((c: Contact) => c.id === selectedContact.id);
+        setSelectedContact(updatedSelectedContact || (contacts.length > 0 ? contacts[0] : null));
+      } else if (contacts.length > 0) {
+        setSelectedContact(contacts[0]);
+      }
+    } catch (error) {
+      console.error('Error refreshing contacts:', error);
+      setErrors((prev) => ({
+        ...prev,
+        contacts: error instanceof Error ? error.message : 'Failed to refresh contacts',
+      }));
+    } finally {
+      setLoading((prev) => ({ ...prev, contacts: false, isRefreshing: false }));
+    }
+  }, [selectedAirport, selectedContact]);
+
+  /**
+   * Update contact
+   */
+  const updateContact = useCallback(
+    (updatedContact: Contact) => {
+      setContacts((prevContacts) =>
+        prevContacts.map((contact) =>
+          contact.id === updatedContact.id ? updatedContact : contact,
+        ),
+      );
+
+      if (selectedContact?.id === updatedContact.id) {
+        setSelectedContact(updatedContact);
+      }
+
+      // Update cache as well
+      if (selectedAirport) {
+        setContactsCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]:
+            prev[selectedAirport.id]?.map((contact) =>
+              contact.id === updatedContact.id ? updatedContact : contact,
+            ) || [],
+        }));
+      }
+    },
+    [selectedContact, selectedAirport],
+  );
+
+  /**
+   * Add contact
+   */
+  const addContact = useCallback(
+    (newContact: Contact) => {
+      setContacts((prevContacts) => [newContact, ...prevContacts]);
+
+      // Update cache as well
+      if (selectedAirport) {
+        setContactsCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]: [newContact, ...(prev[selectedAirport.id] || [])],
+        }));
+      }
+    },
+    [selectedAirport],
+  );
+
+  /**
+   * Remove contact
+   */
+  const removeContact = useCallback(
+    (contactId: string) => {
+      setContacts((prevContacts) => prevContacts.filter((contact) => contact.id !== contactId));
+
+      if (selectedContact?.id === contactId) {
+        setSelectedContact(null);
+      }
+
+      // Update cache as well
+      if (selectedAirport) {
+        setContactsCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]:
+            prev[selectedAirport.id]?.filter((contact) => contact.id !== contactId) || [],
+        }));
+      }
+    },
+    [selectedContact, selectedAirport],
+  );
+
+  /**
    * Clear specific error
    */
   const clearError = useCallback((errorType: keyof ErrorState) => {
@@ -358,6 +544,7 @@ export default function AirportHubProvider({
     setErrors({
       airports: null,
       contracts: null,
+      contacts: null,
       general: null,
     });
   }, []);
@@ -383,6 +570,14 @@ export default function AirportHubProvider({
     updateServiceContract,
     addServiceContract,
     removeServiceContract,
+    contacts,
+    setContacts,
+    selectedContact,
+    setSelectedContact,
+    refreshContacts,
+    updateContact,
+    addContact,
+    removeContact,
     loading,
     errors,
     clearError,

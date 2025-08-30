@@ -41,6 +41,7 @@ export const ModernInput = ({
       placeholder={placeholder}
       className={cn(
         'w-full rounded-xl border-2 pr-4 focus:border-primary/50 focus:ring-0',
+        'placeholder:text-gray-400',
         icon && 'pl-10',
         className,
       )}
@@ -65,7 +66,8 @@ export const SearchInput = ({
       type="search"
       autoComplete="off"
       placeholder={placeholder}
-      className="w-full rounded-2xl bg-muted pl-9 pr-4 border-0 focus:ring-2 focus:ring-primary/20"
+      className={`w-full rounded-2xl bg-muted pl-9 pr-4 border-0 focus:ring-2 focus:ring-primary/20',
+        'placeholder:text-gray-400' ${className}`}
       {...props}
     />
   </div>
@@ -119,6 +121,7 @@ export const ModernTextarea = ({
     className={cn(
       'rounded-2xl border-2 focus:border-primary/50 focus:ring-0',
       'min-h-[60px] max-h-[160px]',
+      'placeholder:text-gray-400',
       className,
     )}
     {...props}

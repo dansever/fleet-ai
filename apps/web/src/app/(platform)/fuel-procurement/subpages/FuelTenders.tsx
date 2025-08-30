@@ -3,6 +3,8 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
+import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
 import { deleteFuelTender } from '@/services/fuel/fuel-tender-client';
 import { Button } from '@/stories/Button/Button';
@@ -11,12 +13,12 @@ import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { AlertCircle, CalendarIcon, TrashIcon } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
 import FuelBidsComparison from '../_components/FuelBidsComparison';
 
-export default function FuelTendersPage() {
+const FuelTendersPage = memo(function FuelTendersPage() {
   const {
     selectedAirport,
     airportTenders,
@@ -64,7 +66,7 @@ export default function FuelTendersPage() {
 
   if (!selectedAirport) return null;
 
-  const currentTender = selectedTender || airportTenders[0];
+  const currentTender = selectedTender || (airportTenders.length > 0 ? airportTenders[0] : null);
 
   return (
     <div className="min-h-screen p-4">
@@ -217,10 +219,17 @@ export default function FuelTendersPage() {
                   />
                   <KeyValuePair
                     label="Currency"
-                    value={currentTender.baseCurrency}
+                    value={CURRENCY_MAP[currentTender.baseCurrency || '']}
                     valueType="string"
                   />
-                  <KeyValuePair label="Base UOM" value={currentTender.baseUom} valueType="string" />
+                  <KeyValuePair
+                    label="Base UOM"
+                    value={
+                      BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
+                      ''
+                    }
+                    valueType="string"
+                  />
                 </ContentSection>
 
                 {/* Timeline */}
@@ -343,4 +352,6 @@ export default function FuelTendersPage() {
       </div>
     </div>
   );
-}
+});
+
+export default FuelTendersPage;

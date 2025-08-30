@@ -1,6 +1,6 @@
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { ReactNode } from 'react';
-import { AppSidebar } from './_components/sidebar/AppSidebar';
+import { AppSidebar } from './_components/AppSidebar';
 
 export default function PlatformLayout({ children }: { children: ReactNode }) {
   return (

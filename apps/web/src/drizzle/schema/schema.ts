@@ -12,18 +12,24 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { ContractTypeEnum, decisionEnum, OrderDirectionEnum, statusEnum } from './enums';
+import { ContractTypeEnum, OrderDirectionEnum, statusEnum } from './enums';
 export * from './enums';
 
 // Shared timestamps
 const createdAt = timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 const updatedAt = timestamp('updated_at', { withTimezone: true }).notNull().defaultNow();
 
+// ==============================================================
+// ============================ CORE ============================
+// ==============================================================
+
 /* -------------------- Organizations -------------------- */
 export const organizationsTable = pgTable('organizations', {
+  // System Fields
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   clerkOrgId: text('clerk_org_id').notNull().unique(),
   name: text('name'),
+
   // Organization-level usage tracking
   aiTokensUsed: integer('ai_tokens_used').default(0),
   totalQuotesProcessed: integer('total_quotes_processed').default(0),
@@ -33,40 +39,30 @@ export const organizationsTable = pgTable('organizations', {
   createdAt,
   updatedAt,
 });
-
-// -------------------- Org Settings --------------------
-export const orgSettingsTable = pgTable(
-  'org_settings',
-  {
-    orgId: uuid('org_id').primaryKey().notNull(), // also acts as fk to orgs table
-    // AI Settings
-    autoApprovalLimit: integer('auto_approval_limit').default(10000),
-    aiInsightsEnabled: boolean('ai_insights_enabled').default(true),
-    agentsEnabled: boolean('agents_enabled').default(true),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_org_settings_org_id',
-    }).onDelete('cascade'),
-  ],
-);
+/* -------------------- Organizations Relations -------------------- */
+export const organizationsRelations = relations(organizationsTable, ({ many }) => ({
+  users: many(usersTable),
+  airports: many(airportsTable),
+  vendors: many(vendorsTable),
+  contracts: many(contractsTable),
+  invoices: many(invoicesTable),
+}));
 
 /* -------------------- Users -------------------- */
 export const usersTable = pgTable(
   'users',
   {
+    // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     clerkUserId: text('clerk_user_id').notNull().unique(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
-    displayName: text('display_name').notNull(),
+
+    // User Information
+    firstName: text('first_name').notNull(),
+    lastName: text('last_name').notNull(),
     email: text('email').notNull(),
     position: text('position'),
+
     // User-level usage tracking
     aiTokensUsed: integer('ai_tokens_used').default(0),
     totalQuotesProcessed: integer('total_quotes_processed').default(0),
@@ -85,8 +81,16 @@ export const usersTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
+/* -------------------- Users Relations -------------------- */
+export const usersRelations = relations(usersTable, ({ one, many }) => ({
+  organization: one(organizationsTable, {
+    fields: [usersTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  rfqs: many(rfqsTable),
+}));
 
-// -------------------- Airports --------------------
+/* -------------------- Airports -------------------- */
 export const airportsTable = pgTable(
   'airports',
   {
@@ -120,16 +124,32 @@ export const airportsTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
+/* -------------------- Airports Relations -------------------- */
+export const airportsRelations = relations(airportsTable, ({ one, many }) => ({
+  organization: one(organizationsTable, {
+    fields: [airportsTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  contracts: many(contractsTable),
+  invoices: many(invoicesTable),
+  contacts: many(contactsTable),
+  opsEvidence: many(opsEvidenceTable),
+}));
 
-// -------------------- Vendors --------------------
+// ==============================================================
+// ==================== SUPPLIERS & CONTACTS ====================
+// ==============================================================
+
+/* -------------------- Vendors -------------------- */
 export const vendorsTable = pgTable(
   'vendors',
   {
+    // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
+
+    // Vendor Information
     name: text('name').notNull(),
-    internalRating: integer('internal_rating'),
-    notes: text('notes'),
 
     // Timestamps
     createdAt,
@@ -143,24 +163,33 @@ export const vendorsTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
+/* -------------------- Vendors Relations -------------------- */
+export const vendorsRelations = relations(vendorsTable, ({ one, many }) => ({
+  organization: one(organizationsTable, {
+    fields: [vendorsTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  contracts: many(contractsTable),
+  invoices: many(invoicesTable),
+  contacts: many(contactsTable),
+}));
 
-// -------------------- Contacts --------------------
+/* -------------------- Contacts -------------------- */
 export const contactsTable = pgTable(
   'contacts',
   {
     // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
+    airportId: uuid('airport_id'), //fk to airports table
     vendorId: uuid('vendor_id'), //fk to vendors table
 
     // Contact Information
     name: text('name'),
     email: text('email'),
     phone: text('phone'),
-
-    // Professional Information
-    role: text('role'),
     department: text('department'),
+    role: text('role'),
 
     // Timestamps
     createdAt,
@@ -173,12 +202,36 @@ export const contactsTable = pgTable(
       name: 'fk_contacts_org_id',
     }).onDelete('cascade'),
     foreignKey({
+      columns: [table.airportId],
+      foreignColumns: [airportsTable.id],
+      name: 'fk_contacts_airport_id',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [table.vendorId],
       foreignColumns: [vendorsTable.id],
       name: 'fk_contacts_vendor_id',
     }).onDelete('cascade'),
   ],
 );
+/* -------------------- Contacts Relations -------------------- */
+export const contactsRelations = relations(contactsTable, ({ one }) => ({
+  organization: one(organizationsTable, {
+    fields: [contactsTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  airport: one(airportsTable, {
+    fields: [contactsTable.airportId],
+    references: [airportsTable.id],
+  }),
+  vendor: one(vendorsTable, {
+    fields: [contactsTable.vendorId],
+    references: [vendorsTable.id],
+  }),
+}));
+
+// ===============================================================
+// ==================== TECHNICAL PROCUREMENT ====================
+// ===============================================================
 
 /* -------------------- RFQs -------------------- */
 export const rfqsTable = pgTable(
@@ -238,6 +291,22 @@ export const rfqsTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
+/* -------------------- RFQs Relations -------------------- */
+export const rfqsRelations = relations(rfqsTable, ({ one, many }) => ({
+  user: one(usersTable, {
+    fields: [rfqsTable.userId],
+    references: [usersTable.id],
+  }),
+  organization: one(organizationsTable, {
+    fields: [rfqsTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  quotes: many(quotesTable),
+  selectedQuote: one(quotesTable, {
+    fields: [rfqsTable.selectedQuoteId],
+    references: [quotesTable.id],
+  }),
+}));
 
 /* -------------------- Quotes -------------------- */
 export const quotesTable = pgTable(
@@ -314,24 +383,7 @@ export const quotesTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
-
-// Define relations after both tables are created
-export const rfqsRelations = relations(rfqsTable, ({ one, many }) => ({
-  user: one(usersTable, {
-    fields: [rfqsTable.userId],
-    references: [usersTable.id],
-  }),
-  organization: one(organizationsTable, {
-    fields: [rfqsTable.orgId],
-    references: [organizationsTable.id],
-  }),
-  quotes: many(quotesTable),
-  selectedQuote: one(quotesTable, {
-    fields: [rfqsTable.selectedQuoteId],
-    references: [quotesTable.id],
-  }),
-}));
-
+/* -------------------- Quotes Relations -------------------- */
 export const quotesRelations = relations(quotesTable, ({ one }) => ({
   organization: one(organizationsTable, {
     fields: [quotesTable.orgId],
@@ -343,155 +395,24 @@ export const quotesRelations = relations(quotesTable, ({ one }) => ({
   }),
 }));
 
-/* -------------------- Service Contracts -------------------- */
-export const serviceContractsTable = pgTable(
-  'service_contracts',
+// ================================================================
+// ================== PROCUREMENT CONTRACT MANAGEMENT ==============
+// ================================================================
+
+/* -------------------- Contracts -------------------- */
+export const contractsTable = pgTable(
+  'contracts',
   {
     // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
     airportId: uuid('airport_id'), //fk to airports table
+    vendorId: uuid('vendor_id'), //fk to vendors table
 
-    // Service Contract Information
-    title: text('title').notNull(),
-    contractType: ContractTypeEnum('contract_type'),
-    notes: text('notes'),
-
-    // Vendor Information
-    vendorName: text('vendor_name'),
-    vendorAddress: text('vendor_address'),
-    vendorContactName: text('vendor_contact_name'),
-    vendorContactEmail: text('vendor_contact_email'),
-    vendorContactPhone: text('vendor_contact_phone'),
-
-    // Contract Period
-    effectiveFrom: date('effective_from'),
-    effectiveTo: date('effective_to'),
-
-    // Document Management
-    pdfUrl: text('pdf_url'),
-    rawText: text('raw_text'), // full OCR text for AI
-
-    // Contract Terms
-    aiSummary: text('ai_summary'),
-    terms: jsonb('terms').default({}), // contract terms and conditions as JSON
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    uniqueIndex('uq_org_airport_vendor_contract').on(table.title, table.orgId, table.airportId),
-    foreignKey({
-      columns: [table.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_service_contracts_org_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.airportId],
-      foreignColumns: [airportsTable.id],
-      name: 'fk_service_contracts_airport_id',
-    }).onDelete('cascade'),
-  ],
-);
-
-// -------------------- Service Contract Invoices --------------------
-export const serviceContractInvoicesTable = pgTable(
-  'service_contract_invoices',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(), //fk to orgs table
-    serviceContractId: uuid('service_contract_id'), //fk to service contracts table
-
-    // Invoice Information
-    invoiceNumber: text('invoice_number').notNull(),
-    invoiceDate: date('invoice_date'),
-
-    // Vendor Information
-    vendorName: text('vendor_name'),
-    vendorAddress: text('vendor_address'),
-    vendorContactName: text('vendor_contact_name'),
-    vendorContactEmail: text('vendor_contact_email'),
-    vendorContactPhone: text('vendor_contact_phone'),
-
-    // Financial Details
-    totalAmount: numeric('total_amount'),
-    currency: text('currency'),
-    lines: jsonb('lines').default([]),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    uniqueIndex('uq_org_invoice_number').on(table.invoiceNumber, table.orgId),
-    foreignKey({
-      columns: [table.serviceContractId],
-      foreignColumns: [serviceContractsTable.id],
-      name: 'fk_service_contract_invoices_service_contract_id',
-    }).onDelete('cascade'),
-  ],
-);
-
-// -------------------- Fuel Tenders --------------------
-export const fuelTendersTable = pgTable(
-  'fuel_tenders',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(), //fk to orgs table
-    airportId: uuid('airport_id').notNull(), //fk to airports table
-
-    // Tender Information
-    title: text('title').notNull(),
-    description: text('description'),
-    fuelType: text('fuel_type'),
-
-    // Base Configuration
-    baseCurrency: text('base_currency'),
-    baseUom: text('base_uom'),
-
-    // Timeline
-    biddingStarts: date('bidding_starts'),
-    biddingEnds: date('bidding_ends'),
-    deliveryStarts: date('delivery_starts'),
-    deliveryEnds: date('delivery_ends'),
-
-    // Workflow Management
-    status: statusEnum('status').default('pending'),
-    winningBidId: uuid('winning_bid_id'),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_fuel_tenders_org_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.airportId],
-      foreignColumns: [airportsTable.id],
-      name: 'fk_fuel_tenders_airport_id',
-    }).onDelete('cascade'),
-  ],
-);
-
-// -------------------- Fuel Bids --------------------
-export const fuelBidsTable = pgTable(
-  'fuel_bids',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    tenderId: uuid('tender_id').notNull(), //fk to fuel tenders table
-
-    // Bid Information
-    title: text('title'),
-    round: integer('round'),
-    bidSubmittedAt: date('bid_submitted_at'),
+    // Contract Information
+    title: text('title').notNull(), // title of the contract
+    contractType: ContractTypeEnum('contract_type').notNull(), // service, fuel, ground_handling
+    internalNotes: text('internal_notes'), // internal notes about the contract
 
     // Vendor Information
     vendorName: text('vendor_name'),
@@ -501,150 +422,131 @@ export const fuelBidsTable = pgTable(
     vendorContactPhone: text('vendor_contact_phone'),
     vendorComments: text('vendor_comments'),
 
-    // Pricing Structure
-    priceType: text('price_type'), // fixed, index_formula
-    uom: text('uom').default('USG'), // USG, L, m3, MT
-    currency: text('currency').default('USD'),
-    paymentTerms: text('payment_terms'),
-
-    // Fixed Pricing
-    baseUnitPrice: numeric('base_unit_price'), // numeric only, no currency symbol
-
-    // Index-Linked Pricing
-    indexName: text('index_name'), // Platts Jet A-1 Med, Argus, etc.
-    indexLocation: text('index_location'), // region or marker
-    differential: numeric('differential'), // +/− per unit in currency or in cents
-    differentialUnit: text('differential_unit'),
-    formulaNotes: text('formula_notes'),
-
-    // Fees & Charges
-    intoPlaneFee: numeric('into_plane_fee'), // per unit
-    handlingFee: numeric('handling_fee'), // per unit or per uplift
-    otherFee: numeric('other_fee'),
-    otherFeeDescription: text('other_fee_description'),
-
-    // Inclusions & Exclusions
-    includesTaxes: boolean('includes_taxes'),
-    includesAirportFees: boolean('includes_airport_fees'),
-
-    // Calculated Fields
-    densityAt15C: numeric('density_at_15c'), // kg/m3 if mass quote present
-    normalizedUnitPriceUsdPerUsg: numeric('norm_usd_per_usg'), // computed and stored
-
-    // AI Processing
-    aiSummary: text('ai_summary'),
-
-    // Decision Tracking
-    decision: decisionEnum('decision'),
-    decisionByUserId: uuid('decision_by_user_id'), // fk to users table
-    decisionAt: timestamp('decision_at', { withTimezone: true }),
-    decisionNotes: text('decision_notes'),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.tenderId],
-      foreignColumns: [fuelTendersTable.id],
-      name: 'fk_fuel_bids_tender_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.decisionByUserId],
-      foreignColumns: [usersTable.id],
-      name: 'fk_fuel_bids_decision_by_user_id',
-    }).onDelete('set null'),
-  ],
-);
-
-// -------------------- Fuel Contracts --------------------
-export const fuelContracts = pgTable(
-  'fuel_contracts',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(), //fk to orgs table
-    airportId: uuid('airport_id').notNull(), //fk to airports table
-
-    // Contract Identification
-    contractNumber: text('contract_number'),
-    title: text('title'),
-    fuelType: text('fuel_type'),
-
-    // Vendor Information
-    vendorName: text('vendor_name'),
-    vendorAddress: text('vendor_address'),
-    vendorContactName: text('vendor_contact_name'),
-    vendorContactEmail: text('vendor_contact_email'),
-    vendorContactPhone: text('vendor_contact_phone'),
-
-    // Pricing Structure
-    currency: text('currency'),
-    priceType: text('price_type'),
-    priceFormula: text('price_formula'),
-    baseUnitPrice: numeric('base_unit_price'),
-    normalizedUsdPerUsg: numeric('normalized_usd_per_usg'),
-
-    // Volume & Fees
-    volumeCommitted: numeric('volume_committed'),
-    volumeUnit: text('volume_unit'),
-    intoPlaneFee: numeric('into_plane_fee'),
-
-    // Inclusions & Exclusions
-    includesTaxes: boolean('includes_taxes'),
-    includesAirportFees: boolean('includes_airport_fees'),
+    // Contract Terms & Conditions
+    terms: text('terms'), // terms and conditions of the contract
+    summary: text('summary'), // summary of the contract
+    docUrl: text('doc_url'), // url of the contract document
 
     // Contract Period
     effectiveFrom: date('effective_from'),
     effectiveTo: date('effective_to'),
 
-    // Document Management
-    pdfUrl: text('pdf_url'),
-    rawText: text('raw_text'),
+    // Timestamps
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_contracts_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.airportId],
+      foreignColumns: [airportsTable.id],
+      name: 'fk_contracts_airport_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.vendorId],
+      foreignColumns: [vendorsTable.id],
+      name: 'fk_contracts_vendor_id',
+    }).onDelete('cascade'),
+  ],
+);
 
-    // Contract Terms
-    aiSummary: text('ai_summary'),
-    terms: jsonb('terms').default({}), // contract terms and conditions as JSON
+/* -------------------- Contracts Relations -------------------- */
+export const contractsRelations = relations(contractsTable, ({ one, many }) => ({
+  organization: one(organizationsTable, {
+    fields: [contractsTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  airport: one(airportsTable, {
+    fields: [contractsTable.airportId],
+    references: [airportsTable.id],
+  }),
+  vendor: one(vendorsTable, {
+    fields: [contractsTable.vendorId],
+    references: [vendorsTable.id],
+  }),
+  rules: many(contractRulesTable),
+  invoices: many(invoicesTable),
+}));
 
-    // Workflow Management
-    status: statusEnum('status').default('pending'),
+/* -------------------- Contract Rules -------------------- */
+export const contractRulesTable = pgTable(
+  'contract_rules',
+  {
+    // System Fields
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), //fk to orgs table
+    contractId: uuid('contract_id').notNull(), //fk to contracts table
+
+    // Contract Rule Information
+    chargeCode: text('charge_code'), // gpu_hour, bus, deicing, parking, airport_fee, fuel_uplift, other
+    description: text('description'), // description of the rule
+    priceModel: text('price_model'), // fixed, per_unit, tiered, index_formula, bundled, waived
+    rate: numeric('rate'), // rate of the rule
+    uom: text('uom'), // unit of measure of the rule
+    currency: text('currency'), // currency of the rule
+    formula: jsonb('formula').default({}), // e.g., {index_name, index_location, differential, into_plane_fee, notes}
+    applicability: jsonb('applicability').default({}), // e.g., {season:"winter", aircraft:"narrowbody"}
+
+    // Contract Rule Period
+    activeFrom: date('active_from'), // effective from date of the rule
+    activeTo: date('active_to'), // effective to date of the rule
 
     // Timestamps
     createdAt,
     updatedAt,
   },
   (table) => [
-    uniqueIndex('uq_org_airport_type_fuel_contract').on(
-      table.orgId,
-      table.airportId,
-      table.fuelType,
-    ),
+    foreignKey({
+      columns: [table.contractId],
+      foreignColumns: [contractsTable.id],
+      name: 'fk_contract_rules_contract_id',
+    }).onDelete('cascade'),
     foreignKey({
       columns: [table.orgId],
       foreignColumns: [organizationsTable.id],
-      name: 'fk_fuel_contracts_org_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.airportId],
-      foreignColumns: [airportsTable.id],
-      name: 'fk_fuel_contracts_airport_id',
+      name: 'fk_contract_rules_org_id',
     }).onDelete('cascade'),
   ],
 );
 
-// -------------------- Fuel Contract Invoices --------------------
-export const fuelContractInvoices = pgTable(
-  'fuel_contract_invoices',
+/* -------------------- Contract Rules Relations -------------------- */
+export const contractRulesRelations = relations(contractRulesTable, ({ one, many }) => ({
+  organization: one(organizationsTable, {
+    fields: [contractRulesTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  contract: one(contractsTable, {
+    fields: [contractRulesTable.contractId],
+    references: [contractsTable.id],
+  }),
+  matchedInvoiceLines: many(invoiceLinesTable),
+}));
+
+// -------------------- Invoices --------------------
+export const invoicesTable = pgTable(
+  'invoices',
   {
     // System Fields
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
-    fuelContractId: uuid('fuel_contract_id'), //fk to fuel contracts table
+    airportId: uuid('airport_id'), //fk to airports table
+    contractId: uuid('contract_id'), //fk to contracts table
+
+    vendorId: uuid('vendor_id'), //fk to vendors table
 
     // Invoice Information
-    invoiceNumber: text('invoice_number').notNull(),
-    invoiceDate: date('invoice_date'),
+    invoiceNumber: text('invoice_number').notNull(), // number of the invoice
+    invoiceDate: date('invoice_date'), // date when the invoice was issued
+    totalAmount: numeric('total_amount'), // total amount of the invoice
+    currency: text('currency'), // currency of the invoice
+
+    // Document Management
+    summary: text('summary'), // summary of the invoice
+    docUrl: text('doc_url'), // url of the invoice document
 
     // Vendor Information
     vendorName: text('vendor_name'),
@@ -652,11 +554,11 @@ export const fuelContractInvoices = pgTable(
     vendorContactName: text('vendor_contact_name'),
     vendorContactEmail: text('vendor_contact_email'),
     vendorContactPhone: text('vendor_contact_phone'),
+    vendorComments: text('vendor_comments'),
 
-    // Financial Details
-    totalAmount: numeric('total_amount'),
-    currency: text('currency'),
-    lines: jsonb('lines').default([]),
+    // Timeline
+    periodStart: date('period_start'), // start date of the invoice period
+    periodEnd: date('period_end'), // end date of the invoice period
 
     // Timestamps
     createdAt,
@@ -664,9 +566,200 @@ export const fuelContractInvoices = pgTable(
   },
   (table) => [
     foreignKey({
-      columns: [table.fuelContractId],
-      foreignColumns: [fuelContracts.id],
-      name: 'fk_fuel_contract_invoices_fuel_contract_id',
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_invoices_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.airportId],
+      foreignColumns: [airportsTable.id],
+      name: 'fk_invoices_airport_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.contractId],
+      foreignColumns: [contractsTable.id],
+      name: 'fk_invoices_contract_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.vendorId],
+      foreignColumns: [vendorsTable.id],
+      name: 'fk_invoices_vendor_id',
     }).onDelete('cascade'),
   ],
 );
+
+/* -------------------- Invoices Relations -------------------- */
+export const invoicesRelations = relations(invoicesTable, ({ one, many }) => ({
+  organization: one(organizationsTable, {
+    fields: [invoicesTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  airport: one(airportsTable, {
+    fields: [invoicesTable.airportId],
+    references: [airportsTable.id],
+  }),
+  vendor: one(vendorsTable, {
+    fields: [invoicesTable.vendorId],
+    references: [vendorsTable.id],
+  }),
+  contract: one(contractsTable, {
+    fields: [invoicesTable.contractId],
+    references: [contractsTable.id],
+  }),
+
+  lines: many(invoiceLinesTable),
+}));
+
+/* -------------------- Invoice Lines -------------------- */
+export const invoiceLinesTable = pgTable(
+  'invoice_lines',
+  {
+    // System Fields
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), //fk to orgs table
+    invoiceId: uuid('invoice_id').notNull(), //fk to invoices table
+
+    // Invoice Line Information
+    lineNo: integer('line_no'), // line number of the invoice line
+    description: text('description'), // description of the invoice line
+    serviceDate: date('service_date'), // date when the service was provided
+    chargeType: text('charge_type'), // e.g., gpu_hour, bus, deicing, parking, airport_fee, fuel_uplift, other
+    quantity: numeric('quantity'), // quantity of the service
+    uom: text('uom'), // unit of measure of the service
+    unitPrice: numeric('unit_price'), // unit price of the service
+    amount: numeric('amount'), // amount of the service
+    taxAmount: numeric('tax_amount'), // tax amount of the service
+    currency: text('currency'), // currency of the service
+    aiExtract: jsonb('ai_extract').default({}), // raw tokens, positions, vendor column mapping
+
+    // Contract Rule Management
+    matchedContractRuleId: uuid('matched_contract_rule_id'), //fk to contract rules table
+    expectedCalc: jsonb('expected_calc').default({}), // expected calculation
+    expectedAmount: numeric('expected_amount'), // expected amount of the service
+    deltaAmount: numeric('delta_amount'), // difference between expected and actual amount
+
+    // Timestamps
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_invoice_lines_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.invoiceId],
+      foreignColumns: [invoicesTable.id],
+      name: 'fk_invoice_lines_invoice_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.matchedContractRuleId],
+      foreignColumns: [contractRulesTable.id],
+      name: 'fk_invoice_lines_matched_contract_rule_id',
+    }).onDelete('cascade'),
+  ],
+);
+
+/* -------------------- Invoice Lines Relations -------------------- */
+export const invoiceLinesRelations = relations(invoiceLinesTable, ({ one, many }) => ({
+  invoice: one(invoicesTable, {
+    fields: [invoiceLinesTable.invoiceId],
+    references: [invoicesTable.id],
+  }),
+  matchedRule: one(contractRulesTable, {
+    fields: [invoiceLinesTable.matchedContractRuleId],
+    references: [contractRulesTable.id],
+  }),
+  claims: many(claimsTable),
+}));
+
+// ============================================================
+// ======================= OPS & CLAIMS =======================
+// ============================================================
+
+/* -------------------- Ops Evidence -------------------- */
+export const opsEvidenceTable = pgTable(
+  'ops_evidence',
+  {
+    // System Fields
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), // fk to orgs
+    airportId: uuid('airport_id'), // fk to airports
+
+    // Ops Evidence Information
+    flightId: text('flight_id'), // optional, flight number or UUID
+    serviceCode: text('service_code'), // matches invoice line chargeType
+    evidenceType: text('evidence_type'), // sensor, pilot_note, uplift_report, etc.
+    timestamp: timestamp('timestamp', { withTimezone: true }).notNull(),
+    details: jsonb('details').default({}), // raw evidence payload
+
+    // Timestamps
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_ops_evidence_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.airportId],
+      foreignColumns: [airportsTable.id],
+      name: 'fk_ops_evidence_airport_id',
+    }).onDelete('cascade'),
+  ],
+);
+
+export const opsEvidenceRelations = relations(opsEvidenceTable, ({ one }) => ({
+  organization: one(organizationsTable, {
+    fields: [opsEvidenceTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  airport: one(airportsTable, {
+    fields: [opsEvidenceTable.airportId],
+    references: [airportsTable.id],
+  }),
+}));
+
+/* -------------------- Claims -------------------- */
+export const claimsTable = pgTable(
+  'claims',
+  {
+    // System Fields
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), // fk to orgs
+    invoiceLineId: uuid('invoice_line_id').notNull(), // fk to invoice lines
+
+    // Claim Details
+    reason: text('reason'), // e.g. rate_mismatch, unused_service, etc.
+    status: statusEnum('status').default('pending'), // draft, sent, resolved
+    claimPackUrl: text('claim_pack_url'), // PDF reference
+    recoveredAmount: numeric('recovered_amount').default('0'),
+
+    // Timestamps
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_claims_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.invoiceLineId],
+      foreignColumns: [invoiceLinesTable.id],
+      name: 'fk_claims_invoice_line_id',
+    }).onDelete('cascade'),
+  ],
+);
+
+/* -------------------- Claims Relations -------------------- */
+export const claimsRelations = relations(claimsTable, ({ one }) => ({
+  line: one(invoiceLinesTable, {
+    fields: [claimsTable.invoiceLineId],
+    references: [invoiceLinesTable.id],
+  }),
+}));

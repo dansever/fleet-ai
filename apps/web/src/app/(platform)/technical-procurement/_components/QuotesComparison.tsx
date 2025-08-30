@@ -1,5 +1,6 @@
 'use client';
 
+import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { Quote } from '@/drizzle/types';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
 import { deleteQuote } from '@/services/technical/quote-client';
+import { updateRfq } from '@/services/technical/rfq-client';
 import { Button } from '@/stories/Button/Button';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
@@ -15,7 +17,6 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  DollarSign,
   Eye,
   FileText,
   MessageSquare,
@@ -23,10 +24,9 @@ import {
   Shield,
   Trash,
   Truck,
-  XCircle,
 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { CopyableText } from '../../_components/CopyableText';
 import { useTechnicalProcurement } from '../ContextProvider';
 
 interface QuotesComparisonProps {
@@ -43,13 +43,6 @@ const getStatusBadge = (status: string | null) => {
       return (
         <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
           <CheckCircle className="w-3 h-3 mr-1" />
-          {displayText}
-        </Badge>
-      );
-    case 'rejected':
-      return (
-        <Badge variant="destructive">
-          <XCircle className="w-3 h-3 mr-1" />
           {displayText}
         </Badge>
       );
@@ -85,53 +78,59 @@ const getStatusBadge = (status: string | null) => {
   }
 };
 
-const createQuoteColumns = (onDeleteQuote: (quoteId: string) => Promise<void>): Column<Quote>[] => [
+const createQuoteColumns = (
+  acceptedQuoteId: Quote['id'] | null,
+  acceptingQuoteId: Quote['id'] | null,
+  onDeleteQuote: (quoteId: string) => Promise<void>,
+  onUpdateQuote: (quote: Quote) => void,
+  onAcceptQuote: (quoteId: string) => Promise<void>,
+): Column<Quote>[] => [
   {
     key: 'actions',
     header: 'Actions',
     accessor: (quote) => (
       <div className="flex flex-col gap-1.5">
         <Button
-          intent="secondary"
-          text="Accept"
+          intent={acceptedQuoteId === quote.id ? 'success' : 'secondary'}
+          text={
+            acceptedQuoteId === quote.id
+              ? 'Accepted'
+              : acceptingQuoteId === quote.id
+                ? 'Accepting...'
+                : 'Accept'
+          }
           icon={CheckCircle}
+          disabled={acceptedQuoteId === quote.id || acceptingQuoteId === quote.id}
           size="sm"
-          onClick={() => {}}
-          className="w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200"
+          onClick={() => onAcceptQuote(quote.id)}
+          className="disabled:opacity-100 disabled:pointer-arrow w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200"
         />
-        <Button
-          intent="secondary"
-          text="Reject"
-          icon={XCircle}
-          size="sm"
-          onClick={() => {}}
-          className="w-full hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+
+        <QuoteDialog
+          quote={quote}
+          onChange={onUpdateQuote}
+          DialogType="view"
+          triggerButtonText="View"
+          triggerButtonIntent="secondary"
+          triggerButtonIcon={Eye}
+          TriggerButtonSize="sm"
         />
-        <div className="grid grid-cols-2 gap-2">
-          <ConfirmationPopover
-            trigger={
-              <Button
-                intent="secondary"
-                icon={Trash}
-                size="sm"
-                onClick={() => {}}
-                className="hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-              />
-            }
-            intent="danger"
-            title="Delete Quote"
-            description="Are you sure you want to delete this quote?"
-            onConfirm={() => onDeleteQuote(quote.id)}
-          />
-          <QuoteDialog
-            quote={quote}
-            onChange={() => {}}
-            DialogType="view"
-            triggerButtonIntent="secondary"
-            triggerButtonIcon={Eye}
-            TriggerButtonSize="sm"
-          />
-        </div>
+        <ConfirmationPopover
+          trigger={
+            <Button
+              intent="secondary"
+              icon={Trash}
+              text="Delete"
+              size="sm"
+              onClick={() => {}}
+              className="hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+            />
+          }
+          intent="danger"
+          title="Delete Quote"
+          description="Are you sure you want to delete this quote?"
+          onConfirm={() => onDeleteQuote(quote.id)}
+        />
       </div>
     ),
     align: 'center' as const,
@@ -221,23 +220,20 @@ const createQuoteColumns = (onDeleteQuote: (quoteId: string) => Promise<void>): 
     key: 'pricing',
     header: 'Pricing',
     accessor: (quote) => (
-      <div className="min-w-[140px]">
-        <div className="flex items-center gap-2 mb-1">
-          <DollarSign className="w-4 h-4 text-green-600" />
-          <div className="font-bold text-lg text-slate-900">
-            {quote.price ? formatCurrency(Number(quote.price), quote.currency || 'USD') : '-'}
-          </div>
+      <div className="min-w-[140px] flex flex-col gap-2">
+        <div className="flex items-center gap-2 mb-1 font-bold text-lg">
+          {quote.price ? formatCurrency(Number(quote.price), quote.currency) : '-'}
         </div>
-        {quote.currency && quote.currency !== 'USD' && (
-          <div className="text-xs text-slate-500 ml-6">{quote.currency}</div>
-        )}
+
         {quote.pricingType && (
-          <Badge variant="outline" className="text-xs mt-1 ml-6">
+          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700">
             {quote.pricingType}
           </Badge>
         )}
         {quote.minimumOrderQuantity && (
-          <div className="text-xs text-slate-600 mt-1 ml-6">MOQ: {quote.minimumOrderQuantity}</div>
+          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700">
+            MOQ: {quote.minimumOrderQuantity}
+          </Badge>
         )}
       </div>
     ),
@@ -360,7 +356,35 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
     isLoadingQuotes,
     refreshSelectedRfqQuotes,
     deleteQuote: removeQuoteFromCache,
+    updateQuote,
+    refreshSelectedRfq,
+    updateRfq: updateRfqLocal,
   } = useTechnicalProcurement();
+  const [acceptingQuoteId, setAcceptingQuoteId] = useState<Quote['id'] | null>(null);
+
+  const handleQuoteAccept = async (quoteId: string) => {
+    try {
+      if (!selectedRfq?.id) {
+        toast.error('No RFQ selected');
+        return;
+      }
+      setAcceptingQuoteId(quoteId);
+
+      // Update on server
+      await updateRfq(selectedRfq.id, { selectedQuoteId: quoteId });
+
+      // Optimistically update local RFQ state
+      updateRfqLocal({ ...selectedRfq, selectedQuoteId: quoteId });
+
+      // Refresh quotes and RFQ in parallel for immediate consistency
+      await Promise.all([refreshSelectedRfqQuotes(), refreshSelectedRfq()]);
+      toast.success('Quote accepted successfully');
+    } catch (error) {
+      console.error('Error accepting quote:', error);
+      toast.error('Failed to accept quote');
+    }
+    setAcceptingQuoteId(null);
+  };
 
   // Handle quote deletion with optimistic updates
   const handleQuoteDelete = async (quoteId: string) => {
@@ -382,7 +406,13 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
   };
 
   // Create columns with the delete handler
-  const quoteColumns = createQuoteColumns(handleQuoteDelete);
+  const quoteColumns = createQuoteColumns(
+    selectedRfq?.selectedQuoteId || null,
+    acceptingQuoteId,
+    handleQuoteDelete,
+    updateQuote,
+    handleQuoteAccept,
+  );
 
   if (!selectedRfq) {
     return (

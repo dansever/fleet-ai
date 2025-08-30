@@ -3,14 +3,14 @@ Configuration module for FleetAI backend.
 Provides typed enums, settings classes, and a top-level AIConfig instance.
 """
 
-from .config import (
+from .ai_config import (
     AIConfig,
     LLMProvider,
     OpenAIModel,
     GeminiModel,
 )
 
-# Convenience singleton so you can just `from config import ai_config`
+# Singleton config so we can `from config import ai_config` anywhere
 ai_config = AIConfig()
 
 __all__ = [

@@ -7,8 +7,8 @@ import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
 import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
 import { Quote } from '@/drizzle/types';
+import { createRandomQuote } from '@/features/quotes/createRandomQuote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
-import { createRandomQuote } from '@/features/quotes/utils';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { compareQuotes, createQuote, extractQuote } from '@/services/technical/quote-client';
@@ -21,11 +21,10 @@ import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CopyableText } from '../_components/CopyableText';
+import RfqList from '../_components/RfqList';
 import { useTechnicalProcurement } from './ContextProvider';
 import QuoteAnalysis from './_components/QuoteAnalysis';
 import QuotesComparison from './_components/QuotesComparison';
-import RfqList from './_components/RfqList';
 
 export default function TechnicalProcurementClientPage() {
   const {
@@ -45,6 +44,7 @@ export default function TechnicalProcurementClientPage() {
     deleteRfqAndSelectAdjacent,
     quoteComparisonResult,
     setQuoteComparisonResult,
+    refreshRfqs,
   } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
@@ -135,13 +135,14 @@ export default function TechnicalProcurementClientPage() {
       isLoading={isLoading}
       isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
-      onAddRfq={addRfq}
+      addedRfqDirection={'received'}
+      onCreatedRfq={refreshRfqs}
     />
   );
 
   // Header content
   const headerContent = selectedRfq ? (
-    <div className="flex items-start justify-between w-full">
+    <div className="flex items-center justify-between w-full">
       <div>
         <h1 className="text-xl font-semibold mb-1">
           {selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`}
@@ -162,7 +163,7 @@ export default function TechnicalProcurementClientPage() {
         <RfqDialog
           rfq={selectedRfq}
           onChange={() => {}}
-          triggerText="View"
+          triggerText="View Details"
           triggerIntent="secondary"
           DialogType="view"
         />
@@ -195,7 +196,7 @@ export default function TechnicalProcurementClientPage() {
   // Main content
   const mainContent = selectedRfq ? (
     <div className="space-y-6">
-      <div className="">
+      <div>
         {/* RFQ Details */}
         {selectedRfq && (
           <ContentSection
@@ -264,12 +265,11 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.partDescription || ''}
                   valueType="string"
                 />
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-sm text-muted-foreground">Quantity</span>
-                  <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                    {selectedRfq.quantity || ''}
-                  </Badge>
-                </div>
+                <KeyValuePair
+                  label="Quantity"
+                  value={selectedRfq.quantity || ''}
+                  valueType="number"
+                />
               </ContentSection>
               {/* Timeline */}
               <ContentSection
@@ -300,12 +300,11 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.vendorContactName || ''}
                   valueType="string"
                 />
-                {selectedRfq.vendorContactEmail && (
-                  <div className="flex justify-between items-center py-1">
-                    <span className="text-sm text-muted-foreground">Email</span>
-                    <CopyableText text={selectedRfq.vendorContactEmail} />
-                  </div>
-                )}
+                <KeyValuePair
+                  label="Email"
+                  value={selectedRfq.vendorContactEmail || ''}
+                  valueType="email"
+                />
                 <KeyValuePair
                   label="Phone"
                   value={selectedRfq.vendorContactPhone || ''}
@@ -391,10 +390,10 @@ export default function TechnicalProcurementClientPage() {
                       {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
                     </span>
                   )}
-                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length > 0 && (
+                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'closed').length > 0 && (
                     <span className="text-green-600">
                       Accepted:{' '}
-                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'completed').length}
+                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'closed').length}
                     </span>
                   )}
                 </div>

@@ -252,8 +252,8 @@ export function DataTable<T extends Record<string, unknown>>({
                   <React.Fragment key={index}>
                     {/* Original row */}
                     <tr
-                      className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors ${
-                        onRowClick ? 'cursor-pointer' : ''
+                      className={`border-b border-gray-100/50 hover:bg-gray-50/30 ransition-colors ${
+                        onRowClick ? '' : ''
                       } ${rowClassName ? rowClassName(item) : ''}`}
                       onClick={() => onRowClick?.(item)}
                     >
