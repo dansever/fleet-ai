@@ -273,7 +273,7 @@ export const ListItemCard = ({
       'border-0 shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
       isSelected
         ? 'border-0 bg-gradient-to-br from-blue-200/80 via-pink-200/80 to-purple-200/80'
-        : 'hover:bg-gradient-to-br hover:from-blue-50 hover:via-pink-50 hover:to-purple-50',
+        : 'border-1 border-primary/20 hover:bg-gradient-to-br hover:from-blue-50/50 hover:via-pink-50/50 hover:to-purple-50/50',
       className,
     )}
     onClick={onClick}
@@ -328,7 +328,7 @@ export const MainCard = ({
   headerGradient?: string;
   neutralHeader?: boolean; // New prop for neutral header styling
 }) => (
-  <Card className={cn('rounded-3xl p-0 border-0 overflow-hidden shadow-none gap-2', className)}>
+  <Card className={cn('rounded-3xl p-0 border-0 shadow-none overflow-hidden gap-2', className)}>
     <CardHeader className="p-0">
       <div
         className={cn(

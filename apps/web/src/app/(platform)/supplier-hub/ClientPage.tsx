@@ -10,8 +10,8 @@ import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DatePicker, ModernInput, ModernSelect, ModernTextarea } from '@/stories/Form/Form';
+import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import {
   Building2,
   Calculator,

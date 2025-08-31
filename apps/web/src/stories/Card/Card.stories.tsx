@@ -1,16 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import {
-  ArrowDown,
-  ArrowUp,
-  Globe,
-  Mail,
-  MapPin,
-  Phone,
-  Star,
-  TrendingUp,
-  Users,
-  Zap,
-} from 'lucide-react';
+import { ArrowDown, Globe, Mail, MapPin, Phone, Star, TrendingUp, Users, Zap } from 'lucide-react';
 import {
   BadgeGroup,
   FeatureCard,
@@ -159,13 +148,6 @@ export const AllCardVariants: StoryObj = {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            title="Total Revenue"
-            value="$2.4M"
-            change="+18.2% from last quarter"
-            trend="up"
-            icon={<ArrowUp className="w-6 h-6 text-green-600" />}
-          />
-          <MetricCard
             title="Operating Costs"
             value="$1.8M"
             change="-5.4% from last month"
@@ -183,13 +165,6 @@ export const AllCardVariants: StoryObj = {
             title="Active Aircraft"
             value="247"
             icon={<Zap className="w-6 h-6 text-violet-600" />}
-          />
-          <MetricCard
-            title="Total Flights"
-            value="12,847"
-            change="+2.1% this month"
-            trend="up"
-            icon={<Globe className="w-6 h-6 text-blue-600" />}
           />
           <MetricCard
             title="On-Time Performance"

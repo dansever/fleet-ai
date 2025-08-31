@@ -1,3 +1,7 @@
+'use client';
+
+import type React from 'react';
+
 import { TabsList, TabsTrigger, Tabs as TabsUI } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
@@ -22,8 +26,8 @@ export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: Ta
           value={tab.value}
           className={cn(
             'cursor-pointer rounded-xl transition-all duration-300',
-            'text-base text-muted-foreground/60 font-bold hover:bg-secondary/10',
-            'data-[state=active]:bg-secondary/40 data-[state=active]:text-foreground',
+            'text-base text-muted-foreground/30 font-bold hover:text-foreground/80',
+            'data-[state=active]:bg-secondary/10 data-[state=active]:text-foreground',
             'data-[state=active]:shadow-none',
           )}
         >

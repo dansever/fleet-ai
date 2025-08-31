@@ -210,7 +210,7 @@ export function DataTable<T extends Record<string, unknown>>({
       <div className="w-full max-w-full flex justify-end p-4 gap-2">
         {csvDownload && (
           <Button
-            intent="info"
+            intent="ghost"
             size="sm"
             text="Download"
             icon={FileDown}
@@ -218,7 +218,7 @@ export function DataTable<T extends Record<string, unknown>>({
             disabled={filteredData.length === 0}
           />
         )}
-        <Button disabled intent="info" size="sm" text="Full View" icon={Expand} />
+        <Button disabled intent="ghost" size="sm" text="Full View" icon={Expand} />
       </div>
 
       <div

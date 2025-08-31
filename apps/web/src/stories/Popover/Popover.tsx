@@ -1,9 +1,13 @@
+'use client';
+
+import type React from 'react';
+
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
-import { ReactNode, useCallback, useRef, useState } from 'react';
-import { Button, ButtonProps } from '../Button/Button';
-import { ContentSection } from '../Card/Card';
+import { type ReactNode, useCallback, useRef, useState } from 'react';
+import { Button, type ButtonProps } from '../Button/Button';
+import { MainCard } from '../Card/Card';
 
 // Confirmation Popover Component for direct actions
 interface ConfirmationPopoverProps {
@@ -17,7 +21,7 @@ interface ConfirmationPopoverProps {
   onCancel?: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  popoverContentAlign?: 'start' | 'center' | 'end'; // Alignment of the popover content relative to the trigger
+  popoverContentAlign?: 'start' | 'center' | 'end';
 }
 
 export const ConfirmationPopover = ({
@@ -61,17 +65,17 @@ export const ConfirmationPopover = ({
   const intentStyles = {
     danger: {
       gradient: 'from-red-500 to-red-600',
-      confirmButton: 'bg-red-500 hover:bg-red-600 text-white',
+      confirmButton: 'danger' as const,
       icon: '⚠️',
     },
     warning: {
       gradient: 'from-orange-500 to-orange-600',
-      confirmButton: 'bg-orange-500 hover:bg-orange-600 text-white',
+      confirmButton: 'warning' as const,
       icon: '⚠️',
     },
     info: {
       gradient: 'from-blue-500 to-blue-600',
-      confirmButton: 'bg-blue-500 hover:bg-blue-600 text-white',
+      confirmButton: 'primary' as const,
       icon: 'ℹ️',
     },
   } as const;
@@ -83,7 +87,7 @@ export const ConfirmationPopover = ({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         align={popoverContentAlign}
-        className="w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0"
+        className="w-80 p-0 rounded-2xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm"
       >
         <div className={cn('bg-gradient-to-r text-white p-4', styles.gradient)}>
           <div className="flex items-center gap-3">
@@ -105,16 +109,7 @@ export const ConfirmationPopover = ({
               disabled={submitting}
             />
             <Button
-              intent={
-                popoverIntent as
-                  | 'primary'
-                  | 'secondary'
-                  | 'ghost'
-                  | 'secondaryInverted'
-                  | 'success'
-                  | 'danger'
-                  | 'warning'
-              }
+              intent={styles.confirmButton}
               onClick={handleConfirm}
               size="sm"
               text={confirmText}
@@ -135,13 +130,9 @@ export interface FileUploadPopoverProps {
   triggerIntent?: ButtonProps['intent'];
   triggerText?: string;
   triggerSize?: ButtonProps['size'];
-
-  // Popover Behavior
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   popoverContentAlign?: 'start' | 'center' | 'end';
-
-  // Children can be nodes or a render-prop that gets a close() helper
   children?: ReactNode | ((utils: { close: () => void }) => ReactNode);
 }
 
@@ -154,8 +145,8 @@ export const FileUploadPopover = ({
   triggerText = 'Upload',
   triggerSize = 'md',
   popoverContentAlign = 'end',
-  open, // controlled
-  onOpenChange, // controlled
+  open,
+  onOpenChange,
   children,
 }: FileUploadPopoverProps) => {
   const isControlled = open !== undefined;
@@ -215,7 +206,7 @@ export const FileUploadPopover = ({
     if (selectedFile && onSend) {
       await onSend(selectedFile);
       setSelectedFile(null);
-      close(); // works in both modes
+      close();
     }
   };
 
@@ -241,21 +232,16 @@ export const FileUploadPopover = ({
 
         <PopoverContent
           align={popoverContentAlign}
-          className={cn('w-80 p-0 rounded-2xl overflow-hidden shadow-lg border-0')}
+          className={cn(
+            'w-80 p-0 rounded-2xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
+          )}
         >
           {!selectedFile ? (
             <>
-              <ContentSection
-                header={
-                  <div className="flex items-center gap-3">
-                    <Upload className="w-5 h-5" />
-                    <div>
-                      <h4 className="font-semibold text-sm">Upload Document</h4>
-                      <p className="text-white/90 text-xs mt-1">Drag and drop or click to select</p>
-                    </div>
-                  </div>
-                }
-                headerGradient="from-blue-500 to-purple-600"
+              <MainCard
+                title="Upload Document"
+                subtitle="Drag and drop or click to select"
+                neutralHeader={false}
               >
                 <div className="space-y-2">
                   <div
@@ -291,10 +277,9 @@ export const FileUploadPopover = ({
                     className="hidden"
                   />
 
-                  {/* Support render-prop children so callers can close the popover from inside */}
                   {typeof children === 'function' ? children({ close }) : children}
                 </div>
-              </ContentSection>
+              </MainCard>
             </>
           ) : (
             <>

@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Mail, MapPin, Plane, User } from 'lucide-react';
-import React, { useState } from 'react';
-
+import { useState } from 'react';
 import {
   DatePicker,
+  FileUpload,
   ModernInput,
   ModernSelect,
   ModernSwitch,
   ModernTextarea,
+  NumberInput,
   PasswordInput,
   SearchInput,
 } from './Form';
@@ -20,534 +21,636 @@ const meta: Meta<typeof ModernInput> = {
     docs: {
       description: {
         component:
-          'A comprehensive collection of modern form components designed for Fleet AI applications. Each component features consistent styling, accessibility, and user experience optimizations.',
+          'A comprehensive collection of modern form components for Fleet AI applications. Includes inputs, selects, switches, date pickers, and specialized components with consistent styling and validation states.',
       },
     },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof ModernInput>;
 
-// Overview showing all form components
-export const Overview: Story = {
-  render: () => (
-    <div className="space-y-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">Form Components Overview</h1>
-        <p className="text-muted-foreground">
-          Modern, accessible form components for Fleet AI applications
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Text Inputs */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Text Inputs</h2>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Standard Input</label>
-              <ModernInput placeholder="Enter aircraft model" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Input with Icon</label>
-              <ModernInput
-                placeholder="Enter pilot name"
-                icon={<User className="w-4 h-4 text-gray-400" />}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email Input</label>
-              <ModernInput
-                type="email"
-                placeholder="pilot@fleetai.com"
-                icon={<Mail className="w-4 h-4 text-gray-400" />}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Search Input</label>
-              <SearchInput placeholder="Search flights..." />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password Input</label>
-              <PasswordInput placeholder="Enter password" />
-            </div>
-          </div>
-        </div>
-
-        {/* Advanced Inputs */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Advanced Inputs</h2>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Textarea</label>
-              <ModernTextarea placeholder="Flight notes and observations..." />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Dropdown</label>
-              <ModernSelect
-                placeholder="Select aircraft type"
-                options={[
-                  { value: 'boeing737', label: 'Boeing 737' },
-                  { value: 'airbus320', label: 'Airbus A320' },
-                  { value: 'boeing777', label: 'Boeing 777' },
-                  { value: 'airbus350', label: 'Airbus A350' },
-                ]}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Date Picker</label>
-              <DatePicker />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                Toggle Switch
-                <ModernSwitch />
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Complete overview of all form components with proper labeling and realistic Fleet AI examples.',
-      },
-    },
-  },
-};
-
-// Input Variants
-export const InputVariants: Story = {
-  render: () => (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Standard Inputs */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">STANDARD INPUTS</h3>
-          <div className="space-y-3">
-            <ModernInput placeholder="Basic text input" />
-            <ModernInput placeholder="Email input" type="email" />
-            <ModernInput placeholder="Number input" type="number" />
-            <ModernInput placeholder="Disabled input" disabled />
-          </div>
-        </div>
-
-        {/* Inputs with Icons */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">WITH ICONS</h3>
-          <div className="space-y-3">
-            <ModernInput
-              placeholder="Pilot name"
-              icon={<User className="w-4 h-4 text-gray-400" />}
-            />
-            <ModernInput
-              placeholder="Email address"
-              type="email"
-              icon={<Mail className="w-4 h-4 text-gray-400" />}
-            />
-            <ModernInput
-              placeholder="Aircraft registration"
-              icon={<Plane className="w-4 h-4 text-gray-400" />}
-            />
-            <ModernInput
-              placeholder="Departure airport"
-              icon={<MapPin className="w-4 h-4 text-gray-400" />}
-            />
-          </div>
-        </div>
-
-        {/* Search Variants */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">SEARCH INPUTS</h3>
-          <div className="space-y-3">
-            <SearchInput placeholder="Search flights..." />
-            <SearchInput placeholder="Search aircraft..." />
-            <SearchInput placeholder="Search pilots..." />
-            <SearchInput placeholder="Search routes..." />
-          </div>
-        </div>
-
-        {/* Password Variants */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">PASSWORD INPUTS</h3>
-          <div className="space-y-3">
-            <PasswordInput placeholder="Current password" />
-            <PasswordInput placeholder="New password" />
-            <PasswordInput placeholder="Confirm password" />
-          </div>
-        </div>
-      </div>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Various input field configurations including standard, icon-enhanced, search, and password inputs.',
-      },
-    },
-  },
-};
-
-// Advanced Form Controls
-export const AdvancedControls: Story = {
+// Comprehensive Form Components Showcase - All variants in one story
+export const AllFormComponentVariants: Story = {
   render: () => {
-    const [selectedAircraft, setSelectedAircraft] = useState('');
-    const [flightDate, setFlightDate] = useState('');
-    const [cateringEnabled, setCateringEnabled] = useState(true);
-    const [notes, setNotes] = useState('');
+    // State for interactive examples
+    const [textValue, setTextValue] = useState('');
+    const [numberValue, setNumberValue] = useState(0);
+    const [selectValue, setSelectValue] = useState('');
+    const [switchValue, setSwitchValue] = useState(false);
+    const [dateValue, setDateValue] = useState('');
 
     return (
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Textarea Examples */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground">TEXTAREA FIELDS</h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Flight Notes</label>
-                <ModernTextarea
-                  placeholder="Enter flight observations, weather conditions, or special instructions..."
-                  value={notes}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Maintenance Report</label>
-                <ModernTextarea
-                  placeholder="Describe maintenance issues, repairs completed, or recommendations..."
-                  className="min-h-[100px]"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Passenger Feedback</label>
-                <ModernTextarea
-                  placeholder="Summarize passenger feedback, complaints, or commendations..."
-                  className="min-h-[80px]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Select Examples */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground">SELECT DROPDOWNS</h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Aircraft Type</label>
-                <ModernSelect
-                  placeholder="Select aircraft model"
-                  value={selectedAircraft}
-                  onValueChange={setSelectedAircraft}
-                  options={[
-                    { value: 'boeing737-800', label: 'Boeing 737-800' },
-                    { value: 'boeing737-900', label: 'Boeing 737-900' },
-                    { value: 'airbus320', label: 'Airbus A320' },
-                    { value: 'airbus321', label: 'Airbus A321' },
-                    { value: 'boeing777', label: 'Boeing 777' },
-                    { value: 'boeing787', label: 'Boeing 787 Dreamliner' },
-                    { value: 'airbus350', label: 'Airbus A350' },
-                  ]}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Flight Status</label>
-                <ModernSelect
-                  placeholder="Select status"
-                  options={[
-                    { value: 'scheduled', label: '🟡 Scheduled' },
-                    { value: 'boarding', label: '🟠 Boarding' },
-                    { value: 'departed', label: '🔵 Departed' },
-                    { value: 'arrived', label: '🟢 Arrived' },
-                    { value: 'delayed', label: '🟠 Delayed' },
-                    { value: 'cancelled', label: '🔴 Cancelled' },
-                  ]}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Priority Level</label>
-                <ModernSelect
-                  placeholder="Select priority"
-                  options={[
-                    { value: 'low', label: 'Low Priority' },
-                    { value: 'medium', label: 'Medium Priority' },
-                    { value: 'high', label: 'High Priority' },
-                    { value: 'critical', label: 'Critical Priority' },
-                  ]}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Date Pickers */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground">DATE PICKERS</h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Departure Date</label>
-                <DatePicker
-                  value={flightDate}
-                  onChange={setFlightDate}
-                  fromYear={2024}
-                  toYear={2025}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Maintenance Due Date</label>
-                <DatePicker fromYear={2024} toYear={2026} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Contract Expiry</label>
-                <DatePicker fromYear={2024} toYear={2030} />
-              </div>
-            </div>
-          </div>
-
-          {/* Switches */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground">TOGGLE SWITCHES</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <label className="text-sm font-medium">Catering Required</label>
-                  <p className="text-xs text-muted-foreground">
-                    Include meal service for passengers
-                  </p>
-                </div>
-                <ModernSwitch checked={cateringEnabled} onCheckedChange={setCateringEnabled} />
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <label className="text-sm font-medium">Wi-Fi Available</label>
-                  <p className="text-xs text-muted-foreground">Enable in-flight internet access</p>
-                </div>
-                <ModernSwitch />
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <label className="text-sm font-medium">Ground Power</label>
-                  <p className="text-xs text-muted-foreground">Connect external power source</p>
-                </div>
-                <ModernSwitch />
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <label className="text-sm font-medium">Auto Notifications</label>
-                  <p className="text-xs text-muted-foreground">Send status updates automatically</p>
-                </div>
-                <ModernSwitch defaultChecked />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Advanced form controls including textareas, selects, date pickers, and toggle switches with proper labeling.',
-      },
-    },
-  },
-};
-
-// Form Layout Examples
-export const FormLayouts: Story = {
-  render: () => {
-    const [formData, setFormData] = useState({
-      flightNumber: '',
-      aircraft: '',
-      departure: '',
-      arrival: '',
-      passengers: '',
-      notes: '',
-      catering: true,
-      priority: '',
-    });
-
-    return (
-      <div className="space-y-8">
-        <div className="text-center mb-6">
-          <h3 className="text-lg font-semibold">Form Layout Examples</h3>
-          <p className="text-sm text-muted-foreground">
-            Complete form layouts for different Fleet AI use cases
+      <div className="space-y-12 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+            Fleet AI Form Components
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Complete showcase of form input components and validation states
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Flight Booking Form */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Flight Booking Form</h4>
-            <div className="border rounded-xl p-6 space-y-4 bg-white">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Flight Number</label>
-                  <ModernInput
-                    placeholder="FL-1234"
-                    value={formData.flightNumber}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({ ...formData, flightNumber: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Aircraft</label>
-                  <ModernSelect
-                    placeholder="Select aircraft"
-                    value={formData.aircraft}
-                    onValueChange={(value: string) => setFormData({ ...formData, aircraft: value })}
-                    options={[
-                      { value: 'boeing737', label: 'Boeing 737-800' },
-                      { value: 'airbus320', label: 'Airbus A320' },
-                      { value: 'boeing777', label: 'Boeing 777' },
-                    ]}
-                  />
-                </div>
-              </div>
+        {/* Basic Input Components */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Basic Input Components
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Standard input fields with labels, placeholders, and helper text
+          </p>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Departure</label>
-                  <ModernInput
-                    placeholder="JFK"
-                    icon={<MapPin className="w-4 h-4 text-gray-400" />}
-                    value={formData.departure}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({ ...formData, departure: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Arrival</label>
-                  <ModernInput
-                    placeholder="LAX"
-                    icon={<MapPin className="w-4 h-4 text-gray-400" />}
-                    value={formData.arrival}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({ ...formData, arrival: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ModernInput
+              label="Aircraft Registration"
+              placeholder="Enter registration number"
+              helper="Format: N12345AB"
+            />
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Passenger Count</label>
+            <ModernInput
+              label="Pilot Name"
+              placeholder="Enter pilot name"
+              icon={<User className="w-4 h-4" />}
+            />
+
+            <ModernInput
+              label="Flight Number"
+              placeholder="FL-2024-001"
+              value={textValue}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextValue(e.target.value)}
+            />
+
+            <SearchInput label="Search Aircraft" placeholder="Search by registration or model" />
+
+            <PasswordInput
+              label="System Password"
+              placeholder="Enter secure password"
+              helper="Must be at least 8 characters"
+            />
+
+            <ModernInput
+              label="Email Address"
+              type="email"
+              placeholder="pilot@fleetai.com"
+              icon={<Mail className="w-4 h-4" />}
+            />
+          </div>
+        </section>
+
+        {/* Input States */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Input States
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Different states including normal, error, and disabled states
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ModernInput
+              label="Normal State"
+              placeholder="Normal input field"
+              helper="This is a normal input field"
+            />
+
+            <ModernInput
+              label="Error State"
+              placeholder="Invalid input"
+              error="This field is required"
+            />
+
+            <ModernInput
+              label="Disabled State"
+              placeholder="Disabled input"
+              disabled
+              helper="This field is disabled"
+            />
+
+            <SearchInput
+              label="Search with Error"
+              placeholder="Search query"
+              error="Invalid search criteria"
+            />
+
+            <PasswordInput
+              label="Password Error"
+              placeholder="Enter password"
+              error="Password must contain at least one uppercase letter"
+            />
+
+            <ModernInput
+              label="Success State"
+              placeholder="Valid input"
+              helper="✓ This input is valid"
+              className="border-green-300 focus:border-green-500 focus:ring-green-500/20"
+            />
+          </div>
+        </section>
+
+        {/* Specialized Input Components */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Specialized Input Components
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Number inputs, textareas, and other specialized form controls
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <NumberInput
+              label="Passenger Count"
+              placeholder="Enter number of passengers"
+              min={0}
+              max={850}
+              step={1}
+              value={numberValue}
+              onChange={setNumberValue}
+              helper="Maximum capacity: 850 passengers"
+            />
+
+            <NumberInput
+              label="Flight Hours"
+              placeholder="0.0"
+              min={0}
+              max={24}
+              step={0.5}
+              helper="Total flight duration in hours"
+            />
+
+            <NumberInput
+              label="Altitude (ft)"
+              placeholder="Enter altitude"
+              min={0}
+              max={45000}
+              step={1000}
+            />
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <ModernTextarea
+                label="Flight Notes"
+                placeholder="Enter detailed flight notes, weather conditions, or special instructions..."
+                rows={4}
+                helper="Include any relevant information about the flight"
+              />
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <ModernTextarea
+                label="Maintenance Report"
+                placeholder="Describe maintenance activities performed..."
+                rows={3}
+                error="Please provide a detailed maintenance report"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Select and Switch Components */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Select and Switch Components
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Dropdown selects and toggle switches for various options
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ModernSelect
+              label="Aircraft Type"
+              placeholder="Select aircraft type"
+              value={selectValue}
+              onValueChange={setSelectValue}
+              options={[
+                { value: 'boeing737', label: 'Boeing 737' },
+                { value: 'boeing777', label: 'Boeing 777' },
+                { value: 'boeing787', label: 'Boeing 787' },
+                { value: 'airbusa320', label: 'Airbus A320' },
+                { value: 'airbusa350', label: 'Airbus A350' },
+                { value: 'airbusa380', label: 'Airbus A380' },
+              ]}
+              helper="Select the aircraft model"
+            />
+
+            <ModernSelect
+              label="Flight Status"
+              placeholder="Select status"
+              options={[
+                { value: 'scheduled', label: '🕒 Scheduled' },
+                { value: 'boarding', label: '🚶 Boarding' },
+                { value: 'departed', label: '✈️ Departed' },
+                { value: 'arrived', label: '🏁 Arrived' },
+                { value: 'delayed', label: '⏰ Delayed' },
+                { value: 'cancelled', label: '❌ Cancelled' },
+              ]}
+            />
+
+            <ModernSelect
+              label="Priority Level"
+              placeholder="Select priority"
+              error="Please select a priority level"
+              options={[
+                { value: 'low', label: 'Low Priority' },
+                { value: 'medium', label: 'Medium Priority' },
+                { value: 'high', label: 'High Priority' },
+                { value: 'critical', label: 'Critical Priority' },
+              ]}
+            />
+
+            <div className="space-y-4">
+              <ModernSwitch
+                label="Auto-pilot Enabled"
+                description="Enable automatic flight control systems"
+                checked={switchValue}
+                onCheckedChange={setSwitchValue}
+              />
+
+              <ModernSwitch
+                label="Weather Radar"
+                description="Activate weather monitoring and alerts"
+                defaultChecked={true}
+              />
+
+              <ModernSwitch
+                label="Emergency Protocols"
+                description="Enable enhanced safety and emergency procedures"
+                defaultChecked={false}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <ModernSwitch
+                label="Maintenance Mode"
+                description="Put aircraft in maintenance mode - disables flight operations"
+                defaultChecked={false}
+              />
+
+              <ModernSwitch
+                label="Crew Notifications"
+                description="Send automatic notifications to flight crew"
+                defaultChecked={true}
+              />
+
+              <ModernSwitch
+                label="Real-time Tracking"
+                description="Enable GPS tracking and live flight monitoring"
+                defaultChecked={true}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Date and File Components */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Date and File Components
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Date pickers and file upload components for document management
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <DatePicker
+              label="Departure Date"
+              value={dateValue}
+              onChange={setDateValue}
+              helper="Select the scheduled departure date"
+            />
+
+            <DatePicker
+              label="Maintenance Due"
+              fromYear={2024}
+              toYear={2026}
+              error="Maintenance date cannot be in the past"
+            />
+
+            <DatePicker
+              label="License Expiry"
+              fromYear={2024}
+              toYear={2030}
+              helper="Pilot license expiration date"
+            />
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <FileUpload
+                label="Flight Documents"
+                accept=".pdf,.doc,.docx,.txt"
+                multiple={true}
+                onFileSelect={(files) => console.log('Files selected:', files)}
+                helper="Upload flight plans, maintenance reports, or other relevant documents"
+              />
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <FileUpload
+                label="Aircraft Images"
+                accept="image/*"
+                multiple={true}
+                error="Please upload at least one aircraft image"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Fleet AI Application Examples */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Fleet AI Application Examples
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Real-world form examples for fleet management scenarios
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Aircraft Registration Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-lg">Aircraft Registration Form</h4>
+              <div className="p-6 bg-white border rounded-xl space-y-4">
                 <ModernInput
-                  type="number"
-                  placeholder="189"
-                  icon={<User className="w-4 h-4 text-gray-400" />}
-                  value={formData.passengers}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setFormData({ ...formData, passengers: e.target.value })
-                  }
+                  label="Aircraft Registration Number"
+                  placeholder="N12345AB"
+                  icon={<Plane className="w-4 h-4" />}
+                  helper="FAA registration format required"
                 />
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Flight Notes</label>
-                <ModernTextarea
-                  placeholder="Special instructions, weather considerations, etc..."
-                  value={formData.notes}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
+                <ModernSelect
+                  label="Aircraft Manufacturer"
+                  placeholder="Select manufacturer"
+                  options={[
+                    { value: 'boeing', label: 'Boeing' },
+                    { value: 'airbus', label: 'Airbus' },
+                    { value: 'embraer', label: 'Embraer' },
+                    { value: 'bombardier', label: 'Bombardier' },
+                  ]}
                 />
-              </div>
 
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <label className="text-sm font-medium">Catering Service</label>
-                  <p className="text-xs text-muted-foreground">Include meal service</p>
-                </div>
+                <ModernInput label="Aircraft Model" placeholder="737-800" />
+
+                <NumberInput label="Year Manufactured" min={1990} max={2024} placeholder="2019" />
+
+                <NumberInput label="Maximum Seating Capacity" min={1} max={850} placeholder="189" />
+
+                <DatePicker label="Date Acquired" fromYear={2000} toYear={2024} />
+
                 <ModernSwitch
-                  checked={formData.catering}
-                  onCheckedChange={(checked: boolean) =>
-                    setFormData({ ...formData, catering: checked })
-                  }
+                  label="Currently Active"
+                  description="Aircraft is available for flight operations"
+                  defaultChecked={true}
                 />
               </div>
             </div>
-          </div>
 
-          {/* Maintenance Request Form */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Maintenance Request</h4>
-            <div className="border rounded-xl p-6 space-y-4 bg-white">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Aircraft Registration</label>
+            {/* Flight Planning Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-lg">Flight Planning Form</h4>
+              <div className="p-6 bg-white border rounded-xl space-y-4">
                 <ModernInput
-                  placeholder="N123FA"
-                  icon={<Plane className="w-4 h-4 text-gray-400" />}
+                  label="Flight Number"
+                  placeholder="FA-1247"
+                  helper="Format: AA-#### (Airline code + flight number)"
                 />
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Maintenance Type</label>
-                  <ModernSelect
-                    placeholder="Select type"
-                    options={[
-                      { value: 'routine', label: 'Routine Maintenance' },
-                      { value: 'repair', label: 'Repair Work' },
-                      { value: 'inspection', label: 'Safety Inspection' },
-                      { value: 'emergency', label: 'Emergency Repair' },
-                    ]}
+                <div className="grid grid-cols-2 gap-4">
+                  <ModernInput
+                    label="Departure Airport"
+                    placeholder="JFK"
+                    icon={<MapPin className="w-4 h-4" />}
+                  />
+                  <ModernInput
+                    label="Arrival Airport"
+                    placeholder="LAX"
+                    icon={<MapPin className="w-4 h-4" />}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Priority</label>
-                  <ModernSelect
-                    placeholder="Select priority"
-                    value={formData.priority}
-                    onValueChange={(value: string) => setFormData({ ...formData, priority: value })}
-                    options={[
-                      { value: 'low', label: 'Low' },
-                      { value: 'medium', label: 'Medium' },
-                      { value: 'high', label: 'High' },
-                      { value: 'critical', label: 'Critical' },
-                    ]}
-                  />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <DatePicker label="Departure Date" fromYear={2024} toYear={2025} />
+                  <ModernInput label="Departure Time" type="time" placeholder="14:30" />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Scheduled Date</label>
-                <DatePicker />
-              </div>
+                <ModernSelect
+                  label="Assigned Aircraft"
+                  placeholder="Select aircraft"
+                  options={[
+                    { value: 'n737ba', label: 'N737BA - Boeing 737-800' },
+                    { value: 'n777cd', label: 'N777CD - Boeing 777-300' },
+                    { value: 'n320ef', label: 'N320EF - Airbus A320' },
+                  ]}
+                />
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Issue Description</label>
+                <NumberInput
+                  label="Estimated Flight Duration (hours)"
+                  min={0.5}
+                  max={18}
+                  step={0.25}
+                  placeholder="5.5"
+                />
+
                 <ModernTextarea
-                  placeholder="Describe the maintenance issue, symptoms observed, or work required..."
-                  className="min-h-[100px]"
+                  label="Flight Notes"
+                  placeholder="Weather conditions, special instructions, cargo details..."
+                  rows={3}
                 />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Technician Email</label>
-                <ModernInput
-                  type="email"
-                  placeholder="tech@fleetai.com"
-                  icon={<Mail className="w-4 h-4 text-gray-400" />}
+            {/* Crew Assignment Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-lg">Crew Assignment Form</h4>
+              <div className="p-6 bg-white border rounded-xl space-y-4">
+                <ModernSelect
+                  label="Captain"
+                  placeholder="Select captain"
+                  options={[
+                    { value: 'johnson', label: 'Capt. Sarah Johnson - B737 Certified' },
+                    { value: 'chen', label: 'Capt. Mike Chen - B777 Certified' },
+                    { value: 'rodriguez', label: 'Capt. Alex Rodriguez - A320 Certified' },
+                  ]}
                 />
-              </div>
 
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <label className="text-sm font-medium">Aircraft Grounded</label>
-                  <p className="text-xs text-muted-foreground">Cannot operate until fixed</p>
+                <ModernSelect
+                  label="First Officer"
+                  placeholder="Select first officer"
+                  options={[
+                    { value: 'thompson', label: 'FO Emma Thompson - B737 Certified' },
+                    { value: 'wilson', label: 'FO David Wilson - B777 Certified' },
+                    { value: 'garcia', label: 'FO Maria Garcia - A320 Certified' },
+                  ]}
+                />
+
+                <NumberInput
+                  label="Cabin Crew Required"
+                  min={2}
+                  max={12}
+                  placeholder="4"
+                  helper="Minimum 2 crew members required"
+                />
+
+                <ModernSelect
+                  label="Senior Flight Attendant"
+                  placeholder="Select senior FA"
+                  options={[
+                    { value: 'brown', label: 'Lisa Brown - 8 years experience' },
+                    { value: 'taylor', label: 'James Taylor - 6 years experience' },
+                    { value: 'anderson', label: 'Amy Anderson - 10 years experience' },
+                  ]}
+                />
+
+                <div className="space-y-3">
+                  <ModernSwitch
+                    label="International Flight"
+                    description="Requires additional documentation and crew certifications"
+                  />
+
+                  <ModernSwitch
+                    label="Overnight Crew Rest Required"
+                    description="Flight duration requires mandatory crew rest period"
+                  />
                 </div>
-                <ModernSwitch />
+              </div>
+            </div>
+
+            {/* Maintenance Request Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-lg">Maintenance Request Form</h4>
+              <div className="p-6 bg-white border rounded-xl space-y-4">
+                <ModernSelect
+                  label="Aircraft"
+                  placeholder="Select aircraft"
+                  options={[
+                    { value: 'n737ba', label: 'N737BA - Boeing 737-800' },
+                    { value: 'n777cd', label: 'N777CD - Boeing 777-300' },
+                    { value: 'n320ef', label: 'N320EF - Airbus A320' },
+                  ]}
+                />
+
+                <ModernSelect
+                  label="Maintenance Type"
+                  placeholder="Select maintenance type"
+                  options={[
+                    { value: 'routine', label: '🔧 Routine Maintenance' },
+                    { value: 'inspection', label: '🔍 Safety Inspection' },
+                    { value: 'repair', label: '⚠️ Repair Required' },
+                    { value: 'emergency', label: '🚨 Emergency Maintenance' },
+                  ]}
+                />
+
+                <ModernSelect
+                  label="Priority Level"
+                  placeholder="Select priority"
+                  options={[
+                    { value: 'low', label: '🟢 Low Priority' },
+                    { value: 'medium', label: '🟡 Medium Priority' },
+                    { value: 'high', label: '🟠 High Priority' },
+                    { value: 'critical', label: '🔴 Critical Priority' },
+                  ]}
+                />
+
+                <DatePicker label="Scheduled Date" fromYear={2024} toYear={2025} />
+
+                <NumberInput
+                  label="Estimated Hours"
+                  min={0.5}
+                  max={72}
+                  step={0.5}
+                  placeholder="8"
+                />
+
+                <ModernTextarea
+                  label="Issue Description"
+                  placeholder="Describe the maintenance issue, symptoms, or requirements in detail..."
+                  rows={4}
+                />
+
+                <FileUpload
+                  label="Supporting Documents"
+                  accept=".pdf,.doc,.docx,.jpg,.png"
+                  multiple={true}
+                  helper="Upload photos, reports, or technical documentation"
+                />
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Form Layout Examples */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Form Layout Examples
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Different form layouts and arrangements for various use cases
+          </p>
+
+          <div className="space-y-8">
+            {/* Inline Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">INLINE FORM LAYOUT</h4>
+              <div className="p-4 bg-white border rounded-xl">
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div className="min-w-[200px]">
+                    <SearchInput label="Quick Search" placeholder="Search flights..." />
+                  </div>
+                  <div className="min-w-[150px]">
+                    <ModernSelect
+                      label="Status"
+                      placeholder="Any status"
+                      options={[
+                        { value: 'all', label: 'All Status' },
+                        { value: 'active', label: 'Active' },
+                        { value: 'delayed', label: 'Delayed' },
+                        { value: 'cancelled', label: 'Cancelled' },
+                      ]}
+                    />
+                  </div>
+                  <div className="min-w-[140px]">
+                    <DatePicker label="Date" fromYear={2024} toYear={2024} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Compact Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">COMPACT FORM LAYOUT</h4>
+              <div className="max-w-md p-4 bg-white border rounded-xl space-y-3">
+                <ModernInput label="Flight ID" placeholder="FL-001" className="h-9 text-sm" />
+                <ModernSelect
+                  label="Aircraft"
+                  placeholder="Select"
+                  className="h-9 text-sm"
+                  options={[
+                    { value: 'b737', label: 'Boeing 737' },
+                    { value: 'a320', label: 'Airbus A320' },
+                  ]}
+                />
+                <div className="pt-2">
+                  <ModernSwitch label="Active" description="Flight is operational" />
+                </div>
+              </div>
+            </div>
+
+            {/* Wide Form */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">WIDE FORM LAYOUT</h4>
+              <div className="p-6 bg-white border rounded-xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <ModernInput label="Flight Number" placeholder="FA-1247" />
+                  <ModernInput label="Origin" placeholder="JFK" />
+                  <ModernInput label="Destination" placeholder="LAX" />
+                  <DatePicker label="Date" fromYear={2024} toYear={2024} />
+                </div>
+                <div className="mt-4">
+                  <ModernTextarea
+                    label="Additional Notes"
+                    placeholder="Enter any additional flight information..."
+                    rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     );
   },
@@ -555,173 +658,7 @@ export const FormLayouts: Story = {
     docs: {
       description: {
         story:
-          'Complete form layouts demonstrating real-world Fleet AI use cases with proper field grouping and validation.',
-      },
-    },
-  },
-};
-
-// States and Validation
-export const StatesAndValidation: Story = {
-  render: () => (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Input States */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">INPUT STATES</h3>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Normal State</label>
-              <ModernInput placeholder="Enter flight number" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Focused State</label>
-              <ModernInput placeholder="Click to focus" autoFocus />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Disabled State</label>
-              <ModernInput placeholder="Cannot edit" disabled />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">With Value</label>
-              <ModernInput value="FL-1234" />
-            </div>
-          </div>
-        </div>
-
-        {/* Validation Examples */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">VALIDATION EXAMPLES</h3>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-red-600">Required Field *</label>
-              <ModernInput
-                placeholder="Flight number required"
-                className="border-red-300 focus-visible:border-red-500 focus-visible:ring-red-500"
-              />
-              <p className="text-xs text-red-600">Flight number is required</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-green-600">Valid Input ✓</label>
-              <ModernInput
-                value="FL-1234"
-                className="border-green-300 focus-visible:border-green-500 focus-visible:ring-green-500"
-              />
-              <p className="text-xs text-green-600">Valid flight number format</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-orange-600">Warning</label>
-              <ModernInput
-                value="FL123"
-                className="border-orange-300 focus-visible:border-orange-500 focus-visible:ring-orange-500"
-              />
-              <p className="text-xs text-orange-600">
-                Flight number should include hyphen (FL-123)
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Select States */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">SELECT STATES</h3>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Default Select</label>
-              <ModernSelect
-                placeholder="Choose aircraft"
-                options={[
-                  { value: 'boeing737', label: 'Boeing 737' },
-                  { value: 'airbus320', label: 'Airbus A320' },
-                ]}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">With Selection</label>
-              <ModernSelect
-                value="boeing737"
-                options={[
-                  { value: 'boeing737', label: 'Boeing 737' },
-                  { value: 'airbus320', label: 'Airbus A320' },
-                ]}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Long Options</label>
-              <ModernSelect
-                placeholder="Select detailed option"
-                options={[
-                  {
-                    value: 'boeing737-800',
-                    label: 'Boeing 737-800 (189 passengers, 3,383 nm range)',
-                  },
-                  {
-                    value: 'airbus320-200',
-                    label: 'Airbus A320-200 (180 passengers, 3,300 nm range)',
-                  },
-                  {
-                    value: 'boeing777-300er',
-                    label: 'Boeing 777-300ER (396 passengers, 7,370 nm range)',
-                  },
-                ]}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Other Control States */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground">OTHER CONTROLS</h3>
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Textarea States</label>
-              <ModernTextarea placeholder="Normal textarea" />
-              <ModernTextarea value="Pre-filled content" />
-              <ModernTextarea placeholder="Disabled textarea" disabled />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Switch States</label>
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2">
-                  <ModernSwitch />
-                  <span className="text-sm">Off</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ModernSwitch defaultChecked />
-                  <span className="text-sm">On</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ModernSwitch disabled />
-                  <span className="text-sm">Disabled</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Examples of different form control states including normal, focused, disabled, and validation states.',
-      },
-    },
-  },
-};
-
-// Interactive Controls
-export const Interactive: Story = {
-  args: {
-    placeholder: 'Interactive input field',
-    type: 'text',
-    disabled: false,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Interactive form input with controls for testing different configurations.',
+          'Comprehensive showcase of all available Form component configurations in the Fleet AI design system.',
       },
     },
   },

@@ -2,7 +2,7 @@
 
 import { Button } from '@/stories/Button/Button';
 import { ContentSection, MetricCard } from '@/stories/Card/Card';
-import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
+import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { Building2, Info, Pencil, Plane, Save, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAirportHub } from '../ContextProvider';

@@ -9,7 +9,7 @@ import {
 import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
-import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
+import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';

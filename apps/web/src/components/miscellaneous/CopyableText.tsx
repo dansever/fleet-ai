@@ -1,42 +1,67 @@
-// apps/web/src/app/(platform)/_components/CopyableText.tsx
-'use client';
-
-import { copyToClipboard } from '@/lib/browser/copy-to-clipboard';
+// CopyButton.tsx
 import { cn } from '@/lib/utils';
-import { Copy } from 'lucide-react';
-import { toast } from 'sonner';
+import { CopyIcon } from 'lucide-react';
+import * as React from 'react';
 
-interface CopyableTextProps {
-  text?: string | null;
-  className?: string;
-}
+type RenderFn = (args: { copied: boolean }) => React.ReactNode;
 
-export function CopyableText({ text, className }: CopyableTextProps) {
-  const handleCopy = async () => {
-    if (!text) {
-      toast.info('Nothing to copy');
-      return;
-    }
-    const success = await copyToClipboard(text);
-    if (success) {
-      toast.success('Copied to clipboard');
-    } else {
-      toast.error('Failed to copy to clipboard');
-    }
-  };
+export type CopyableTextProps = Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'onClick' | 'children'
+> & {
+  value: string; // text to copy
+  resetDelay?: number; // ms to reset "copied" state
+  onCopied?: () => void; // callback after successful copy
+  children?: React.ReactNode | RenderFn; // optional render control
+};
 
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className={cn('group flex w-full items-center gap-1 cursor-pointer', className)}
-      title={text ?? ''}
-    >
-      {/* Text should take all leftover space and truncate */}
-      <span className="flex-1 truncate">{text}</span>
+export const CopyableText = React.forwardRef<HTMLButtonElement, CopyableTextProps>(
+  ({ value, resetDelay = 1500, onCopied, title, className, children, ...buttonProps }, ref) => {
+    const [copied, setCopied] = React.useState(false);
+    const timerRef = React.useRef<number | null>(null);
 
-      {/* Icon should never shrink, always visible */}
-      {text && <Copy className="h-4 w-4 transition group-hover:scale-105 shrink-0" />}
-    </button>
-  );
-}
+    React.useEffect(() => {
+      return () => {
+        if (timerRef.current) window.clearTimeout(timerRef.current);
+      };
+    }, []);
+
+    const handleCopy = async (e: React.MouseEvent<HTMLButtonElement>) => {
+      try {
+        await navigator.clipboard.writeText(value);
+        setCopied(true);
+        onCopied?.();
+        if (resetDelay > 0) {
+          timerRef.current = window.setTimeout(() => setCopied(false), resetDelay);
+        }
+      } catch (err) {
+        // optional: surface error or toast
+        console.error('Copy failed', err);
+      }
+
+      // Do not stop consumers from also listening to onClick
+      buttonProps.onChange?.(e);
+    };
+
+    const content =
+      typeof children === 'function' ? (children as RenderFn)({ copied }) : (children ?? value);
+
+    return (
+      <button
+        ref={ref}
+        type="button"
+        onClick={handleCopy}
+        title={title ?? value}
+        aria-label={title ?? 'Copy to clipboard'}
+        data-state={copied ? 'copied' : 'idle'}
+        className={cn('group cursor-pointer flex items-center gap-2', className)}
+        {...buttonProps}
+      >
+        {content}
+        {content && <CopyIcon className="h-4 w-4 transition group-hover:scale-110 shrink-0" />}
+      </button>
+    );
+  },
+);
+
+CopyableText.displayName = 'CopyableText';

@@ -1,470 +1,725 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { AlertTriangle, Archive, Copy, Edit, Save, Trash2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  Archive,
+  Calendar,
+  Clock,
+  Download,
+  Edit,
+  MoreVertical,
+  Plane,
+  Plus,
+  Send,
+  Share,
+  Trash2,
+  Users,
+  X,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../Button/Button';
+import { BadgeGroup } from '../Card/Card';
+import { KeyValuePair } from '../KeyValuePair/KeyValuePair';
 import { ConfirmationPopover, FileUploadPopover } from './Popover';
 
-const meta: Meta = {
+const meta: Meta<typeof ConfirmationPopover> = {
   title: 'Components/Popover',
+  component: ConfirmationPopover,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
         component:
-          'A collection of popover components for Fleet AI applications. Includes confirmation dialogs and file upload functionality with modern design and smooth interactions.',
+          'A collection of popover components for Fleet AI applications. Includes confirmation popovers for destructive actions and file upload popovers for document management.',
       },
     },
   },
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof ConfirmationPopover>;
 
-// Single comprehensive story showing both popover types
-export const PopoverShowcase: Story = {
+// Comprehensive Popover Showcase - All variants in one story
+export const AllPopoverVariants: Story = {
   render: () => {
-    const [controlledOpen, setControlledOpen] = useState(false);
-    const [uploadOpen, setUploadOpen] = useState(false);
+    // State for interactive examples
+    const [uploadCount, setUploadCount] = useState(0);
+
+    const handleFileUpload = (file: File) => {
+      console.log('File uploaded:', file.name);
+      setUploadCount((prev) => prev + 1);
+    };
+
+    const handleDeleteAction = () => {
+      console.log('Delete action confirmed');
+    };
+
+    const handleArchiveAction = () => {
+      console.log('Archive action confirmed');
+    };
 
     return (
-      <div className="space-y-12 max-w-6xl mx-auto">
+      <div className="space-y-12 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Fleet AI Popover Components</h1>
-          <p className="text-lg text-muted-foreground mb-2">
-            Interactive confirmation dialogs and file upload popovers with modern design
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Featuring drag & drop support, controlled state, custom alignment, and Fleet AI theming
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+            Fleet AI Popover Components
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Complete showcase of confirmation and file upload popovers for user interactions
           </p>
         </div>
 
-        {/* Main Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Confirmation Popovers Section */}
-          <div className="space-y-6">
-            <div className="border-b pb-3">
-              <h2 className="text-xl font-semibold mb-2">Confirmation Popovers</h2>
-              <p className="text-sm text-muted-foreground">
-                Contextual confirmation dialogs with different intent levels
+        {/* Confirmation Popover Types */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Confirmation Popover Types
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Three intent types for different confirmation scenarios
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">DANGER INTENT</h4>
+              <div className="space-y-3">
+                <ConfirmationPopover
+                  trigger={<Button intent="danger" text="Delete Aircraft" icon={Trash2} />}
+                  popoverIntent="danger"
+                  title="Delete Aircraft"
+                  description="This will permanently remove the aircraft from your fleet. This action cannot be undone."
+                  confirmText="Delete"
+                  onConfirm={handleDeleteAction}
+                />
+
+                <ConfirmationPopover
+                  trigger={<Button intent="danger" text="Cancel Flight" icon={X} size="sm" />}
+                  popoverIntent="danger"
+                  title="Cancel Flight"
+                  description="This will cancel the flight and notify all passengers."
+                  confirmText="Cancel Flight"
+                  onConfirm={() => console.log('Flight cancelled')}
+                />
+
+                <ConfirmationPopover
+                  trigger={<Button intent="danger" text="Remove Crew" icon={Users} size="sm" />}
+                  popoverIntent="danger"
+                  title="Remove Crew Member"
+                  description="This will remove the crew member from all assigned flights."
+                  confirmText="Remove"
+                  onConfirm={() => console.log('Crew member removed')}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Use for destructive actions like deleting, cancelling, or removing items
               </p>
             </div>
 
-            {/* Basic Examples */}
             <div className="space-y-4">
-              <h3 className="font-medium text-muted-foreground">BASIC EXAMPLES</h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Danger Action</p>
-                    <p className="text-xs text-muted-foreground">Destructive operations</p>
-                  </div>
-                  <ConfirmationPopover
-                    trigger={
-                      <Button intent="danger" text="Delete Aircraft" icon={Trash2} size="sm" />
-                    }
-                    popoverIntent="danger"
-                    title="Delete Aircraft N123FA"
-                    description="This will permanently remove the aircraft and all associated records. This action cannot be undone."
-                    confirmText="Delete Aircraft"
-                    onConfirm={() => console.log('Aircraft N123FA deleted')}
-                  />
-                </div>
+              <h4 className="font-medium text-sm text-muted-foreground">WARNING INTENT</h4>
+              <div className="space-y-3">
+                <ConfirmationPopover
+                  trigger={<Button intent="warning" text="Ground Aircraft" icon={AlertTriangle} />}
+                  popoverIntent="warning"
+                  title="Ground Aircraft"
+                  description="This will ground the aircraft and cancel all scheduled flights."
+                  confirmText="Ground"
+                  onConfirm={() => console.log('Aircraft grounded')}
+                />
 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Warning Action</p>
-                    <p className="text-xs text-muted-foreground">Potentially risky operations</p>
-                  </div>
-                  <ConfirmationPopover
-                    trigger={
-                      <Button intent="secondary" text="Archive Flight" icon={Archive} size="sm" />
-                    }
-                    popoverIntent="warning"
-                    title="Archive Flight Record"
-                    description="The flight will be moved to archived records and hidden from active views. You can restore it later."
-                    confirmText="Archive"
-                    onConfirm={() => console.log('Flight archived')}
-                  />
-                </div>
+                <ConfirmationPopover
+                  trigger={
+                    <Button intent="warning" text="Archive Flight" icon={Archive} size="sm" />
+                  }
+                  popoverIntent="warning"
+                  title="Archive Flight Record"
+                  description="This will move the flight to archived records."
+                  confirmText="Archive"
+                  onConfirm={handleArchiveAction}
+                />
 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Info Action</p>
-                    <p className="text-xs text-muted-foreground">Standard confirmations</p>
-                  </div>
-                  <ConfirmationPopover
-                    trigger={<Button intent="primary" text="Save Changes" icon={Save} size="sm" />}
-                    popoverIntent="info"
-                    title="Save Configuration"
-                    description="Your changes will be applied to all active aircraft in the fleet."
-                    confirmText="Save"
-                    onConfirm={() => console.log('Changes saved')}
-                  />
-                </div>
+                <ConfirmationPopover
+                  trigger={
+                    <Button intent="warning" text="Reset Data" icon={AlertTriangle} size="sm" />
+                  }
+                  popoverIntent="warning"
+                  title="Reset System Data"
+                  description="This will reset all system preferences to defaults."
+                  confirmText="Reset"
+                  onConfirm={() => console.log('Data reset')}
+                />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Use for potentially disruptive actions that require caution
+              </p>
             </div>
 
-            {/* Advanced Examples */}
             <div className="space-y-4">
-              <h3 className="font-medium text-muted-foreground">ADVANCED FEATURES</h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
-                  <div>
-                    <p className="font-medium text-sm">Controlled State</p>
-                    <p className="text-xs text-muted-foreground">
-                      State: {controlledOpen ? 'Open' : 'Closed'}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      intent="ghost"
-                      text="Open"
-                      size="sm"
-                      onClick={() => setControlledOpen(true)}
-                    />
-                    <ConfirmationPopover
-                      trigger={<Button intent="danger" text="Controlled Delete" size="sm" />}
-                      popoverIntent="danger"
-                      title="Controlled Confirmation"
-                      description="This popover is controlled by external state for complex workflows."
-                      confirmText="Delete"
-                      open={controlledOpen}
-                      onOpenChange={setControlledOpen}
-                      onConfirm={() => {
-                        console.log('Controlled delete confirmed');
-                        setControlledOpen(false);
-                      }}
-                    />
-                  </div>
-                </div>
+              <h4 className="font-medium text-sm text-muted-foreground">INFO INTENT</h4>
+              <div className="space-y-3">
+                <ConfirmationPopover
+                  trigger={<Button intent="primary" text="Send Report" icon={Send} />}
+                  popoverIntent="info"
+                  title="Send Report"
+                  description="This will send the maintenance report to all supervisors."
+                  confirmText="Send"
+                  onConfirm={() => console.log('Report sent')}
+                />
 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Custom Alignment</p>
-                    <p className="text-xs text-muted-foreground">Different popover positions</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <ConfirmationPopover
-                      trigger={<Button intent="ghost" text="Start" size="sm" />}
-                      popoverIntent="info"
-                      title="Start Aligned"
-                      description="Popover aligned to the start."
-                      confirmText="OK"
-                      popoverContentAlign="start"
-                      onConfirm={() => console.log('Start aligned')}
-                    />
-                    <ConfirmationPopover
-                      trigger={<Button intent="ghost" text="Center" size="sm" />}
-                      popoverIntent="info"
-                      title="Center Aligned"
-                      description="Popover aligned to the center."
-                      confirmText="OK"
-                      popoverContentAlign="center"
-                      onConfirm={() => console.log('Center aligned')}
-                    />
-                    <ConfirmationPopover
-                      trigger={<Button intent="ghost" text="End" size="sm" />}
-                      popoverIntent="info"
-                      title="End Aligned"
-                      description="Popover aligned to the end."
-                      confirmText="OK"
-                      popoverContentAlign="end"
-                      onConfirm={() => console.log('End aligned')}
-                    />
-                  </div>
-                </div>
+                <ConfirmationPopover
+                  trigger={<Button intent="primary" text="Export Data" icon={Download} size="sm" />}
+                  popoverIntent="info"
+                  title="Export Flight Data"
+                  description="This will export all flight data for the selected period."
+                  confirmText="Export"
+                  onConfirm={() => console.log('Data exported')}
+                />
+
+                <ConfirmationPopover
+                  trigger={<Button intent="primary" text="Share Schedule" icon={Share} size="sm" />}
+                  popoverIntent="info"
+                  title="Share Flight Schedule"
+                  description="This will share the schedule with selected crew members."
+                  confirmText="Share"
+                  onConfirm={() => console.log('Schedule shared')}
+                />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Use for informational confirmations and non-destructive actions
+              </p>
             </div>
           </div>
+        </section>
 
-          {/* File Upload Popovers Section */}
-          <div className="space-y-6">
-            <div className="border-b pb-3">
-              <h2 className="text-xl font-semibold mb-2">File Upload Popovers</h2>
-              <p className="text-sm text-muted-foreground">
-                Drag & drop file uploads with validation and custom content
+        {/* File Upload Popovers */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            File Upload Popovers
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            File upload components with drag-and-drop support and file type restrictions
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">DOCUMENT UPLOAD</h4>
+              <FileUploadPopover
+                triggerText="Upload Documents"
+                triggerIntent="primary"
+                accept=".pdf,.doc,.docx,.txt"
+                maxSize={10}
+                onSend={handleFileUpload}
+              />
+              <p className="text-xs text-muted-foreground">
+                For flight plans, maintenance reports, and official documents
               </p>
             </div>
 
-            {/* Basic Examples */}
             <div className="space-y-4">
-              <h3 className="font-medium text-muted-foreground">BASIC EXAMPLES</h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Document Upload</p>
-                    <p className="text-xs text-muted-foreground">PDF, DOC, DOCX files</p>
-                  </div>
-                  <FileUploadPopover
-                    triggerText="Upload Documents"
-                    triggerIntent="primary"
-                    triggerSize="sm"
-                    accept=".pdf,.doc,.docx"
-                    maxSize={5}
-                    onSend={(file) => console.log('Document uploaded:', file.name)}
-                  />
-                </div>
+              <h4 className="font-medium text-sm text-muted-foreground">IMAGE UPLOAD</h4>
+              <FileUploadPopover
+                triggerText="Upload Images"
+                triggerIntent="secondary"
+                triggerSize="sm"
+                accept="image/*"
+                maxSize={5}
+                onSend={handleFileUpload}
+              />
+              <p className="text-xs text-muted-foreground">
+                For aircraft photos, damage reports, and visual documentation
+              </p>
+            </div>
 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Image Upload</p>
-                    <p className="text-xs text-muted-foreground">All image formats</p>
-                  </div>
-                  <FileUploadPopover
-                    triggerText="Add Images"
-                    triggerIntent="secondary"
-                    triggerSize="sm"
-                    accept="image/*"
-                    maxSize={10}
-                    onSend={(file) => console.log('Image uploaded:', file.name)}
-                  />
-                </div>
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">ANY FILE TYPE</h4>
+              <FileUploadPopover
+                triggerText="Upload Any File"
+                triggerIntent="success"
+                triggerSize="lg"
+                accept="*/*"
+                maxSize={25}
+                onSend={handleFileUpload}
+              />
+              <p className="text-xs text-muted-foreground">
+                For any type of file with larger size limit
+              </p>
+            </div>
 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Data Import</p>
-                    <p className="text-xs text-muted-foreground">CSV, XLSX, JSON files</p>
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">SPREADSHEET UPLOAD</h4>
+              <FileUploadPopover
+                triggerText="Import Data"
+                triggerIntent="primary"
+                accept=".xlsx,.xls,.csv"
+                maxSize={15}
+                onSend={handleFileUpload}
+              />
+              <p className="text-xs text-muted-foreground">
+                For importing flight schedules, crew data, and analytics
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">COMPRESSED FILES</h4>
+              <FileUploadPopover
+                triggerText="Upload Archive"
+                triggerIntent="secondary"
+                accept=".zip,.rar,.7z"
+                maxSize={50}
+                onSend={handleFileUpload}
+              />
+              <p className="text-xs text-muted-foreground">
+                For bulk uploads and compressed document collections
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">UPLOAD STATUS</h4>
+              <div className="p-3 bg-gray-50 rounded-lg text-center">
+                <p className="text-sm text-muted-foreground">Files uploaded: {uploadCount}</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Upload counter updates when files are successfully processed
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Fleet AI Application Examples */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Fleet AI Application Examples
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Real-world popover usage in fleet management scenarios
+          </p>
+
+          <div className="space-y-8">
+            {/* Aircraft Management Actions */}
+            <div className="space-y-4">
+              <h4 className="font-medium">Aircraft Management Actions</h4>
+              <div className="p-6 bg-white border rounded-xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h5 className="font-medium text-sm text-muted-foreground">AIRCRAFT N737BA</h5>
+                    <div className="space-y-0">
+                      <KeyValuePair label="Status" value="Operational" valueType="string" />
+                      <KeyValuePair label="Next Maintenance" value="2024-03-15" valueType="date" />
+                      <KeyValuePair label="Flight Hours" value={4250.75} valueType="number" />
+                    </div>
                   </div>
-                  <FileUploadPopover
-                    triggerText="Import Data"
-                    triggerIntent="primary"
-                    triggerSize="sm"
-                    accept=".csv,.xlsx,.json"
-                    maxSize={25}
-                    onSend={(file) => console.log('Data imported:', file.name)}
-                  />
+
+                  <div className="space-y-4">
+                    <h5 className="font-medium text-sm text-muted-foreground">ACTIONS</h5>
+                    <div className="flex flex-wrap gap-2">
+                      <ConfirmationPopover
+                        trigger={
+                          <Button intent="warning" text="Ground" icon={AlertTriangle} size="sm" />
+                        }
+                        popoverIntent="warning"
+                        title="Ground Aircraft N737BA"
+                        description="This will immediately ground the aircraft and cancel 3 scheduled flights."
+                        confirmText="Ground Aircraft"
+                        onConfirm={() => console.log('Aircraft N737BA grounded')}
+                      />
+
+                      <FileUploadPopover
+                        triggerText="Upload Docs"
+                        triggerIntent="secondary"
+                        triggerSize="sm"
+                        accept=".pdf,.doc,.docx"
+                        maxSize={10}
+                        onSend={(file) => console.log('Aircraft document uploaded:', file.name)}
+                      />
+
+                      <ConfirmationPopover
+                        trigger={<Button intent="danger" text="Retire" icon={Archive} size="sm" />}
+                        popoverIntent="danger"
+                        title="Retire Aircraft"
+                        description="This will permanently retire N737BA from the active fleet."
+                        confirmText="Retire"
+                        onConfirm={() => console.log('Aircraft retired')}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Advanced Examples */}
+            {/* Flight Operations Dashboard */}
             <div className="space-y-4">
-              <h3 className="font-medium text-muted-foreground">ADVANCED FEATURES</h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
-                  <div>
-                    <p className="font-medium text-sm">Custom Content</p>
-                    <p className="text-xs text-muted-foreground">
-                      State: {uploadOpen ? 'Open' : 'Closed'}
-                    </p>
+              <h4 className="font-medium">Flight Operations Dashboard</h4>
+              <div className="p-6 bg-white border rounded-xl">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">18</div>
+                      <div className="text-sm text-muted-foreground">Active Flights</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">3</div>
+                      <div className="text-sm text-muted-foreground">Delayed</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">1</div>
+                      <div className="text-sm text-muted-foreground">Cancelled</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">42</div>
+                      <div className="text-sm text-muted-foreground">Scheduled</div>
+                    </div>
                   </div>
-                  <FileUploadPopover
-                    triggerText="Advanced Upload"
-                    triggerIntent="primary"
-                    triggerSize="sm"
-                    accept="*/*"
-                    maxSize={50}
-                    open={uploadOpen}
-                    onOpenChange={setUploadOpen}
-                    onSend={(file) => {
-                      console.log('Advanced upload:', file.name);
-                      setUploadOpen(false);
-                    }}
-                  >
-                    {({ close }) => (
-                      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-800 font-medium">Additional Options</p>
-                        <div className="flex gap-2 mt-2">
-                          <Button
-                            intent="secondary"
-                            text="Scan QR"
-                            size="sm"
-                            onClick={() => {
-                              console.log('QR scan initiated');
-                              close();
-                            }}
-                          />
-                          <Button
-                            intent="ghost"
-                            text="Import URL"
-                            size="sm"
-                            onClick={() => {
-                              console.log('URL import initiated');
-                              close();
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </FileUploadPopover>
-                </div>
 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Different Sizes</p>
-                    <p className="text-xs text-muted-foreground">
-                      Small, medium, and large buttons
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap gap-3">
                     <FileUploadPopover
-                      triggerText="SM"
+                      triggerText="Import Schedule"
+                      triggerIntent="primary"
+                      accept=".xlsx,.csv"
+                      maxSize={5}
+                      onSend={(file) => console.log('Schedule imported:', file.name)}
+                    />
+
+                    <ConfirmationPopover
+                      trigger={<Button intent="primary" text="Export Report" icon={Download} />}
+                      popoverIntent="info"
+                      title="Export Daily Report"
+                      description="This will generate and download today's operations report."
+                      confirmText="Export"
+                      onConfirm={() => console.log('Report exported')}
+                    />
+
+                    <ConfirmationPopover
+                      trigger={
+                        <Button intent="warning" text="Emergency Protocol" icon={AlertTriangle} />
+                      }
+                      popoverIntent="warning"
+                      title="Activate Emergency Protocol"
+                      description="This will activate emergency procedures and alert all relevant personnel."
+                      confirmText="Activate"
+                      onConfirm={() => console.log('Emergency protocol activated')}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Maintenance Management */}
+            <div className="space-y-4">
+              <h4 className="font-medium">Maintenance Management</h4>
+              <div className="p-6 bg-white border rounded-xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h5 className="font-medium text-sm text-muted-foreground">
+                      PENDING MAINTENANCE
+                    </h5>
+                    <BadgeGroup
+                      tags={[
+                        'A-Check Due: N737BA',
+                        'Engine Inspection: N777CD',
+                        'Tire Replacement: N320EF',
+                        'Avionics Update: N787GH',
+                      ]}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <h5 className="font-medium text-sm text-muted-foreground">
+                      MAINTENANCE ACTIONS
+                    </h5>
+                    <div className="flex flex-wrap gap-2">
+                      <FileUploadPopover
+                        triggerText="Upload Report"
+                        triggerIntent="primary"
+                        triggerSize="sm"
+                        accept=".pdf,.doc,.jpg,.png"
+                        maxSize={15}
+                        onSend={(file) => console.log('Maintenance report uploaded:', file.name)}
+                      />
+
+                      <ConfirmationPopover
+                        trigger={
+                          <Button intent="success" text="Complete Task" icon={Plus} size="sm" />
+                        }
+                        popoverIntent="info"
+                        title="Mark Task Complete"
+                        description="This will mark the selected maintenance task as completed."
+                        confirmText="Complete"
+                        onConfirm={() => console.log('Maintenance task completed')}
+                      />
+
+                      <ConfirmationPopover
+                        trigger={
+                          <Button intent="warning" text="Defer Task" icon={Calendar} size="sm" />
+                        }
+                        popoverIntent="warning"
+                        title="Defer Maintenance"
+                        description="This will defer the maintenance task to a later date."
+                        confirmText="Defer"
+                        onConfirm={() => console.log('Maintenance deferred')}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Crew Management */}
+            <div className="space-y-4">
+              <h4 className="font-medium">Crew Management</h4>
+              <div className="p-6 bg-white border rounded-xl">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm">Captain Sarah Johnson</h5>
+                      <div className="text-xs text-muted-foreground">
+                        <div>Flight Hours: 12,000</div>
+                        <div>Type Rating: B737, B777</div>
+                        <div>Status: Available</div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm">FO Mike Chen</h5>
+                      <div className="text-xs text-muted-foreground">
+                        <div>Flight Hours: 8,500</div>
+                        <div>Type Rating: B737, A320</div>
+                        <div>Status: On Duty</div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm">FA Emma Thompson</h5>
+                      <div className="text-xs text-muted-foreground">
+                        <div>Experience: 8 years</div>
+                        <div>Certifications: Current</div>
+                        <div>Status: Rest Period</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <FileUploadPopover
+                      triggerText="Upload Certs"
                       triggerIntent="secondary"
                       triggerSize="sm"
-                      onSend={(file) => console.log('Small upload:', file.name)}
+                      accept=".pdf,.jpg,.png"
+                      maxSize={5}
+                      onSend={(file) => console.log('Certification uploaded:', file.name)}
                     />
-                    <FileUploadPopover
-                      triggerText="MD"
-                      triggerIntent="secondary"
-                      triggerSize="md"
-                      onSend={(file) => console.log('Medium upload:', file.name)}
+
+                    <ConfirmationPopover
+                      trigger={
+                        <Button intent="primary" text="Assign Flight" icon={Plane} size="sm" />
+                      }
+                      popoverIntent="info"
+                      title="Assign Crew to Flight"
+                      description="This will assign the selected crew to flight FA-1247."
+                      confirmText="Assign"
+                      onConfirm={() => console.log('Crew assigned to flight')}
                     />
-                    <FileUploadPopover
-                      triggerText="LG"
-                      triggerIntent="secondary"
-                      triggerSize="lg"
-                      onSend={(file) => console.log('Large upload:', file.name)}
+
+                    <ConfirmationPopover
+                      trigger={
+                        <Button intent="warning" text="Schedule Training" icon={Users} size="sm" />
+                      }
+                      popoverIntent="info"
+                      title="Schedule Training"
+                      description="This will schedule mandatory training for the selected crew member."
+                      confirmText="Schedule"
+                      onConfirm={() => console.log('Training scheduled')}
                     />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Real-World Fleet AI Examples */}
-        <div className="space-y-6">
-          <div className="border-b pb-3">
-            <h2 className="text-xl font-semibold mb-2">Fleet AI Application Examples</h2>
-            <p className="text-sm text-muted-foreground">
-              Real-world usage scenarios in fleet management contexts
-            </p>
-          </div>
+        {/* Popover Positioning */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Popover Positioning
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Different alignment options for popover positioning
+          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Aircraft Management Card */}
-            <div className="border rounded-xl p-6 bg-white space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold">Boeing 737-800 (N123FA)</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Last flight: FL-1234 • Status: Active
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <ConfirmationPopover
-                    trigger={<Button intent="secondary" icon={Edit} size="sm" />}
-                    popoverIntent="info"
-                    title="Update Aircraft Configuration"
-                    description="Changes will affect future flight assignments and passenger capacity calculations."
-                    confirmText="Update"
-                    onConfirm={() => console.log('Aircraft updated')}
-                  />
-                  <ConfirmationPopover
-                    trigger={<Button intent="danger" icon={Trash2} size="sm" />}
-                    popoverIntent="danger"
-                    title="Remove Aircraft from Fleet"
-                    description="This will permanently remove N123FA from your fleet. All historical data will be archived."
-                    confirmText="Remove"
-                    onConfirm={() => console.log('Aircraft removed')}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">START ALIGNMENT</h4>
+              <div className="space-y-3">
+                <ConfirmationPopover
+                  trigger={<Button intent="primary" text="Start Aligned" size="sm" />}
+                  popoverIntent="info"
+                  title="Start Alignment"
+                  description="Popover aligns to the start of the trigger."
+                  confirmText="Confirm"
+                  popoverContentAlign="start"
+                  onConfirm={() => console.log('Start aligned confirmed')}
+                />
+
                 <FileUploadPopover
-                  triggerText="Upload Manual"
+                  triggerText="Upload (Start)"
                   triggerIntent="secondary"
                   triggerSize="sm"
-                  accept=".pdf"
-                  maxSize={100}
-                  onSend={(file) => console.log('Manual uploaded for N123FA:', file.name)}
-                />
-                <FileUploadPopover
-                  triggerText="Add Photos"
-                  triggerIntent="ghost"
-                  triggerSize="sm"
-                  accept="image/*"
-                  maxSize={25}
-                  onSend={(file) => console.log('Photo uploaded for N123FA:', file.name)}
+                  popoverContentAlign="start"
+                  accept="*/*"
+                  maxSize={5}
+                  onSend={handleFileUpload}
                 />
               </div>
             </div>
 
-            {/* Flight Operations Card */}
-            <div className="border rounded-xl p-6 bg-white space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold">Flight FL-1234</h4>
-                  <p className="text-sm text-muted-foreground">JFK → LAX • Scheduled: 14:30 UTC</p>
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">CENTER ALIGNMENT</h4>
+              <div className="space-y-3">
+                <ConfirmationPopover
+                  trigger={<Button intent="primary" text="Center Aligned" size="sm" />}
+                  popoverIntent="info"
+                  title="Center Alignment"
+                  description="Popover centers relative to the trigger."
+                  confirmText="Confirm"
+                  popoverContentAlign="center"
+                  onConfirm={() => console.log('Center aligned confirmed')}
+                />
+
+                <FileUploadPopover
+                  triggerText="Upload (Center)"
+                  triggerIntent="secondary"
+                  triggerSize="sm"
+                  popoverContentAlign="center"
+                  accept="*/*"
+                  maxSize={5}
+                  onSend={handleFileUpload}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground">END ALIGNMENT (Default)</h4>
+              <div className="space-y-3">
+                <ConfirmationPopover
+                  trigger={<Button intent="primary" text="End Aligned" size="sm" />}
+                  popoverIntent="info"
+                  title="End Alignment"
+                  description="Popover aligns to the end of the trigger."
+                  confirmText="Confirm"
+                  popoverContentAlign="end"
+                  onConfirm={() => console.log('End aligned confirmed')}
+                />
+
+                <FileUploadPopover
+                  triggerText="Upload (End)"
+                  triggerIntent="secondary"
+                  triggerSize="sm"
+                  popoverContentAlign="end"
+                  accept="*/*"
+                  maxSize={5}
+                  onSend={handleFileUpload}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Action Menus with Popovers */}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+            Action Menus with Popovers
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Complex action menus combining multiple popover types
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-medium">Aircraft Actions Menu</h4>
+              <div className="p-4 bg-white border rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h5 className="font-medium">Boeing 737-800 (N737BA)</h5>
+                    <p className="text-sm text-muted-foreground">Status: Operational</p>
+                  </div>
+                  <Button intent="secondary" icon={MoreVertical} size="sm" />
                 </div>
-                <div className="flex gap-2">
-                  <ConfirmationPopover
-                    trigger={<Button intent="secondary" icon={Copy} size="sm" />}
-                    popoverIntent="info"
-                    title="Duplicate Flight"
-                    description="Create a new flight with the same route and schedule for next week."
-                    confirmText="Duplicate"
-                    onConfirm={() => console.log('Flight duplicated')}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button intent="primary" text="Edit" icon={Edit} size="sm" />
+
+                  <FileUploadPopover
+                    triggerText="Docs"
+                    triggerIntent="secondary"
+                    triggerSize="sm"
+                    accept=".pdf,.doc,.jpg"
+                    maxSize={10}
+                    onSend={(file) => console.log('Aircraft doc:', file.name)}
                   />
+
                   <ConfirmationPopover
-                    trigger={<Button intent="warning" icon={AlertTriangle} size="sm" />}
+                    trigger={
+                      <Button intent="warning" text="Ground" icon={AlertTriangle} size="sm" />
+                    }
+                    popoverIntent="warning"
+                    title="Ground Aircraft"
+                    description="Ground N737BA and cancel scheduled flights?"
+                    confirmText="Ground"
+                    onConfirm={() => console.log('Aircraft grounded')}
+                  />
+
+                  <ConfirmationPopover
+                    trigger={<Button intent="danger" text="Delete" icon={Trash2} size="sm" />}
+                    popoverIntent="danger"
+                    title="Delete Aircraft Record"
+                    description="Permanently remove this aircraft from the fleet?"
+                    confirmText="Delete"
+                    onConfirm={() => console.log('Aircraft deleted')}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium">Flight Actions Menu</h4>
+              <div className="p-4 bg-white border rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h5 className="font-medium">Flight FA-1247 (JFK → LAX)</h5>
+                    <p className="text-sm text-muted-foreground">Departure: 10:30 AM</p>
+                  </div>
+                  <Button intent="secondary" icon={MoreVertical} size="sm" />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button intent="primary" text="Edit" icon={Edit} size="sm" />
+
+                  <FileUploadPopover
+                    triggerText="Plan"
+                    triggerIntent="secondary"
+                    triggerSize="sm"
+                    accept=".pdf,.doc"
+                    maxSize={5}
+                    onSend={(file) => console.log('Flight plan:', file.name)}
+                  />
+
+                  <ConfirmationPopover
+                    trigger={<Button intent="warning" text="Delay" icon={Clock} size="sm" />}
+                    popoverIntent="warning"
+                    title="Delay Flight"
+                    description="Delay FA-1247 and notify passengers?"
+                    confirmText="Delay"
+                    onConfirm={() => console.log('Flight delayed')}
+                  />
+
+                  <ConfirmationPopover
+                    trigger={<Button intent="danger" text="Cancel" icon={X} size="sm" />}
                     popoverIntent="danger"
                     title="Cancel Flight"
-                    description="This will cancel FL-1234 and automatically process passenger refunds."
-                    confirmText="Cancel Flight"
+                    description="Cancel FA-1247 and process refunds?"
+                    confirmText="Cancel"
                     onConfirm={() => console.log('Flight cancelled')}
                   />
                 </div>
               </div>
-              <div className="flex gap-2">
-                <FileUploadPopover
-                  triggerText="Flight Plan"
-                  triggerIntent="secondary"
-                  triggerSize="sm"
-                  accept=".pdf,.json"
-                  maxSize={10}
-                  onSend={(file) => console.log('Flight plan uploaded:', file.name)}
-                />
-                <FileUploadPopover
-                  triggerText="Weather Data"
-                  triggerIntent="ghost"
-                  triggerSize="sm"
-                  accept=".json,.xml"
-                  maxSize={5}
-                  onSend={(file) => console.log('Weather data uploaded:', file.name)}
-                />
-              </div>
             </div>
           </div>
-        </div>
-
-        {/* Usage Guidelines */}
-        <div className="bg-gray-50 rounded-xl p-6 space-y-4">
-          <h3 className="font-semibold">Usage Guidelines</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <h4 className="font-medium mb-2">Confirmation Popovers</h4>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>
-                  • Use <code>danger</code> for destructive actions
-                </li>
-                <li>
-                  • Use <code>warning</code> for potentially risky operations
-                </li>
-                <li>
-                  • Use <code>info</code> for standard confirmations
-                </li>
-                <li>• Provide clear, specific descriptions</li>
-                <li>• Use controlled state for complex workflows</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">File Upload Popovers</h4>
-              <ul className="space-y-1 text-muted-foreground">
-                <li>
-                  • Specify appropriate file types with <code>accept</code>
-                </li>
-                <li>
-                  • Set reasonable <code>maxSize</code> limits
-                </li>
-                <li>• Support drag & drop for better UX</li>
-                <li>• Use custom content for additional options</li>
-                <li>• Handle file validation and error states</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
     );
   },
@@ -472,7 +727,7 @@ export const PopoverShowcase: Story = {
     docs: {
       description: {
         story:
-          'Comprehensive showcase of Fleet AI popover components including confirmation dialogs and file upload functionality with real-world examples and usage guidelines.',
+          'Comprehensive showcase of all available Popover component configurations in the Fleet AI design system.',
       },
     },
   },
