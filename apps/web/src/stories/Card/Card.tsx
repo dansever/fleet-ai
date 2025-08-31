@@ -1,3 +1,5 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,11 +20,11 @@ export enum GradientPalette {
 }
 
 const paletteToClasses: Record<GradientPalette, string> = {
-  [GradientPalette.PinkPurpleBlue]: 'from-pink-600 via-purple-500 to-blue-600',
-  [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-600 via-fuchsia-500 to-indigo-600',
-  [GradientPalette.SkyIndigoViolet]: 'from-sky-800 via-indigo-600 to-violet-700',
-  [GradientPalette.VioletPinkRose]: 'from-violet-600 via-pink-500 to-rose-600',
-  [GradientPalette.CyanBluePurple]: 'from-cyan-600 via-blue-500 to-purple-600',
+  [GradientPalette.PinkPurpleBlue]: 'from-pink-500/90 via-purple-600/90 to-blue-700/90',
+  [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-500/90 via-fuchsia-600/90 to-indigo-700/90',
+  [GradientPalette.SkyIndigoViolet]: 'from-sky-600/90 via-indigo-700/90 to-violet-800/90',
+  [GradientPalette.VioletPinkRose]: 'from-violet-600/90 via-pink-600/90 to-rose-700/90',
+  [GradientPalette.CyanBluePurple]: 'from-cyan-500/90 via-blue-600/90 to-purple-700/90',
 };
 
 export interface BaseCardProps {
@@ -61,26 +63,33 @@ export const FeatureCard = ({
   }, [palette]);
 
   return (
-    <Card className={cn('rounded-3xl border-0 overflow-hidden p-0 relative', className)}>
-      {/* Background layers */}
+    <Card className={cn('rounded-3xl border-0 overflow-hidden p-0 relative group', className)}>
       <div className="absolute inset-0 pointer-events-none">
         <div
-          className={cn('absolute -inset-24 blur-lg opacity-80 bg-gradient-to-br', chosenGradient)}
+          className={cn(
+            'absolute -inset-24 blur-2xl opacity-70 bg-gradient-to-br transition-all duration-500 group-hover:opacity-80',
+            chosenGradient,
+          )}
         />
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/5" />
       </div>
 
       {/* Foreground content */}
       <div className="relative z-10 p-6 text-white">
         <div className="flex items-center gap-3 mb-4 justify-between">
           <div className="flex flex-row gap-2 items-center">
-            {icon && <div className="p-2 bg-white/20 rounded-2xl">{icon}</div>}
-            <h3>{title}</h3>
+            {icon && (
+              <div className="p-2 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20">
+                {icon}
+              </div>
+            )}
+            <h3 className="font-semibold">{title}</h3>
           </div>
           {buttonChildren}
         </div>
-        <p className="text-white/90">{description}</p>
-        {bodyChildren && <div className="text-white/80 mt-3">{bodyChildren}</div>}
+        <p className="text-white/85">{description}</p>
+        {bodyChildren && <div className="text-white/75 mt-3">{bodyChildren}</div>}
       </div>
     </Card>
   );
@@ -110,7 +119,7 @@ export const ProjectCard = ({
 }) => (
   <Card
     className={cn(
-      'rounded-3xl overflow-hidden hover:shadow-lg transition-shadow',
+      'rounded-3xl overflow-hidden shadow-none border-0',
       imagePath && 'pt-0',
       className,
     )}
@@ -217,7 +226,7 @@ export const ProfileCard = ({
   stats?: { label: string; value: string }[];
   className?: string;
 }) => (
-  <Card className={cn('rounded-3xl p-4 text-center gap-4', className)}>
+  <Card className={cn('rounded-3xl p-4 text-center gap-4 border-0 shadow-none', className)}>
     <Avatar className="w-20 h-20 mx-auto">
       <AvatarImage src={avatar || '/placeholder.svg'} />
       <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-violet-500 to-blue-500 text-white">
@@ -243,43 +252,7 @@ export const ProfileCard = ({
   </Card>
 );
 
-// Notification Card - For alerts and notifications
-export const NotificationCard = ({
-  title,
-  message,
-  type = 'info',
-  timestamp,
-  className,
-}: {
-  title: string;
-  message: string;
-  type?: 'info' | 'success' | 'warning' | 'error';
-  timestamp?: string;
-  className?: string;
-}) => {
-  const typeStyles = {
-    info: 'border-l-blue-500 bg-blue-50',
-    success: 'border-l-green-500 bg-green-50',
-    warning: 'border-l-orange-500 bg-orange-50',
-    error: 'border-l-red-500 bg-red-50',
-  };
-
-  return (
-    <Card className={cn('rounded-2xl border-l-4', typeStyles[type], className)}>
-      <CardContent className="px-4 py-0">
-        <div className="flex justify-between items-start gap-4">
-          <div>
-            <h4 className="font-semibold">{title}</h4>
-            <p className="text-sm text-muted-foreground mt-1">{message}</p>
-          </div>
-          {timestamp && <span className="text-xs text-muted-foreground/80">{timestamp}</span>}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// List Item Card - For scrollable lists with flexible content
+// List Item Card - For scrollable lists with flexible content (renamed from ListItemCard)
 export const ListItemCard = ({
   children,
   icon = null,
@@ -297,10 +270,10 @@ export const ListItemCard = ({
 }) => (
   <Card
     className={cn(
-      'box-border border-1 shadow-none hover:shadow-sm overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
+      'border-0 shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
       isSelected
-        ? 'bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100'
-        : 'hover:bg-gradient-to-br hover:from-blue-50/50 hover:via-pink-50/50 hover:to-purple-50/50',
+        ? 'border-0 bg-gradient-to-br from-blue-200/80 via-pink-200/80 to-purple-200/80'
+        : 'hover:bg-gradient-to-br hover:from-blue-50 hover:via-pink-50 hover:to-purple-50',
       className,
     )}
     onClick={onClick}
@@ -318,9 +291,7 @@ export const ListItemCard = ({
           </div>
         )}
 
-        {/* Fills all remaining width */}
         <div className={cn('flex-1 min-w-0', !icon && 'pl-1')}>
-          {/* Force children to span the full width */}
           <div className="w-full max-w-full">{children}</div>
         </div>
       </div>
@@ -328,28 +299,8 @@ export const ListItemCard = ({
   </Card>
 );
 
-// Content Section - Sectioned card component for organized content
-export const ContentSection = ({
-  header,
-  children,
-  className,
-  headerGradient = 'from-blue-600 via-violet-600 to-blue-700',
-}: {
-  header: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-  headerGradient?: string;
-}) => (
-  <div className={cn('rounded-3xl bg-white overflow-hidden', className)}>
-    <div className={cn('bg-gradient-to-r text-white px-4 py-3', headerGradient)}>
-      {typeof header === 'string' ? <h4>{header}</h4> : header}
-    </div>
-    <div className="p-4">{children}</div>
-  </div>
-);
-
-// Tag List - For displaying badges/tags
-export const TagList = ({ tags, className }: { tags: string[]; className?: string }) => (
+// Badge Group - For displaying badges/tags (renamed from TagList)
+export const BadgeGroup = ({ tags, className }: { tags: string[]; className?: string }) => (
   <div className={cn('flex flex-wrap gap-2', className)}>
     {tags.map((tag, index) => (
       <Badge key={index} variant="outline" className="rounded-full">
@@ -357,4 +308,55 @@ export const TagList = ({ tags, className }: { tags: string[]; className?: strin
       </Badge>
     ))}
   </div>
+);
+
+// Main Card - For displaying main content with header and actions
+export const MainCard = ({
+  title,
+  subtitle,
+  headerActions,
+  children,
+  className,
+  headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
+  neutralHeader = false, // Added neutralHeader parameter
+}: {
+  title: string;
+  subtitle?: string;
+  headerActions?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  headerGradient?: string;
+  neutralHeader?: boolean; // New prop for neutral header styling
+}) => (
+  <Card className={cn('rounded-3xl p-0 border-0 overflow-hidden shadow-none gap-2', className)}>
+    <CardHeader className="p-0">
+      <div
+        className={cn(
+          'px-6 py-4 relative overflow-hidden',
+          neutralHeader
+            ? 'bg-white text-gray-900'
+            : `bg-gradient-to-r text-white ${headerGradient}`,
+        )}
+      >
+        {!neutralHeader && (
+          <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
+        )}
+
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-balance">{title}</h3>
+            {subtitle && (
+              <p className={cn('text-sm mt-1', neutralHeader ? 'text-gray-600' : 'text-white/80')}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+          {headerActions && <div className="flex items-center gap-2">{headerActions}</div>}
+        </div>
+      </div>
+    </CardHeader>
+
+    {/* Content area */}
+    <CardContent className="p-4">{children}</CardContent>
+  </Card>
 );
