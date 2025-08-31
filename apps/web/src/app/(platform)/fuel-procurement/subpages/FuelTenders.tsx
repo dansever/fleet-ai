@@ -12,7 +12,7 @@ import { ContentSection } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { AlertCircle, CalendarIcon, Pencil, Plus, TrashIcon } from 'lucide-react';
+import { AlertCircle, CalendarIcon, Eye, Pencil, Plus, TrashIcon } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
@@ -148,7 +148,8 @@ const FuelTendersPage = memo(function FuelTendersPage() {
           />
           <div className="flex gap-2">
             <TenderDialog
-              trigger={<Button intent="add" icon={Plus} text="Add Tender" />}
+              key="add-tender"
+              trigger={<Button intent="secondary" icon={Plus} text="Add Tender" />}
               tender={null}
               airportId={selectedAirport.id}
               onChange={handleTenderAdded}
@@ -170,7 +171,16 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                     {/* Buttons */}
                     <div className="flex gap-2">
                       <TenderDialog
-                        trigger={<Button intent="secondaryInverted" icon={Pencil} text="Edit" />}
+                        key={`view-tender-${currentTender.id}`}
+                        trigger={<Button intent="secondaryInverted" icon={Eye} />}
+                        tender={currentTender}
+                        airportId={selectedAirport.id}
+                        onChange={handleTenderUpdated}
+                        DialogType="view"
+                      />
+                      <TenderDialog
+                        key={`edit-tender-${currentTender.id}`}
+                        trigger={<Button intent="secondaryInverted" icon={Pencil} />}
                         tender={currentTender}
                         airportId={selectedAirport.id}
                         onChange={handleTenderUpdated}
@@ -181,7 +191,6 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                           <Button
                             intent="secondary"
                             icon={TrashIcon}
-                            text="Delete"
                             className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
                           />
                         }

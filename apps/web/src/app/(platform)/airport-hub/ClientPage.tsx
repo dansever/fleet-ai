@@ -11,9 +11,9 @@ import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
 import ContactsAndProviders from './subpages/ContactsAndProviders';
 import ManageAirport from './subpages/ManageAirport';
-import ServiceContracts from './subpages/ServiceContracts';
+import ServiceContracts from './subpages/ManageContracts';
 
-type TabValue = 'service-agreements' | 'contacts-and-providers' | 'manage-airport';
+type TabValue = 'manage-contracts' | 'contacts-and-providers' | 'manage-airport';
 
 export default function AirportHubClientPage() {
   const {
@@ -80,7 +80,7 @@ export default function AirportHubClientPage() {
 }
 
 function MainContentSection() {
-  const [selectedTab, setSelectedTab] = useState<TabValue>('service-agreements');
+  const [selectedTab, setSelectedTab] = useState<TabValue>('manage-contracts');
   const { selectedAirport } = useAirportHub();
 
   if (!selectedAirport) {

@@ -6,22 +6,32 @@ import { cn } from '@/lib/utils';
 import { TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import type React from 'react';
+import { useMemo } from 'react';
+
+// Gradient palettes for FeatureCard
+export enum GradientPalette {
+  PinkPurpleBlue = 'PinkPurpleBlue',
+  RoseFuchsiaIndigo = 'RoseFuchsiaIndigo',
+  SkyIndigoViolet = 'SkyIndigoViolet',
+  VioletPinkRose = 'VioletPinkRose',
+  CyanBluePurple = 'CyanBluePurple',
+}
+
+const paletteToClasses: Record<GradientPalette, string> = {
+  [GradientPalette.PinkPurpleBlue]: 'from-pink-600 via-purple-500 to-blue-600',
+  [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-600 via-fuchsia-500 to-indigo-600',
+  [GradientPalette.SkyIndigoViolet]: 'from-sky-600 via-indigo-500 to-violet-600',
+  [GradientPalette.VioletPinkRose]: 'from-violet-600 via-pink-500 to-rose-600',
+  [GradientPalette.CyanBluePurple]: 'from-cyan-600 via-blue-500 to-purple-600',
+};
 
 export interface BaseCardProps {
   className?: string;
   children?: React.ReactNode;
 }
 
-// Feature Card - For showcasing features or services
-export const BaseCard = ({
-  className,
-  children,
-}: {
-  title: string;
-  description: string;
-  className?: string;
-  children?: React.ReactNode;
-}) => (
+// Surface Card - Minimal base surface for custom layouts
+export const BaseCard = ({ className, children }: BaseCardProps) => (
   <Card className={cn('rounded-3xl shadow-none border-0 overflow-hidden', className)}>
     {children}
   </Card>
@@ -32,7 +42,7 @@ export const FeatureCard = ({
   title,
   description,
   icon = null,
-  gradient = 'from-violet-800 to-blue-700',
+  palette = GradientPalette.VioletPinkRose,
   className,
   buttonChildren,
   bodyChildren,
@@ -40,24 +50,41 @@ export const FeatureCard = ({
   title: string;
   description: string;
   icon?: React.ReactNode;
-  gradient?: string;
+  palette?: GradientPalette;
   className?: string;
   buttonChildren?: React.ReactNode;
   bodyChildren?: React.ReactNode;
-}) => (
-  <Card className={cn('rounded-3xl border-0 overflow-hidden p-0', className)}>
-    <div className={cn('p-6 text-white bg-gradient-to-r', gradient)}>
-      <div className="flex items-center gap-3 mb-4 justify-between">
-        <div className="flex flex-row gap-2 items-center">
-          {icon && <div className="p-2 bg-white/20 rounded-2xl">{icon}</div>}
-          <h3>{title}</h3>
-        </div>
-        {buttonChildren}
+}) => {
+  // Choose classes based on enum or manual override; no randomization
+  const chosenGradient = useMemo(() => {
+    return paletteToClasses[palette] ?? paletteToClasses[GradientPalette.VioletPinkRose];
+  }, [palette]);
+
+  return (
+    <Card className={cn('rounded-3xl border-0 overflow-hidden p-0 relative', className)}>
+      {/* Background layers */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div
+          className={cn('absolute -inset-24 blur-3xl opacity-70 bg-gradient-to-br', chosenGradient)}
+        />
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-sm" />
       </div>
-      {bodyChildren && <div className="text-white/80">{bodyChildren}</div>}
-    </div>
-  </Card>
-);
+
+      {/* Foreground content */}
+      <div className="relative z-10 p-6 text-white">
+        <div className="flex items-center gap-3 mb-4 justify-between">
+          <div className="flex flex-row gap-2 items-center">
+            {icon && <div className="p-2 bg-white/20 rounded-2xl">{icon}</div>}
+            <h3>{title}</h3>
+          </div>
+          {buttonChildren}
+        </div>
+        <p className="text-white/90">{description}</p>
+        {bodyChildren && <div className="text-white/80 mt-3">{bodyChildren}</div>}
+      </div>
+    </Card>
+  );
+};
 
 // Project Card - For displaying projects or portfolio items
 export const ProjectCard = ({
@@ -134,7 +161,7 @@ export const ProjectCard = ({
 );
 
 // Stats Card - For displaying metrics and statistics
-export const StatsCard = ({
+export const MetricCard = ({
   title,
   value,
   change,
@@ -190,8 +217,8 @@ export const ProfileCard = ({
   stats?: { label: string; value: string }[];
   className?: string;
 }) => (
-  <Card className={cn('rounded-3xl p-6 text-center', className)}>
-    <Avatar className="w-20 h-20 mx-auto mb-4">
+  <Card className={cn('rounded-3xl p-4 text-center gap-4', className)}>
+    <Avatar className="w-20 h-20 mx-auto">
       <AvatarImage src={avatar || '/placeholder.svg'} />
       <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-violet-500 to-blue-500 text-white">
         {name
@@ -201,10 +228,10 @@ export const ProfileCard = ({
       </AvatarFallback>
     </Avatar>
     <h3>{name}</h3>
-    <p className="text-muted-foreground mb-3">{role}</p>
+    <p className="text-muted-foreground">{role}</p>
     {bio && <p className="text-sm text-muted-foreground mb-4">{bio}</p>}
     {stats && (
-      <div className="flex justify-center gap-6 pt-4 border-t">
+      <div className="flex justify-center pt-4 border-t">
         {stats.map((stat, index) => (
           <div key={index} className="text-center">
             <p className="text-lg font-bold">{stat.value}</p>
@@ -251,16 +278,6 @@ export const NotificationCard = ({
     </Card>
   );
 };
-
-// StatusBadge component for person cards
-const StatusBadge = ({ status }: { status: string }) => (
-  <Badge
-    variant={status === 'active' ? 'default' : 'secondary'}
-    className={status === 'active' ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
-  >
-    {status}
-  </Badge>
-);
 
 // List Item Card - For scrollable lists with flexible content
 export const ListItemCard = ({
@@ -323,7 +340,7 @@ export const ContentSection = ({
   className?: string;
   headerGradient?: string;
 }) => (
-  <div className={cn('rounded-2xl border border-gray-200 overflow-hidden', className)}>
+  <div className={cn('rounded-3xl bg-white overflow-hidden', className)}>
     <div className={cn('bg-gradient-to-r text-white px-4 py-3', headerGradient)}>
       {typeof header === 'string' ? <h4>{header}</h4> : header}
     </div>

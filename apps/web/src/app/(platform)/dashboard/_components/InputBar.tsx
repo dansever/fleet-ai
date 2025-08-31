@@ -2,7 +2,7 @@
 
 import { simpleLLM } from '@/services/ai/llm-client';
 import { Button } from '@/stories/Button/Button';
-import { FeatureCard } from '@/stories/Card/Card';
+import { FeatureCard, GradientPalette } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
 import { LLMResponse } from '@/types/llm';
 import { Bot, RefreshCcw } from 'lucide-react';
@@ -54,7 +54,7 @@ export default function InputBar() {
         title="AI Response"
         description={response?.content || 'No response yet'}
         icon={<Bot />}
-        gradient="linear-to-r from-blue-500 to-pink-300"
+        palette={GradientPalette.SkyIndigoViolet}
         className="flex-1 min-h-10"
         buttonChildren={
           <Button

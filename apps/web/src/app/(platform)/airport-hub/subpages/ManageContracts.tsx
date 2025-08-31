@@ -1,10 +1,10 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
-import { ServiceContract } from '@/drizzle/types';
+import { Contract } from '@/drizzle/types';
 import ServiceContractDialog from '@/features/service-contracts/ServiceContractDialog';
 import { createRandomServiceContract } from '@/features/service-contracts/createRandomServiceContract';
 import { Button } from '@/stories/Button/Button';
-import { FeatureCard, ProjectCard, StatsCard } from '@/stories/Card/Card';
+import { FeatureCard, GradientPalette, MetricCard, ProjectCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { calculateProgress } from '@/utils/dateUtils';
 import {
@@ -21,7 +21,7 @@ import {
 import { useMemo } from 'react';
 import { useAirportHub } from '../ContextProvider';
 
-export default function ServiceContracts() {
+export default function ManageContracts() {
   const {
     addServiceContract,
     selectedAirport,
@@ -47,7 +47,7 @@ export default function ServiceContracts() {
       acc[type].push(contract);
       return acc;
     },
-    {} as Record<string, ServiceContract[]>,
+    {} as Record<string, Contract[]>,
   );
 
   // Get all contract types to ensure consistent ordering
@@ -104,28 +104,28 @@ export default function ServiceContracts() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <StatsCard
+            <MetricCard
               title="Active Contracts"
               value={contractStats.active}
               change={`${contractStats.total} total`}
               icon={<CheckCircle className="w-6 h-6 text-green-600" />}
               trend="neutral"
             />
-            <StatsCard
+            <MetricCard
               title="Expiring Soon"
               value={contractStats.expiringSoon}
               change="Next 30 days"
               icon={<AlertTriangle className="w-6 h-6 text-orange-600" />}
               trend={contractStats.expiringSoon > 0 ? 'down' : 'neutral'}
             />
-            <StatsCard
+            <MetricCard
               title="Service Types"
               value={contractStats.contractsByType.length}
               change="Categories"
               icon={<Building2 className="w-6 h-6 text-blue-600" />}
               trend="neutral"
             />
-            <StatsCard
+            <MetricCard
               title="AI Monitoring"
               value="24/7"
               change="Active monitoring"
@@ -139,7 +139,7 @@ export default function ServiceContracts() {
             title="AI-Powered Contract Intelligence"
             description="FleetAI monitors your contracts for compliance, cost optimization, and renewal alerts"
             icon={<Zap className="w-6 h-6" />}
-            gradient="from-blue-600 via-purple-600 to-blue-700"
+            palette={GradientPalette.VioletPinkRose}
             buttonChildren={
               <Button
                 intent="ghost"
@@ -221,7 +221,7 @@ export default function ServiceContracts() {
                 </span>
               </div>
               <div className="grid grid-cols-2  gap-4">
-                {contractsOfType.map((contract) => (
+                {contractsOfType.map((contract: Contract) => (
                   <ProjectCard
                     key={contract.id}
                     badgeText={

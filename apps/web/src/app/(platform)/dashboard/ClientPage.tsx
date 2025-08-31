@@ -9,7 +9,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Airport, Rfq } from '@/drizzle/types';
-import { BaseCard, StatsCard } from '@/stories/Card/Card';
+import { BaseCard, MetricCard } from '@/stories/Card/Card';
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -111,7 +111,7 @@ export default function DashboardClientPage({
       {/* Executive KPI Metrics */}
       <div className="col-span-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {executiveMetrics.map((metric) => (
-          <StatsCard
+          <MetricCard
             key={metric.title}
             title={metric.title}
             value={metric.value}
@@ -132,7 +132,7 @@ export default function DashboardClientPage({
 
       <div className="col-span-4 flex flex-col gap-4">
         {/* Charts and Analytics */}
-        <BaseCard title="Monthly Spend vs Budget" description="Monthly Spend vs Budget">
+        <BaseCard>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />

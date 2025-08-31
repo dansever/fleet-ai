@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/stories/Button/Button';
-import { ContentSection, StatsCard } from '@/stories/Card/Card';
+import { ContentSection, MetricCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { Building2, Info, Pencil, Plane, Save, X } from 'lucide-react';
 import { useState } from 'react';
@@ -65,20 +65,20 @@ export default function ManageAirport() {
 
       {/* Airport Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatsCard
+        <MetricCard
           title="Total Contracts"
           value={airportStats.totalContracts}
           icon={<Building2 className="w-6 h-6 text-blue-600" />}
           trend="neutral"
         />
-        <StatsCard
+        <MetricCard
           title="Active Contracts"
           value={airportStats.activeContracts}
           change={`${airportStats.totalContracts - airportStats.activeContracts} expired`}
           icon={<Plane className="w-6 h-6 text-green-600" />}
           trend={airportStats.activeContracts > 0 ? 'up' : 'neutral'}
         />
-        <StatsCard
+        <MetricCard
           title="Airport Type"
           value={airportStats.hubStatus}
           icon={

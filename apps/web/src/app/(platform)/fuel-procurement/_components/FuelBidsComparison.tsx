@@ -1,7 +1,8 @@
 'use client';
 
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { NewFuelBid } from '@/drizzle/types';
+import { FuelBid, NewFuelBid } from '@/drizzle/types';
+import { createRandomFuelBid } from '@/features/fuel/bid/createRandomBid';
 import { convertPydanticToFuelBid } from '@/features/fuel/bid/pydanticConverter';
 import { createFuelBid, extractFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
@@ -26,6 +27,7 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
   const { selectedTender, fuelBids, setFuelBids, addFuelBid } = useFuelProcurement();
   const [newBid, setNewBid] = useState<NewFuelBid | null>(null);
   const fuelBidColumns = useFuelBidColumns();
+  const [uploadFuelBidPopoverOpen, setUploadFuelBidPopoverOpen] = useState(false);
 
   if (!selectedTender) {
     return null;
@@ -45,8 +47,8 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
 
   return (
     <BaseCard
-      title="Fuel Bids"
-      description={`Compare and evaluate fuel bids for ${selectedTender?.title}`}
+    // header="Fuel Bids"
+    // subheader={`Compare and evaluate fuel bids for ${selectedTender?.title}`}
     >
       <CardHeader className="flex items-center justify-between">
         <div>
@@ -69,10 +71,26 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
             />
           )}
           <FileUploadPopover
+            open={uploadFuelBidPopoverOpen}
+            onOpenChange={setUploadFuelBidPopoverOpen}
             triggerButtonIntent="add"
             triggerButtonText="Upload Bid"
+            buttonSize="md"
             onSend={handleSendFuelBidFile}
-          />
+          >
+            <Button
+              intent="ghost"
+              text="Or generate random Bid"
+              size="sm"
+              className="text-gray-500"
+              onClick={async () => {
+                const bid = await createRandomFuelBid(selectedTender);
+                addFuelBid(bid as FuelBid);
+                console.log('Time to close the popover');
+                setUploadFuelBidPopoverOpen(false);
+              }}
+            />
+          </FileUploadPopover>
         </div>
       </CardHeader>
       <CardContent>

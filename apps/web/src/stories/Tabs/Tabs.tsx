@@ -13,17 +13,17 @@ export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: Ta
   <TabsUI
     defaultValue={selectedTab}
     onValueChange={onTabChange}
-    className={cn('w-full gap-4 p-2', className)}
+    className={cn('w-full gap-4', className)}
   >
-    <TabsList className="w-full flex bg-muted/50 rounded-2xl p-1.5 h-12 gap-2">
+    <TabsList className="w-full flex bg-white rounded-2xl p-1 h-12 gap-2">
       {tabs.map((tab) => (
         <TabsTrigger
           key={tab.value}
           value={tab.value}
           className={cn(
-            'cursor-pointer rounded-xl transition-all duration-300',
-            'text-base text-muted-foreground/60 font-bold hover:bg-muted/80',
-            'data-[state=active]:bg-background data-[state=active]:text-foreground',
+            'cursor-pointer rounded-xl transition-all duration-400',
+            'text-base text-muted-foreground/60 font-bold hover:bg-secondary/10',
+            'data-[state=active]:bg-secondary data-[state=active]:text-white',
             'data-[state=active]:shadow-none',
           )}
         >

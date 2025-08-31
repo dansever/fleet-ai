@@ -7,7 +7,7 @@ import { twMerge } from 'tailwind-merge';
 const buttonStyles = cva(
   [
     'inline-flex items-center justify-center',
-    'rounded-2xl',
+    'rounded-2xl shadow-sm hover:shadow-md ',
     'transition-colors duration-200',
     'font-normal text-center',
     'cursor-pointer',
@@ -17,21 +17,24 @@ const buttonStyles = cva(
   {
     variants: {
       intent: {
+        // Primary action - main call-to-action, most important actions
         primary:
-          'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-primary-foreground',
-        secondary: 'border-1 border-primary/20 hover:bg-muted/70 text-primary',
-        secondaryInverted: 'bg-white/20 hover:bg-muted/40 text-white',
+          'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white',
+        // Secondary action - less prominent, alternative actions
+        secondary: 'bg-white border border-primary/20  text-primary',
+        // Secondary inverted - for use on dark/colored backgrounds
+        secondaryInverted: 'bg-white/20 hover:bg-white/30 text-white border border-white/20',
+        // Success action - confirmations, completions, positive outcomes
         success:
           'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white',
+        // Warning action - caution required, potentially risky actions
         warning:
           'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white',
+        // Danger action - destructive actions, deletions, critical operations
         danger:
           'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white',
-        ghost: 'bg-transparent hover:bg-muted/40 border-0 border-muted text-primary/70',
-        info: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-primary-foreground',
-        add: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-600 hover:to-emerald-600 text-white',
-        favorite: 'border border-pink-200 text-pink-600 hover:bg-pink-50',
-        edit: 'border border-blue-200 text-blue-600 hover:bg-blue-50',
+        // Ghost action - minimal prominence, tertiary actions, icon buttons
+        ghost: 'bg-transparent hover:bg-muted/80 text-primary/70 shadow-none hover:shadow-none',
       },
       size: {
         sm: 'h-8 p-3 text-sm',
@@ -58,11 +61,7 @@ export interface ButtonProps
     | 'success'
     | 'warning'
     | 'danger'
-    | 'ghost'
-    | 'info'
-    | 'add'
-    | 'favorite'
-    | 'edit';
+    | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   type?: 'button' | 'submit' | 'reset';
   text?: string | null; // The text to display in the button

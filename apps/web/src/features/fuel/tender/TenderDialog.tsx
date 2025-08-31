@@ -12,7 +12,7 @@ import {
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function TenderDialog({
@@ -28,24 +28,27 @@ export default function TenderDialog({
   onChange: (tender: FuelTender) => void;
   DialogType: 'add' | 'edit' | 'view';
 }) {
-  const [formData, setFormData] = useState({
-    title: tender?.title || null,
-    description: tender?.description || null,
-    fuelType: tender?.fuelType || null,
-    baseCurrency: tender?.baseCurrency || null,
-    baseUom: tender?.baseUom || null,
-    biddingStarts: tender?.biddingStarts || null,
-    biddingEnds: tender?.biddingEnds || null,
-    deliveryStarts: tender?.deliveryStarts || null,
-    deliveryEnds: tender?.deliveryEnds || null,
-  });
-  const [isSaving, setIsSaving] = useState(false);
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
-  // Update formData when tender prop changes
-  useEffect(() => {
-    setFormData({
+  // Helper function to get initial form data based on dialog type
+  const getInitialFormData = useCallback(() => {
+    if (DialogType === 'add') {
+      // For add mode, always start with empty form regardless of tender prop
+      return {
+        title: null,
+        description: null,
+        fuelType: null,
+        baseCurrency: null,
+        baseUom: null,
+        biddingStarts: null,
+        biddingEnds: null,
+        deliveryStarts: null,
+        deliveryEnds: null,
+      };
+    }
+    // For edit/view modes, populate from tender
+    return {
       title: tender?.title || null,
       description: tender?.description || null,
       fuelType: tender?.fuelType || null,
@@ -55,15 +58,21 @@ export default function TenderDialog({
       biddingEnds: tender?.biddingEnds || null,
       deliveryStarts: tender?.deliveryStarts || null,
       deliveryEnds: tender?.deliveryEnds || null,
-    });
-  }, [tender]);
+    };
+  }, [DialogType, tender]);
+
+  const [formData, setFormData] = useState(() => getInitialFormData());
+
+  // Update formData when DialogType changes (most important) or tender changes
+  useEffect(() => {
+    setFormData(getInitialFormData());
+  }, [DialogType, tender]);
 
   const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       let savedTender: FuelTender;
 
@@ -116,40 +125,31 @@ export default function TenderDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} tender`);
       console.error(`Error ${action}ing tender:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
   const handleCancel = () => {
-    if (isAdd) {
-      setFormData({
-        title: null,
-        description: null,
-        fuelType: null,
-        baseCurrency: null,
-        baseUom: null,
-        biddingStarts: null,
-        biddingEnds: null,
-        deliveryStarts: null,
-        deliveryEnds: null,
-      });
-    }
+    // Reset form data to initial state based on current dialog type
+    setFormData(getInitialFormData());
   };
 
-  const triggerText = isAdd ? 'Add Tender' : isEdit ? 'Edit' : `View ${tender?.title || 'Tender'}`;
+  const handleReset = () => {
+    // Reset form to initial empty state for add mode
+    setFormData(getInitialFormData());
+  };
+
   const dialogTitle = isAdd ? 'Add New Tender' : tender?.title || 'Tender Details';
-  const saveButtonText = isAdd ? 'Create Tender' : 'Save Changes';
 
   return (
     <DetailDialog
       trigger={trigger}
       headerGradient="from-orange-500 to-orange-500"
       title={dialogTitle}
+      DialogType={DialogType}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      onReset={handleReset}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
