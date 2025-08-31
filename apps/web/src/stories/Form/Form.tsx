@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // styles.ts
 export const inputBorderClasses = cn(
@@ -132,8 +132,8 @@ export const ModernTextarea = ({
     autoComplete="off"
     className={cn(
       inputBorderClasses,
-      'rounded-lg',
-      'min-h-[60px] max-h-[160px]',
+      'rounded-xl',
+      'min-h-[30px] max-h-[160px]',
       'placeholder:text-gray-400',
       className,
     )}
@@ -154,24 +154,17 @@ export const ModernSelect = ({
   [key: string]: unknown;
 }) => {
   const selected = options.find((opt) => opt.value === props.value);
-
   return (
     <Select {...props}>
-      <SelectTrigger
-        className={cn(
-          'rounded-xl border-2 focus:border-primary focus:ring-0',
-          inputBorderClasses,
-          triggerClassName,
-        )}
-      >
+      <SelectTrigger className={cn('rounded-xl bg-white', triggerClassName)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="rounded-2xl">
+      <SelectContent className="rounded-2xl bg-white">
         {options.map((option) => (
           <SelectItem
             key={option.value}
             value={option.value}
-            className="whitespace-normal py-2 leading-snug text-left min-h-[40px]"
+            className="whitespace-normal py-2 leading-snug text-left min-h-[40px] rounded-lg"
           >
             {option.label}
           </SelectItem>
@@ -210,6 +203,11 @@ export const DatePicker = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(value ? new Date(value) : undefined);
+
+  // Sync internal date state when value prop changes
+  useEffect(() => {
+    setDate(value ? new Date(value) : undefined);
+  }, [value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -10,7 +10,7 @@ export const CURRENCY_MAP: Record<string, CurrencyInfo> = {
   EUR: { code: 'EUR', name: 'Euro', symbol: '€', display: 'Euro (€)' },
   GBP: { code: 'GBP', name: 'British Pound', symbol: '£', display: 'British Pound (£)' },
   JPY: { code: 'JPY', name: 'Japanese Yen', symbol: '¥', display: 'Japanese Yen (¥)' },
-  NIS: { code: 'NIS', name: 'New Israeli Shekel', symbol: '₪', display: 'New Israeli Shekel (₪)' },
+  NIS: { code: 'NIS', name: 'Israeli Shekel', symbol: '₪', display: 'Israeli Shekel (₪)' },
   INR: { code: 'INR', name: 'Indian Rupee', symbol: '₹', display: 'Indian Rupee (₹)' },
   AUD: { code: 'AUD', name: 'Australian Dollar', symbol: '$', display: 'Australian Dollar ($)' },
   CAD: { code: 'CAD', name: 'Canadian Dollar', symbol: '$', display: 'Canadian Dollar ($)' },

@@ -52,7 +52,7 @@ export const KeyValuePair = ({
           value={value ? value : ''}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange?.(e.target.value)}
           name={name}
-          className="max-w-3/5 resize-none leading-tight whitespace-pre-wrap text-left break-words min-h-[40px]"
+          className="max-w-3/5 resize-none leading-tight whitespace-pre-wrap text-left break-words"
         />
       ) : valueType === 'number' ? (
         <ModernInput
@@ -75,7 +75,7 @@ export const KeyValuePair = ({
           value={(value as string) ?? ''}
           onChange={(value: string) => onChange?.(value)}
           name={name}
-          triggerClassName="max-w-3/5 flex-1"
+          triggerClassName="max-w-3/5 flex-1 text-sm"
         />
       ) : valueType === 'select' ? (
         <ModernSelect

@@ -29,7 +29,7 @@ const buttonStyles = cva(
           'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white',
         ghost: 'bg-transparent hover:bg-muted/40 border-0 border-muted text-primary/70',
         info: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-primary-foreground',
-        add: 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white',
+        add: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-600 hover:to-emerald-600 text-white',
         favorite: 'border border-pink-200 text-pink-600 hover:bg-pink-50',
         edit: 'border border-blue-200 text-blue-600 hover:bg-blue-50',
       },
