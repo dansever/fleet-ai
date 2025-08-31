@@ -70,7 +70,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
 
   return (
     <div className="min-h-screen p-4">
-      <div className="max-w-7xl mx-auto space-y-4">
+      <div className="max-w-8xl mx-auto space-y-4">
         {/* Error State */}
         {errors.tenders && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">

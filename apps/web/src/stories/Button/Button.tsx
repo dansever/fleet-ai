@@ -23,7 +23,7 @@ const buttonStyles = cva(
         // Secondary action - less prominent, alternative actions
         secondary: 'bg-white border border-primary/20  text-primary',
         // Secondary inverted - for use on dark/colored backgrounds
-        secondaryInverted: 'bg-white/20 hover:bg-white/30 text-white border border-white/20',
+        secondaryInverted: 'bg-white/20 hover:bg-white/30 text-white',
         // Success action - confirmations, completions, positive outcomes
         success:
           'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white',

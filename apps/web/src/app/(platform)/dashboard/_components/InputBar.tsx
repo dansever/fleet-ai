@@ -58,7 +58,7 @@ export default function InputBar() {
         className="flex-1 min-h-10"
         buttonChildren={
           <Button
-            intent="ghost"
+            intent="secondaryInverted"
             icon={RefreshCcw}
             onClick={() => setResponse(null)}
             className={`${isLoading && 'animate-spin'}`}

@@ -181,10 +181,10 @@ export default function ManageContracts() {
           onSend={() => {}}
           accept="application/pdf"
           maxSize={10}
-          triggerButtonIntent="add"
-          triggerButtonText="Upload Contract"
+          triggerIntent="secondary"
+          triggerText="Upload Contract"
           popoverContentAlign="end"
-          buttonSize="md"
+          triggerSize="md"
         >
           <div className="flex flex-col gap-2 text-sm">
             <Button intent="secondary" text="Manually Add Contract" size="sm" onClick={() => {}} />

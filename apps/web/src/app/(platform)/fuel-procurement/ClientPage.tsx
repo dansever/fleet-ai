@@ -7,6 +7,7 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useFuelProcurement } from './ContextProvider';
+import FuelAgreements from './subpages/FuelAgreements';
 import FuelTendersPage from './subpages/FuelTenders';
 
 type TabValue = 'fuel-tenders' | 'fuel-agreements';
@@ -86,7 +87,9 @@ function MainContentSection() {
       <TabsContent value="fuel-tenders">
         <FuelTendersPage />
       </TabsContent>
-      <TabsContent value="fuel-agreements">Fuel Agreements</TabsContent>
+      <TabsContent value="fuel-agreements">
+        <FuelAgreements />
+      </TabsContent>
     </Tabs>
   );
 }

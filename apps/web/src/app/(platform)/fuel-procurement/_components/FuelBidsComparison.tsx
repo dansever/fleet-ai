@@ -73,9 +73,9 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
           <FileUploadPopover
             open={uploadFuelBidPopoverOpen}
             onOpenChange={setUploadFuelBidPopoverOpen}
-            triggerButtonIntent="add"
-            triggerButtonText="Upload Bid"
-            buttonSize="md"
+            triggerIntent="secondary"
+            triggerText="Upload Bid"
+            triggerSize="md"
             onSend={handleSendFuelBidFile}
           >
             <Button

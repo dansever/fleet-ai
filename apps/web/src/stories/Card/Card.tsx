@@ -20,7 +20,7 @@ export enum GradientPalette {
 const paletteToClasses: Record<GradientPalette, string> = {
   [GradientPalette.PinkPurpleBlue]: 'from-pink-600 via-purple-500 to-blue-600',
   [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-600 via-fuchsia-500 to-indigo-600',
-  [GradientPalette.SkyIndigoViolet]: 'from-sky-600 via-indigo-500 to-violet-600',
+  [GradientPalette.SkyIndigoViolet]: 'from-sky-800 via-indigo-600 to-violet-700',
   [GradientPalette.VioletPinkRose]: 'from-violet-600 via-pink-500 to-rose-600',
   [GradientPalette.CyanBluePurple]: 'from-cyan-600 via-blue-500 to-purple-600',
 };
@@ -65,7 +65,7 @@ export const FeatureCard = ({
       {/* Background layers */}
       <div className="absolute inset-0 pointer-events-none">
         <div
-          className={cn('absolute -inset-24 blur-3xl opacity-70 bg-gradient-to-br', chosenGradient)}
+          className={cn('absolute -inset-24 blur-lg opacity-80 bg-gradient-to-br', chosenGradient)}
         />
         <div className="absolute inset-0 bg-white/20 backdrop-blur-sm" />
       </div>
@@ -299,8 +299,8 @@ export const ListItemCard = ({
     className={cn(
       'box-border border-1 shadow-none hover:shadow-sm overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
       isSelected
-        ? 'border-green-500 bg-gradient-to-br from-green-100 to-green-50'
-        : 'border-slate-300 hover:bg-gray-50',
+        ? 'bg-gradient-to-br from-blue-100 to-emerald-100 to-green-100'
+        : 'hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-emerald-50/50 hover:to-green-50/50',
       className,
     )}
     onClick={onClick}

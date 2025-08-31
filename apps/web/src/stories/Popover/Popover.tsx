@@ -2,7 +2,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
 import { ReactNode, useCallback, useRef, useState } from 'react';
-import { Button } from '../Button/Button';
+import { Button, ButtonProps } from '../Button/Button';
 import { ContentSection } from '../Card/Card';
 
 // Confirmation Popover Component for direct actions
@@ -105,7 +105,16 @@ export const ConfirmationPopover = ({
               disabled={submitting}
             />
             <Button
-              intent={popoverIntent}
+              intent={
+                popoverIntent as
+                  | 'primary'
+                  | 'secondary'
+                  | 'ghost'
+                  | 'secondaryInverted'
+                  | 'success'
+                  | 'danger'
+                  | 'warning'
+              }
               onClick={handleConfirm}
               size="sm"
               text={confirmText}
@@ -123,11 +132,9 @@ export interface FileUploadPopoverProps {
   accept?: string;
   maxSize?: number; // in MB
   className?: string;
-
-  // Trigger Button
-  triggerButtonIntent?: 'primary' | 'secondary' | 'ghost' | 'add';
-  triggerButtonText?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
+  triggerIntent?: ButtonProps['intent'];
+  triggerText?: string;
+  triggerSize?: ButtonProps['size'];
 
   // Popover Behavior
   open?: boolean;
@@ -143,10 +150,10 @@ export const FileUploadPopover = ({
   accept = '*/*',
   maxSize = 10,
   className,
-  triggerButtonIntent = 'primary',
-  triggerButtonText = 'Upload',
+  triggerIntent = 'primary',
+  triggerText = 'Upload',
+  triggerSize = 'md',
   popoverContentAlign = 'end',
-  buttonSize = 'md',
   open, // controlled
   onOpenChange, // controlled
   children,
@@ -229,12 +236,7 @@ export const FileUploadPopover = ({
     <div className={cn('space-y-3 flex flex-row gap-2', className)}>
       <Popover open={isOpen} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            intent={triggerButtonIntent}
-            text={triggerButtonText}
-            icon={Upload}
-            size={buttonSize}
-          />
+          <Button intent={triggerIntent} text={triggerText} icon={Upload} size={triggerSize} />
         </PopoverTrigger>
 
         <PopoverContent
