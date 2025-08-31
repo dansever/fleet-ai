@@ -3,8 +3,8 @@ import {
   deleteFuelBid,
   getFuelBidsByTender,
   updateFuelBid,
-} from '@/db/fuel-bids/db-actions';
-import { getFuelTenderById } from '@/db/fuel-tenders/db-actions';
+} from '@/db/fuel/fuel-bids/db-actions';
+import { getFuelTenderById } from '@/db/fuel/fuel-tenders/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';

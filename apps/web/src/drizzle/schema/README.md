@@ -20,25 +20,25 @@ The database is organized into five main domains:
 
 **Purpose**: Multi-tenant organization management  
 **Key Fields**: `clerkOrgId`, `name`, usage tracking fields  
-**Relationships**: Parent to all other entities via `orgId`
+**Cardinality & Relations**: One organization has many `users`, `airports`, `vendors`, `contracts`, `invoices`, `fuel_tenders`.  
+**Unique**: `clerkOrgId`  
+**On delete**: Cascades to all child records
 
 ### `users`
 
 **Purpose**: User accounts within organizations  
 **Key Fields**: `clerkUserId`, `orgId`, `firstName`, `lastName`, `email`  
-**Relationships**:
-
-- Belongs to `organizations`
-- Creates `rfqs`
+**Cardinality & Relations**: Many users belong to one `organization`; one user has many `rfqs`.  
+**Unique**: `clerkUserId`  
+**On delete**: Organization → users (cascade); user → `rfqs` (cascade); `fuel_bids.decisionByUserId` set null on user delete
 
 ### `airports`
 
 **Purpose**: Airport/location master data  
 **Key Fields**: `iata`, `icao`, `name`, `country`, `isHub`  
-**Relationships**:
-
-- Belongs to `organizations`
-- Referenced by `contracts`, `invoices`, `ops_evidence`, `fuel_tenders`
+**Cardinality & Relations**: Many airports belong to one `organization`; one airport has many `contracts`, `invoices`, `contacts`, `ops_evidence`, `fuel_tenders`.  
+**Unique**: none  
+**On delete**: Organization → airports (cascade); airport → linked records (cascade)
 
 ---
 
@@ -48,19 +48,17 @@ The database is organized into five main domains:
 
 **Purpose**: Supplier/vendor master data  
 **Key Fields**: `name`  
-**Relationships**:
-
-- Belongs to `organizations`
-- Referenced by `contracts`, `invoices`, `contacts`, `fuel_bids`
+**Cardinality & Relations**: Many vendors belong to one `organization`; one vendor has many `contracts`, `invoices`, `contacts`, `fuel_bids`.  
+**Unique**: none  
+**On delete**: Organization → vendors (cascade); vendor → linked records (cascade)
 
 ### `contacts`
 
 **Purpose**: Individual contact persons at vendors or airports  
 **Key Fields**: `name`, `email`, `phone`, `department`, `role`  
-**Relationships**:
-
-- Belongs to `organizations`
-- Optional links to `airports` and `vendors`
+**Cardinality & Relations**: Many contacts belong to one `organization`; each may link to one `airport` and/or one `vendor`.  
+**Unique**: none  
+**On delete**: Organization/airport/vendor → contacts (cascade)
 
 ---
 
@@ -70,21 +68,17 @@ The database is organized into five main domains:
 
 **Purpose**: Outbound procurement requests for technical parts/services  
 **Key Fields**: `rfqNumber`, `partNumber`, `quantity`, `status`, `selectedQuoteId`  
-**Relationships**:
-
-- Created by `users`
-- Belongs to `organizations`
-- Receives multiple `quotes`
-- Can select one winning `quote`
+**Cardinality & Relations**: Many RFQs belong to one `user` and one `organization`; one RFQ has many `quotes`; optional selected `quote`.  
+**Unique**: (`orgId`, `rfqNumber`)  
+**On delete**: User/org → RFQs (cascade); RFQ → quotes (cascade)
 
 ### `quotes`
 
 **Purpose**: Vendor responses to RFQs  
 **Key Fields**: `price`, `leadTime`, `partCondition`, `warranty`, `status`  
-**Relationships**:
-
-- Responds to `rfqs`
-- Belongs to `organizations`
+**Cardinality & Relations**: Many quotes belong to one `rfq` and one `organization`.  
+**Unique**: none  
+**On delete**: RFQ/org → quotes (cascade)
 
 ---
 
@@ -94,22 +88,18 @@ The database is organized into five main domains:
 
 **Purpose**: Competitive fuel procurement tenders issued by airlines  
 **Key Fields**: `title`, `fuelType`, `biddingStarts`, `biddingEnds`, `deliveryStarts`, `deliveryEnds`, `winningBidId`  
-**Relationships**:
-
-- Belongs to `organizations` and `airports`
-- Receives multiple `fuel_bids`
-- Can select one winning `fuel_bid`
+**Cardinality & Relations**: Many fuel tenders belong to one `organization` and one `airport`; one tender has many `fuel_bids`; optional winning `fuel_bid`.  
+**Unique**: none  
+**On delete**: Org/airport → fuel tenders (cascade); tender → bids (cascade)
 
 ### `fuel_bids`
 
 **Purpose**: Vendor responses to fuel tenders with detailed pricing  
 **Key Fields**: `priceType`, `baseUnitPrice`, `indexName`, `differential`, `intoPlaneFee`, `decision`  
 **Pricing Types**: `fixed` (set price) or `index_formula` (Platts/Argus-linked)  
-**Relationships**:
-
-- Responds to `fuel_tenders`
-- Links to `vendors` (optional)
-- Decision tracked by `users`
+**Cardinality & Relations**: Many fuel bids belong to one `fuel_tender`; optional link to one `vendor`; decision by one `user`.  
+**Unique**: none  
+**On delete**: Tender → bids (cascade); vendor → bids (cascade); user → `decisionByUserId` set null
 
 ---
 
@@ -120,46 +110,35 @@ The database is organized into five main domains:
 **Purpose**: Master agreements with vendors for all service types  
 **Key Fields**: `title`, `contractType`, `effectiveFrom`, `effectiveTo`  
 **Contract Types**: `fuel`, `ground_handling`, `catering`, `technical_mro_parts`, `airport_and_nav_charges`, etc.  
-**Relationships**:
-
-- Belongs to `organizations`
-- Links to `airports` and `vendors`
-- Contains multiple `contract_rules`
-- Referenced by `invoices`
+**Cardinality & Relations**: Many contracts belong to one `organization`; optional link to one `airport` and/or one `vendor`; one contract has many `contract_rules`; one contract may be referenced by many `invoices`.  
+**Unique**: none  
+**On delete**: Org/airport/vendor → contracts (cascade); contract → rules and linked invoices (cascade)
 
 ### `contract_rules`
 
 **Purpose**: Detailed pricing rules within contracts  
 **Key Fields**: `chargeCode`, `priceModel`, `rate`, `uom`, `currency`, `formula`, `applicability`  
 **Price Models**: `fixed`, `per_unit`, `tiered`, `index_formula` (for fuel), `bundled`, `waived`  
-**Relationships**:
-
-- Belongs to `contracts` and `organizations`
-- Referenced by `invoice_lines` for rate matching
+**Cardinality & Relations**: Many rules belong to one `contract` and one `organization`; one rule may be referenced by many `invoice_lines`.  
+**Unique**: none  
+**On delete**: Contract/org → rules (cascade); rule → matched invoice lines (cascade)
 
 ### `invoices`
 
 **Purpose**: Supplier bills received for reconciliation  
 **Key Fields**: `invoiceNumber`, `invoiceDate`, `totalAmount`, `periodStart`, `periodEnd`  
-**Relationships**:
-
-- Belongs to `organizations`
-- Links to `airports`, `vendors`, and optionally `contracts`
-- Contains multiple `invoice_lines`
+**Cardinality & Relations**: Many invoices belong to one `organization`; each invoice may link to one `airport`, one `vendor`, and an optional `contract`; one invoice has many `invoice_lines`.  
+**Unique**: none (consider per-org invoice number uniqueness).  
+**On delete**: Org/airport/vendor/contract → invoices (cascade); invoice → lines (cascade)
 
 ### `invoice_lines`
 
 **Purpose**: Individual line items on invoices with reconciliation data  
 **Key Fields**: `chargeType`, `quantity`, `unitPrice`, `amount`, `expectedAmount`, `deltaAmount`  
-**Reconciliation Fields**:
-
-- `matchedContractRuleId` - links to applicable contract rule
-- `expectedCalc` - JSON showing calculation methodology
-- `deltaAmount` - difference between billed and expected amounts
-  **Relationships**:
-- Belongs to `invoices` and `organizations`
-- Optionally matches to `contract_rules`
-- Can generate `claims`
+**Reconciliation Fields**: `matchedContractRuleId`, `expectedCalc`, `deltaAmount`  
+**Cardinality & Relations**: Many lines belong to one `invoice` and one `organization`; each line may link to one `contract_rule`; one line can have many `claims`.  
+**Unique**: none  
+**On delete**: Invoice/org/rule → lines (cascade); line → claims (cascade)
 
 ---
 
@@ -169,19 +148,17 @@ The database is organized into five main domains:
 
 **Purpose**: Operational data to validate billed services  
 **Key Fields**: `flightId`, `serviceCode`, `evidenceType`, `timestamp`, `details`  
-**Relationships**:
-
-- Belongs to `organizations` and `airports`
-- Linked contextually to invoice lines by airport + service + time
+**Cardinality & Relations**: Many records belong to one `organization` and one `airport`; linked to invoice lines contextually (no FK).  
+**Unique**: none  
+**On delete**: Org/airport → ops evidence (cascade)
 
 ### `claims`
 
 **Purpose**: Dispute management for billing discrepancies  
 **Key Fields**: `reason`, `status`, `claimPackUrl`, `recoveredAmount`  
-**Relationships**:
-
-- Belongs to `organizations`
-- Links to specific `invoice_lines`
+**Cardinality & Relations**: Many claims belong to one `organization` and one `invoice_line`.  
+**Unique**: none  
+**On delete**: Org/line → claims (cascade)
 
 ---
 

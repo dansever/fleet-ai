@@ -9,28 +9,24 @@ import {
   updateFuelTender,
   type CreateFuelTenderData,
 } from '@/services/fuel/fuel-tender-client';
-import { Button } from '@/stories/Button/Button';
 import { ContentSection } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function TenderDialog({
+  trigger,
   tender,
   airportId,
   onChange,
   DialogType = 'view',
-  triggerClassName,
-  buttonSize = 'md',
 }: {
+  trigger: React.ReactNode;
   tender: FuelTender | null;
   airportId?: string; // Required when isNew is true
   onChange: (tender: FuelTender) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerClassName?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
 }) {
   const [formData, setFormData] = useState({
     title: tender?.title || null,
@@ -147,15 +143,7 @@ export default function TenderDialog({
 
   return (
     <DetailDialog
-      trigger={
-        <Button
-          intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
-          text={triggerText}
-          icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
-          size={buttonSize}
-          className={triggerClassName}
-        />
-      }
+      trigger={trigger}
       headerGradient="from-orange-500 to-orange-500"
       title={dialogTitle}
       onSave={handleSave}
@@ -202,7 +190,7 @@ export default function TenderDialog({
                 name="baseCurrency"
                 value={formData.baseCurrency}
                 selectOptions={Object.entries(CURRENCY_MAP).map(([key, value]) => ({
-                  label: value,
+                  label: value.display,
                   value: key,
                 }))}
               />

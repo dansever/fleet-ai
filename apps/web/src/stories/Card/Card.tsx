@@ -280,10 +280,10 @@ export const ListItemCard = ({
 }) => (
   <Card
     className={cn(
-      'box-border overflow-hidden rounded-2xl p-2 transition-all duration-200 cursor-pointer hover:shadow-md w-full min-w-0',
+      'box-border border-1 shadow-none hover:shadow-sm overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
       isSelected
-        ? 'ring-2 ring-green-500 bg-gradient-to-br from-green-100 to-green-50'
-        : 'hover:bg-gray-50',
+        ? 'border-green-500 bg-gradient-to-br from-green-100 to-green-50'
+        : 'border-slate-300 hover:bg-gray-50',
       className,
     )}
     onClick={onClick}

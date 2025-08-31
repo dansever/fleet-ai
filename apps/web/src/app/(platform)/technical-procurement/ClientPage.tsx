@@ -21,7 +21,7 @@ import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
 import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import RfqList from '../_components/RfqList';
+import RfqList from '../_components/RfqSidebar';
 import { useTechnicalProcurement } from './ContextProvider';
 import QuoteAnalysis from './_components/QuoteAnalysis';
 import QuotesComparison from './_components/QuotesComparison';

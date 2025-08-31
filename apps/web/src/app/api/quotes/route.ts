@@ -4,7 +4,7 @@ import {
   getQuoteById,
   getQuotesByRfq,
   updateQuote,
-} from '@/db/quotes/db-actions';
+} from '@/db/technical-procurement/quotes/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';

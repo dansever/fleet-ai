@@ -1,9 +1,8 @@
 'use client';
 
-import { Airport, FuelBid, FuelContract, FuelTender, User } from '@/drizzle/types';
+import { Airport, FuelBid, FuelTender, User } from '@/drizzle/types';
 import { getAirports } from '@/services/core/airport-client';
 import { getFuelBidsByTender } from '@/services/fuel/fuel-bid-client';
-import { getFuelContractsByAirport } from '@/services/fuel/fuel-contract-client';
 import { getFuelTendersByAirport } from '@/services/fuel/fuel-tender-client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
@@ -11,14 +10,12 @@ export type LoadingState = {
   airports: boolean;
   tenders: boolean;
   fuelBids: boolean;
-  fuelContracts: boolean;
 };
 
 export type ErrorState = {
   airports: string | null;
   tenders: string | null;
   fuelBids: string | null;
-  fuelContracts: string | null;
   general: string | null;
 };
 
@@ -54,16 +51,6 @@ export type FuelProcurementContextType = {
   addFuelBid: (newFuelBid: FuelBid) => void;
   removeFuelBid: (fuelBidId: string) => void;
 
-  // Fuel Contracts
-  fuelContracts: FuelContract[];
-  setFuelContracts: (fuelContracts: FuelContract[]) => void;
-  refreshFuelContracts: () => Promise<void>;
-  addFuelContract: (newFuelContract: FuelContract) => void;
-  updateFuelContract: (updatedFuelContract: FuelContract) => void;
-  removeFuelContract: (fuelContractId: string) => void;
-  selectedFuelContract: FuelContract | null;
-  setSelectedFuelContract: (contract: FuelContract | null) => void;
-
   // Loading and error states
   loading: LoadingState;
   errors: ErrorState;
@@ -90,17 +77,12 @@ export default function FuelProcurementProvider({
   const [airportTenders, setAirportTenders] = useState<FuelTender[]>([]);
   const [selectedTender, setSelectedTender] = useState<FuelTender | null>(null);
   const [fuelBids, setFuelBids] = useState<FuelBid[]>([]);
-  const [fuelContracts, setFuelContracts] = useState<FuelContract[]>([]);
-  const [selectedFuelContract, setSelectedFuelContract] = useState<FuelContract | null>(null);
 
   // Cache to avoid refetching tenders for the same airport
   const [tendersCache, setTendersCache] = useState<Record<string, FuelTender[]>>({});
 
   // Cache to avoid refetching fuel bids for the same tender
   const [fuelBidsCache, setFuelBidsCache] = useState<Record<string, FuelBid[]>>({});
-
-  // Cache to avoid refetching fuel contracts for the same tender
-  const [fuelContractsCache, setFuelContractsCache] = useState<Record<string, FuelContract[]>>({});
 
   // Cache timestamps for TTL (Time To Live) - 5 minutes
   const [cacheTimestamps, setCacheTimestamps] = useState<Record<string, number>>({});
@@ -111,7 +93,6 @@ export default function FuelProcurementProvider({
     airports: false,
     tenders: false,
     fuelBids: false,
-    fuelContracts: false,
   });
 
   // Error states
@@ -119,7 +100,6 @@ export default function FuelProcurementProvider({
     airports: null,
     tenders: null,
     fuelBids: null,
-    fuelContracts: null,
     general: null,
   });
 
@@ -152,7 +132,6 @@ export default function FuelProcurementProvider({
   const clearAllCaches = useCallback(() => {
     setTendersCache({});
     setFuelBidsCache({});
-    setFuelContractsCache({});
     setCacheTimestamps({});
   }, []);
 
@@ -176,18 +155,13 @@ export default function FuelProcurementProvider({
         expiredKeys.forEach((key) => delete updated[key]);
         return updated;
       });
-      setFuelContractsCache((prev) => {
-        const updated = { ...prev };
-        expiredKeys.forEach((key) => delete updated[key]);
-        return updated;
-      });
       setCacheTimestamps((prev) => {
         const updated = { ...prev };
         expiredKeys.forEach((key) => delete updated[key]);
         return updated;
       });
     }
-  }, [cacheTimestamps, CACHE_TTL, setTendersCache, setFuelBidsCache, setFuelContractsCache]);
+  }, [cacheTimestamps, CACHE_TTL, setTendersCache, setFuelBidsCache]);
 
   /**
    * Sort airports on initial load and set first as selected
@@ -210,8 +184,6 @@ export default function FuelProcurementProvider({
       setAirportTenders([]);
       setSelectedTender(null);
       setFuelBids([]);
-      setFuelContracts([]);
-      setSelectedFuelContract(null);
       return;
     }
 
@@ -219,21 +191,17 @@ export default function FuelProcurementProvider({
     setAirportTenders([]);
     setSelectedTender(null);
     setFuelBids([]);
-    setFuelContracts([]);
-    setSelectedFuelContract(null);
 
     // Set loading states immediately to show user that data is being fetched
     setLoading((prev) => ({
       ...prev,
       tenders: true,
-      fuelContracts: true,
     }));
 
     // Clear any previous errors
     setErrors((prev) => ({
       ...prev,
       tenders: null,
-      fuelContracts: null,
       fuelBids: null,
     }));
 
@@ -413,69 +381,6 @@ export default function FuelProcurementProvider({
 
     loadFuelBids();
   }, [selectedTender, fuelBidsCache, isCacheExpired]);
-
-  /**
-   * Load fuel contracts for the selected airport (only when airport changes)
-   */
-  useEffect(() => {
-    if (!selectedAirport) {
-      setFuelContracts([]);
-      setSelectedFuelContract(null);
-      return;
-    }
-
-    // Note: Data is already cleared in the tenders useEffect above
-    // This ensures we don't show stale contract data while loading
-
-    const loadFuelContracts = async () => {
-      // Check cache first (with expiration check)
-      if (
-        fuelContractsCache[selectedAirport.id] &&
-        !isCacheExpired(`fuelContracts-${selectedAirport.id}`)
-      ) {
-        const cachedFuelContracts = fuelContractsCache[selectedAirport.id];
-        setFuelContracts(cachedFuelContracts);
-        setSelectedFuelContract(cachedFuelContracts.length > 0 ? cachedFuelContracts[0] : null);
-        // Clear loading state since we have cached data
-        setLoading((prev) => ({ ...prev, fuelContracts: false }));
-        return;
-      }
-
-      // Only set loading state if we don't have cached data
-      setLoading((prev) => ({ ...prev, fuelContracts: true }));
-      setErrors((prev) => ({ ...prev, fuelContracts: null }));
-
-      try {
-        const contracts = await getFuelContractsByAirport(selectedAirport.id);
-        setFuelContracts(contracts);
-
-        // Cache the fuel contracts for this airport with timestamp
-        setFuelContractsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]: contracts,
-        }));
-        setCacheTimestamps((prev) => ({
-          ...prev,
-          [`fuelContracts-${selectedAirport.id}`]: Date.now(),
-        }));
-
-        // Always set first contract as selected when loading contracts for a new airport
-        setSelectedFuelContract(contracts.length > 0 ? contracts[0] : null);
-      } catch (error) {
-        console.error('Error loading fuel contracts:', error);
-        setErrors((prev) => ({
-          ...prev,
-          fuelContracts: error instanceof Error ? error.message : 'Failed to load fuel contracts',
-        }));
-        setFuelContracts([]);
-        setSelectedFuelContract(null);
-      } finally {
-        setLoading((prev) => ({ ...prev, fuelContracts: false }));
-      }
-    };
-
-    loadFuelContracts();
-  }, [selectedAirport, fuelContractsCache, isCacheExpired]);
 
   /**
    * Select tender by ID without refetching (instant selection)
@@ -696,134 +601,6 @@ export default function FuelProcurementProvider({
   );
 
   /**
-   * Refresh fuel contracts for the currently selected airport (clears cache)
-   */
-  const refreshFuelContracts = useCallback(async () => {
-    if (!selectedAirport) return;
-
-    // Clear cache for this airport to force fresh data
-    setFuelContractsCache((prev) => {
-      const updated = { ...prev };
-      delete updated[selectedAirport.id];
-      return updated;
-    });
-    setCacheTimestamps((prev) => {
-      const updated = { ...prev };
-      delete updated[`fuelContracts-${selectedAirport.id}`];
-      return updated;
-    });
-
-    setLoading((prev) => ({ ...prev, fuelContracts: true }));
-    setErrors((prev) => ({ ...prev, fuelContracts: null }));
-
-    try {
-      const contracts = await getFuelContractsByAirport(selectedAirport.id);
-      setFuelContracts(contracts);
-
-      // Update cache with fresh data
-      setFuelContractsCache((prev) => ({
-        ...prev,
-        [selectedAirport.id]: contracts,
-      }));
-      setCacheTimestamps((prev) => ({
-        ...prev,
-        [`fuelContracts-${selectedAirport.id}`]: Date.now(),
-      }));
-
-      // Preserve the currently selected contract if it still exists, otherwise select first
-      if (selectedFuelContract) {
-        const updatedSelectedContract = contracts.find((c) => c.id === selectedFuelContract.id);
-        setSelectedFuelContract(
-          updatedSelectedContract || (contracts.length > 0 ? contracts[0] : null),
-        );
-      } else if (contracts.length > 0) {
-        setSelectedFuelContract(contracts[0]);
-      }
-    } catch (error) {
-      console.error('Error refreshing fuel contracts:', error);
-      setErrors((prev) => ({
-        ...prev,
-        fuelContracts: error instanceof Error ? error.message : 'Failed to refresh fuel contracts',
-      }));
-    } finally {
-      setLoading((prev) => ({ ...prev, fuelContracts: false }));
-    }
-  }, [selectedAirport, selectedFuelContract]);
-
-  /**
-   * Add fuel contract
-   */
-  const addFuelContract = useCallback(
-    (newFuelContract: FuelContract) => {
-      setFuelContracts((prevFuelContracts) => [newFuelContract, ...prevFuelContracts]);
-
-      // Update the cache for the current airport
-      if (selectedAirport) {
-        setFuelContractsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]: [newFuelContract, ...(prev[selectedAirport.id] || [])],
-        }));
-      }
-    },
-    [selectedAirport],
-  );
-
-  /**
-   * Update fuel contract
-   */
-  const updateFuelContract = useCallback(
-    (updatedFuelContract: FuelContract) => {
-      setFuelContracts((prevFuelContracts) =>
-        prevFuelContracts.map((fuelContract) =>
-          fuelContract.id === updatedFuelContract.id ? updatedFuelContract : fuelContract,
-        ),
-      );
-
-      // Update the cache for the current airport
-      if (selectedAirport) {
-        setFuelContractsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]:
-            prev[selectedAirport.id]?.map((fuelContract) =>
-              fuelContract.id === updatedFuelContract.id ? updatedFuelContract : fuelContract,
-            ) || [],
-        }));
-      }
-
-      if (selectedFuelContract?.id === updatedFuelContract.id) {
-        setSelectedFuelContract(updatedFuelContract);
-      }
-    },
-    [selectedFuelContract, selectedAirport],
-  );
-
-  /**
-   * Remove fuel contract
-   */
-  const removeFuelContract = useCallback(
-    (fuelContractId: string) => {
-      setFuelContracts((prevFuelContracts) =>
-        prevFuelContracts.filter((fuelContract) => fuelContract.id !== fuelContractId),
-      );
-
-      // Update the cache for the current airport
-      if (selectedAirport) {
-        setFuelContractsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]: (prev[selectedAirport.id] || []).filter(
-            (fuelContract) => fuelContract.id !== fuelContractId,
-          ),
-        }));
-      }
-
-      if (selectedFuelContract?.id === fuelContractId) {
-        setSelectedFuelContract(null);
-      }
-    },
-    [selectedFuelContract, selectedAirport],
-  );
-
-  /**
    * Clear specific error
    */
   const clearError = useCallback((errorType: keyof ErrorState) => {
@@ -838,7 +615,6 @@ export default function FuelProcurementProvider({
       airports: null,
       tenders: null,
       fuelBids: null,
-      fuelContracts: null,
       general: null,
     });
   }, []);
@@ -884,14 +660,6 @@ export default function FuelProcurementProvider({
       updateFuelBid,
       addFuelBid,
       removeFuelBid,
-      fuelContracts,
-      setFuelContracts,
-      refreshFuelContracts,
-      addFuelContract,
-      updateFuelContract,
-      removeFuelContract,
-      selectedFuelContract,
-      setSelectedFuelContract,
       loading,
       errors,
       clearError,
@@ -927,14 +695,6 @@ export default function FuelProcurementProvider({
       clearError,
       clearAllErrors,
       clearAllCaches,
-      fuelContracts,
-      setFuelContracts,
-      refreshFuelContracts,
-      addFuelContract,
-      updateFuelContract,
-      removeFuelContract,
-      selectedFuelContract,
-      setSelectedFuelContract,
     ],
   );
 

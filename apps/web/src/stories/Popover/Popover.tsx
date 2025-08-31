@@ -5,30 +5,30 @@ import { ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '../Button/Button';
 import { ContentSection } from '../Card/Card';
 
-// Confirmation Popover Component for delete actions
+// Confirmation Popover Component for direct actions
 interface ConfirmationPopoverProps {
   trigger: ReactNode;
+  popoverIntent?: 'danger' | 'warning' | 'info';
   title: string;
   description?: string;
   confirmText?: string;
-  cancelText?: string;
   onConfirm: () => void | Promise<void>;
+  cancelText?: string;
   onCancel?: () => void;
-  intent?: 'danger' | 'warning' | 'info';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  popoverContentAlign?: 'start' | 'center' | 'end';
+  popoverContentAlign?: 'start' | 'center' | 'end'; // Alignment of the popover content relative to the trigger
 }
 
 export const ConfirmationPopover = ({
   trigger,
+  popoverIntent = 'info',
   title,
   description = 'This action cannot be undone.',
   confirmText = 'Confirm',
-  cancelText = 'Cancel',
   onConfirm,
+  cancelText = 'Cancel',
   onCancel,
-  intent = 'info',
   open,
   onOpenChange,
   popoverContentAlign = 'end',
@@ -39,8 +39,8 @@ export const ConfirmationPopover = ({
   const actualOpen = isControlled ? open! : internalOpen;
   const setOpen = (v: boolean) => (isControlled ? onOpenChange?.(v) : setInternalOpen(v));
 
-  if (intent && !['danger', 'warning', 'info'].includes(intent)) {
-    return `Invalid intent: ${intent}`;
+  if (popoverIntent && !['danger', 'warning', 'info'].includes(popoverIntent)) {
+    return `Invalid intent: ${popoverIntent}`;
   }
 
   const handleConfirm = async () => {
@@ -76,7 +76,7 @@ export const ConfirmationPopover = ({
     },
   } as const;
 
-  const styles = intentStyles[intent];
+  const styles = intentStyles[popoverIntent];
 
   return (
     <Popover open={actualOpen} onOpenChange={setOpen}>
@@ -105,7 +105,7 @@ export const ConfirmationPopover = ({
               disabled={submitting}
             />
             <Button
-              intent={intent}
+              intent={popoverIntent}
               onClick={handleConfirm}
               size="sm"
               text={confirmText}

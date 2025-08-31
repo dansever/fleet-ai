@@ -23,7 +23,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
-import RfqList from '../_components/RfqList';
+import RfqList from '../_components/RfqSidebar';
 import { useSupplierHub } from './ContextProvider';
 
 // Mock inventory data - will be replaced with real API calls later

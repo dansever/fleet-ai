@@ -9,6 +9,8 @@
     "format:check": "prettier -c .",
     "format:fix": "prettier --write .",
     "lint": "next lint",
+    "clean_bash": "rm -rf .next .turbo node_modules/.cache",
+    "clean_pw": "Remove-Item -Recurse -Force .next, .turbo, node_modules/.cache",
     "typecheck": "tsc --noEmit",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

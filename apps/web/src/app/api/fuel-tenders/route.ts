@@ -5,7 +5,7 @@ import {
   getFuelTendersByAirportId,
   getFuelTendersByOrgId,
   updateFuelTender,
-} from '@/db/fuel-tenders/db-actions';
+} from '@/db/fuel/fuel-tenders/db-actions';
 import type { NewFuelTender, UpdateFuelTender } from '@/drizzle/types';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';

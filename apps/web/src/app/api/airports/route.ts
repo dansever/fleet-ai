@@ -4,7 +4,7 @@ import {
   getAirportById,
   getAirportsByOrgId,
   updateAirport,
-} from '@/db/airports/db-actions';
+} from '@/db/core/airports/db-actions';
 import { NewAirport, UpdateAirport } from '@/drizzle/types';
 import { loadAirportDataset } from '@/features/airports/airportDatasetService';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';

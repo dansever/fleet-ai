@@ -1,5 +1,5 @@
-import { getAirportsByOrgId } from '@/db/airports/db-actions';
-import { getRfqsByOrgAndDirection } from '@/db/rfqs/db-actions';
+import { getAirportsByOrgId } from '@/db/core/airports/db-actions';
+import { getRfqsByOrgAndDirection } from '@/db/technical-procurement/rfqs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import DashboardClientPage from './ClientPage';

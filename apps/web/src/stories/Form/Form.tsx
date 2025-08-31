@@ -19,6 +19,13 @@ import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { useState } from 'react';
 
+// styles.ts
+export const inputBorderClasses = cn(
+  'border-1 border-slate-300',
+  'ring-0 focus-visible:ring-1 focus-visible:ring-offset-0',
+  'focus-visible:border-secondary focus-visible:ring-secondary',
+);
+
 // Modern Input Field
 export const ModernInput = ({
   placeholder,
@@ -40,9 +47,10 @@ export const ModernInput = ({
       autoComplete="off"
       placeholder={placeholder}
       className={cn(
-        'w-full rounded-xl border-2 pr-4 focus:border-primary/50 focus:ring-0',
+        'w-full rounded-xl pr-4',
         'placeholder:text-gray-400',
         icon && 'pl-10',
+        inputBorderClasses,
         className,
       )}
       {...props}
@@ -66,8 +74,12 @@ export const SearchInput = ({
       type="search"
       autoComplete="off"
       placeholder={placeholder}
-      className={`w-full rounded-2xl bg-muted pl-9 pr-4 border-0 focus:ring-2 focus:ring-primary/20',
-        'placeholder:text-gray-400' ${className}`}
+      className={cn(
+        'w-full rounded-lg bg-muted pl-9 pr-4',
+        'placeholder:text-gray-400',
+        inputBorderClasses,
+        className,
+      )}
       {...props}
     />
   </div>
@@ -90,7 +102,7 @@ export const PasswordInput = ({
       <Input
         type={showPassword ? 'text' : 'password'}
         placeholder={placeholder}
-        className="w-full rounded-2xl border-2 focus:border-primary/50 focus:ring-0 pr-10"
+        className={cn('w-full rounded-lg pr-10', inputBorderClasses, className)}
         {...props}
       />
       <Button
@@ -119,7 +131,8 @@ export const ModernTextarea = ({
     placeholder={placeholder}
     autoComplete="off"
     className={cn(
-      'rounded-2xl border-2 focus:border-primary/50 focus:ring-0',
+      inputBorderClasses,
+      'rounded-lg',
       'min-h-[60px] max-h-[160px]',
       'placeholder:text-gray-400',
       className,
@@ -145,7 +158,11 @@ export const ModernSelect = ({
   return (
     <Select {...props}>
       <SelectTrigger
-        className={cn('rounded-xl border-2 focus:border-primary/50 focus:ring-0', triggerClassName)}
+        className={cn(
+          'rounded-xl border-2 focus:border-primary focus:ring-0',
+          inputBorderClasses,
+          triggerClassName,
+        )}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

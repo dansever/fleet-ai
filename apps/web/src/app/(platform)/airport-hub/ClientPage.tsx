@@ -7,7 +7,7 @@ import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { MapPin } from 'lucide-react';
 import { useState } from 'react';
-import AirportList from '../_components/AirportList';
+import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
 import ContactsAndProviders from './subpages/ContactsAndProviders';
 import ManageAirport from './subpages/ManageAirport';

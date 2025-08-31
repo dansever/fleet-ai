@@ -1,8 +1,8 @@
 import {
-  createServiceContract,
-  getServiceContract,
-  getServiceContractsByAirport,
-} from '@/db/service-contracts/db-actions';
+  createContract,
+  getContract,
+  getContractsByAirport,
+} from '@/db/contract-management/contracts/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
@@ -31,13 +31,13 @@ export async function GET(request: NextRequest) {
 
     // Get service contract by ID
     if (id) {
-      const contract = await getServiceContract(id);
+      const contract = await getContract(id);
       return NextResponse.json(contract);
     }
 
     // Get service contracts by airport
     if (airportId) {
-      const contracts = await getServiceContractsByAirport(airportId);
+      const contracts = await getContractsByAirport(airportId);
       return NextResponse.json(contracts);
     }
   } catch (error) {
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Get body
     const body = await request.json();
-    const contract = await createServiceContract({ ...body, airportId, orgId });
+    const contract = await createContract({ ...body, airportId, orgId });
 
     return NextResponse.json(contract);
   } catch (error) {

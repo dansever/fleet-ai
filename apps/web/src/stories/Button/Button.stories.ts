@@ -6,15 +6,16 @@ import {
   Heart,
   Plus,
 } from 'lucide-react';
+import { createElement } from 'react';
 import { Button } from './Button';
 
 const intents = [
   'primary',
   'secondary',
+  'secondaryInverted',
   'success',
   'warning',
   'danger',
-  'ghost',
   'download',
   'add',
   'favorite',
@@ -65,6 +66,20 @@ export const Secondary: Story = {
   },
 };
 
+export const SecondaryInverted: Story = {
+  render: (args) =>
+    createElement(
+      'div',
+      { className: 'p-4 bg-gradient-to-r from-blue-500 to-purple-600 w-fit' },
+      createElement(Button, args),
+    ),
+  args: {
+    intent: 'secondaryInverted',
+    size: 'md',
+    text: 'Secondary Inverted',
+  },
+};
+
 export const Sucess: Story = {
   args: {
     intent: 'success',
@@ -86,14 +101,6 @@ export const Danger: Story = {
     intent: 'danger',
     size: 'md',
     text: 'Danger',
-  },
-};
-
-export const Ghost: Story = {
-  args: {
-    intent: 'ghost',
-    size: 'md',
-    text: 'Ghost',
   },
 };
 

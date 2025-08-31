@@ -1,4 +1,4 @@
-import { getAirportById } from '@/db/airports/db-actions';
+import { getAirportById } from '@/db/core/airports/db-actions';
 import {
   createContact,
   deleteContact,
@@ -6,7 +6,7 @@ import {
   getContactsByAirport,
   getContactsByOrg,
   updateContact,
-} from '@/db/contacts/db-actions';
+} from '@/db/suppliers-and-contacts/contacts/db-actions';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';

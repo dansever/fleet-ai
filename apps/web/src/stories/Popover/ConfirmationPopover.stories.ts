@@ -30,20 +30,20 @@ type Story = StoryObj<typeof meta>;
 export const Delete: Story = {
   args: {
     trigger: createElement(Button, { intent: 'danger', text: 'Delete' }),
-    intent: 'danger',
+    popoverIntent: 'danger',
   },
 };
 
 export const Archive: Story = {
   args: {
     trigger: createElement(Button, { intent: 'secondary', text: 'Archive' }),
-    intent: 'warning',
+    popoverIntent: 'warning',
   },
 };
 
 export const Info: Story = {
   args: {
     trigger: createElement(Button, { intent: 'secondary', text: 'Save Changes' }),
-    intent: 'info',
+    popoverIntent: 'info',
   },
 };

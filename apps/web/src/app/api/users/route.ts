@@ -4,7 +4,7 @@ import {
   getOrgUsers,
   getUserById,
   updateUser,
-} from '@/db/users/db-actions';
+} from '@/db/core/users/db-actions';
 import { NewUser } from '@/drizzle/types';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';

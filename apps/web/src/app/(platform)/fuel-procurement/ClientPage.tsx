@@ -5,12 +5,11 @@ import { TabsContent } from '@/components/ui/tabs';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { useState } from 'react';
-import AirportList from '../_components/AirportList';
+import AirportList from '../_components/AirportSidebar';
 import { useFuelProcurement } from './ContextProvider';
 import FuelTendersPage from './subpages/FuelTenders';
-import ManageContractsPage from './subpages/ManageContracts';
 
-type TabValue = 'fuel-tenders' | 'manage-contracts';
+type TabValue = 'fuel-tenders' | 'fuel-agreements';
 
 export default function FuelProcurementClientPage() {
   const {
@@ -79,7 +78,7 @@ function MainContentSection() {
     <Tabs
       tabs={[
         { label: 'Fuel Tenders', value: 'fuel-tenders' },
-        { label: 'Manage Contracts', value: 'manage-contracts' },
+        { label: 'Fuel Agreements', value: 'fuel-agreements' },
       ]}
       selectedTab={selectedTab}
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
@@ -87,9 +86,7 @@ function MainContentSection() {
       <TabsContent value="fuel-tenders">
         <FuelTendersPage />
       </TabsContent>
-      <TabsContent value="manage-contracts">
-        <ManageContractsPage />
-      </TabsContent>
+      <TabsContent value="fuel-agreements">Fuel Agreements</TabsContent>
     </Tabs>
   );
 }

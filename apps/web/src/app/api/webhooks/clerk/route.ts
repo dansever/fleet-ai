@@ -1,4 +1,4 @@
-import { createUser, deleteUser } from '@/db/users/db-actions';
+import { createUser, deleteUser } from '@/db/core/users/db-actions';
 import { serverEnv } from '@/lib/env/server';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { headers } from 'next/headers';

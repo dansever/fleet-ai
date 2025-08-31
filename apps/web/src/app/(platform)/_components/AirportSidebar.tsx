@@ -82,28 +82,25 @@ export default function AirportList({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 px-4 py-2 border-b border-border">
-        <div className="flex flex-row justify-between items-center">
-          <h1 className="font-light italic">Airports</h1>
-          {InsertAddAirportButton && (
-            <AirportDialog
-              airport={null}
-              DialogType="add"
-              triggerButtonIntent="add"
-              TriggerButtonText="Add"
-              TriggerButtonIcon={Plus}
-              onChange={(newAirport) => {
-                if (onAirportAdd) {
-                  onAirportAdd(newAirport);
-                  // Automatically select the newly created airport
-                  onAirportSelect(newAirport);
-                }
-              }}
-              TriggerButtonSize="md"
-            />
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">{airports.length} Airports</p>
+      <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2 border-b border-border">
+        <h2>Airports</h2>
+        {InsertAddAirportButton && (
+          <AirportDialog
+            airport={null}
+            DialogType="add"
+            triggerButtonIntent="add"
+            TriggerButtonText="Add"
+            TriggerButtonIcon={Plus}
+            onChange={(newAirport) => {
+              if (onAirportAdd) {
+                onAirportAdd(newAirport);
+                // Automatically select the newly created airport
+                onAirportSelect(newAirport);
+              }
+            }}
+            TriggerButtonSize="md"
+          />
+        )}
       </div>
 
       {/* Search Input */}

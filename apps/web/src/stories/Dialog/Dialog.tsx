@@ -112,10 +112,9 @@ export const DetailDialog = ({
             <div className="flex gap-2 mr-4">
               {!isEditing ? (
                 <Button
-                  intent="secondary"
+                  intent="secondaryInverted"
                   text="Edit"
                   icon={Edit2}
-                  className="bg-white/20 text-white rounded-lg hover:bg-white/30 border-1"
                   onClick={() => setIsEditing(true)}
                 />
               ) : (

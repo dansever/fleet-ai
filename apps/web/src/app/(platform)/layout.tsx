@@ -1,11 +1,11 @@
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { ReactNode } from 'react';
-import { AppSidebar } from './_components/AppSidebar';
+import { MainSidebar } from './_components/MainSidebar';
 
 export default function PlatformLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
-      <AppSidebar variant="sidebar" />
+      <MainSidebar variant="sidebar" />
       <main className="flex-1 overflow-hidden">{children}</main>
     </SidebarProvider>
   );

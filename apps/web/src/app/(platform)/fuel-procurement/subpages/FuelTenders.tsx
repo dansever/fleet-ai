@@ -12,7 +12,7 @@ import { ContentSection } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { AlertCircle, CalendarIcon, TrashIcon } from 'lucide-react';
+import { AlertCircle, CalendarIcon, Pencil, Plus, TrashIcon } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
@@ -148,6 +148,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
           />
           <div className="flex gap-2">
             <TenderDialog
+              trigger={<Button intent="add" icon={Plus} text="Add Tender" />}
               tender={null}
               airportId={selectedAirport.id}
               onChange={handleTenderAdded}
@@ -169,11 +170,11 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                     {/* Buttons */}
                     <div className="flex gap-2">
                       <TenderDialog
+                        trigger={<Button intent="secondaryInverted" icon={Pencil} text="Edit" />}
                         tender={currentTender}
                         airportId={selectedAirport.id}
                         onChange={handleTenderUpdated}
                         DialogType="edit"
-                        triggerClassName="bg-white/20 text-white-700"
                       />
                       <ConfirmationPopover
                         trigger={
@@ -184,7 +185,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                             className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
                           />
                         }
-                        intent="danger"
+                        popoverIntent="danger"
                         title="Delete Tender"
                         onConfirm={handleTenderDelete}
                         open={isDeletePopoverOpen}
@@ -219,7 +220,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                   />
                   <KeyValuePair
                     label="Currency"
-                    value={CURRENCY_MAP[currentTender.baseCurrency || '']}
+                    value={CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
                     valueType="string"
                   />
                   <KeyValuePair

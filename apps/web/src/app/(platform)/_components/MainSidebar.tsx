@@ -23,7 +23,7 @@ import { UserButton, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { sidebarTabs } from './AppSidebarTabs';
+import { sidebarTabs } from './MainSidebarTabs';
 
 const SIDEBAR_MENU_BUTTON_SIZES = {
   md: 'text-base pl-3 pr-1 py-5',
@@ -125,7 +125,7 @@ function SidebarNavItem({
   return <SidebarMenuItem>{menuButton}</SidebarMenuItem>;
 }
 
-export function AppSidebar({
+export function MainSidebar({
   variant = 'sidebar',
 }: {
   variant?: 'sidebar' | 'floating' | 'inset';
@@ -136,12 +136,11 @@ export function AppSidebar({
   const { user } = useUser();
 
   return (
-    <Sidebar collapsible="icon" variant={variant} className="border-transparent">
+    <Sidebar collapsible="icon" variant={variant} className="border-transparen">
       <SidebarHeader
         className={cn(
           'flex flex-row items-center w-full h-16 min-h-16 px-2',
           'transition-all duration-300 ease-in-out',
-          'rounded-t-lg',
         )}
       >
         <div

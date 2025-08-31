@@ -1,4 +1,4 @@
-import { getAirportsByOrgId } from '@/db/airports/db-actions';
+import { getAirportsByOrgId } from '@/db/core/airports/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import AirportHubClientPage from './ClientPage';

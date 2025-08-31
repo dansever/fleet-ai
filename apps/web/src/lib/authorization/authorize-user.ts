@@ -1,4 +1,4 @@
-import { getUserByClerkUserId } from '@/db/users/db-actions';
+import { getUserByClerkUserId } from '@/db/core/users/db-actions';
 import { currentUser } from '@clerk/nextjs/server';
 /*
   Authorizes a user by their Clerk user id and returns the user's database record.

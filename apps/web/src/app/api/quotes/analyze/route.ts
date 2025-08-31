@@ -1,4 +1,4 @@
-import { getQuotesByOrgForAnalysis } from '@/db/quotes/db-actions';
+import { getQuotesByOrgForAnalysis } from '@/db/technical-procurement/quotes/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { NextRequest, NextResponse } from 'next/server';
 

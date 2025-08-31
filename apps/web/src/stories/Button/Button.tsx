@@ -19,16 +19,17 @@ const buttonStyles = cva(
       intent: {
         primary:
           'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-primary-foreground',
-        secondary: 'bg-transparent hover:bg-muted/40 border-2 border-muted text-primary/70',
+        secondary: 'border-1 border-primary/20 hover:bg-muted/70 text-primary',
+        secondaryInverted: 'bg-white/20 hover:bg-muted/40 text-white',
         success:
-          'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white',
+          'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white',
         warning:
           'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white',
         danger:
           'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white',
-        ghost: 'bg-transparent hover:bg-muted/50',
+        ghost: 'bg-transparent hover:bg-muted/40 border-0 border-muted text-primary/70',
         info: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-primary-foreground',
-        add: 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white',
+        add: 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white',
         favorite: 'border border-pink-200 text-pink-600 hover:bg-pink-50',
         edit: 'border border-blue-200 text-blue-600 hover:bg-blue-50',
       },
@@ -50,25 +51,31 @@ type ButtonStyleProps = VariantProps<typeof buttonStyles>;
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     ButtonStyleProps {
-  /** The text to display in the button */
-  text?: string | null;
-  /** Optional icon to display before the text */
-  icon?: LucideIcon;
-  /** Position of the icon relative to text */
-  iconPosition?: 'left' | 'right';
-  /** Show loading state */
-  isLoading?: boolean;
-  /** Link to navigate to (if provided, renders as Link instead of button) */
-  href?: string;
-  /** Open link in new tab */
-  external?: boolean;
+  intent?:
+    | 'primary'
+    | 'secondary'
+    | 'secondaryInverted'
+    | 'success'
+    | 'warning'
+    | 'danger'
+    | 'ghost'
+    | 'info'
+    | 'add'
+    | 'favorite'
+    | 'edit';
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'button' | 'submit' | 'reset';
+  text?: string | null; // The text to display in the button
+  icon?: LucideIcon; // Optional icon to display before the text
+  iconPosition?: 'left' | 'right'; // Position of the icon relative to text
+  isLoading?: boolean; // Show loading state
+  href?: string; // Link to navigate to (renders as Link instead of button)
+  external?: boolean; // Open link in new tab
 }
 
-// ========= Text / Icon + Text Button =========
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      className,
       intent,
       size,
       type = 'button',
@@ -78,6 +85,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       isLoading = false,
       href,
       external = false,
+      className,
       ...props
     },
     ref,

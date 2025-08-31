@@ -1,4 +1,4 @@
-import { getRfqsByOrgAndDirection } from '@/db/rfqs/db-actions';
+import { getRfqsByOrgAndDirection } from '@/db/technical-procurement/rfqs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import TechnicalProcurementClientPage from './ClientPage';
 import { TechnicalProcurementContextProvider } from './ContextProvider';

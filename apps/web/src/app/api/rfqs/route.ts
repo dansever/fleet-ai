@@ -5,7 +5,7 @@ import {
   getRfqsByOrgAndDirection,
   getUserRfqs,
   updateRfq,
-} from '@/db/rfqs/db-actions';
+} from '@/db/technical-procurement/rfqs/db-actions';
 import { NewRfq } from '@/drizzle/types';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
