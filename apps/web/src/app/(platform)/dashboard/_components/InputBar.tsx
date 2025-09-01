@@ -48,6 +48,7 @@ export default function InputBar() {
           text="Ask AI"
           onClick={handleAskAI}
           disabled={isLoading}
+          className="flex-shrink-0"
         />
       </div>
       <FeatureCard

@@ -208,7 +208,6 @@ export const NumberInput = ({
 
   return (
     <div className="w-full">
-      {label && <label className={formStyles.label}>{label}</label>}
       <div className="relative">
         <Input
           type="number"
@@ -220,7 +219,6 @@ export const NumberInput = ({
           onChange={(e) => onChange?.(Number.parseFloat(e.target.value) || 0)}
           className={cn(
             formStyles.input,
-            'pr-16',
             error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
             className,
           )}
@@ -297,7 +295,7 @@ export const ModernSelect = ({
   helper,
   placeholder = 'Select an option',
   options,
-  className,
+  TriggerClassName,
   ...props
 }: {
   label?: string;
@@ -305,7 +303,7 @@ export const ModernSelect = ({
   helper?: string;
   placeholder?: string;
   options: { value: string; label: React.ReactNode }[];
-  className?: string;
+  TriggerClassName?: string;
   [key: string]: unknown;
 }) => (
   <div className="w-full">
@@ -314,8 +312,9 @@ export const ModernSelect = ({
       <SelectTrigger
         className={cn(
           formStyles.input,
+          'cursor-pointer',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
-          className,
+          TriggerClassName,
         )}
       >
         <SelectValue placeholder={placeholder} />

@@ -7,8 +7,10 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useFuelProcurement } from './ContextProvider';
-import FuelAgreements from './subpages/FuelAgreements';
+import FuelAgreementsPage from './subpages/FuelAgreements';
 import FuelTendersPage from './subpages/FuelTenders';
+import HistoricalDataPage from './subpages/HistoricalData';
+import ReconciliationPage from './subpages/Reconciliation';
 
 type TabValue = 'fuel-tenders' | 'fuel-agreements';
 
@@ -80,6 +82,8 @@ function MainContentSection() {
       tabs={[
         { label: 'Fuel Tenders', value: 'fuel-tenders' },
         { label: 'Fuel Agreements', value: 'fuel-agreements' },
+        { label: 'Reconciliation', value: 'reconciliation' },
+        { label: 'Historical Data', value: 'historical-data' },
       ]}
       selectedTab={selectedTab}
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
@@ -88,7 +92,13 @@ function MainContentSection() {
         <FuelTendersPage />
       </TabsContent>
       <TabsContent value="fuel-agreements">
-        <FuelAgreements />
+        <FuelAgreementsPage />
+      </TabsContent>
+      <TabsContent value="reconciliation">
+        <ReconciliationPage />
+      </TabsContent>
+      <TabsContent value="historical-data">
+        <HistoricalDataPage />
       </TabsContent>
     </Tabs>
   );

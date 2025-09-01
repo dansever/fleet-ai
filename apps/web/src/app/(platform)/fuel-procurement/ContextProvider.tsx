@@ -20,24 +20,24 @@ export type ErrorState = {
 };
 
 export type FuelProcurementContextType = {
-  // User and airports
+  // User
   dbUser: User;
+
+  // Airports
   airports: Airport[];
+  selectedAirport: Airport | null;
+  setSelectedAirport: (airport: Airport | null) => void;
   setAirports: (airports: Airport[]) => void;
   refreshAirports: () => Promise<void>;
   updateAirport: (updatedAirport: Airport) => void;
   addAirport: (newAirport: Airport) => void;
   removeAirport: (airportId: string) => void;
 
-  // Selected airport
-  selectedAirport: Airport | null;
-  setSelectedAirport: (airport: Airport | null) => void;
-
   // Tenders
   airportTenders: FuelTender[];
   selectedTender: FuelTender | null;
   setSelectedTender: (tender: FuelTender | null) => void;
-  selectTenderById: (tenderId: string) => void; // New optimized tender selection
+  selectTenderById: (tenderId: string) => void;
   refreshTenders: () => Promise<void>;
   updateTender: (updatedTender: FuelTender) => void;
   addTender: (newTender: FuelTender) => void;

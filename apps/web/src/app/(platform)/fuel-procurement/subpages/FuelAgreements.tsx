@@ -1,3 +1,3 @@
-export default function FuelAgreements() {
+export default function FuelAgreementsPage() {
   return <div>Fuel Agreements</div>;
 }

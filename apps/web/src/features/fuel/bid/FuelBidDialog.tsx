@@ -3,7 +3,7 @@
 import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { createFuelBid, updateFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { Pencil, Plus } from 'lucide-react';
@@ -206,7 +206,7 @@ export default function FuelBidDialog({
     <DetailDialog
       trigger={
         <Button
-          intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+          intent={'secondary'}
           text={triggerText}
           icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
           size={buttonSize}
@@ -217,16 +217,12 @@ export default function FuelBidDialog({
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      DialogType={DialogType}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bid Information & Timeline */}
-          <ContentSection
-            header="Bid Information & Timeline"
-            headerGradient="from-pink-600 to-pink-400"
-          >
+          <MainCard title="Bid Information & Timeline" headerGradient="from-pink-600 to-pink-400">
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Title"
@@ -277,10 +273,10 @@ export default function FuelBidDialog({
                 name="aiSummary"
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
           {/* Vendor Information */}
-          <ContentSection header="Vendor Information" headerGradient="from-pink-600 to-pink-400">
+          <MainCard title="Vendor Information" headerGradient="from-pink-600 to-pink-400">
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
@@ -331,13 +327,10 @@ export default function FuelBidDialog({
                 name="vendorComments"
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
           {/* Pricing Structure & Terms */}
-          <ContentSection
-            header="Pricing Structure & Terms"
-            headerGradient="from-pink-600 to-pink-400"
-          >
+          <MainCard title="Pricing Structure & Terms" headerGradient="from-pink-600 to-pink-400">
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Price Type"
@@ -420,10 +413,10 @@ export default function FuelBidDialog({
                 name="formulaNotes"
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
           {/* Fees & Specifications */}
-          <ContentSection header="Fees & Specifications" headerGradient="from-pink-600 to-pink-400">
+          <MainCard title="Fees & Specifications" headerGradient="from-pink-600 to-pink-400">
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Into Plane Fee"
@@ -490,7 +483,7 @@ export default function FuelBidDialog({
                 name="normalizedUnitPriceUsdPerUsg"
               />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>

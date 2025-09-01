@@ -8,11 +8,23 @@ import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
 import { deleteFuelTender } from '@/services/fuel/fuel-tender-client';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
-import { ModernSelect } from '@/stories/Form/Form';
-import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { MainCard } from '@/stories/Card/Card';
+import { ModernSelect, NumberInput } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
-import { AlertCircle, CalendarIcon, Eye, Pencil, Plus, TrashIcon } from 'lucide-react';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
+import {
+  AlertCircle,
+  Calendar,
+  Coins,
+  Eye,
+  FileText,
+  Fuel,
+  Pencil,
+  Plus,
+  Ruler,
+  TrashIcon,
+  Users,
+} from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
@@ -39,6 +51,15 @@ const FuelTendersPage = memo(function FuelTendersPage() {
 
   const [showTenderDropdown, setShowTenderDropdown] = useState(false);
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
+
+  const [volumeForecast, setVolumeForecast] = useState({
+    jan: '45000',
+    feb: '42000',
+    mar: '48000',
+    apr: '46000',
+    may: '50000',
+    jun: '52000',
+  });
 
   // Handle tender addition
   const handleTenderAdded = (newTender: FuelTender) => {
@@ -130,8 +151,8 @@ const FuelTendersPage = memo(function FuelTendersPage() {
             placeholder="Select a tender"
             onValueChange={selectTenderById}
             value={selectedTender?.id}
-            triggerClassName="min-h-12"
             disabled={!airportTenders.length}
+            TriggerClassName="min-h-12"
             options={airportTenders.map((tender) => ({
               value: tender.id,
               label: (
@@ -146,16 +167,16 @@ const FuelTendersPage = memo(function FuelTendersPage() {
               ),
             }))}
           />
-          <div className="flex gap-2">
-            <TenderDialog
-              key="add-tender"
-              trigger={<Button intent="secondary" icon={Plus} text="Add Tender" />}
-              tender={null}
-              airportId={selectedAirport.id}
-              onChange={handleTenderAdded}
-              DialogType="add"
-            />
-          </div>
+          <TenderDialog
+            key="add-tender"
+            trigger={
+              <Button className="flex-shrink-0" intent="secondary" icon={Plus} text="Add Tender" />
+            }
+            tender={null}
+            airportId={selectedAirport.id}
+            onChange={handleTenderAdded}
+            DialogType="add"
+          />
         </div>
 
         {/* Loading State */}
@@ -163,193 +184,141 @@ const FuelTendersPage = memo(function FuelTendersPage() {
 
         {currentTender && (
           <div className="flex flex-col gap-4">
-            <ContentSection
-              header={
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-start gap-2 justify-between">
-                    <h3>{currentTender.title}</h3>
-                    {/* Buttons */}
-                    <div className="flex gap-2">
-                      <TenderDialog
-                        key={`view-tender-${currentTender.id}`}
-                        trigger={<Button intent="secondaryInverted" icon={Eye} />}
-                        tender={currentTender}
-                        airportId={selectedAirport.id}
-                        onChange={handleTenderUpdated}
-                        DialogType="view"
+            <MainCard
+              title={currentTender.title}
+              subtitle={currentTender.description || 'No description available'}
+              headerActions={
+                // Buttons
+                <div className="flex gap-2">
+                  <TenderDialog
+                    key={`view-tender-${currentTender.id}`}
+                    trigger={<Button intent="secondaryInverted" icon={Eye} />}
+                    tender={currentTender}
+                    airportId={selectedAirport.id}
+                    onChange={handleTenderUpdated}
+                    DialogType="view"
+                  />
+                  <TenderDialog
+                    key={`edit-tender-${currentTender.id}`}
+                    trigger={<Button intent="secondaryInverted" icon={Pencil} />}
+                    tender={currentTender}
+                    airportId={selectedAirport.id}
+                    onChange={handleTenderUpdated}
+                    DialogType="edit"
+                  />
+                  <ConfirmationPopover
+                    trigger={
+                      <Button
+                        intent="secondary"
+                        icon={TrashIcon}
+                        className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
                       />
-                      <TenderDialog
-                        key={`edit-tender-${currentTender.id}`}
-                        trigger={<Button intent="secondaryInverted" icon={Pencil} />}
-                        tender={currentTender}
-                        airportId={selectedAirport.id}
-                        onChange={handleTenderUpdated}
-                        DialogType="edit"
-                      />
-                      <ConfirmationPopover
-                        trigger={
-                          <Button
-                            intent="secondary"
-                            icon={TrashIcon}
-                            className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
-                          />
-                        }
-                        popoverIntent="danger"
-                        title="Delete Tender"
-                        onConfirm={handleTenderDelete}
-                        open={isDeletePopoverOpen}
-                        onOpenChange={setIsDeletePopoverOpen}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-blue-100">
-                    {currentTender.description || 'No description available'}
-                  </p>
+                    }
+                    popoverIntent="danger"
+                    title="Delete Tender"
+                    onConfirm={handleTenderDelete}
+                    open={isDeletePopoverOpen}
+                    onOpenChange={setIsDeletePopoverOpen}
+                  />
                 </div>
               }
             >
-              <div className="grid grid-cols-9 gap-4">
-                {/* Tender Information */}
-                <ContentSection
-                  headerGradient="none"
-                  header={
-                    <div className="flex items-start gap-2 text-foreground">
-                      <div className="p-2 bg-blue-600 rounded-xl">
-                        <CalendarIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <h4>Details</h4>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {/* grid col*/}
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Fuel className="h-4 w-4" />
+                      Fuel Type
                     </div>
-                  }
-                  className="col-span-3 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
-                >
-                  <KeyValuePair
-                    label="Fuel Type"
-                    value={currentTender.fuelType}
-                    valueType="string"
-                  />
-                  <KeyValuePair
-                    label="Currency"
-                    value={CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
-                    valueType="string"
-                  />
-                  <KeyValuePair
-                    label="Base UOM"
-                    value={
-                      BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
-                      ''
-                    }
-                    valueType="string"
-                  />
-                </ContentSection>
-
-                {/* Timeline */}
-                <ContentSection
-                  className="col-span-4 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
-                  headerGradient="none"
-                  header={
-                    <div className="flex items-start gap-2 text-foreground">
-                      <div className="p-2 bg-purple-600 rounded-xl">
-                        <CalendarIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <h4>Timeline</h4>
+                    <div className="text-sm font-medium">{currentTender.fuelType}</div>
+                  </div>
+                </div>
+                {/* grid col*/}
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Calendar className="h-4 w-4" />
+                      Tender Period
                     </div>
-                  }
-                >
-                  <div className="flex flex-row gap-8 justify-between">
-                    <div className="flex flex-col gap-2 w-1/2">
-                      <h4 className="font-bold">Bidding Period</h4>
-                      <div className="flex flex-col">
-                        <KeyValuePair
-                          label="Starts"
-                          value={
-                            currentTender.biddingStarts
-                              ? formatDate(currentTender.biddingStarts)
-                              : 'TBD'
-                          }
-                          valueType="date"
-                        />
-                        <KeyValuePair
-                          label="Ends"
-                          value={
-                            currentTender.biddingEnds
-                              ? formatDate(currentTender.biddingEnds)
-                              : 'TBD'
-                          }
-                          valueType="date"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 w-1/2">
-                      <h4 className="font-bold">Delivery Period</h4>
-                      <div className="flex flex-col">
-                        <KeyValuePair
-                          label="Starts"
-                          value={
-                            currentTender.deliveryStarts
-                              ? formatDate(currentTender.deliveryStarts)
-                              : 'TBD'
-                          }
-                          valueType="date"
-                        />
-                        <KeyValuePair
-                          label="Ends"
-                          value={
-                            currentTender.deliveryEnds
-                              ? formatDate(currentTender.deliveryEnds)
-                              : 'TBD'
-                          }
-                          valueType="date"
-                        />
-                      </div>
+                    <div className="text-sm font-medium">
+                      {currentTender.biddingStarts} - {currentTender.biddingEnds}
                     </div>
                   </div>
-                </ContentSection>
-
-                {/* Quick Stats */}
-                <ContentSection
-                  className="col-span-2 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
-                  headerGradient="none"
-                  header={
-                    <div className="flex items-start gap-2 text-foreground">
-                      <div className="p-2 bg-orange-600 rounded-xl">
-                        <CalendarIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <h4>Summary</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Calendar className="h-4 w-4" />
+                      Agreement Period
                     </div>
-                  }
-                >
-                  <KeyValuePair
-                    keyClassName="max-w-1/2"
-                    label="Total Bids"
-                    value={fuelBids.length}
-                    valueType="number"
-                  />
-                  <KeyValuePair
-                    keyClassName="max-w-1/2"
-                    label="Accepted"
-                    value={
-                      fuelBids.filter(
-                        (bid) =>
-                          bid.decision?.toLowerCase() === 'accepted' ||
-                          bid.decision?.toLowerCase() === 'winner',
-                      ).length
-                    }
-                    valueType="number"
-                  />
-                  <KeyValuePair
-                    keyClassName="max-w-1/2"
-                    label="Pending"
-                    value={
-                      fuelBids.filter(
-                        (bid) => !bid.decision || bid.decision.toLowerCase() === 'pending',
-                      ).length
-                    }
-                    valueType="number"
-                  />
-                </ContentSection>
+                    <div className="text-sm font-medium">
+                      {currentTender.deliveryStarts} - {currentTender.deliveryEnds}
+                    </div>
+                  </div>
+                </div>
+                {/* grid col*/}
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Coins className="h-4 w-4" />
+                      Base Currency
+                    </div>
+                    <div className="text-sm font-medium">
+                      {CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Ruler className="h-4 w-4" />
+                      Base Unit of Measure
+                    </div>
+                    <div className="text-sm font-medium">
+                      {BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
+                        ''}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FileText className="h-4 w-4" />
+                      Status
+                    </div>
+                    <StatusBadge status="operational" text={currentTender.status || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Users className="h-4 w-4" />
+                      Suppliers
+                    </div>
+                    <div className="text-sm font-medium">{fuelBids.length} responded</div>
+                  </div>
+                </div>
               </div>
-            </ContentSection>
+
+              {/* Volume Forecast */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4">Monthly Volume Forecast</h3>
+                <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+                  {Object.entries(volumeForecast).map(([month, volume]) => (
+                    <div key={month}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                        {month}
+                      </label>
+                      <NumberInput
+                        label={month}
+                        step={1000}
+                        value={Number(volume)}
+                        onChange={(value) =>
+                          setVolumeForecast((prev) => ({ ...prev, [month]: value }))
+                        }
+                        placeholder="Liters"
+                        className="text-sm"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </MainCard>
 
             {/* Fuel Bids Loading State */}
             {loading.fuelBids ? (

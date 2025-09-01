@@ -21,7 +21,8 @@ const buttonStyles = cva(
         primary:
           'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white',
         // Secondary action - less prominent, alternative actions
-        secondary: 'bg-white border border-primary/20  text-primary',
+        secondary:
+          'bg-white border border-primary/20 text-primary/80 hover:text-primary hover:border-primary/40',
         // Secondary inverted - for use on dark/colored backgrounds
         secondaryInverted: 'bg-white/20 hover:bg-white/30 text-white',
         // Success action - confirmations, completions, positive outcomes

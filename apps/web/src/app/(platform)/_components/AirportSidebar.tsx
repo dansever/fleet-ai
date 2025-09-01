@@ -88,7 +88,6 @@ export default function AirportList({
           <AirportDialog
             airport={null}
             DialogType="add"
-            triggerButtonIntent="add"
             TriggerButtonText="Add"
             TriggerButtonIcon={Plus}
             onChange={(newAirport) => {

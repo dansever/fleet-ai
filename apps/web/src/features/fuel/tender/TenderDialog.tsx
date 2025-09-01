@@ -9,7 +9,7 @@ import {
   updateFuelTender,
   type CreateFuelTenderData,
 } from '@/services/fuel/fuel-tender-client';
-import { ContentSection } from '@/stories/Card/Card';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { useCallback, useEffect, useState } from 'react';
@@ -153,10 +153,7 @@ export default function TenderDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ContentSection
-            header="Tender Information"
-            headerGradient="from-orange-500 to-orange-300"
-          >
+          <MainCard title="Tender Information" headerGradient="from-orange-500 to-orange-300">
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Title"
@@ -195,11 +192,8 @@ export default function TenderDialog({
                 }))}
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Configuration & Timeline"
-            headerGradient="from-orange-500 to-orange-300"
-          >
+          </MainCard>
+          <MainCard title="Configuration & Timeline" headerGradient="from-orange-500 to-orange-300">
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Base UOM"
@@ -247,7 +241,7 @@ export default function TenderDialog({
                 name="deliveryEnds"
               />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>

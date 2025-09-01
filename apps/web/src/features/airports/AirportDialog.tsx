@@ -3,15 +3,15 @@
 import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { createAirport, updateAirport } from '@/services/core/airport-client';
-import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { Button, ButtonProps } from '@/stories/Button/Button';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { Eye, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AirportAutocomplete from './AirportAutocomplete';
-import type { AirportDatasetItem } from './airportDatasetType';
+import { AirportDatasetItem } from './airportDatasetType';
 
 export default function AirportDialog({
   airport,
@@ -24,7 +24,7 @@ export default function AirportDialog({
 }: {
   airport: Airport | null;
   DialogType: 'add' | 'edit' | 'view';
-  triggerButtonIntent?: 'primary' | 'secondary' | 'ghost' | 'add';
+  triggerButtonIntent?: ButtonProps['intent'];
   TriggerButtonText?: string;
   TriggerButtonIcon?: LucideIcon;
   onChange: (airport: Airport) => void;
@@ -138,12 +138,11 @@ export default function AirportDialog({
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      DialogType={DialogType}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ContentSection header="Information" headerGradient="from-blue-500 to-blue-300">
+          <MainCard title="Information" headerGradient="from-blue-500 to-blue-300">
             <div className="flex flex-col justify-between space-y-4">
               {isEditing && isAdd ? (
                 <AirportAutocomplete
@@ -189,9 +188,9 @@ export default function AirportDialog({
                 value={formData.isHub}
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
-          <ContentSection header="Location" headerGradient="from-blue-500 to-blue-300">
+          <MainCard title="Location" headerGradient="from-blue-500 to-blue-300">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="City"
@@ -218,7 +217,7 @@ export default function AirportDialog({
                 name="country"
               />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>
