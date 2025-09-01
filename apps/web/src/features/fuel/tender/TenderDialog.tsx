@@ -41,6 +41,7 @@ export default function TenderDialog({
         fuelType: null,
         baseCurrency: null,
         baseUom: null,
+        projectedAnnualVolume: null,
         biddingStarts: null,
         biddingEnds: null,
         deliveryStarts: null,
@@ -49,15 +50,16 @@ export default function TenderDialog({
     }
     // For edit/view modes, populate from tender
     return {
-      title: tender?.title || null,
-      description: tender?.description || null,
-      fuelType: tender?.fuelType || null,
-      baseCurrency: tender?.baseCurrency || null,
-      baseUom: tender?.baseUom || null,
-      biddingStarts: tender?.biddingStarts || null,
-      biddingEnds: tender?.biddingEnds || null,
-      deliveryStarts: tender?.deliveryStarts || null,
-      deliveryEnds: tender?.deliveryEnds || null,
+      title: tender?.title ?? null,
+      description: tender?.description ?? null,
+      fuelType: tender?.fuelType ?? null,
+      baseCurrency: tender?.baseCurrency ?? null,
+      baseUom: tender?.baseUom ?? null,
+      projectedAnnualVolume: tender?.projectedAnnualVolume ?? null,
+      biddingStarts: tender?.biddingStarts ?? null,
+      biddingEnds: tender?.biddingEnds ?? null,
+      deliveryStarts: tender?.deliveryStarts ?? null,
+      deliveryEnds: tender?.deliveryEnds ?? null,
     };
   }, [DialogType, tender]);
 
@@ -86,11 +88,12 @@ export default function TenderDialog({
         }
         const createData: CreateFuelTenderData = {
           airportId,
-          title: serializedFormData.title || '', // Ensure title is not null
+          title: serializedFormData.title || '',
           description: serializedFormData.description,
           fuelType: serializedFormData.fuelType,
           baseCurrency: serializedFormData.baseCurrency,
           baseUom: serializedFormData.baseUom,
+          projectedAnnualVolume: serializedFormData.projectedAnnualVolume,
           biddingStarts: serializedFormData.biddingStarts,
           biddingEnds: serializedFormData.biddingEnds,
           deliveryStarts: serializedFormData.deliveryStarts,
@@ -109,6 +112,7 @@ export default function TenderDialog({
           description: serializedFormData.description,
           fuelType: serializedFormData.fuelType,
           baseCurrency: serializedFormData.baseCurrency,
+          projectedAnnualVolume: serializedFormData.projectedAnnualVolume,
           baseUom: serializedFormData.baseUom,
           biddingStarts: serializedFormData.biddingStarts,
           biddingEnds: serializedFormData.biddingEnds,
@@ -154,7 +158,7 @@ export default function TenderDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MainCard title="Tender Information" headerGradient="from-orange-500 to-orange-300">
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -191,10 +195,6 @@ export default function TenderDialog({
                   value: key,
                 }))}
               />
-            </div>
-          </MainCard>
-          <MainCard title="Configuration & Timeline" headerGradient="from-orange-500 to-orange-300">
-            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Base UOM"
                 value={formData.baseUom}
@@ -207,7 +207,20 @@ export default function TenderDialog({
                   value: uom.value,
                 }))}
               />
-
+              <KeyValuePair
+                label="Projected Annual Volume"
+                value={formData.projectedAnnualVolume}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('projectedAnnualVolume', value)}
+                name="projectedAnnualVolume"
+                step={1000}
+                min={0}
+              />
+            </div>
+          </MainCard>
+          <MainCard title="Configuration & Timeline" headerGradient="from-orange-500 to-orange-300">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Bidding Starts"
                 value={formData.biddingStarts}

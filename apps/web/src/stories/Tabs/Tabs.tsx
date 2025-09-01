@@ -26,7 +26,7 @@ export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: Ta
           value={tab.value}
           className={cn(
             'cursor-pointer rounded-xl transition-all duration-300',
-            'text-base text-muted-foreground/30 font-bold hover:text-foreground/80',
+            'text-base text-muted-foreground/50 font-bold hover:text-foreground',
             'data-[state=active]:bg-secondary/10 data-[state=active]:text-foreground',
             'data-[state=active]:shadow-none',
           )}

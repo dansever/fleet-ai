@@ -102,7 +102,7 @@ export const ConfirmationPopover = ({
         <div className="p-4 bg-white">
           <div className="flex gap-2 justify-end">
             <Button
-              intent="secondary"
+              intent="ghost"
               onClick={handleCancel}
               size="sm"
               text={cancelText}

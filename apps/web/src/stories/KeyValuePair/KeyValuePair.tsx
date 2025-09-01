@@ -14,7 +14,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { DatePicker } from '../Form/Form';
+import { DatePicker, ModernInput, NumberInput } from '../Form/Form';
 
 export interface SelectOption {
   value: string;
@@ -33,6 +33,9 @@ export interface KeyValuePairProps {
   keyClassName?: string;
   valueClassName?: string;
   placeholder?: string;
+  step?: number;
+  min?: number;
+  max?: number;
 }
 
 export const KeyValuePair: React.FC<KeyValuePairProps> = ({
@@ -47,6 +50,9 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
   keyClassName = '',
   valueClassName = '',
   placeholder,
+  step = 1,
+  min = 0,
+  max,
 }) => {
   const handleChange = (newValue: string | number | boolean) => {
     onChange?.(newValue);
@@ -57,24 +63,24 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
       switch (valueType) {
         case 'string':
           return (
-            <Input
+            <ModernInput
               type="text"
               value={(value as string) || ''}
-              onChange={(e) => handleChange(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value)}
               placeholder={placeholder || `Enter ${label.toLowerCase()}`}
-              className="rounded-xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
               name={name}
             />
           );
         case 'number':
           return (
-            <Input
-              type="number"
-              value={(value as number) || ''}
-              onChange={(e) => handleChange(Number(e.target.value))}
+            <NumberInput
+              value={value as number | undefined}
+              onChange={(value) => handleChange(value)}
               placeholder={placeholder || '0'}
-              className="rounded-xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
               name={name}
+              step={step}
+              min={min}
+              max={max}
             />
           );
         case 'boolean':
@@ -94,7 +100,7 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
             <DatePicker
               value={(value as string) || ''}
               onChange={(value: string) => handleChange(value)}
-              triggerClassName="rounded-xl border-gray-200 focus:border-blue-300"
+              triggerClassName=""
             />
           );
         case 'select':
@@ -138,9 +144,9 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
         );
       case 'number':
         return (
-          <span className={cn('text-gray-900 font-mono', valueClassName)}>
+          <span className={cn('text-gray-900', valueClassName)}>
             {value !== null && value !== undefined ? (
-              value.toLocaleString()
+              Number(value).toLocaleString()
             ) : (
               <span className="text-gray-400 italic">Not set</span>
             )}

@@ -13,31 +13,42 @@ export async function GET(request: NextRequest) {
   try {
     // Authorize user
     const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    if (error || !dbUser) {
+      return jsonError('Unauthorized', 401);
+    }
 
     // Get organization ID
     const orgId = dbUser.orgId;
-    if (!orgId) return jsonError('User has no organization', 403);
+    if (!orgId) {
+      return jsonError('User has no organization', 403);
+    }
 
     // Get tender ID from query params
     const { searchParams } = new URL(request.url);
     const tenderId = searchParams.get('tenderId');
 
     // Check if tender ID is provided
-    if (!tenderId) return jsonError('Tender ID is required', 400);
+    if (!tenderId) {
+      return jsonError('Tender ID is required', 400);
+    }
 
     // Get fuel tender by ID
     const fuelTender = await getFuelTenderById(tenderId);
-    if (!fuelTender) return jsonError('Fuel tender not found', 404);
+    if (!fuelTender) {
+      return jsonError('Fuel tender not found', 404);
+    }
 
     // Check if user has access to tender
-    if (fuelTender.orgId !== orgId) return jsonError('Unauthorized', 401);
+    if (fuelTender.orgId !== orgId) {
+      return jsonError('Unauthorized', 401);
+    }
 
     // Get fuel bids by tender ID
     const fuelBids = await getFuelBidsByTender(tenderId);
+
     return NextResponse.json(fuelBids);
   } catch (error) {
-    console.error('Error getting fuel bids:', error);
+    console.error('API: GET /api/fuel-bids - Error:', error);
     return jsonError('Failed to get fuel bids', 500);
   }
 }

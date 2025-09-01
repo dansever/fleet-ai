@@ -41,8 +41,8 @@ export async function getFuelBidsByOrg(): Promise<FuelBid[]> {
  * Create a new fuel bid
  */
 export async function createFuelBid(
-  data: CreateFuelBidData,
   tenderId: FuelTender['id'],
+  data: CreateFuelBidData,
 ): Promise<FuelBid> {
   const res = await api.post(`/api/fuel-bids?tenderId=${tenderId}`, data);
   return res.data;
@@ -59,7 +59,7 @@ export async function updateFuelBid(id: string, data: UpdateFuelBidData): Promis
 /**
  * Delete a fuel bid
  */
-export async function deleteFuelBid(id: string): Promise<void> {
+export async function deleteFuelBid(id: FuelBid['id']): Promise<void> {
   await api.delete(`/api/fuel-bids?id=${id}`);
 }
 

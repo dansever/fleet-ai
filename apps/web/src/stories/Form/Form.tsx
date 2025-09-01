@@ -1,7 +1,5 @@
 'use client';
 
-import type React from 'react';
-
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -19,17 +17,17 @@ import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Minus, Plus, Search, Upload, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export const formStyles = {
   // Base input styling - consistent across all form elements
   input: cn(
-    'h-11 px-4 py-2 text-sm font-medium',
+    'h-10 px-4 py-2 text-sm font-normal',
     'rounded-xl border border-slate-200 bg-white',
     'placeholder:text-slate-400 placeholder:font-normal',
     'transition-all duration-200',
-    'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-0',
-    'hover:border-slate-300',
+    'focus:border-secondary focus:ring-offset-0 focus-visible:ring-0 focus-visible:border-secondary',
+    'hover:border-secondary/50',
     'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
   ),
 
@@ -107,7 +105,7 @@ export const SearchInput = ({
         type="search"
         autoComplete="off"
         placeholder={placeholder}
-        className={cn(formStyles.input, 'pl-10', className)}
+        className={cn(formStyles.input, 'pl-10 ', className)}
         {...props}
       />
     </div>
@@ -167,12 +165,14 @@ export const PasswordInput = ({
   );
 };
 
+// changes inside your NumberInput component
+
 export const NumberInput = ({
   label,
   error,
   helper,
   placeholder,
-  min,
+  min = 0,
   max,
   step = 1,
   className,
@@ -192,19 +192,59 @@ export const NumberInput = ({
   onChange?: (value: number) => void;
   [key: string]: unknown;
 }) => {
-  const handleIncrement = () => {
-    const newValue = (value || 0) + step;
-    if (max === undefined || newValue <= max) {
-      onChange?.(newValue);
+  // --- keep the latest value in a ref so repeating timer reads fresh value
+  const valueRef = React.useRef<number>(0);
+  React.useEffect(() => {
+    valueRef.current = Number.isFinite(value as number) ? (value as number) : 0;
+  }, [value]);
+
+  // --- get the latest value
+  const getSafe = () => valueRef.current;
+
+  // --- apply the change
+  const applyChange = (next: number) => {
+    if (max !== undefined && next > max) return;
+    if (min !== undefined && next < min) return;
+    onChange?.(next);
+  };
+
+  // --- handle the button clicks
+  const handleIncrementOnce = () => applyChange(getSafe() + (step ?? 1));
+  const handleDecrementOnce = () => applyChange(getSafe() - (step ?? 1));
+
+  // --- press-and-hold state
+  const repeatRef = React.useRef<number | null>(null);
+  const delayRef = React.useRef<number | null>(null);
+
+  const startHold = (fn: () => void) => (e: React.PointerEvent) => {
+    if ((e.currentTarget as HTMLButtonElement).disabled) return;
+
+    // immediate tick
+    fn();
+
+    // small initial delay, then repeat
+    delayRef.current = window.setTimeout(() => {
+      repeatRef.current = window.setInterval(fn, 80); // repeat speed
+    }, 300); // initial delay
+
+    // capture pointer so we still get pointerup even if pointer leaves button
+    (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId);
+  };
+
+  // --- stop the hold
+  const stopHold = () => {
+    if (delayRef.current) {
+      window.clearTimeout(delayRef.current);
+      delayRef.current = null;
+    }
+    if (repeatRef.current) {
+      window.clearInterval(repeatRef.current);
+      repeatRef.current = null;
     }
   };
 
-  const handleDecrement = () => {
-    const newValue = (value || 0) - step;
-    if (min === undefined || newValue >= min) {
-      onChange?.(newValue);
-    }
-  };
+  // --- stop the hold when component unmounts
+  React.useEffect(() => stopHold, []);
 
   return (
     <div className="w-full">
@@ -215,8 +255,11 @@ export const NumberInput = ({
           min={min}
           max={max}
           step={step}
-          value={value || ''}
-          onChange={(e) => onChange?.(Number.parseFloat(e.target.value) || 0)}
+          value={Number.isFinite(value) ? value : ''}
+          onChange={(e) => {
+            const n = Number.parseFloat(e.target.value);
+            onChange?.(Number.isFinite(n) ? n : 0);
+          }}
           className={cn(
             formStyles.input,
             error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
@@ -224,31 +267,42 @@ export const NumberInput = ({
           )}
           {...props}
         />
-        <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex">
+
+        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             className="h-8 w-6 p-0 hover:bg-slate-100"
-            onClick={handleDecrement}
-            disabled={min !== undefined && (value || 0) <= min}
+            onPointerDown={startHold(handleDecrementOnce)}
+            onPointerUp={stopHold}
+            onPointerCancel={stopHold}
+            onPointerLeave={stopHold}
+            disabled={min !== undefined && (value ?? 0) <= min}
+            aria-label="Decrease"
           >
             <Minus className="h-3 w-3 text-slate-400" />
           </Button>
+
           <Button
             type="button"
             variant="ghost"
             size="sm"
             className="h-8 w-6 p-0 hover:bg-slate-100"
-            onClick={handleIncrement}
-            disabled={max !== undefined && (value || 0) >= max}
+            onPointerDown={startHold(handleIncrementOnce)}
+            onPointerUp={stopHold}
+            onPointerCancel={stopHold}
+            onPointerLeave={stopHold}
+            disabled={max !== undefined && (value ?? 0) >= max}
+            aria-label="Increase"
           >
             <Plus className="h-3 w-3 text-slate-400" />
           </Button>
         </div>
       </div>
+
       {error && <p className={formStyles.error}>{error}</p>}
-      {helper && !error && <p className={formStyles.helper}>{helper}</p>}
+      {!error && helper && <p className={formStyles.helper}>{helper}</p>}
     </div>
   );
 };
@@ -324,7 +378,7 @@ export const ModernSelect = ({
           <SelectItem
             key={option.value}
             value={option.value}
-            className="rounded-lg py-2 px-3 text-sm font-medium hover:bg-slate-50 focus:bg-slate-50"
+            className="rounded-lg py-2 px-3 text-sm font-medium focus:bg-accent"
           >
             {option.label}
           </SelectItem>
@@ -395,7 +449,7 @@ export const DatePicker = ({
             variant="outline"
             className={cn(
               formStyles.input,
-              'justify-between font-normal',
+              'justify-between font-normal hover:bg-slate-50 cursor-pointer',
               !date && 'text-slate-400',
               error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
               className,

@@ -13,17 +13,17 @@ import { FileText, RefreshCw } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
-import { useFuelBidColumns } from './fuelBidColumns';
+import { useFuelBidColumns } from './FuelBidsDataTableColumns';
 
-interface FuelBidsTableProps {
+interface FuelBidsDataTableProps {
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
 
-const FuelBidsComparison = memo(function FuelBidsComparison({
+const FuelBidsDataTable = memo(function FuelBidsDataTable({
   onRefresh,
   isRefreshing,
-}: FuelBidsTableProps) {
+}: FuelBidsDataTableProps) {
   const { selectedTender, fuelBids, setFuelBids, addFuelBid } = useFuelProcurement();
   const [newBid, setNewBid] = useState<NewFuelBid | null>(null);
   const fuelBidColumns = useFuelBidColumns();
@@ -37,7 +37,7 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
     try {
       const result = await extractFuelBid(file);
       const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
-      const createdBid = await createFuelBid(convertedBid, selectedTender.id);
+      const createdBid = await createFuelBid(selectedTender.id, convertedBid);
       addFuelBid(createdBid);
       toast.success('Fuel bid extracted successfully');
     } catch (error) {
@@ -46,10 +46,7 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
   };
 
   return (
-    <BaseCard
-    // header="Fuel Bids"
-    // subheader={`Compare and evaluate fuel bids for ${selectedTender?.title}`}
-    >
+    <BaseCard>
       <CardHeader className="flex items-center justify-between">
         <div>
           <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -84,9 +81,8 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
               size="sm"
               className="text-gray-500"
               onClick={async () => {
-                const bid = await createRandomFuelBid(selectedTender);
+                const bid = await createRandomFuelBid(selectedTender.id);
                 addFuelBid(bid as FuelBid);
-                console.log('Time to close the popover');
                 setUploadFuelBidPopoverOpen(false);
               }}
             />
@@ -98,14 +94,14 @@ const FuelBidsComparison = memo(function FuelBidsComparison({
           data={fuelBids}
           columns={fuelBidColumns}
           searchable={true}
-          filterable={true}
           pagination={true}
           pageSize={10}
           onRowClick={() => {}}
+          csvDownload={true}
         />
       </CardContent>
     </BaseCard>
   );
 });
 
-export default FuelBidsComparison;
+export default FuelBidsDataTable;

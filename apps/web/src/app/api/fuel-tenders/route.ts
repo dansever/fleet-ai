@@ -6,7 +6,7 @@ import {
   getFuelTendersByOrgId,
   updateFuelTender,
 } from '@/db/fuel/fuel-tenders/db-actions';
-import type { NewFuelTender, UpdateFuelTender } from '@/drizzle/types';
+import type { NewFuelTender } from '@/drizzle/types';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
@@ -109,8 +109,6 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    console.log('PUT /api/fuel-tenders');
-
     // Authorize user
     const { dbUser, error } = await authorizeUser();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
@@ -134,23 +132,8 @@ export async function PUT(request: NextRequest) {
     // Parse request body and handle date conversion
     const body = await request.json();
 
-    // Create update data from body, excluding system fields
-    const updateData: UpdateFuelTender = {
-      title: body.title,
-      description: body.description,
-      fuelType: body.fuelType,
-      baseCurrency: body.baseCurrency,
-      baseUom: body.baseUom,
-      biddingStarts: body.biddingStarts,
-      biddingEnds: body.biddingEnds,
-      deliveryStarts: body.deliveryStarts,
-      deliveryEnds: body.deliveryEnds,
-      status: body.status,
-      // Don't include orgId, id, createdAt, updatedAt - these are managed by the system
-    };
-
     // Update fuel tender
-    const updatedFuelTender = await updateFuelTender(id, updateData);
+    const updatedFuelTender = await updateFuelTender(id, body);
     return NextResponse.json(updatedFuelTender);
   } catch (error) {
     console.error('Error updating fuel tender:', error);

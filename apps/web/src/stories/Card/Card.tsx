@@ -328,11 +328,13 @@ export const MainCard = ({
   headerGradient?: string;
   neutralHeader?: boolean; // New prop for neutral header styling
 }) => (
-  <Card className={cn('rounded-3xl p-0 border-0 shadow-none overflow-hidden gap-2', className)}>
-    <CardHeader className="p-0">
+  <Card
+    className={cn('rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden', className)}
+  >
+    <CardHeader className="px-0">
       <div
         className={cn(
-          'px-6 py-4 relative overflow-hidden',
+          'px-6 py-2 relative overflow-hidden',
           neutralHeader
             ? 'bg-white text-gray-900'
             : `bg-gradient-to-r text-white ${headerGradient}`,
@@ -342,21 +344,21 @@ export const MainCard = ({
           <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
         )}
 
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-semibold text-balance">{title}</h3>
+        <div className="relative z-10 flex items-center justify-between gap-2">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-balance">{title}</h3>
             {subtitle && (
-              <p className={cn('text-sm mt-1', neutralHeader ? 'text-gray-600' : 'text-white/80')}>
-                {subtitle}
-              </p>
+              <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>{subtitle}</p>
             )}
           </div>
-          {headerActions && <div className="flex items-center gap-2">{headerActions}</div>}
+          {headerActions && (
+            <div className="flex items-center gap-2 flex-shrink-0">{headerActions}</div>
+          )}
         </div>
       </div>
     </CardHeader>
 
     {/* Content area */}
-    <CardContent className="p-4">{children}</CardContent>
+    <CardContent>{children}</CardContent>
   </Card>
 );

@@ -360,3 +360,15 @@
   content: '';
   @apply absolute -z-10 w-full h-full top-0 left-0 blur-3xl opacity-30 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-full;
 }
+
+/* Hide number spinners (Chrome/Safari/Edge) */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number spinners (Firefox) */
+input[type='number'] {
+  -moz-appearance: textfield;
+}

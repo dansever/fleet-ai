@@ -1,6 +1,8 @@
 'use client';
 
+import { decisionDisplayMap } from '@/drizzle/schema/enums';
 import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
+import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { createFuelBid, updateFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
@@ -137,7 +139,7 @@ export default function FuelBidDialog({
           tenderId,
           ...formData,
         };
-        savedBid = await createFuelBid(createData, tenderId);
+        savedBid = await createFuelBid(tenderId, createData);
         toast.success('Fuel bid created successfully');
       } else {
         // Update existing bid
@@ -223,7 +225,7 @@ export default function FuelBidDialog({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bid Information & Timeline */}
           <MainCard title="Bid Information & Timeline" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -239,6 +241,8 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('round', value)}
                 name="round"
+                min={1}
+                max={5}
               />
               <KeyValuePair
                 label="Bid Submitted At"
@@ -251,10 +255,14 @@ export default function FuelBidDialog({
               <KeyValuePair
                 label="Decision"
                 value={formData.decision}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('decision', value)}
-                name="decision"
+                name="decis ion"
+                selectOptions={Object.entries(decisionDisplayMap).map(([key, value]) => ({
+                  label: value,
+                  value: key,
+                }))}
               />
               <KeyValuePair
                 label="Decision Notes"
@@ -277,7 +285,7 @@ export default function FuelBidDialog({
 
           {/* Vendor Information */}
           <MainCard title="Vendor Information" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -331,7 +339,7 @@ export default function FuelBidDialog({
 
           {/* Pricing Structure & Terms */}
           <MainCard title="Pricing Structure & Terms" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Price Type"
                 value={formData.priceType}
@@ -351,10 +359,14 @@ export default function FuelBidDialog({
               <KeyValuePair
                 label="Unit of Measure"
                 value={formData.uom}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('uom', value)}
                 name="uom"
+                selectOptions={Object.entries(BASE_UOM_OPTIONS).map(([key, value]) => ({
+                  label: value.label,
+                  value: key,
+                }))}
               />
               <KeyValuePair
                 label="Payment Terms"
@@ -417,7 +429,7 @@ export default function FuelBidDialog({
 
           {/* Fees & Specifications */}
           <MainCard title="Fees & Specifications" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Into Plane Fee"
                 value={formData.intoPlaneFee}

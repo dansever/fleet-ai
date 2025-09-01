@@ -3,32 +3,24 @@
 import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { createAirport, updateAirport } from '@/services/core/airport-client';
-import { Button, ButtonProps } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Eye, LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AirportAutocomplete from './AirportAutocomplete';
 import { AirportDatasetItem } from './airportDatasetType';
 
 export default function AirportDialog({
+  trigger,
   airport,
   DialogType = 'view',
-  triggerButtonIntent = 'secondary',
-  TriggerButtonText = 'View Airport',
-  TriggerButtonIcon = Eye,
   onChange,
-  TriggerButtonSize = 'md',
 }: {
+  trigger: React.ReactNode;
   airport: Airport | null;
   DialogType: 'add' | 'edit' | 'view';
-  triggerButtonIntent?: ButtonProps['intent'];
-  TriggerButtonText?: string;
-  TriggerButtonIcon?: LucideIcon;
   onChange: (airport: Airport) => void;
-  TriggerButtonSize?: 'sm' | 'md' | 'lg';
 }) {
   const { map: countryMap } = useCountryMap();
   const isAdd = DialogType === 'add';
@@ -126,14 +118,7 @@ export default function AirportDialog({
 
   return (
     <DetailDialog
-      trigger={
-        <Button
-          intent={triggerButtonIntent}
-          text={TriggerButtonText}
-          icon={TriggerButtonIcon}
-          size={TriggerButtonSize}
-        />
-      }
+      trigger={trigger}
       headerGradient="from-blue-500 to-blue-500"
       title={dialogTitle}
       onSave={handleSave}
@@ -143,7 +128,7 @@ export default function AirportDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MainCard title="Information" headerGradient="from-blue-500 to-blue-300">
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               {isEditing && isAdd ? (
                 <AirportAutocomplete
                   label="Search Airport"

@@ -1,6 +1,5 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/stories/Button/Button';
 import { downloadTableAsCSV } from '@/utils/download-csv';
@@ -12,17 +11,18 @@ import {
   FilterIcon,
   SearchIcon,
 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
+import { ModernInput } from '../Form/Form';
 
 export interface Column<T> {
   key: keyof T | string;
-  header: string;
-  accessor?: (item: T) => React.ReactNode;
+  header: string | ReactNode;
+  accessor?: (item: T) => ReactNode;
   sortable?: boolean;
   filterable?: boolean;
   width?: string;
   align?: 'left' | 'center' | 'right';
-  normalizeAccessor?: (item: T) => React.ReactNode;
+  normalizeAccessor?: (item: T) => ReactNode;
 }
 
 export interface DataTableProps<T> {
@@ -130,6 +130,32 @@ export function DataTable<T extends Record<string, unknown>>({
     );
   };
 
+  const getSortIndicators = (columnKey: string) => {
+    if (!sortColumn || sortColumn !== columnKey) {
+      return (
+        <div className="flex flex-col opacity-40 hover:opacity-60 transition-opacity">
+          <ChevronUpIcon className="h-3 w-3 -mb-0.5 text-muted-foreground" />
+          <ChevronDownIcon className="h-3 w-3 text-muted-foreground" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col">
+        <ChevronUpIcon
+          className={`h-3 w-3 -mb-0.5 transition-colors duration-200 ${
+            sortDirection === 'asc' ? 'text-primary opacity-100' : 'text-muted-foreground/40'
+          }`}
+        />
+        <ChevronDownIcon
+          className={`h-3 w-3 transition-colors duration-200 ${
+            sortDirection === 'desc' ? 'text-primary opacity-100' : 'text-muted-foreground/40'
+          }`}
+        />
+      </div>
+    );
+  };
+
   const handleCSVDownload = () => {
     // Use filtered data for CSV export (respects current search/filter state)
     const dataToExport = filteredData;
@@ -137,7 +163,7 @@ export function DataTable<T extends Record<string, unknown>>({
     // Convert columns to format expected by CSV utility
     const csvColumns = columns.map((col) => ({
       key: col.key,
-      header: col.header,
+      header: col.header as string,
       accessor: col.accessor
         ? (item: T) => {
             const value = col.accessor!(item);
@@ -158,7 +184,7 @@ export function DataTable<T extends Record<string, unknown>>({
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       {/* Header */}
       {(title || description) && (
         <div className="p-6 border-b border-gray-200/50">
@@ -168,57 +194,39 @@ export function DataTable<T extends Record<string, unknown>>({
       )}
 
       {/* Controls */}
-      {(searchable || filterable) && (
-        <div>
-          {searchable && (
-            <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search across all columns..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 rounded-2xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
-              />
-            </div>
-          )}
-
-          {filterable && (
-            <div className="flex flex-wrap gap-3">
-              {columns
-                .filter((col) => col.filterable)
-                .map((column) => (
-                  <div key={String(column.key)} className="flex-1 min-w-[200px]">
-                    <Input
-                      placeholder={`Filter by ${column.header}...`}
-                      value={filters[String(column.key)] || ''}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          [String(column.key)]: e.target.value,
-                        }))
-                      }
-                      className="rounded-2xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
-                    />
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Button Container */}
-      <div className="w-full max-w-full flex justify-end p-4 gap-2">
-        {csvDownload && (
-          <Button
-            intent="ghost"
-            size="sm"
-            text="Download"
-            icon={FileDown}
-            onClick={handleCSVDownload}
-            disabled={filteredData.length === 0}
-          />
+      <div className="flex justify-between items-center">
+        {/* Search */}
+        {(searchable || filterable) && (
+          <div className="flex-1 space-y-4">
+            {searchable && (
+              <div className="relative max-w-lg">
+                <ModernInput
+                  placeholder="Search across all columns..."
+                  value={searchTerm}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchTerm(e.target.value)
+                  }
+                  icon={<SearchIcon />}
+                />
+              </div>
+            )}
+          </div>
         )}
-        <Button disabled intent="ghost" size="sm" text="Full View" icon={Expand} />
+
+        {/* Button Container */}
+        <div className="flex-shrink-0 justify-end">
+          {csvDownload && (
+            <Button
+              intent="ghost"
+              size="sm"
+              text="Download"
+              icon={FileDown}
+              onClick={handleCSVDownload}
+              disabled={filteredData.length === 0}
+            />
+          )}
+          <Button disabled intent="ghost" size="sm" text="Full View" icon={Expand} />
+        </div>
       </div>
 
       <div
@@ -233,15 +241,17 @@ export function DataTable<T extends Record<string, unknown>>({
                   {columns.map((column) => (
                     <th
                       key={String(column.key)}
-                      className={`px-6 py-4 text-left text-sm font-semibold text-gray-800 bg-secondary/30 ${
-                        column.sortable ? 'cursor-pointer hover:bg-secondary/40' : ''
+                      className={`px-6 py-4 text-left text-sm font-semibold text-gray-800 bg-secondary/5 ${
+                        column.sortable
+                          ? 'cursor-pointer hover:bg-secondary/10 transition-colors duration-200'
+                          : ''
                       } ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : ''}`}
                       style={{ width: column.width }}
                       onClick={() => column.sortable && handleSort(String(column.key))}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         {column.header}
-                        {column.sortable && getSortIcon(String(column.key))}
+                        {column.sortable && getSortIndicators(String(column.key))}
                       </div>
                     </th>
                   ))}
@@ -252,15 +262,15 @@ export function DataTable<T extends Record<string, unknown>>({
                   <React.Fragment key={index}>
                     {/* Original row */}
                     <tr
-                      className={`border-b border-gray-100/50 hover:bg-gray-50/30 ransition-colors ${
-                        onRowClick ? '' : ''
+                      className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors duration-200  ${
+                        onRowClick ? 'cursor-pointer' : ''
                       } ${rowClassName ? rowClassName(item) : ''}`}
                       onClick={() => onRowClick?.(item)}
                     >
                       {columns.map((column) => (
                         <td
                           key={String(column.key)}
-                          className={`px-6 py-4 text-sm text-gray-700 ${
+                          className={`px-6 py-4 text-sm text-gray-700 min-w-[120px] align-top ${
                             column.align === 'center'
                               ? 'text-center'
                               : column.align === 'right'
@@ -277,7 +287,7 @@ export function DataTable<T extends Record<string, unknown>>({
 
                     {/* Normalized row */}
                     {showNormalizedRow && (
-                      <tr className="border-b border-gray-100/50 bg-accent/20">
+                      <tr className="border-b border-gray-100/50 bg-blue-50">
                         {columns.map((column, i) => (
                           <td
                             key={`${String(column.key)}-normalized`}

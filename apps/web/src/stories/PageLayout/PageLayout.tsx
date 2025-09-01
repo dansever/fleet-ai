@@ -47,7 +47,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
         <header className="px-4 py-2 flex items-center flex-shrink-0">{headerContent}</header>
 
         {/* Scrollable Main Content */}
-        <main className="px-2 py-4 flex-1 overflow-y-auto bg-background">{mainContent}</main>
+        <main className="p-2 flex-1 overflow-y-scroll">{mainContent}</main>
       </div>
     </div>
   );

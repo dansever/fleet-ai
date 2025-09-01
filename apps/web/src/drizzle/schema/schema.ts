@@ -415,6 +415,7 @@ export const fuelTendersTable = pgTable(
     title: text('title').notNull(),
     description: text('description'),
     fuelType: text('fuel_type'),
+    projectedAnnualVolume: integer('projected_annual_volume'),
 
     // Base Configuration
     baseCurrency: text('base_currency'),

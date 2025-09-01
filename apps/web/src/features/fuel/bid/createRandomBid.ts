@@ -1,5 +1,7 @@
 import type { FuelTender } from '@/drizzle/types';
-import type { CreateFuelBidData } from '@/services/fuel/fuel-bid-client';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
+import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
+import { createFuelBid, type CreateFuelBidData } from '@/services/fuel/fuel-bid-client';
 
 function getRandomInt(min: number, max: number): number {
   const ceilMin = Math.ceil(min);
@@ -68,13 +70,16 @@ const INDEX_LOCATIONS = ['USGC', 'USWC', 'NWE', 'Singapore', 'Mediterranean'];
  * Generate a realistic random fuel bid for a given tender.
  * Returns a CreateFuelBidData object suitable for API submission.
  */
-export function createRandomFuelBid(tender: FuelTender, round?: number): CreateFuelBidData {
+export async function createRandomFuelBid(
+  tenderId: FuelTender['id'],
+  round?: number,
+): Promise<CreateFuelBidData> {
   const useIndexPricing = Math.random() < 0.45; // 45% chance of index-linked pricing
 
   const vendorName = pickOne(VENDOR_NAMES);
   const contactName = `${pickOne(CONTACT_FIRST_NAMES)} ${pickOne(CONTACT_LAST_NAMES)}`;
-  const currency = tender.baseCurrency || 'USD';
-  const uom = tender.baseUom || 'USG';
+  const currency = pickOne(Object.keys(CURRENCY_MAP).map((key) => CURRENCY_MAP[key]));
+  const uom = pickOne(BASE_UOM_OPTIONS.map((option) => option.value));
 
   // Base unit price assumptions (varies by currency a bit)
   const basePrice = getRandomFloat(1.4, 3.5, 3); // typical USD/USG spot range example
@@ -88,12 +93,12 @@ export function createRandomFuelBid(tender: FuelTender, round?: number): CreateF
 
   const data: CreateFuelBidData = {
     // Required linkage
-    tenderId: tender.id,
+    tenderId,
 
     // Submission info
     title: `${vendorName} R${round || getRandomInt(1, 3)} Offer`,
     round: round || getRandomInt(1, 3),
-    bidSubmittedAt: randomDateIsoBetween(tender.biddingStarts as any, tender.biddingEnds as any),
+    bidSubmittedAt: randomDateIsoBetween(),
 
     // Vendor
     vendorName,
@@ -109,7 +114,7 @@ export function createRandomFuelBid(tender: FuelTender, round?: number): CreateF
     // Pricing structure
     priceType: useIndexPricing ? 'index_formula' : 'fixed',
     uom,
-    currency,
+    currency: currency.code,
     paymentTerms: pickOne(['Net 15', 'Net 30', 'Net 45', 'Net 60']),
 
     // Fixed pricing
@@ -144,7 +149,7 @@ export function createRandomFuelBid(tender: FuelTender, round?: number): CreateF
     decision: null,
     decisionNotes: null,
   };
-
+  await createFuelBid(tenderId, data);
   return data;
 }
 

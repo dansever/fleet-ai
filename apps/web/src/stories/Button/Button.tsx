@@ -10,7 +10,7 @@ const buttonStyles = cva(
     'rounded-2xl shadow-sm hover:shadow-md ',
     'transition-colors duration-200',
     'font-normal text-center',
-    'cursor-pointer',
+    'cursor-pointer flex-shrink-0',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],
@@ -22,9 +22,9 @@ const buttonStyles = cva(
           'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white',
         // Secondary action - less prominent, alternative actions
         secondary:
-          'bg-white border border-primary/20 text-primary/80 hover:text-primary hover:border-primary/40',
+          'bg-white border border-primary/20 text-gray-600 hover:text-gray-800 hover:border-primary/40',
         // Secondary inverted - for use on dark/colored backgrounds
-        secondaryInverted: 'bg-white/20 hover:bg-white/30 text-white',
+        secondaryInverted: 'bg-white/30 hover:bg-white/40 text-white',
         // Success action - confirmations, completions, positive outcomes
         success:
           'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white',

@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/core/formatters';
 import { deleteFuelTender } from '@/services/fuel/fuel-tender-client';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
-import { ModernSelect, NumberInput } from '@/stories/Form/Form';
+import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import {
@@ -23,12 +23,13 @@ import {
   Plus,
   Ruler,
   TrashIcon,
+  TrendingUpDown,
   Users,
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../ContextProvider';
-import FuelBidsComparison from '../_components/FuelBidsComparison';
+import FuelBidsDataTable from '../_components/FuelBidsDataTable';
 
 const FuelTendersPage = memo(function FuelTendersPage() {
   const {
@@ -59,6 +60,12 @@ const FuelTendersPage = memo(function FuelTendersPage() {
     apr: '46000',
     may: '50000',
     jun: '52000',
+    jul: '85000',
+    aug: '48000',
+    sep: '46000',
+    oct: '50000',
+    nov: '52000',
+    dev: '85000',
   });
 
   // Handle tender addition
@@ -169,9 +176,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
           />
           <TenderDialog
             key="add-tender"
-            trigger={
-              <Button className="flex-shrink-0" intent="secondary" icon={Plus} text="Add Tender" />
-            }
+            trigger={<Button intent="secondary" icon={Plus} text="Add Tender" />}
             tender={null}
             airportId={selectedAirport.id}
             onChange={handleTenderAdded}
@@ -209,9 +214,9 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                   <ConfirmationPopover
                     trigger={
                       <Button
-                        intent="secondary"
+                        intent="secondaryInverted"
                         icon={TrashIcon}
-                        className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
+                        className="hover:bg-red-500"
                       />
                     }
                     popoverIntent="danger"
@@ -223,7 +228,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                 </div>
               }
             >
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* grid col*/}
                 <div className="flex flex-col gap-4">
                   <div className="space-y-2">
@@ -232,6 +237,18 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                       Fuel Type
                     </div>
                     <div className="text-sm font-medium">{currentTender.fuelType}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <TrendingUpDown className="h-4 w-4" />
+                      Volume Forecast
+                    </div>
+                    <div className="text-sm font-medium">
+                      {currentTender.projectedAnnualVolume?.toLocaleString() +
+                        ' ' +
+                        BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)
+                          ?.label || ''}
+                    </div>
                   </div>
                 </div>
                 {/* grid col*/}
@@ -294,37 +311,13 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Volume Forecast */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Monthly Volume Forecast</h3>
-                <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
-                  {Object.entries(volumeForecast).map(([month, volume]) => (
-                    <div key={month}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
-                        {month}
-                      </label>
-                      <NumberInput
-                        label={month}
-                        step={1000}
-                        value={Number(volume)}
-                        onChange={(value) =>
-                          setVolumeForecast((prev) => ({ ...prev, [month]: value }))
-                        }
-                        placeholder="Liters"
-                        className="text-sm"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
             </MainCard>
 
             {/* Fuel Bids Loading State */}
             {loading.fuelBids ? (
               <LoadingComponent size="md" text="Loading fuel bids..." />
             ) : (
-              <FuelBidsComparison onRefresh={refreshFuelBids} isRefreshing={loading.fuelBids} />
+              <FuelBidsDataTable onRefresh={refreshFuelBids} isRefreshing={loading.fuelBids} />
             )}
           </div>
         )}

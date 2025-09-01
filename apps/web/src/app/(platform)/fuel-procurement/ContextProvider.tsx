@@ -86,7 +86,7 @@ export default function FuelProcurementProvider({
 
   // Cache timestamps for TTL (Time To Live) - 5 minutes
   const [cacheTimestamps, setCacheTimestamps] = useState<Record<string, number>>({});
-  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const CACHE_TTL = 10 * 60 * 1000; // 5 minutes in milliseconds
 
   // Loading states
   const [loading, setLoading] = useState<LoadingState>({
@@ -336,9 +336,12 @@ export default function FuelProcurementProvider({
    */
   useEffect(() => {
     if (!selectedTender) {
+      console.log('ContextProvider: No selected tender, clearing fuel bids');
       setFuelBids([]);
       return;
     }
+
+    console.log('ContextProvider: Loading fuel bids for tender:', selectedTender.id);
 
     // Immediately clear fuel bids when tender changes to avoid showing stale data
     setFuelBids([]);
@@ -346,16 +349,20 @@ export default function FuelProcurementProvider({
     const loadFuelBids = async () => {
       // Check cache first (with expiration check)
       if (fuelBidsCache[selectedTender.id] && !isCacheExpired(`fuelBids-${selectedTender.id}`)) {
+        console.log('ContextProvider: Using cached fuel bids for tender:', selectedTender.id);
         const cachedFuelBids = fuelBidsCache[selectedTender.id];
         setFuelBids(cachedFuelBids);
         return;
       }
 
+      console.log('ContextProvider: Fetching fresh fuel bids for tender:', selectedTender.id);
       setLoading((prev) => ({ ...prev, fuelBids: true }));
       setErrors((prev) => ({ ...prev, fuelBids: null }));
 
       try {
         const fuelBids = await getFuelBidsByTender(selectedTender.id);
+        console.log('ContextProvider: Received fuel bids:', fuelBids);
+        console.log('ContextProvider: Fuel bids count:', fuelBids.length);
         setFuelBids(fuelBids);
 
         // Cache the fuel bids for this tender with timestamp
@@ -368,7 +375,7 @@ export default function FuelProcurementProvider({
           [`fuelBids-${selectedTender.id}`]: Date.now(),
         }));
       } catch (error) {
-        console.error('Error loading fuel bids:', error);
+        console.error('ContextProvider: Error loading fuel bids:', error);
         setErrors((prev) => ({
           ...prev,
           fuelBids: error instanceof Error ? error.message : 'Failed to load fuel bids',

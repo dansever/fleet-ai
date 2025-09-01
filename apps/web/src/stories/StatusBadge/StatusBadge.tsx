@@ -1,19 +1,36 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle, Clock, XCircle, Zap } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, LucideIcon, XCircle, Zap } from 'lucide-react';
 import type React from 'react';
 
-export type StatusType = 'operational' | 'pending' | 'warning' | 'error' | 'processing';
+export type StatusType =
+  | 'default'
+  | 'secondary'
+  | 'operational'
+  | 'pending'
+  | 'warning'
+  | 'error'
+  | 'processing';
 
 export interface StatusBadgeProps {
   status: StatusType;
   text?: string;
   size?: 'sm' | 'md' | 'lg';
-  showIcon?: boolean;
+  icon?: LucideIcon;
   className?: string;
 }
 
 const statusConfig = {
+  default: {
+    icon: null,
+    text: 'Default',
+    className: 'bg-secondary/90 text-white hover:bg-secondary',
+  },
+  secondary: {
+    icon: null,
+    text: 'Secondary',
+    className: 'bg-white text-secondary border-secondary/20 hover:border-secondary/50',
+  },
   operational: {
     icon: CheckCircle,
     text: 'Operational',
@@ -54,14 +71,14 @@ const iconSizeConfig = {
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
-  status,
+  status = 'default',
   text,
-  size = 'md',
-  showIcon = true,
+  size = 'sm',
+  icon,
   className,
 }) => {
   const config = statusConfig[status];
-  const Icon = config.icon;
+  const Icon = icon || config.icon;
   const displayText = text || config.text;
 
   return (
@@ -73,7 +90,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         className,
       )}
     >
-      {showIcon && <Icon className={iconSizeConfig[size]} />}
+      {Icon && <Icon className={iconSizeConfig[size]} />}
       {displayText}
     </Badge>
   );

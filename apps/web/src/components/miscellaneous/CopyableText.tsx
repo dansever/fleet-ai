@@ -1,7 +1,9 @@
-// CopyButton.tsx
+'use client';
+
 import { cn } from '@/lib/utils';
 import { CopyIcon } from 'lucide-react';
 import * as React from 'react';
+import { toast } from 'sonner';
 
 type RenderFn = (args: { copied: boolean }) => React.ReactNode;
 
@@ -34,6 +36,7 @@ export const CopyableText = React.forwardRef<HTMLButtonElement, CopyableTextProp
         if (resetDelay > 0) {
           timerRef.current = window.setTimeout(() => setCopied(false), resetDelay);
         }
+        toast.info('Copied to clipboard');
       } catch (err) {
         // optional: surface error or toast
         console.error('Copy failed', err);
@@ -54,11 +57,14 @@ export const CopyableText = React.forwardRef<HTMLButtonElement, CopyableTextProp
         title={title ?? value}
         aria-label={title ?? 'Copy to clipboard'}
         data-state={copied ? 'copied' : 'idle'}
-        className={cn('group cursor-pointer flex items-center gap-2', className)}
+        className={cn(
+          'cursor-pointer flex items-center hover:scale-101 transition-all gap-2',
+          className,
+        )}
         {...buttonProps}
       >
         {content}
-        {content && <CopyIcon className="h-4 w-4 transition group-hover:scale-110 shrink-0" />}
+        {content && <CopyIcon className="h-4 w-4 transition shrink-0" />}
       </button>
     );
   },

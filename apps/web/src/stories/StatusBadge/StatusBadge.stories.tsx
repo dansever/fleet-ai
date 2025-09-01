@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { CheckCircle } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 
 const meta: Meta<typeof StatusBadge> = {
@@ -16,13 +17,13 @@ const meta: Meta<typeof StatusBadge> = {
   argTypes: {
     status: {
       control: 'select',
-      options: ['operational', 'pending', 'warning', 'error', 'processing'],
+      options: ['default', 'secondary', 'operational', 'pending', 'warning', 'error', 'processing'],
     },
     size: {
       control: 'inline-radio',
       options: ['sm', 'md', 'lg'],
     },
-    showIcon: {
+    icon: {
       control: 'boolean',
     },
   },
@@ -56,9 +57,33 @@ export const AllStatusBadgeVariants: Story = {
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           <div className="space-y-4">
+            <h4 className="font-medium text-sm text-muted-foreground">DEFAULT</h4>
+            <div className="flex flex-col space-y-3">
+              <StatusBadge status="default" />
+              <StatusBadge status="default" text="Round 2" />
+              <StatusBadge status="default" text="Flight Ready" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <strong>Use for:</strong> Default state, placeholder text, optional text
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium text-sm text-muted-foreground">SECONDARY</h4>
+            <div className="flex flex-col space-y-3">
+              <StatusBadge status="secondary" />
+              <StatusBadge status="secondary" text="Round 2" />
+              <StatusBadge status="secondary" text="Flight Ready" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <strong>Use for:</strong> Default state, placeholder text, optional text
+            </p>
+          </div>
+
+          <div className="space-y-4">
             <h4 className="font-medium text-sm text-muted-foreground">OPERATIONAL</h4>
             <div className="space-y-3">
-              <StatusBadge status="operational" />
+              <StatusBadge status="operational" icon={CheckCircle} />
               <StatusBadge status="operational" text="All Systems Go" />
               <StatusBadge status="operational" text="Flight Ready" />
             </div>
@@ -184,11 +209,11 @@ export const AllStatusBadgeVariants: Story = {
           <div className="space-y-4">
             <h4 className="font-medium text-sm text-muted-foreground">WITH ICONS (Default)</h4>
             <div className="flex flex-wrap gap-3">
-              <StatusBadge status="operational" text="Operational" showIcon={true} />
-              <StatusBadge status="pending" text="Pending" showIcon={true} />
-              <StatusBadge status="warning" text="Warning" showIcon={true} />
-              <StatusBadge status="error" text="Error" showIcon={true} />
-              <StatusBadge status="processing" text="Processing" showIcon={true} />
+              <StatusBadge status="operational" text="Operational" icon={CheckCircle} />
+              <StatusBadge status="pending" text="Pending" icon={CheckCircle} />
+              <StatusBadge status="warning" text="Warning" icon={CheckCircle} />
+              <StatusBadge status="error" text="Error" icon={CheckCircle} />
+              <StatusBadge status="processing" text="Processing" icon={CheckCircle} />
             </div>
             <p className="text-xs text-muted-foreground">
               Icons provide visual context and improve recognition
@@ -198,11 +223,11 @@ export const AllStatusBadgeVariants: Story = {
           <div className="space-y-4">
             <h4 className="font-medium text-sm text-muted-foreground">WITHOUT ICONS</h4>
             <div className="flex flex-wrap gap-3">
-              <StatusBadge status="operational" text="Operational" showIcon={false} />
-              <StatusBadge status="pending" text="Pending" showIcon={false} />
-              <StatusBadge status="warning" text="Warning" showIcon={false} />
-              <StatusBadge status="error" text="Error" showIcon={false} />
-              <StatusBadge status="processing" text="Processing" showIcon={false} />
+              <StatusBadge status="operational" text="Operational" icon={CheckCircle} />
+              <StatusBadge status="pending" text="Pending" icon={CheckCircle} />
+              <StatusBadge status="warning" text="Warning" icon={CheckCircle} />
+              <StatusBadge status="error" text="Error" icon={CheckCircle} />
+              <StatusBadge status="processing" text="Processing" icon={CheckCircle} />
             </div>
             <p className="text-xs text-muted-foreground">
               Clean text-only badges for minimal interfaces or space constraints
