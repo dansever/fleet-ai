@@ -1,15 +1,26 @@
 'use client';
 
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createRandomContract } from '@/features/contract-management/contracts/createRandomContract';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { AlertTriangle, Diff, Edit, Plus, Sigma, Upload, X } from 'lucide-react';
 import FuelInvoicesDataTable from '../_components/FuelInvoicesDataTable';
 import { useFuelProcurement } from '../contexts';
+import { useContracts } from '../hooks';
 
 export default function FuelAgreementsPage() {
   const { airports, invoices } = useFuelProcurement();
+  const { contracts, addContract } = useContracts({
+    airportId: airports.selectedAirport?.id || null,
+    enabled: !!airports.selectedAirport,
+  });
+  const selectedContract = contracts[0];
   const { selectedAirport } = airports;
+
+  const handleGenerateRandomInvoice = () => {
+    const invoice = createRandomContract(selectedContract?.id);
+  };
 
   const agreementData = {
     id: 'AGR-2024-SHL-001',
@@ -37,7 +48,7 @@ export default function FuelAgreementsPage() {
       <MainCard
         title="Active Agreement & Reconciliation"
         subtitle={`${agreementData.supplier} • ${agreementData.id}`}
-        headerActions={
+        actions={
           <div className="flex gap-2">
             <Button intent="secondaryInverted" text="Upload Invoices" icon={Upload} />
             <Button intent="secondaryInverted" text="Edit Agreement" icon={Edit} />
@@ -135,7 +146,13 @@ export default function FuelAgreementsPage() {
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <Button intent="warning" text="Generate Dispute" icon={AlertTriangle} />
-            <Button intent="secondary" size="sm" text="Generate Random Invoice" icon={Plus} />
+            <Button
+              intent="secondary"
+              size="sm"
+              text="Generate Random Invoice"
+              icon={Plus}
+              onClick={handleGenerateRandomInvoice}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -154,7 +171,7 @@ export default function FuelAgreementsPage() {
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 <span className="font-medium text-yellow-800">
-                  {selectedInvoices.length} invoice(s) selected for dispute
+                  {invoices.length} invoice(s) selected for dispute
                 </span>
               </div>
               <div className="text-sm text-yellow-700">
@@ -164,12 +181,7 @@ export default function FuelAgreementsPage() {
 
             <div className="flex gap-2">
               <Button intent="warning" text="Create Dispute" icon={AlertTriangle} />
-              <Button
-                intent="secondary"
-                onClick={() => setSelectedInvoices([])}
-                text="Cancel"
-                icon={X}
-              />
+              <Button intent="secondary" onClick={() => {}} text="Cancel" icon={X} />
             </div>
           </div>
         </MainCard>

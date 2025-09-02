@@ -387,7 +387,7 @@ export const ListItemCard = ({
     className={cn(
       'border-1 border-muted shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
       isSelected
-        ? 'bg-gradient-to-br from-blue-200/80 via-purple-200/80 to-pink-200/80'
+        ? 'border-purple-200 bg-gradient-to-br from-blue-200/80 via-purple-200/80 to-pink-200/80'
         : 'hover:bg-gradient-to-br hover:from-blue-50/50 hover:via-pink-50/50 hover:to-purple-50/50',
       className,
     )}

@@ -1,4 +1,4 @@
-// Updated by CursorAI on Dec 2 2024
+// Updated by CursorAI on Sep 2 2025
 'use client';
 
 import { getStatusDisplay, statusEnum } from '@/drizzle/schema/enums';
@@ -201,7 +201,7 @@ export default function TenderDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MainCard title="Tender Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -251,8 +251,12 @@ export default function TenderDialog({
             </div>
           </MainCard>
 
-          <MainCard title="Configuration & Timeline" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <MainCard
+            title="Configuration & Timeline"
+            neutralHeader={true}
+            headerGradient="from-orange-500 to-orange-400"
+          >
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Base Currency"
                 valueType="select"

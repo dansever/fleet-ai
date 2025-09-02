@@ -7,15 +7,21 @@ import { cn } from '@/lib/utils';
 
 export interface TabsProps {
   tabs: { label: string; value: string }[];
-  selectedTab: string;
+  defaultTab: string;
   onTabChange: (tab: string) => void;
   children?: React.ReactNode;
   className?: string;
 }
 
-export const Tabs = ({ tabs, selectedTab, onTabChange, children, className }: TabsProps) => (
+export const Tabs = ({
+  tabs,
+  defaultTab = tabs ? tabs[0].value : '',
+  onTabChange,
+  children,
+  className,
+}: TabsProps) => (
   <TabsUI
-    defaultValue={selectedTab}
+    defaultValue={defaultTab}
     onValueChange={onTabChange}
     className={cn('w-full gap-4 p-2', className)}
   >

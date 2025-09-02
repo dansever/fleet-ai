@@ -1,8 +1,8 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
 import { Contract } from '@/drizzle/types';
-import { createRandomContract } from '@/features/contract-management/createRandomContract';
-import ContractDialog from '@/features/contracts/ContractDialog';
+import ContractDialog from '@/features/contract-management/contracts/ContractDialog';
+import { createRandomContract } from '@/features/contract-management/contracts/createRandomContract';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette, MetricCard, ProjectCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';

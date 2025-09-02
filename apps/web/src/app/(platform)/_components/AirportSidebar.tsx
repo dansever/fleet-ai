@@ -1,6 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Airport } from '@/drizzle/types';
@@ -10,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Home, Plane, Plus, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -82,14 +82,13 @@ export default function AirportList({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2 border-b border-border">
+      <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2">
         <h2>Airports</h2>
         {InsertAddAirportButton && (
           <AirportDialog
             airport={null}
             DialogType="add"
-            TriggerButtonText="Add"
-            TriggerButtonIcon={Plus}
+            trigger={<Button intent="add" text="Add" icon={Plus} size="md" />}
             onChange={(newAirport) => {
               if (onAirportAdd) {
                 onAirportAdd(newAirport);
@@ -97,15 +96,12 @@ export default function AirportList({
                 onAirportSelect(newAirport);
               }
             }}
-            TriggerButtonSize="md"
           />
         )}
       </div>
 
-      {/* Search Input */}
+      {/* Filters */}
       <div className="flex-shrink-0 px-4 py-2 border-b border-border flex flex-col gap-2">
-        <h3 className="font-light">Filters</h3>
-
         {/* Search Input */}
         <div className="relative">
           {/* <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" /> */}
@@ -155,36 +151,39 @@ export default function AirportList({
               !isCollapsed && 'pl-2',
             )}
           >
-            {filteredAirports.map((airport) => (
-              <ListItemCard
-                key={airport.id}
-                isSelected={selectedAirport?.id === airport.id}
-                onClick={() => onAirportSelect(airport)}
-                icon={airport.isHub ? <Home /> : <Plane />}
-                iconBackground={
-                  airport.isHub ? 'from-yellow-400 to-yellow-200' : 'from-blue-300 to-blue-200'
-                }
-              >
-                <div className="flex flex-row gap-2">
-                  {/* Left side: main airport info */}
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-sm font-medium">
-                      <span className="text-sm font-medium">{airport.name}</span>
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {airport.city && `${airport.city}`}
-                      {airport.state && `, ${airport.state}`}
-                      {airport.country && `, ${airport.country}`}
-                    </span>
+            {filteredAirports.map((airport) => {
+              const isSelected = selectedAirport?.id === airport.id;
+              return (
+                <ListItemCard
+                  key={airport.id}
+                  isSelected={isSelected}
+                  onClick={() => onAirportSelect(airport)}
+                  icon={airport.isHub ? <Home /> : <Plane />}
+                  iconBackground={
+                    airport.isHub ? 'from-yellow-400 to-yellow-200' : 'from-blue-300 to-blue-200'
+                  }
+                >
+                  <div className="flex flex-row gap-2">
+                    {/* Left side: main airport info */}
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="text-sm font-medium">
+                        <span className="text-sm font-medium">{airport.name}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {airport.city && `${airport.city}`}
+                        {airport.state && `, ${airport.state}`}
+                        {airport.country && `, ${airport.country}`}
+                      </span>
+                    </div>
+                    {/* Right side: badges */}
+                    <div className="flex flex-col gap-2 items-end">
+                      <StatusBadge status={'secondary'} text={airport.iata} />
+                      <StatusBadge status={'secondary'} text={airport.icao} />
+                    </div>
                   </div>
-                  {/* Right side: badges */}
-                  <div className="flex flex-col gap-2 items-end">
-                    <Badge variant="outline">{airport.iata}</Badge>
-                    <Badge variant="outline">{airport.icao}</Badge>
-                  </div>
-                </div>
-              </ListItemCard>
-            ))}
+                </ListItemCard>
+              );
+            })}
           </div>
         </ScrollArea>
       </div>

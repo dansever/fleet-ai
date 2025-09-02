@@ -1,7 +1,7 @@
 'use client';
 
 import { Airport, Contact, Contract, User } from '@/drizzle/types';
-import { getContractsByAirport, updateContract } from '@/services/contracts/contract-client';
+import { getContractsByAirport } from '@/services/contracts/contract-client';
 import { getAirports } from '@/services/core/airport-client';
 import { getContactsByAirport } from '@/services/vendors/contact-client';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -392,22 +392,35 @@ export default function AirportHubProvider({
   /**
    * Add service contract
    */
-  const addcontract = useCallback((newContract: Contract) => {
+  const addContract = useCallback((newContract: Contract) => {
     setContracts((prevContracts) => [newContract, ...prevContracts]);
   }, []);
 
   /**
    * Remove service contract
    */
-  const removecontract = useCallback(
+  const removeContract = useCallback(
     (contractId: string) => {
       setContracts((prevContracts) =>
         prevContracts.filter((contract) => contract.id !== contractId),
       );
-
       if (selectedContract?.id === contractId) {
         setSelectedContract(null);
       }
+    },
+    [selectedContract],
+  );
+
+  /**
+   * Update service contract
+   */
+  const updateContract = useCallback(
+    (updatedContract: Contract) => {
+      setContracts((prevContracts) =>
+        prevContracts.map((contract) =>
+          contract.id === updatedContract.id ? updatedContract : contract,
+        ),
+      );
     },
     [selectedContract],
   );

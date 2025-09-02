@@ -230,11 +230,11 @@ export function DataTable<T extends Record<string, unknown>>({
       </div>
 
       <div
-        className={`bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-lg ${className}`}
+        className={`bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg ${className}`}
       >
         {/* Table */}
         <div className="w-full max-w-full overflow-x-auto">
-          <ScrollArea className="w-full max-w-full rounded-3xl">
+          <ScrollArea className="w-full max-w-full rounded-xl">
             <table className="min-w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-400/50">
@@ -287,11 +287,11 @@ export function DataTable<T extends Record<string, unknown>>({
 
                     {/* Normalized row */}
                     {showNormalizedRow && (
-                      <tr className="border-b border-gray-100/50 bg-blue-50">
+                      <tr className="bg-blue-50">
                         {columns.map((column, i) => (
                           <td
                             key={`${String(column.key)}-normalized`}
-                            className={`px-6 py-2 text-xs text-gray-600 ${
+                            className={`px-6 py-2 text-sm text-gray-600 ${
                               column.align === 'center'
                                 ? 'text-center'
                                 : column.align === 'right'
@@ -302,15 +302,15 @@ export function DataTable<T extends Record<string, unknown>>({
                             {/* Small prefix label only once per row if you like */}
                             {i === 0 ? (
                               <span className="inline-flex items-center gap-2">
-                                <span className="rounded bg-gray-200 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-700">
+                                <span className="rounded bg-gray-200 px-2 py-0.5 text-xs uppercase tracking-wide text-gray-700">
                                   normalized
                                 </span>
-                                <span className="font-mono text-blue-500">
+                                <span className="font-mono font-bold text-blue-500">
                                   {column.normalizeAccessor?.(item)}
                                 </span>
                               </span>
                             ) : (
-                              <span className="text-xs font-mono text-blue-500">
+                              <span className="font-mono font-bold text-blue-500">
                                 {column.normalizeAccessor?.(item)}
                               </span>
                             )}

@@ -53,11 +53,11 @@ export default function InputBar() {
       </div>
       <FeatureCard
         title="AI Response"
-        description={response?.content || 'No response yet'}
+        subtitle={response?.content || 'No response yet'}
         icon={<Bot />}
         palette={GradientPalette.SkyIndigoViolet}
         className="flex-1 min-h-10"
-        buttonChildren={
+        actions={
           <Button
             intent="secondaryInverted"
             icon={RefreshCcw}
@@ -65,7 +65,7 @@ export default function InputBar() {
             className={`${isLoading && 'animate-spin'}`}
           />
         }
-        bodyChildren={<span className="text-white/80">{response?.content}</span>}
+        children={<span className="text-white/80">{response?.content}</span>}
       />
     </div>
   );

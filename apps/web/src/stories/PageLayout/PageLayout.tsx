@@ -26,7 +26,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
       {/* Left Sidebar Panel - Only render if sidebarContent exists */}
       {sidebarContent && (
         <div
-          className="border-r border-border bg-card flex flex-col overflow-hidden min-w-0 flex-shrink-0"
+          className=" bg-card flex flex-col overflow-hidden min-w-0 flex-shrink-0"
           style={{
             // Smooth width transition
             width: 'var(--sidebar-w)',

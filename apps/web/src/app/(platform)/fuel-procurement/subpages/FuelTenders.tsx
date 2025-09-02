@@ -187,7 +187,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
             <MainCard
               title={currentTender.title}
               subtitle={currentTender.description || 'No description available'}
-              headerActions={
+              actions={
                 // Buttons
                 <div className="flex gap-2">
                   <TenderDialog

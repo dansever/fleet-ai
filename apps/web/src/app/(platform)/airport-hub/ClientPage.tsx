@@ -1,11 +1,13 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
+import AirportDialog from '@/features/airports/AirportDialog';
+import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { MapPin } from 'lucide-react';
+import { Eye, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
@@ -53,16 +55,16 @@ export default function AirportHubClientPage() {
         />
       }
       headerContent={
-        <div className="flex flex-row items-center gap-4 justify-between">
+        <div className="flex flex-row items-center gap-4 justify-between w-full">
           <div className="flex flex-col">
             <div className="flex flex-row items-center gap-4">
-              <h3 className="text-2xl font-bold text-gray-900">{selectedAirport?.name}</h3>
-              <div className="flex flex-row items-center gap-2">
-                <Badge>{selectedAirport?.icao}</Badge>
-                <Badge>{selectedAirport?.iata}</Badge>
+              <h1>{selectedAirport?.name}</h1>
+              <div className="flex flex-row items-center gap-1">
+                <StatusBadge status="secondary" text={selectedAirport?.icao || ''} />
+                <StatusBadge status="secondary" text={selectedAirport?.iata || ''} />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600 text-sm">
               <MapPin className="w-4 h-4" />
               <span>
                 {selectedAirport?.city}
@@ -71,6 +73,12 @@ export default function AirportHubClientPage() {
               </span>
             </div>
           </div>
+          <AirportDialog
+            trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
+            airport={selectedAirport}
+            onChange={() => {}}
+            DialogType="view"
+          />
         </div>
       }
       mainContent={<MainContentSection />}
@@ -103,7 +111,7 @@ function MainContentSection() {
         { label: 'Contacts & Providers', value: 'contacts-and-providers' },
         { label: 'Manage Airport', value: 'manage-airport' },
       ]}
-      selectedTab={selectedTab}
+      defaultTab="service-agreements"
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
     >
       <TabsContent value="service-agreements">

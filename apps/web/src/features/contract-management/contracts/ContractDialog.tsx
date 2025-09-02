@@ -1,4 +1,4 @@
-// Updated by CursorAI on Dec 2 2024
+// Updated by CursorAI on Sep 2 2025
 'use client';
 
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
@@ -162,7 +162,7 @@ export default function ContractDialog({
 
         const updateData = {
           title: serializedFormData.title,
-          contractType: serializedFormData.contractType,
+          contractType: serializedFormData.contractType || undefined,
           internalNotes: serializedFormData.internalNotes,
           summary: serializedFormData.summary,
           terms: serializedFormData.terms,
@@ -177,7 +177,10 @@ export default function ContractDialog({
           effectiveTo: serializedFormData.effectiveTo,
         };
 
-        savedContract = await updateContract(contract.id, updateData);
+        savedContract = await updateContract(
+          contract.id,
+          updateData as Partial<CreateContractData>,
+        );
         toast.success('Contract updated successfully');
       }
 
@@ -285,7 +288,6 @@ export default function ContractDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('contractType', value)}
                 name="contractType"
-                required={true}
                 selectOptions={ContractTypeEnum.enumValues.map((value) => ({
                   value,
                   label: getContractTypeDisplay(value),
@@ -383,18 +385,22 @@ export default function ContractDialog({
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Effective From"
-                value={formData.effectiveFrom}
+                value={formData.effectiveFrom?.toISOString().split('T')[0] || ''}
                 valueType="date"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('effectiveFrom', value)}
+                onChange={(value) =>
+                  handleFieldChange('effectiveFrom', value ? new Date(value as string) : null)
+                }
                 name="effectiveFrom"
               />
               <KeyValuePair
                 label="Effective To"
-                value={formData.effectiveTo}
+                value={formData.effectiveTo?.toISOString().split('T')[0] || ''}
                 valueType="date"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('effectiveTo', value)}
+                onChange={(value) =>
+                  handleFieldChange('effectiveTo', value ? new Date(value as string) : null)
+                }
                 name="effectiveTo"
               />
             </div>

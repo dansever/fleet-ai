@@ -1,4 +1,4 @@
-// Updated by CursorAI on Dec 2 2024
+// Updated by CursorAI on Sep 2 2025
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';

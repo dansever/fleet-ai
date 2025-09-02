@@ -1,4 +1,4 @@
-// Updated by CursorAI on Dec 2 2024
+// Updated by CursorAI on Sep 2 2025
 // NOTE: FuelContract entity is not found in schema.ts - this may need to be added or this dialog may be deprecated
 'use client';
 

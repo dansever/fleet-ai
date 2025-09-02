@@ -1,6 +1,7 @@
 import { Invoice, UpdateInvoice } from '@/drizzle/types';
 import { getInvoicesByContract } from '@/services/contracts/invoice-client';
 import { useCallback, useEffect, useState } from 'react';
+import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
 interface UseInvoicesOptions {
   contractId: string | null;
@@ -17,8 +18,6 @@ interface UseInvoicesReturn {
   removeInvoice: (invoiceId: string) => void;
 }
 
-// Simple in-memory cache
-const invoicesCache = new Map<string, { data: Invoice[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions): UseInvoicesReturn {
@@ -27,9 +26,7 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
   const [error, setError] = useState<string | null>(null);
 
   const isCacheValid = useCallback((key: string) => {
-    const cached = invoicesCache.get(key);
-    if (!cached) return false;
-    return Date.now() - cached.timestamp < CACHE_TTL;
+    return cacheManager.get(key, CACHE_TTL) !== null;
   }, []);
 
   const loadInvoices = useCallback(async () => {
@@ -38,15 +35,13 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
       return;
     }
 
-    const cacheKey = `invoices-${contractId}`;
+    const cacheKey = createCacheKey('invoices', contractId);
 
     // Check cache first
-    if (isCacheValid(cacheKey)) {
-      const cached = invoicesCache.get(cacheKey);
-      if (cached) {
-        setInvoices(cached.data);
-        return;
-      }
+    const cachedData = cacheManager.get<Invoice[]>(cacheKey, CACHE_TTL);
+    if (cachedData) {
+      setInvoices(cachedData);
+      return;
     }
 
     setLoading(true);
@@ -57,20 +52,20 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
       setInvoices(data);
 
       // Update cache
-      invoicesCache.set(cacheKey, { data, timestamp: Date.now() });
+      cacheManager.set(cacheKey, data, CACHE_TTL);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load invoices');
       setInvoices([]);
     } finally {
       setLoading(false);
     }
-  }, [contractId, enabled, isCacheValid]);
+  }, [contractId, enabled]);
 
   const refreshInvoices = useCallback(async () => {
     if (!contractId) return;
 
-    const cacheKey = `invoices-${contractId}`;
-    invoicesCache.delete(cacheKey); // Clear cache to force refresh
+    const cacheKey = createCacheKey('invoices', contractId);
+    cacheManager.delete(cacheKey); // Clear cache to force refresh
     await loadInvoices();
   }, [contractId, loadInvoices]);
 
@@ -86,15 +81,13 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
 
       // Update cache
       if (contractId) {
-        const cacheKey = `invoices-${contractId}`;
-        const cached = invoicesCache.get(cacheKey);
-        if (cached) {
-          invoicesCache.set(cacheKey, {
-            data: cached.data.map((invoice) =>
-              invoice.id === id ? { ...invoice, ...data } : invoice,
-            ),
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('invoices', contractId);
+        const cachedData = cacheManager.get<Invoice[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          const updatedData = cachedData.map((invoice) =>
+            invoice.id === id ? { ...invoice, ...data } : invoice,
+          );
+          cacheManager.set(cacheKey, updatedData, CACHE_TTL);
         }
       }
     },
@@ -107,13 +100,10 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
 
       // Update cache
       if (contractId) {
-        const cacheKey = `invoices-${contractId}`;
-        const cached = invoicesCache.get(cacheKey);
-        if (cached) {
-          invoicesCache.set(cacheKey, {
-            data: [newInvoice, ...cached.data],
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('invoices', contractId);
+        const cachedData = cacheManager.get<Invoice[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          cacheManager.set(cacheKey, [newInvoice, ...cachedData], CACHE_TTL);
         }
       }
     },
@@ -126,13 +116,11 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
 
       // Update cache
       if (contractId) {
-        const cacheKey = `invoices-${contractId}`;
-        const cached = invoicesCache.get(cacheKey);
-        if (cached) {
-          invoicesCache.set(cacheKey, {
-            data: cached.data.filter((invoice) => invoice.id !== invoiceId),
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('invoices', contractId);
+        const cachedData = cacheManager.get<Invoice[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          const filteredData = cachedData.filter((invoice) => invoice.id !== invoiceId);
+          cacheManager.set(cacheKey, filteredData, CACHE_TTL);
         }
       }
     },

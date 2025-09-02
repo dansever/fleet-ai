@@ -1,6 +1,7 @@
 import { FuelBid } from '@/drizzle/types';
 import { getFuelBidsByTender } from '@/services/fuel/fuel-bid-client';
 import { useCallback, useEffect, useState } from 'react';
+import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
 interface UseFuelBidsOptions {
   tenderId: string | null;
@@ -17,8 +18,6 @@ interface UseFuelBidsReturn {
   removeFuelBid: (fuelBidId: string) => void;
 }
 
-// Simple in-memory cache
-const fuelBidsCache = new Map<string, { data: FuelBid[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): UseFuelBidsReturn {
@@ -27,9 +26,7 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
   const [error, setError] = useState<string | null>(null);
 
   const isCacheValid = useCallback((key: string) => {
-    const cached = fuelBidsCache.get(key);
-    if (!cached) return false;
-    return Date.now() - cached.timestamp < CACHE_TTL;
+    return cacheManager.get(key, CACHE_TTL) !== null;
   }, []);
 
   const loadFuelBids = useCallback(async () => {
@@ -38,15 +35,13 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
       return;
     }
 
-    const cacheKey = `fuelBids-${tenderId}`;
+    const cacheKey = createCacheKey('fuelBids', tenderId);
 
     // Check cache first
-    if (isCacheValid(cacheKey)) {
-      const cached = fuelBidsCache.get(cacheKey);
-      if (cached) {
-        setFuelBids(cached.data);
-        return;
-      }
+    const cachedData = cacheManager.get<FuelBid[]>(cacheKey, CACHE_TTL);
+    if (cachedData) {
+      setFuelBids(cachedData);
+      return;
     }
 
     setLoading(true);
@@ -57,20 +52,33 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
       setFuelBids(data);
 
       // Update cache
-      fuelBidsCache.set(cacheKey, { data, timestamp: Date.now() });
+      cacheManager.set(cacheKey, data, CACHE_TTL);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load fuel bids');
       setFuelBids([]);
     } finally {
       setLoading(false);
     }
-  }, [tenderId, enabled, isCacheValid]);
+  }, [tenderId, enabled]);
+
+  // Clear data immediately when tenderId changes
+  useEffect(() => {
+    if (!tenderId || !enabled) {
+      setFuelBids([]);
+      setError(null);
+      return;
+    }
+
+    // Clear current data immediately to prevent showing stale data
+    setFuelBids([]);
+    setError(null);
+  }, [tenderId, enabled]);
 
   const refreshFuelBids = useCallback(async () => {
     if (!tenderId) return;
 
-    const cacheKey = `fuelBids-${tenderId}`;
-    fuelBidsCache.delete(cacheKey); // Clear cache to force refresh
+    const cacheKey = createCacheKey('fuelBids', tenderId);
+    cacheManager.delete(cacheKey); // Clear cache to force refresh
     await loadFuelBids();
   }, [tenderId, loadFuelBids]);
 
@@ -84,15 +92,13 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
 
       // Update cache
       if (tenderId) {
-        const cacheKey = `fuelBids-${tenderId}`;
-        const cached = fuelBidsCache.get(cacheKey);
-        if (cached) {
-          fuelBidsCache.set(cacheKey, {
-            data: cached.data.map((fuelBid) =>
-              fuelBid.id === updatedFuelBid.id ? updatedFuelBid : fuelBid,
-            ),
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('fuelBids', tenderId);
+        const cachedData = cacheManager.get<FuelBid[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          const updatedData = cachedData.map((fuelBid) =>
+            fuelBid.id === updatedFuelBid.id ? updatedFuelBid : fuelBid,
+          );
+          cacheManager.set(cacheKey, updatedData, CACHE_TTL);
         }
       }
     },
@@ -105,13 +111,10 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
 
       // Update cache
       if (tenderId) {
-        const cacheKey = `fuelBids-${tenderId}`;
-        const cached = fuelBidsCache.get(cacheKey);
-        if (cached) {
-          fuelBidsCache.set(cacheKey, {
-            data: [newFuelBid, ...cached.data],
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('fuelBids', tenderId);
+        const cachedData = cacheManager.get<FuelBid[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          cacheManager.set(cacheKey, [newFuelBid, ...cachedData], CACHE_TTL);
         }
       }
     },
@@ -124,13 +127,11 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
 
       // Update cache
       if (tenderId) {
-        const cacheKey = `fuelBids-${tenderId}`;
-        const cached = fuelBidsCache.get(cacheKey);
-        if (cached) {
-          fuelBidsCache.set(cacheKey, {
-            data: cached.data.filter((fuelBid) => fuelBid.id !== fuelBidId),
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('fuelBids', tenderId);
+        const cachedData = cacheManager.get<FuelBid[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          const filteredData = cachedData.filter((fuelBid) => fuelBid.id !== fuelBidId);
+          cacheManager.set(cacheKey, filteredData, CACHE_TTL);
         }
       }
     },

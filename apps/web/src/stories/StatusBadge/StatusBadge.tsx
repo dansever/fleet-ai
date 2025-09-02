@@ -6,6 +6,7 @@ import type React from 'react';
 export type StatusType =
   | 'default'
   | 'secondary'
+  | 'secondaryInverted'
   | 'operational'
   | 'pending'
   | 'warning'
@@ -14,47 +15,52 @@ export type StatusType =
 
 export interface StatusBadgeProps {
   status: StatusType;
-  text?: string;
+  text?: string | null;
   size?: 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
-  className?: string;
+  className?: string | null;
 }
 
 const statusConfig = {
   default: {
     icon: null,
     text: 'Default',
-    className: 'bg-secondary/90 text-white hover:bg-secondary',
+    className: 'bg-secondary/90 text-white',
   },
   secondary: {
     icon: null,
     text: 'Secondary',
-    className: 'bg-white text-secondary border-secondary/20 hover:border-secondary/50',
+    className: 'bg-white text-secondary border-secondary/20',
+  },
+  secondaryInverted: {
+    icon: null,
+    text: 'Secondary Inverted',
+    className: 'bg-white/60 text-primary border-white/60',
   },
   operational: {
     icon: CheckCircle,
     text: 'Operational',
-    className: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200',
+    className: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   },
   pending: {
     icon: Clock,
     text: 'Pending',
-    className: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200',
+    className: 'bg-amber-100 text-amber-700 border-amber-200',
   },
   warning: {
     icon: AlertCircle,
     text: 'Warning',
-    className: 'bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200',
+    className: 'bg-orange-100 text-orange-700 border-orange-200',
   },
   error: {
     icon: XCircle,
     text: 'Error',
-    className: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200',
+    className: 'bg-red-100 text-red-700 border-red-200',
   },
   processing: {
     icon: Zap,
     text: 'Processing',
-    className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200',
+    className: 'bg-blue-100 text-blue-700 border-blue-200',
   },
 };
 

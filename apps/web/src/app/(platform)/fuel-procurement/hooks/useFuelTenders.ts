@@ -1,6 +1,7 @@
 import { FuelTender } from '@/drizzle/types';
 import { getFuelTendersByAirport } from '@/services/fuel/fuel-tender-client';
 import { useCallback, useEffect, useState } from 'react';
+import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
 interface UseFuelTendersOptions {
   airportId: string | null;
@@ -20,8 +21,6 @@ interface UseFuelTendersReturn {
   removeTender: (tenderId: string) => void;
 }
 
-// Simple in-memory cache
-const tenderCache = new Map<string, { data: FuelTender[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export function useFuelTenders({
@@ -35,9 +34,7 @@ export function useFuelTenders({
   const [error, setError] = useState<string | null>(null);
 
   const isCacheValid = useCallback((key: string) => {
-    const cached = tenderCache.get(key);
-    if (!cached) return false;
-    return Date.now() - cached.timestamp < CACHE_TTL;
+    return cacheManager.get(key, CACHE_TTL) !== null;
   }, []);
 
   const loadTenders = useCallback(async () => {
@@ -47,16 +44,14 @@ export function useFuelTenders({
       return;
     }
 
-    const cacheKey = `tenders-${airportId}`;
+    const cacheKey = createCacheKey('tenders', airportId);
 
     // Check cache first
-    if (isCacheValid(cacheKey)) {
-      const cached = tenderCache.get(cacheKey);
-      if (cached) {
-        setTenders(cached.data);
-        setSelectedTender(cached.data.length > 0 ? cached.data[0] : null);
-        return;
-      }
+    const cachedData = cacheManager.get<FuelTender[]>(cacheKey, CACHE_TTL);
+    if (cachedData) {
+      setTenders(cachedData);
+      setSelectedTender(cachedData.length > 0 ? cachedData[0] : null);
+      return;
     }
 
     setLoading(true);
@@ -68,7 +63,7 @@ export function useFuelTenders({
       setSelectedTender(data.length > 0 ? data[0] : null);
 
       // Update cache
-      tenderCache.set(cacheKey, { data, timestamp: Date.now() });
+      cacheManager.set(cacheKey, data, CACHE_TTL);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load fuel tenders');
       setTenders([]);
@@ -76,13 +71,28 @@ export function useFuelTenders({
     } finally {
       setLoading(false);
     }
-  }, [airportId, enabled, isCacheValid]);
+  }, [airportId, enabled]);
+
+  // Clear data immediately when airportId changes
+  useEffect(() => {
+    if (!airportId || !enabled) {
+      setTenders([]);
+      setSelectedTender(null);
+      setError(null);
+      return;
+    }
+
+    // Clear current data immediately to prevent showing stale data
+    setTenders([]);
+    setSelectedTender(null);
+    setError(null);
+  }, [airportId, enabled]);
 
   const refreshTenders = useCallback(async () => {
     if (!airportId) return;
 
-    const cacheKey = `tenders-${airportId}`;
-    tenderCache.delete(cacheKey); // Clear cache to force refresh
+    const cacheKey = createCacheKey('tenders', airportId);
+    cacheManager.delete(cacheKey); // Clear cache to force refresh
     await loadTenders();
   }, [airportId, loadTenders]);
 
@@ -98,15 +108,13 @@ export function useFuelTenders({
 
       // Update cache
       if (airportId) {
-        const cacheKey = `tenders-${airportId}`;
-        const cached = tenderCache.get(cacheKey);
-        if (cached) {
-          tenderCache.set(cacheKey, {
-            data: cached.data.map((tender) =>
-              tender.id === updatedTender.id ? updatedTender : tender,
-            ),
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('tenders', airportId);
+        const cachedData = cacheManager.get<FuelTender[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          const updatedData = cachedData.map((tender) =>
+            tender.id === updatedTender.id ? updatedTender : tender,
+          );
+          cacheManager.set(cacheKey, updatedData, CACHE_TTL);
         }
       }
     },
@@ -119,13 +127,10 @@ export function useFuelTenders({
 
       // Update cache
       if (airportId) {
-        const cacheKey = `tenders-${airportId}`;
-        const cached = tenderCache.get(cacheKey);
-        if (cached) {
-          tenderCache.set(cacheKey, {
-            data: [newTender, ...cached.data],
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('tenders', airportId);
+        const cachedData = cacheManager.get<FuelTender[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          cacheManager.set(cacheKey, [newTender, ...cachedData], CACHE_TTL);
         }
       }
     },
@@ -142,13 +147,11 @@ export function useFuelTenders({
 
       // Update cache
       if (airportId) {
-        const cacheKey = `tenders-${airportId}`;
-        const cached = tenderCache.get(cacheKey);
-        if (cached) {
-          tenderCache.set(cacheKey, {
-            data: cached.data.filter((tender) => tender.id !== tenderId),
-            timestamp: cached.timestamp,
-          });
+        const cacheKey = createCacheKey('tenders', airportId);
+        const cachedData = cacheManager.get<FuelTender[]>(cacheKey, CACHE_TTL);
+        if (cachedData) {
+          const filteredData = cachedData.filter((tender) => tender.id !== tenderId);
+          cacheManager.set(cacheKey, filteredData, CACHE_TTL);
         }
       }
     },
