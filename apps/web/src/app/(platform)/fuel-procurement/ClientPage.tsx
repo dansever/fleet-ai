@@ -9,7 +9,7 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
-import { useFuelProcurement } from './ContextProvider';
+import { useFuelProcurement } from './contexts';
 import FuelAgreementsPage from './subpages/FuelAgreements';
 import FuelTendersPage from './subpages/FuelTenders';
 import HistoricalDataPage from './subpages/HistoricalData';
@@ -17,27 +17,20 @@ import HistoricalDataPage from './subpages/HistoricalData';
 type TabValue = 'fuel-tenders' | 'fuel-agreements' | 'historical-data';
 
 export default function FuelProcurementClientPage() {
-  const {
-    airports,
-    setAirports,
-    selectedAirport,
-    setSelectedAirport,
-    loading,
-    errors,
-    clearError,
-  } = useFuelProcurement();
+  const { airports } = useFuelProcurement();
+  const { selectedAirport, setSelectedAirport, loading, error } = airports;
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
-  if (loading.airports) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (errors.airports) {
-    return <div>Error: {errors.airports}</div>;
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
-  if (!airports) {
+  if (!airports.airports || airports.airports.length === 0) {
     return <div>No airports found</div>;
   }
 
@@ -45,7 +38,7 @@ export default function FuelProcurementClientPage() {
     <PageLayout
       sidebarContent={
         <AirportList
-          airports={airports}
+          airports={airports.airports}
           onAirportSelect={setSelectedAirport}
           selectedAirport={selectedAirport}
           InsertAddAirportButton={false}
@@ -79,7 +72,8 @@ export default function FuelProcurementClientPage() {
 
 function MainContentSection() {
   const [selectedTab, setSelectedTab] = useState<TabValue>('fuel-tenders');
-  const { selectedAirport } = useFuelProcurement();
+  const { airports } = useFuelProcurement();
+  const { selectedAirport } = airports;
 
   if (!selectedAirport) {
     return (

@@ -13,7 +13,7 @@ import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { compareQuotes, createQuote, extractQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
-import { BaseCard, ContentSection } from '@/stories/Card/Card';
+import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
@@ -199,8 +199,10 @@ export default function TechnicalProcurementClientPage() {
       <div>
         {/* RFQ Details */}
         {selectedRfq && (
-          <ContentSection
-            header={
+          <MainCard
+            title={selectedRfq.rfqNumber || ''}
+            subtitle={selectedRfq.buyerComments || 'No buyer comments available'}
+            headerActions={
               <div className="flex flex-col gap-2">
                 <div className="flex items-start gap-2 justify-between">
                   <h3>{selectedRfq.rfqNumber}</h3>
@@ -223,7 +225,7 @@ export default function TechnicalProcurementClientPage() {
                           className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
                         />
                       }
-                      intent="danger"
+                      popoverIntent="danger"
                       title="Delete RFQ"
                       onConfirm={handleDeleteRfq}
                     />
@@ -237,10 +239,11 @@ export default function TechnicalProcurementClientPage() {
           >
             <div className="grid grid-cols-3 gap-4">
               {/* Tender Information */}
-              <ContentSection
+              <MainCard
                 className="col-span-1 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
-                headerGradient="none"
-                header={
+                neutralHeader={true}
+                title="Details"
+                headerActions={
                   <div className="flex items-start gap-2 text-foreground">
                     <div className="p-2 bg-blue-600 rounded-xl">
                       <CalendarIcon className="w-5 h-5 text-white" />
@@ -270,17 +273,21 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.quantity || ''}
                   valueType="number"
                 />
-              </ContentSection>
+              </MainCard>
               {/* Timeline */}
-              <ContentSection
-                className="col-span-1 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/50"
-                headerGradient="none"
-                header={
-                  <div className="flex items-start gap-2 text-foreground">
-                    <div className="p-2 bg-purple-600 rounded-xl">
-                      <CalendarIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <h4>Vendor Information</h4>
+              <MainCard
+                title="Vendor Information"
+                subtitle={selectedRfq.vendorName || 'No vendor name available'}
+                neutralHeader={true}
+                headerActions={
+                  <div className="flex gap-2">
+                    <RfqDialog
+                      rfq={selectedRfq}
+                      onChange={updateRfq}
+                      triggerText="Edit"
+                      DialogType="edit"
+                      triggerClassName="bg-white/20 text-white-700"
+                    />
                   </div>
                 }
               >
@@ -310,20 +317,26 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.vendorContactPhone || ''}
                   valueType="string"
                 />
-              </ContentSection>
+              </MainCard>
 
               {/* Quick Stats */}
-              <ContentSection
-                className="col-span-1 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
-                headerGradient="none"
-                header={
-                  <div className="flex items-start gap-2 text-foreground">
-                    <div className="p-2 bg-orange-600 rounded-xl">
-                      <CalendarIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <h4>General</h4>
+              <MainCard
+                title="General"
+                subtitle={selectedRfq.status || ''}
+                headerActions={
+                  <div className="flex gap-2">
+                    <RfqDialog
+                      rfq={selectedRfq}
+                      onChange={updateRfq}
+                      triggerText="Edit"
+                      DialogType="edit"
+                      triggerClassName="bg-white/20 text-white-700"
+                    />
                   </div>
                 }
+                className="col-span-1 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
+                headerGradient="none"
+                neutralHeader={true}
               >
                 <KeyValuePair
                   keyClassName="max-w-1/2"
@@ -349,9 +362,9 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.buyerComments || ''}
                   valueType="string"
                 />
-              </ContentSection>
+              </MainCard>
             </div>
-          </ContentSection>
+          </MainCard>
         )}
       </div>
 
@@ -365,10 +378,7 @@ export default function TechnicalProcurementClientPage() {
         onTabChange={() => {}}
       >
         <TabsContent value="quotes">
-          <BaseCard
-            title="Technical Quotes Comparison"
-            description="Compare and evaluate quotes for {selectedRfq?.rfqNumber}"
-          >
+          <BaseCard>
             <CardHeader className="flex items-start justify-between">
               {/* Left Side - Title and Description */}
               <div>
@@ -416,8 +426,8 @@ export default function TechnicalProcurementClientPage() {
                 <FileUploadPopover
                   open={uploadQuotePopoverOpen}
                   onOpenChange={setUploadQuotePopoverOpen}
-                  triggerButtonIntent="add"
-                  triggerButtonText="Upload Quote"
+                  triggerIntent="secondary"
+                  triggerText="Upload Quote"
                   onSend={() => {}}
                 >
                   <div className="flex flex-col gap-2 text-sm">

@@ -39,23 +39,92 @@ export const BaseCard = ({ className, children }: BaseCardProps) => (
   </Card>
 );
 
+// Common standardized props for all cards
+export interface StandardCardProps {
+  className?: string;
+  // Header options (either simple or custom)
+  title?: string;
+  subtitle?: string;
+  header?: React.ReactNode; // Takes precedence over title/subtitle
+  // Actions (consistent naming)
+  actions?: React.ReactNode;
+  // Content
+  children?: React.ReactNode;
+  // Optional footer
+  footer?: React.ReactNode;
+}
+
+// Main Card - For displaying main content with header and actions
+export const MainCard = ({
+  title,
+  subtitle,
+  header, // Custom header option
+  headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
+  neutralHeader = false,
+  actions,
+  children,
+  footer,
+  className,
+}: StandardCardProps & {
+  headerGradient?: string;
+  neutralHeader?: boolean;
+}) => (
+  <Card
+    className={cn('rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden', className)}
+  >
+    {(header || title) && (
+      <CardHeader className="px-0">
+        {header ? (
+          header
+        ) : (
+          <div
+            className={cn(
+              'px-6 py-2 relative overflow-hidden',
+              neutralHeader
+                ? 'bg-white text-gray-900'
+                : `bg-gradient-to-r text-white ${headerGradient}`,
+            )}
+          >
+            {!neutralHeader && (
+              <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
+            )}
+
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-balance">{title}</h3>
+                {subtitle && (
+                  <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+              {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+            </div>
+          </div>
+        )}
+      </CardHeader>
+    )}
+
+    {/* Content area */}
+    <CardContent>{children}</CardContent>
+    {footer && <CardContent>{footer}</CardContent>}
+  </Card>
+);
+
 // Feature Card - For showcasing features or services
 export const FeatureCard = ({
   title,
-  description,
-  icon = null,
+  subtitle, // Add for consistency
+  header,
+  icon,
   palette = GradientPalette.VioletPinkRose,
+  actions, // Renamed from buttonChildren
+  children, // Renamed from bodyChildren
+  footer,
   className,
-  buttonChildren,
-  bodyChildren,
-}: {
-  title: string;
-  description: string;
+}: StandardCardProps & {
   icon?: React.ReactNode;
   palette?: GradientPalette;
-  className?: string;
-  buttonChildren?: React.ReactNode;
-  bodyChildren?: React.ReactNode;
 }) => {
   // Choose classes based on enum or manual override; no randomization
   const chosenGradient = useMemo(() => {
@@ -77,19 +146,26 @@ export const FeatureCard = ({
 
       {/* Foreground content */}
       <div className="relative z-10 p-6 text-white">
-        <div className="flex items-center gap-3 mb-4 justify-between">
-          <div className="flex flex-row gap-2 items-center">
-            {icon && (
-              <div className="p-2 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20">
-                {icon}
+        {header ? (
+          header
+        ) : (
+          <div className="flex items-center gap-3 mb-4 justify-between">
+            <div className="flex flex-row gap-2 items-center">
+              {icon && (
+                <div className="p-2 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20">
+                  {icon}
+                </div>
+              )}
+              <div>
+                <h3 className="font-semibold">{title}</h3>
+                {subtitle && <p className="text-white/70 text-sm">{subtitle}</p>}
               </div>
-            )}
-            <h3 className="font-semibold">{title}</h3>
+            </div>
+            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
           </div>
-          {buttonChildren}
-        </div>
-        <p className="text-white/85">{description}</p>
-        {bodyChildren && <div className="text-white/75 mt-3">{bodyChildren}</div>}
+        )}
+        <div className="text-white/85">{children}</div>
+        {footer && <div className="text-white/75 mt-3">{footer}</div>}
       </div>
     </Card>
   );
@@ -98,24 +174,21 @@ export const FeatureCard = ({
 // Project Card - For displaying projects or portfolio items
 export const ProjectCard = ({
   title,
-  description,
+  subtitle, // Use instead of description for consistency
+  header,
   imagePath,
-  category,
   progress,
-  badgeText = null,
-  badgeColor = 'bg-gradient-to-r from-pink-500 to-red-500',
+  badgeText,
+  badgeColor,
+  actions, // Clarify that children are actions
+  children, // Main content
+  footer,
   className,
-  children,
-}: {
-  title: string;
-  description: string;
+}: StandardCardProps & {
   imagePath?: string;
-  category: string;
   progress?: number;
   badgeText?: string | null;
   badgeColor?: string;
-  className?: string;
-  children?: React.ReactNode;
 }) => (
   <Card
     className={cn(
@@ -128,7 +201,7 @@ export const ProjectCard = ({
       <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative">
         <Image
           src={imagePath ?? '/placeholder.svg'}
-          alt={title}
+          alt={title || 'Project Image'}
           fill
           className="object-cover"
           sizes="100vw"
@@ -146,15 +219,23 @@ export const ProjectCard = ({
         )}
       </div>
     )}
-    <CardHeader>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <CardTitle className="text-lg font-bold">{title}</CardTitle>
-          <CardDescription className="mt-1">{description}</CardDescription>
-        </div>
-        {children}
-      </div>
-    </CardHeader>
+    {(header || title) && (
+      <CardHeader>
+        {header ? (
+          header
+        ) : (
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <CardTitle className="text-lg font-bold">{title}</CardTitle>
+              {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
+            </div>
+            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+          </div>
+        )}
+      </CardHeader>
+    )}
+    <CardContent>{children}</CardContent>
+    {footer && <CardContent>{footer}</CardContent>}
     {progress !== undefined && (
       <CardContent className="pt-0">
         <div className="space-y-2">
@@ -172,24 +253,41 @@ export const ProjectCard = ({
 // Stats Card - For displaying metrics and statistics
 export const MetricCard = ({
   title,
+  subtitle,
+  header,
   value,
   change,
   icon = <TrendingUp className="w-6 h-6 text-violet-600" />,
   trend = 'up',
+  actions,
+  children,
+  footer,
   className,
-}: {
-  title: string;
-  value: string | number;
+}: StandardCardProps & {
+  value?: string | number;
   change?: string;
   icon?: React.ReactNode;
   trend?: 'up' | 'down' | 'neutral';
-  className?: string;
 }) => (
-  <Card className={cn('rounded-3xl p-6 border-0 shadow-none', className)}>
+  <Card className={cn('rounded-3xl p-4 border-0 shadow-none gap-4', className)}>
+    {(header || title) && (
+      <div className="">
+        {header ? (
+          header
+        ) : (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+            </div>
+            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+          </div>
+        )}
+      </div>
+    )}
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <h2 className="mt-2">{value}</h2>
+        {value && <h1>{value}</h1>}
         {change && (
           <p
             className={cn(
@@ -207,38 +305,51 @@ export const MetricCard = ({
       </div>
       <div className="p-2 bg-gradient-to-br from-violet-50 to-blue-50 rounded-2xl">{icon}</div>
     </div>
+    {children && <div className="mt-4">{children}</div>}
+    {footer && <div className="mt-4 pt-4 border-t">{footer}</div>}
   </Card>
 );
 
 // Profile Card - For user profiles or team members
 export const ProfileCard = ({
-  name,
-  role,
+  title, // name
+  subtitle, // role
+  header,
   avatar,
   bio,
   stats,
+  actions,
+  children,
+  footer,
   className,
-}: {
-  name: string;
-  role: string;
+}: StandardCardProps & {
   avatar?: string;
   bio?: string;
   stats?: { label: string; value: string }[];
-  className?: string;
 }) => (
   <Card className={cn('rounded-3xl p-4 text-center gap-4 border-0 shadow-none', className)}>
-    <Avatar className="w-20 h-20 mx-auto">
-      <AvatarImage src={avatar || '/placeholder.svg'} />
-      <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-violet-500 to-blue-500 text-white">
-        {name
-          .split(' ')
-          .map((n) => n[0])
-          .join('')}
-      </AvatarFallback>
-    </Avatar>
-    <h3>{name}</h3>
-    <p className="text-muted-foreground">{role}</p>
+    {header ? (
+      header
+    ) : (
+      <>
+        <Avatar className="w-20 h-20 mx-auto">
+          <AvatarImage src={avatar || '/placeholder.svg'} />
+          <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-violet-500 to-blue-500 text-white">
+            {title
+              ?.split(' ')
+              .map((n) => n[0])
+              .join('') || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <h3>{title}</h3>
+          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+          {actions && <div className="flex justify-center gap-2 mt-2">{actions}</div>}
+        </div>
+      </>
+    )}
     {bio && <p className="text-sm text-muted-foreground mb-4">{bio}</p>}
+    {children && <div className="mb-4">{children}</div>}
     {stats && (
       <div className="flex justify-center pt-4 border-t">
         {stats.map((stat, index) => (
@@ -249,24 +360,28 @@ export const ProfileCard = ({
         ))}
       </div>
     )}
+    {footer && <div className="pt-4 border-t">{footer}</div>}
   </Card>
 );
 
 // List Item Card - For scrollable lists with flexible content (renamed from ListItemCard)
 export const ListItemCard = ({
-  children,
+  title,
+  subtitle,
+  header,
   icon = null,
   iconBackground,
   isSelected = false,
   onClick,
+  actions,
+  children,
+  footer,
   className,
-}: {
-  children?: React.ReactNode;
+}: StandardCardProps & {
   icon?: React.ReactNode;
   iconBackground?: string;
   isSelected?: boolean;
   onClick?: () => void;
-  className?: string;
 }) => (
   <Card
     className={cn(
@@ -279,22 +394,34 @@ export const ListItemCard = ({
     onClick={onClick}
   >
     <CardContent className="px-0">
-      <div className="flex flex-row w-full gap-2">
-        {icon && (
-          <div
-            className={cn(
-              'w-10 h-10 bg-gradient-to-r text-gray-700 rounded-lg p-2 flex items-center justify-center shrink-0 self-start',
-              iconBackground,
-            )}
-          >
-            {icon}
-          </div>
-        )}
+      {header ? (
+        header
+      ) : (
+        <div className="flex flex-row w-full gap-2">
+          {icon && (
+            <div
+              className={cn(
+                'w-10 h-10 bg-gradient-to-r text-gray-700 rounded-lg p-2 flex items-center justify-center shrink-0 self-start',
+                iconBackground,
+              )}
+            >
+              {icon}
+            </div>
+          )}
 
-        <div className={cn('flex-1 min-w-0', !icon && 'pl-1')}>
-          <div className="w-full max-w-full">{children}</div>
+          <div className={cn('flex-1 min-w-0', !icon && 'pl-1')}>
+            <div className="flex items-start justify-between gap-2 w-full max-w-full">
+              <div className="min-w-0 flex-1">
+                {title && <h4 className="font-medium truncate">{title}</h4>}
+                {subtitle && <p className="text-sm text-muted-foreground truncate">{subtitle}</p>}
+                {children && <div className="mt-1">{children}</div>}
+              </div>
+              {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+      {footer && <div className="mt-2 pt-2 border-t">{footer}</div>}
     </CardContent>
   </Card>
 );
@@ -308,57 +435,4 @@ export const BadgeGroup = ({ tags, className }: { tags: string[]; className?: st
       </Badge>
     ))}
   </div>
-);
-
-// Main Card - For displaying main content with header and actions
-export const MainCard = ({
-  title,
-  subtitle,
-  headerActions,
-  children,
-  className,
-  headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
-  neutralHeader = false, // Added neutralHeader parameter
-}: {
-  title: string;
-  subtitle?: string;
-  headerActions?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-  headerGradient?: string;
-  neutralHeader?: boolean; // New prop for neutral header styling
-}) => (
-  <Card
-    className={cn('rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden', className)}
-  >
-    <CardHeader className="px-0">
-      <div
-        className={cn(
-          'px-6 py-2 relative overflow-hidden',
-          neutralHeader
-            ? 'bg-white text-gray-900'
-            : `bg-gradient-to-r text-white ${headerGradient}`,
-        )}
-      >
-        {!neutralHeader && (
-          <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
-        )}
-
-        <div className="relative z-10 flex items-center justify-between gap-2">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-balance">{title}</h3>
-            {subtitle && (
-              <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>{subtitle}</p>
-            )}
-          </div>
-          {headerActions && (
-            <div className="flex items-center gap-2 flex-shrink-0">{headerActions}</div>
-          )}
-        </div>
-      </div>
-    </CardHeader>
-
-    {/* Content area */}
-    <CardContent>{children}</CardContent>
-  </Card>
 );

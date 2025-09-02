@@ -13,7 +13,7 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { CheckCircle, Clock, Fuel, Star, Trash, XCircle, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
-import { useFuelProcurement } from '../ContextProvider';
+import { useFuelProcurement } from '../contexts';
 
 const getDecisionBadge = (decision: string | null) => {
   if (!decision)
@@ -49,7 +49,8 @@ const getDecisionBadge = (decision: string | null) => {
 };
 
 export const useFuelBidColumns = (): Column<FuelBid>[] => {
-  const { refreshFuelBids } = useFuelProcurement();
+  const { fuelBids } = useFuelProcurement();
+  const { refreshFuelBids } = fuelBids;
 
   const handleDeleteBid = async (bidId: string) => {
     try {

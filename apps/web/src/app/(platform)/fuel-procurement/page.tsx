@@ -2,7 +2,7 @@ import { getAirportsByOrgId } from '@/db/core/airports/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import FuelProcurementClientPage from './ClientPage';
-import FuelProcurementProvider from './ContextProvider';
+import { FuelProcurementProvider } from './contexts';
 
 export default async function FuelProcurementPage() {
   const { dbUser, error } = await authorizeUser();

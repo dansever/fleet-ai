@@ -1,8 +1,12 @@
+// Updated by CursorAI on Dec 2 2024
 'use client';
 
 import {
   getStatusDisplay,
   getUrgencyLevelDisplay,
+  OrderDirection,
+  orderDirectionDisplayMap,
+  OrderDirectionEnum,
   statusEnum,
   UrgencyLevel,
   urgencyLevelEnum,
@@ -11,7 +15,7 @@ import type { Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
 import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';
 import { Button, ButtonProps } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { Eye, Pencil, Plus } from 'lucide-react';
@@ -35,34 +39,46 @@ export default function RfqDialog({
   DialogType: 'add' | 'edit' | 'view';
   triggerText?: string;
   triggerClassName?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
-  triggerIntent?: 'primary' | 'secondary' | 'add' | 'delete' | 'info';
+  buttonSize?: ButtonProps['size'];
+  triggerIntent?: ButtonProps['intent'];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
+    // RFQ Identification (matching schema)
     direction: rfq?.direction || null,
     rfqNumber: rfq?.rfqNumber || null,
+    status: rfq?.status || 'pending',
+
+    // Vendor Information (matching schema)
     vendorName: rfq?.vendorName || null,
     vendorAddress: rfq?.vendorAddress || null,
     vendorContactName: rfq?.vendorContactName || null,
     vendorContactEmail: rfq?.vendorContactEmail || null,
     vendorContactPhone: rfq?.vendorContactPhone || null,
+
+    // Part Specifications (matching schema)
     partNumber: rfq?.partNumber || null,
     altPartNumber: rfq?.altPartNumber || null,
     partDescription: rfq?.partDescription || null,
     conditionCode: rfq?.conditionCode || null,
     unitOfMeasure: rfq?.unitOfMeasure || null,
     quantity: rfq?.quantity || null,
+
+    // Commercial Terms (matching schema)
     pricingType: rfq?.pricingType || null,
     urgencyLevel: rfq?.urgencyLevel || null,
     deliverTo: rfq?.deliverTo || null,
     buyerComments: rfq?.buyerComments || null,
-    status: rfq?.status || 'pending',
+
+    // Workflow Management (matching schema)
+    selectedQuoteId: rfq?.selectedQuoteId || null,
+
+    // Timestamps (matching schema)
     sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
   });
-  const [isSaving, setIsSaving] = useState(false);
+
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
@@ -71,6 +87,7 @@ export default function RfqDialog({
     setFormData({
       direction: rfq?.direction || null,
       rfqNumber: rfq?.rfqNumber || null,
+      status: rfq?.status || 'pending',
       vendorName: rfq?.vendorName || null,
       vendorAddress: rfq?.vendorAddress || null,
       vendorContactName: rfq?.vendorContactName || null,
@@ -86,7 +103,7 @@ export default function RfqDialog({
       urgencyLevel: rfq?.urgencyLevel || null,
       deliverTo: rfq?.deliverTo || null,
       buyerComments: rfq?.buyerComments || null,
-      status: rfq?.status || 'pending',
+      selectedQuoteId: rfq?.selectedQuoteId || null,
       sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
     });
   }, [rfq]);
@@ -96,7 +113,6 @@ export default function RfqDialog({
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       let savedRfq: Rfq;
 
@@ -124,7 +140,7 @@ export default function RfqDialog({
           deliverTo: serializedFormData.deliverTo,
           buyerComments: serializedFormData.buyerComments,
           status: serializedFormData.status,
-          selectedQuoteId: null,
+          selectedQuoteId: serializedFormData.selectedQuoteId,
           sentAt: serializedFormData.sentAt,
         };
         savedRfq = await createRfq(createData);
@@ -154,7 +170,6 @@ export default function RfqDialog({
           buyerComments: serializedFormData.buyerComments,
           status: serializedFormData.status,
           sentAt: serializedFormData.sentAt,
-          receivedAt: serializedFormData.receivedAt,
         };
         savedRfq = await updateRfq(rfq.id, updateData);
         toast.success('RFQ updated successfully');
@@ -166,8 +181,7 @@ export default function RfqDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} RFQ`);
       console.error(`Error ${action}ing RFQ:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
@@ -176,6 +190,7 @@ export default function RfqDialog({
       setFormData({
         direction: null,
         rfqNumber: null,
+        status: 'pending',
         vendorName: null,
         vendorAddress: null,
         vendorContactName: null,
@@ -191,29 +206,45 @@ export default function RfqDialog({
         urgencyLevel: null,
         deliverTo: null,
         buyerComments: null,
-        status: 'pending',
+        selectedQuoteId: null,
         sentAt: null,
       });
     }
   };
 
+  const handleReset = () => {
+    setFormData({
+      direction: null,
+      rfqNumber: null,
+      status: 'pending',
+      vendorName: null,
+      vendorAddress: null,
+      vendorContactName: null,
+      vendorContactEmail: null,
+      vendorContactPhone: null,
+      partNumber: null,
+      altPartNumber: null,
+      partDescription: null,
+      conditionCode: null,
+      unitOfMeasure: null,
+      quantity: null,
+      pricingType: null,
+      urgencyLevel: null,
+      deliverTo: null,
+      buyerComments: null,
+      selectedQuoteId: null,
+      sentAt: null,
+    });
+  };
+
   const dialogTitle = isAdd ? 'Add New RFQ' : rfq?.rfqNumber || 'RFQ Details';
-  const saveButtonText = isAdd ? 'Create RFQ' : 'Save Changes';
 
   return (
     <DetailDialog
       trigger={
         withTrigger ? (
           <Button
-            intent={
-              triggerIntent
-                ? (triggerIntent as ButtonProps['intent'])
-                : isAdd
-                  ? 'add'
-                  : isEdit
-                    ? 'secondary'
-                    : 'primary'
-            }
+            intent={triggerIntent || (isAdd ? 'add' : isEdit ? 'secondary' : 'primary')}
             text={triggerText}
             icon={
               isAdd
@@ -233,14 +264,14 @@ export default function RfqDialog({
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      onReset={handleReset}
+      DialogType={DialogType}
       open={open}
       onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ContentSection header="RFQ Information" headerGradient="from-purple-500 to-purple-300">
+          <MainCard title="RFQ Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Direction"
@@ -249,10 +280,10 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('direction', value)}
                 name="direction"
-                selectOptions={[
-                  { value: 'sent', label: 'Sent' },
-                  { value: 'received', label: 'Received' },
-                ]}
+                selectOptions={Object.values(OrderDirectionEnum.enumValues).map((direction) => ({
+                  value: direction,
+                  label: orderDirectionDisplayMap[direction as OrderDirection],
+                }))}
               />
               <KeyValuePair
                 label="RFQ Number"
@@ -286,12 +317,20 @@ export default function RfqDialog({
                   label: getUrgencyLevelDisplay(level as UrgencyLevel),
                 }))}
               />
+              <KeyValuePair
+                label="Sent At"
+                value={formData.sentAt?.toISOString().split('T')[0] || ''}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) =>
+                  handleFieldChange('sentAt', value ? new Date(value as string) : null)
+                }
+                name="sentAt"
+              />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Vendor Information"
-            headerGradient="from-purple-500 to-purple-300"
-          >
+          </MainCard>
+
+          <MainCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
@@ -334,11 +373,9 @@ export default function RfqDialog({
                 name="vendorContactPhone"
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Part Specifications"
-            headerGradient="from-purple-500 to-purple-300"
-          >
+          </MainCard>
+
+          <MainCard title="Part Specifications" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Part Number"
@@ -387,13 +424,12 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('quantity', value)}
                 name="quantity"
+                min={1}
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Commercial Terms & Timeline"
-            headerGradient="from-purple-500 to-purple-300"
-          >
+          </MainCard>
+
+          <MainCard title="Commercial Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Pricing Type"
@@ -419,16 +455,8 @@ export default function RfqDialog({
                 onChange={(value) => handleFieldChange('buyerComments', value)}
                 name="buyerComments"
               />
-              <KeyValuePair
-                label="Sent At"
-                value={formData.sentAt}
-                valueType="date"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('sentAt', value)}
-                name="sentAt"
-              />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>

@@ -1,16 +1,51 @@
+// Updated by CursorAI on Dec 2 2024
+// NOTE: FuelContract entity is not found in schema.ts - this may need to be added or this dialog may be deprecated
 'use client';
 
-import type { FuelContract, UpdateFuelContract } from '@/drizzle/types';
+// NOTE: These types are not in the current schema and may need to be defined
+// import type { FuelContract, UpdateFuelContract } from '@/drizzle/types';
+
+// Temporary type definitions until schema is updated
+type FuelContract = {
+  id: string;
+  contractNumber?: string | null;
+  title?: string | null;
+  fuelType?: string | null;
+  vendorName?: string | null;
+  vendorAddress?: string | null;
+  vendorContactName?: string | null;
+  vendorContactEmail?: string | null;
+  vendorContactPhone?: string | null;
+  currency?: string;
+  priceType?: string | null;
+  priceFormula?: string | null;
+  baseUnitPrice?: number | null;
+  normalizedUsdPerUsg?: number | null;
+  volumeCommitted?: number | null;
+  volumeUnit?: string;
+  intoPlaneFee?: number | null;
+  includesTaxes?: boolean;
+  includesAirportFees?: boolean;
+  effectiveFrom?: string | null;
+  effectiveTo?: string | null;
+  aiSummary?: string | null;
+  terms?: any;
+};
+
+type UpdateFuelContract = Partial<Omit<FuelContract, 'id'>>;
+
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
+import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import {
   createFuelContract,
   updateFuelContract,
   type CreateFuelContractData,
 } from '@/services/fuel/fuel-contract-client';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Pencil, Plus } from 'lucide-react';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -72,7 +107,7 @@ export default function FuelContractDialog({
     aiSummary: contract?.aiSummary || null,
     terms: contract?.terms || {},
   });
-  const [isSaving, setIsSaving] = useState(false);
+
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
@@ -112,7 +147,6 @@ export default function FuelContractDialog({
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       let savedContract: FuelContract;
 
@@ -143,8 +177,7 @@ export default function FuelContractDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} fuel contract`);
       console.error(`Error ${action}ing fuel contract:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
@@ -177,13 +210,39 @@ export default function FuelContractDialog({
     }
   };
 
+  const handleReset = () => {
+    setFormData({
+      contractNumber: null,
+      title: null,
+      fuelType: null,
+      vendorName: null,
+      vendorAddress: null,
+      vendorContactName: null,
+      vendorContactEmail: null,
+      vendorContactPhone: null,
+      currency: 'USD',
+      priceType: null,
+      priceFormula: null,
+      baseUnitPrice: null,
+      normalizedUsdPerUsg: null,
+      volumeCommitted: null,
+      volumeUnit: 'USG',
+      intoPlaneFee: null,
+      includesTaxes: false,
+      includesAirportFees: false,
+      effectiveFrom: null,
+      effectiveTo: null,
+      aiSummary: null,
+      terms: {},
+    });
+  };
+
   const triggerText = isAdd
     ? 'Add Contract'
     : isEdit
       ? 'Edit'
       : `View ${contract?.title || 'Contract'}`;
   const dialogTitle = isAdd ? 'Add New Fuel Contract' : contract?.title || 'Fuel Contract Details';
-  const saveButtonText = isAdd ? 'Create Contract' : 'Save Changes';
 
   return (
     <DetailDialog
@@ -192,28 +251,25 @@ export default function FuelContractDialog({
           <Button
             intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
             text={triggerText}
-            icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
+            icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
             size={buttonSize}
             className={triggerClassName}
           />
-        ) : undefined
+        ) : null
       }
       headerGradient="from-emerald-500 to-emerald-500"
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      onReset={handleReset}
+      DialogType={DialogType}
       open={open}
       onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Contract Information */}
-          <ContentSection
-            header="Contract Information"
-            headerGradient="from-emerald-600 to-emerald-400"
-          >
+          <MainCard title="Contract Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Contract Number"
@@ -248,13 +304,10 @@ export default function FuelContractDialog({
                 name="aiSummary"
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
           {/* Vendor Information */}
-          <ContentSection
-            header="Vendor Information"
-            headerGradient="from-emerald-600 to-emerald-400"
-          >
+          <MainCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
@@ -297,29 +350,34 @@ export default function FuelContractDialog({
                 name="vendorContactPhone"
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
           {/* Pricing & Volume */}
-          <ContentSection
-            header="Pricing & Volume"
-            headerGradient="from-emerald-600 to-emerald-400"
-          >
+          <MainCard title="Pricing & Volume" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Currency"
                 value={formData.currency}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('currency', value)}
                 name="currency"
+                selectOptions={Object.entries(CURRENCY_MAP).map(([key, value]) => ({
+                  label: value.display,
+                  value: key,
+                }))}
               />
               <KeyValuePair
                 label="Price Type"
                 value={formData.priceType}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('priceType', value)}
                 name="priceType"
+                selectOptions={[
+                  { value: 'fixed', label: 'Fixed Price' },
+                  { value: 'index_formula', label: 'Index Formula' },
+                ]}
               />
               <KeyValuePair
                 label="Price Formula"
@@ -336,6 +394,8 @@ export default function FuelContractDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('baseUnitPrice', value)}
                 name="baseUnitPrice"
+                step={0.01}
+                min={0}
               />
               <KeyValuePair
                 label="Volume Committed"
@@ -344,14 +404,19 @@ export default function FuelContractDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('volumeCommitted', value)}
                 name="volumeCommitted"
+                min={0}
               />
               <KeyValuePair
                 label="Volume Unit"
                 value={formData.volumeUnit}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('volumeUnit', value)}
                 name="volumeUnit"
+                selectOptions={BASE_UOM_OPTIONS.map((uom) => ({
+                  label: uom.label,
+                  value: uom.value,
+                }))}
               />
               <KeyValuePair
                 label="Into Plane Fee"
@@ -360,15 +425,14 @@ export default function FuelContractDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('intoPlaneFee', value)}
                 name="intoPlaneFee"
+                step={0.01}
+                min={0}
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
           {/* Contract Period & Terms */}
-          <ContentSection
-            header="Contract Period & Terms"
-            headerGradient="from-emerald-600 to-emerald-400"
-          >
+          <MainCard title="Contract Period & Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Effective From"
@@ -403,7 +467,7 @@ export default function FuelContractDialog({
                 name="includesAirportFees"
               />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>

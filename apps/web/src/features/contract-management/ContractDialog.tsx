@@ -1,22 +1,24 @@
+// Updated by CursorAI on Dec 2 2024
 'use client';
 
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
-import type { ServiceContract } from '@/drizzle/types';
+import type { Contract } from '@/drizzle/types';
 import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
 import {
-  createServiceContract,
-  updateServiceContract,
-} from '@/services/contracts/service-contract-client';
+  createContract,
+  updateContract,
+  type CreateContractData,
+} from '@/services/contracts/contract-client';
 import { Button, ButtonProps } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { Eye, LucideIcon, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export default function ServiceContractDialog({
-  serviceContract,
+export default function ContractDialog({
+  contract,
   airportId,
   onChange,
   DialogType = 'view',
@@ -29,39 +31,45 @@ export default function ServiceContractDialog({
   onOpenChange,
   withTrigger = true,
 }: {
-  serviceContract: ServiceContract | null;
-  airportId?: string;
-  onChange: (serviceContract: ServiceContract) => void;
+  contract: Contract | null;
+  airportId?: string; // Required when DialogType is 'add'
+  onChange: (contract: Contract) => void;
   DialogType: 'add' | 'edit' | 'view';
   triggerText?: string;
   triggerIcon?: LucideIcon;
   triggerClassName?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
-  triggerIntent?: 'primary' | 'secondary' | 'add' | 'delete' | 'info';
+  buttonSize?: ButtonProps['size'];
+  triggerIntent?: ButtonProps['intent'];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
-    title: serviceContract?.title || '',
-    contractType: serviceContract?.contractType || null,
-    notes: serviceContract?.notes || null,
-    vendorName: serviceContract?.vendorName || null,
-    vendorAddress: serviceContract?.vendorAddress || null,
-    vendorContactName: serviceContract?.vendorContactName || null,
-    vendorContactEmail: serviceContract?.vendorContactEmail || null,
-    vendorContactPhone: serviceContract?.vendorContactPhone || null,
-    effectiveFrom: serviceContract?.effectiveFrom ? new Date(serviceContract.effectiveFrom) : null,
-    effectiveTo: serviceContract?.effectiveTo ? new Date(serviceContract.effectiveTo) : null,
-    pdfUrl: serviceContract?.pdfUrl || null,
-    rawText: serviceContract?.rawText || null,
-    aiSummary: serviceContract?.aiSummary || null,
-    terms: serviceContract?.terms || {},
-    airportId: serviceContract?.airportId || airportId || null,
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [airportQuery, setAirportQuery] = useState('');
+    // Contract Information (matching schema)
+    title: contract?.title || '',
+    contractType: contract?.contractType || null,
+    internalNotes: contract?.internalNotes || null,
+    summary: contract?.summary || null,
+    terms: contract?.terms || null,
+    docUrl: contract?.docUrl || null,
 
+    // Vendor Information (matching schema)
+    vendorName: contract?.vendorName || null,
+    vendorAddress: contract?.vendorAddress || null,
+    vendorContactName: contract?.vendorContactName || null,
+    vendorContactEmail: contract?.vendorContactEmail || null,
+    vendorContactPhone: contract?.vendorContactPhone || null,
+    vendorComments: contract?.vendorComments || null,
+
+    // Contract Period (matching schema)
+    effectiveFrom: contract?.effectiveFrom ? new Date(contract.effectiveFrom) : null,
+    effectiveTo: contract?.effectiveTo ? new Date(contract.effectiveTo) : null,
+
+    // Airport ID for new contracts
+    airportId: contract?.airportId || airportId || null,
+  });
+
+  const [airportQuery, setAirportQuery] = useState('');
   const { suggestions: airportSuggestions, isLoading: isLoadingAirports } = useAirportAutocomplete({
     query: airportQuery,
     enabled: true,
@@ -71,33 +79,28 @@ export default function ServiceContractDialog({
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
-  // Update formData when serviceContract prop changes
+  // Update formData when contract prop changes
   useEffect(() => {
     setFormData({
-      title: serviceContract?.title || '',
-      contractType: serviceContract?.contractType || null,
-      notes: serviceContract?.notes || null,
-      vendorName: serviceContract?.vendorName || null,
-      vendorAddress: serviceContract?.vendorAddress || null,
-      vendorContactName: serviceContract?.vendorContactName || null,
-      vendorContactEmail: serviceContract?.vendorContactEmail || null,
-      vendorContactPhone: serviceContract?.vendorContactPhone || null,
-      effectiveFrom: serviceContract?.effectiveFrom
-        ? new Date(serviceContract.effectiveFrom)
-        : null,
-      effectiveTo: serviceContract?.effectiveTo ? new Date(serviceContract.effectiveTo) : null,
-      pdfUrl: serviceContract?.pdfUrl || null,
-      rawText: serviceContract?.rawText || null,
-      aiSummary: serviceContract?.aiSummary || null,
-      terms: serviceContract?.terms || {},
-      airportId: serviceContract?.airportId || airportId || null,
+      title: contract?.title || '',
+      contractType: contract?.contractType || null,
+      internalNotes: contract?.internalNotes || null,
+      summary: contract?.summary || null,
+      terms: contract?.terms || null,
+      docUrl: contract?.docUrl || null,
+      vendorName: contract?.vendorName || null,
+      vendorAddress: contract?.vendorAddress || null,
+      vendorContactName: contract?.vendorContactName || null,
+      vendorContactEmail: contract?.vendorContactEmail || null,
+      vendorContactPhone: contract?.vendorContactPhone || null,
+      vendorComments: contract?.vendorComments || null,
+      effectiveFrom: contract?.effectiveFrom ? new Date(contract.effectiveFrom) : null,
+      effectiveTo: contract?.effectiveTo ? new Date(contract.effectiveTo) : null,
+      airportId: contract?.airportId || airportId || null,
     });
-  }, [serviceContract, airportId]);
+  }, [contract, airportId]);
 
-  const handleFieldChange = (
-    field: string,
-    value: string | boolean | number | Date | null | object,
-  ) => {
+  const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -107,9 +110,13 @@ export default function ServiceContractDialog({
       return;
     }
 
-    setIsSaving(true);
+    if (!formData.contractType) {
+      toast.error('Contract type is required');
+      return;
+    }
+
     try {
-      let savedServiceContract: ServiceContract;
+      let savedContract: Contract;
 
       // Serialize dates to ISO strings before sending
       const serializedFormData = {
@@ -121,65 +128,66 @@ export default function ServiceContractDialog({
       };
 
       if (isAdd) {
-        // Create new service contract
+        // Create new contract
         if (!formData.airportId) {
-          throw new Error('Airport is required for new service contracts');
+          throw new Error('Airport is required for new contracts');
         }
 
-        const createData = {
+        const createData: CreateContractData = {
+          airportId: serializedFormData.airportId,
+          vendorId: null, // Will be handled by backend if needed
           title: serializedFormData.title as string,
-          contractType: serializedFormData.contractType,
-          notes: serializedFormData.notes,
+          contractType: serializedFormData.contractType!,
+          internalNotes: serializedFormData.internalNotes,
+          summary: serializedFormData.summary,
+          terms: serializedFormData.terms,
+          docUrl: serializedFormData.docUrl,
           vendorName: serializedFormData.vendorName,
           vendorAddress: serializedFormData.vendorAddress,
           vendorContactName: serializedFormData.vendorContactName,
           vendorContactEmail: serializedFormData.vendorContactEmail,
           vendorContactPhone: serializedFormData.vendorContactPhone,
+          vendorComments: serializedFormData.vendorComments,
           effectiveFrom: serializedFormData.effectiveFrom,
           effectiveTo: serializedFormData.effectiveTo,
-          pdfUrl: serializedFormData.pdfUrl,
-          rawText: serializedFormData.rawText,
-          aiSummary: serializedFormData.aiSummary,
-          terms: serializedFormData.terms,
         };
 
-        savedServiceContract = await createServiceContract(formData.airportId, createData);
-        toast.success('Service contract created successfully');
+        savedContract = await createContract(formData.airportId, createData);
+        toast.success('Contract created successfully');
       } else {
-        // Update existing service contract
-        if (!serviceContract?.id) {
-          throw new Error('Service contract ID is required for updates');
+        // Update existing contract
+        if (!contract?.id) {
+          throw new Error('Contract ID is required for updates');
         }
 
         const updateData = {
           title: serializedFormData.title,
           contractType: serializedFormData.contractType,
-          notes: serializedFormData.notes,
+          internalNotes: serializedFormData.internalNotes,
+          summary: serializedFormData.summary,
+          terms: serializedFormData.terms,
+          docUrl: serializedFormData.docUrl,
           vendorName: serializedFormData.vendorName,
           vendorAddress: serializedFormData.vendorAddress,
           vendorContactName: serializedFormData.vendorContactName,
           vendorContactEmail: serializedFormData.vendorContactEmail,
           vendorContactPhone: serializedFormData.vendorContactPhone,
+          vendorComments: serializedFormData.vendorComments,
           effectiveFrom: serializedFormData.effectiveFrom,
           effectiveTo: serializedFormData.effectiveTo,
-          pdfUrl: serializedFormData.pdfUrl,
-          rawText: serializedFormData.rawText,
-          aiSummary: serializedFormData.aiSummary,
-          terms: serializedFormData.terms,
         };
 
-        savedServiceContract = await updateServiceContract(serviceContract.id, updateData);
-        toast.success('Service contract updated successfully');
+        savedContract = await updateContract(contract.id, updateData);
+        toast.success('Contract updated successfully');
       }
 
       // Call onChange to update parent with new data
-      onChange(savedServiceContract);
+      onChange(savedContract);
     } catch (error) {
       const action = isAdd ? 'create' : 'update';
-      toast.error(`Failed to ${action} service contract`);
-      console.error(`Error ${action}ing service contract:`, error);
-    } finally {
-      setIsSaving(false);
+      toast.error(`Failed to ${action} contract`);
+      console.error(`Error ${action}ing contract:`, error);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
@@ -188,42 +196,51 @@ export default function ServiceContractDialog({
       setFormData({
         title: '',
         contractType: null,
-        notes: null,
+        internalNotes: null,
+        summary: null,
+        terms: null,
+        docUrl: null,
         vendorName: null,
         vendorAddress: null,
         vendorContactName: null,
         vendorContactEmail: null,
         vendorContactPhone: null,
+        vendorComments: null,
         effectiveFrom: null,
         effectiveTo: null,
-        pdfUrl: null,
-        rawText: null,
-        aiSummary: null,
-        terms: {},
         airportId: airportId || null,
       });
     }
   };
 
-  const dialogTitle = isAdd
-    ? 'Add New Service Contract'
-    : serviceContract?.title || 'Service Contract Details';
-  const saveButtonText = isAdd ? 'Create Service Contract' : 'Save Changes';
+  const handleReset = () => {
+    setFormData({
+      title: '',
+      contractType: null,
+      internalNotes: null,
+      summary: null,
+      terms: null,
+      docUrl: null,
+      vendorName: null,
+      vendorAddress: null,
+      vendorContactName: null,
+      vendorContactEmail: null,
+      vendorContactPhone: null,
+      vendorComments: null,
+      effectiveFrom: null,
+      effectiveTo: null,
+      airportId: airportId || null,
+    });
+  };
+
+  const dialogTitle = isAdd ? 'Add New Contract' : contract?.title || 'Contract Details';
 
   return (
     <DetailDialog
       trigger={
         withTrigger ? (
           <Button
-            intent={
-              triggerIntent
-                ? (triggerIntent as ButtonProps['intent'])
-                : isAdd
-                  ? 'add'
-                  : isEdit
-                    ? 'secondary'
-                    : 'primary'
-            }
+            intent={triggerIntent || (isAdd ? 'add' : isEdit ? 'secondary' : 'primary')}
             text={triggerText}
             icon={
               triggerIcon ||
@@ -244,17 +261,14 @@ export default function ServiceContractDialog({
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      onReset={handleReset}
+      DialogType={DialogType}
       open={open}
       onOpenChange={onOpenChange}
     >
       {(isEditing: boolean) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ContentSection
-            header="Contract Information"
-            headerGradient="from-green-500 to-green-300"
-          >
+          <MainCard title="Contract Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Title"
@@ -266,45 +280,53 @@ export default function ServiceContractDialog({
               />
               <KeyValuePair
                 label="Contract Type"
-                value={
-                  isEditing
-                    ? formData.contractType || 'none'
-                    : getContractTypeDisplay(formData.contractType)
-                }
-                valueType={isEditing ? 'select' : 'string'}
+                value={formData.contractType}
+                valueType="select"
                 editMode={isEditing}
-                onChange={(value) =>
-                  handleFieldChange('contractType', value === 'none' ? null : value)
-                }
+                onChange={(value) => handleFieldChange('contractType', value)}
                 name="contractType"
-                selectOptions={[
-                  { value: 'none', label: 'None' },
-                  ...ContractTypeEnum.enumValues.map((value) => ({
-                    value,
-                    label: getContractTypeDisplay(value),
-                  })),
-                ]}
+                required={true}
+                selectOptions={ContractTypeEnum.enumValues.map((value) => ({
+                  value,
+                  label: getContractTypeDisplay(value),
+                }))}
               />
               <KeyValuePair
-                label="Notes"
-                value={formData.notes}
+                label="Summary"
+                value={formData.summary}
                 valueType="string"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('notes', value)}
-                name="notes"
+                onChange={(value) => handleFieldChange('summary', value)}
+                name="summary"
               />
               <KeyValuePair
-                label="AI Summary"
-                value={formData.aiSummary}
+                label="Internal Notes"
+                value={formData.internalNotes}
                 valueType="string"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('aiSummary', value)}
-                name="aiSummary"
+                onChange={(value) => handleFieldChange('internalNotes', value)}
+                name="internalNotes"
+              />
+              <KeyValuePair
+                label="Terms"
+                value={formData.terms}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('terms', value)}
+                name="terms"
+              />
+              <KeyValuePair
+                label="Document URL"
+                value={formData.docUrl}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('docUrl', value)}
+                name="docUrl"
               />
             </div>
-          </ContentSection>
+          </MainCard>
 
-          <ContentSection header="Vendor Information" headerGradient="from-green-500 to-green-300">
+          <MainCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
@@ -346,10 +368,18 @@ export default function ServiceContractDialog({
                 onChange={(value) => handleFieldChange('vendorContactPhone', value)}
                 name="vendorContactPhone"
               />
+              <KeyValuePair
+                label="Vendor Comments"
+                value={formData.vendorComments}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('vendorComments', value)}
+                name="vendorComments"
+              />
             </div>
-          </ContentSection>
+          </MainCard>
 
-          <ContentSection header="Contract Period" headerGradient="from-green-500 to-green-300">
+          <MainCard title="Contract Period" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Effective From"
@@ -368,28 +398,7 @@ export default function ServiceContractDialog({
                 name="effectiveTo"
               />
             </div>
-          </ContentSection>
-
-          <ContentSection header="Document Management" headerGradient="from-green-500 to-green-300">
-            <div className="flex flex-col justify-between space-y-4">
-              <KeyValuePair
-                label="PDF URL"
-                value={formData.pdfUrl}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('pdfUrl', value)}
-                name="pdfUrl"
-              />
-              <KeyValuePair
-                label="Raw Text"
-                value={formData.rawText}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('rawText', value)}
-                name="rawText"
-              />
-            </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>

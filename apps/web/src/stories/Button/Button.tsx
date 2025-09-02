@@ -25,6 +25,8 @@ const buttonStyles = cva(
           'bg-white border border-primary/20 text-gray-600 hover:text-gray-800 hover:border-primary/40',
         // Secondary inverted - for use on dark/colored backgrounds
         secondaryInverted: 'bg-white/30 hover:bg-white/40 text-white',
+        // Add action - for creating new items, bright and inviting
+        add: 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white',
         // Success action - confirmations, completions, positive outcomes
         success:
           'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white',
@@ -51,23 +53,28 @@ const buttonStyles = cva(
 );
 
 type ButtonStyleProps = VariantProps<typeof buttonStyles>;
+type ButtonIntent =
+  | 'primary'
+  | 'secondary'
+  | 'secondaryInverted'
+  | 'add'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'ghost';
+type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonType = 'button' | 'submit' | 'reset';
+type ButtonIconPosition = 'left' | 'right';
 
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     ButtonStyleProps {
-  intent?:
-    | 'primary'
-    | 'secondary'
-    | 'secondaryInverted'
-    | 'success'
-    | 'warning'
-    | 'danger'
-    | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  type?: 'button' | 'submit' | 'reset';
+  intent?: ButtonIntent;
+  size?: ButtonSize;
+  type?: ButtonType;
   text?: string | null; // The text to display in the button
   icon?: LucideIcon; // Optional icon to display before the text
-  iconPosition?: 'left' | 'right'; // Position of the icon relative to text
+  iconPosition?: ButtonIconPosition; // Position of the icon relative to text
   isLoading?: boolean; // Show loading state
   href?: string; // Link to navigate to (renders as Link instead of button)
   external?: boolean; // Open link in new tab

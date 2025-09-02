@@ -1,5 +1,7 @@
+// Updated by CursorAI on Dec 2 2024
 'use client';
 
+import { getStatusDisplay, statusEnum } from '@/drizzle/schema/enums';
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
@@ -9,9 +11,11 @@ import {
   updateFuelTender,
   type CreateFuelTenderData,
 } from '@/services/fuel/fuel-tender-client';
+import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -21,12 +25,18 @@ export default function TenderDialog({
   airportId,
   onChange,
   DialogType = 'view',
+  open,
+  onOpenChange,
+  withTrigger = true,
 }: {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   tender: FuelTender | null;
-  airportId?: string; // Required when isNew is true
+  airportId?: string; // Required when DialogType is 'add'
   onChange: (tender: FuelTender) => void;
   DialogType: 'add' | 'edit' | 'view';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  withTrigger?: boolean;
 }) {
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
@@ -36,30 +46,41 @@ export default function TenderDialog({
     if (DialogType === 'add') {
       // For add mode, always start with empty form regardless of tender prop
       return {
-        title: null,
+        // Tender Information (matching schema)
+        title: '',
         description: null,
         fuelType: null,
+        projectedAnnualVolume: null,
+
+        // Base Configuration (matching schema)
         baseCurrency: null,
         baseUom: null,
-        projectedAnnualVolume: null,
+
+        // Timeline (matching schema)
         biddingStarts: null,
         biddingEnds: null,
         deliveryStarts: null,
         deliveryEnds: null,
+
+        // Workflow Management (matching schema)
+        status: 'pending',
+        winningBidId: null,
       };
     }
     // For edit/view modes, populate from tender
     return {
-      title: tender?.title ?? null,
-      description: tender?.description ?? null,
-      fuelType: tender?.fuelType ?? null,
-      baseCurrency: tender?.baseCurrency ?? null,
-      baseUom: tender?.baseUom ?? null,
-      projectedAnnualVolume: tender?.projectedAnnualVolume ?? null,
-      biddingStarts: tender?.biddingStarts ?? null,
-      biddingEnds: tender?.biddingEnds ?? null,
-      deliveryStarts: tender?.deliveryStarts ?? null,
-      deliveryEnds: tender?.deliveryEnds ?? null,
+      title: tender?.title || '',
+      description: tender?.description || null,
+      fuelType: tender?.fuelType || null,
+      projectedAnnualVolume: tender?.projectedAnnualVolume || null,
+      baseCurrency: tender?.baseCurrency || null,
+      baseUom: tender?.baseUom || null,
+      biddingStarts: tender?.biddingStarts || null,
+      biddingEnds: tender?.biddingEnds || null,
+      deliveryStarts: tender?.deliveryStarts || null,
+      deliveryEnds: tender?.deliveryEnds || null,
+      status: tender?.status || 'pending',
+      winningBidId: tender?.winningBidId || null,
     };
   }, [DialogType, tender]);
 
@@ -68,13 +89,18 @@ export default function TenderDialog({
   // Update formData when DialogType changes (most important) or tender changes
   useEffect(() => {
     setFormData(getInitialFormData());
-  }, [DialogType, tender]);
+  }, [getInitialFormData]);
 
   const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
+    if (!formData.title?.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
     try {
       let savedTender: FuelTender;
 
@@ -88,7 +114,7 @@ export default function TenderDialog({
         }
         const createData: CreateFuelTenderData = {
           airportId,
-          title: serializedFormData.title || '',
+          title: serializedFormData.title as string,
           description: serializedFormData.description,
           fuelType: serializedFormData.fuelType,
           baseCurrency: serializedFormData.baseCurrency,
@@ -118,8 +144,12 @@ export default function TenderDialog({
           biddingEnds: serializedFormData.biddingEnds,
           deliveryStarts: serializedFormData.deliveryStarts,
           deliveryEnds: serializedFormData.deliveryEnds,
+          status: serializedFormData.status,
         };
-        savedTender = await updateFuelTender(tender.id, updateData);
+        savedTender = await updateFuelTender(
+          tender.id,
+          updateData as Partial<CreateFuelTenderData>,
+        );
         toast.success('Tender updated successfully');
       }
 
@@ -147,18 +177,31 @@ export default function TenderDialog({
 
   return (
     <DetailDialog
-      trigger={trigger}
+      trigger={
+        withTrigger
+          ? trigger || (
+              <Button
+                intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+                text={isAdd ? 'Add Tender' : isEdit ? 'Edit' : 'View'}
+                icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
+                size="md"
+              />
+            )
+          : null
+      }
       headerGradient="from-orange-500 to-orange-500"
       title={dialogTitle}
       DialogType={DialogType}
       onSave={handleSave}
       onCancel={handleCancel}
       onReset={handleReset}
+      open={open}
+      onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MainCard title="Tender Information" headerGradient="from-orange-500 to-orange-300">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Tender Information" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -184,6 +227,33 @@ export default function TenderDialog({
                 value={formData.fuelType}
               />
               <KeyValuePair
+                label="Projected Annual Volume"
+                value={formData.projectedAnnualVolume}
+                valueType="number"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('projectedAnnualVolume', value)}
+                name="projectedAnnualVolume"
+                step={1000}
+                min={0}
+              />
+              <KeyValuePair
+                label="Status"
+                value={formData.status}
+                valueType="select"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('status', value)}
+                name="status"
+                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                  value: status,
+                  label: getStatusDisplay(status),
+                }))}
+              />
+            </div>
+          </MainCard>
+
+          <MainCard title="Configuration & Timeline" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
+              <KeyValuePair
                 label="Base Currency"
                 valueType="select"
                 editMode={isEditing}
@@ -207,20 +277,6 @@ export default function TenderDialog({
                   value: uom.value,
                 }))}
               />
-              <KeyValuePair
-                label="Projected Annual Volume"
-                value={formData.projectedAnnualVolume}
-                valueType="number"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('projectedAnnualVolume', value)}
-                name="projectedAnnualVolume"
-                step={1000}
-                min={0}
-              />
-            </div>
-          </MainCard>
-          <MainCard title="Configuration & Timeline" headerGradient="from-orange-500 to-orange-300">
-            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Bidding Starts"
                 value={formData.biddingStarts}

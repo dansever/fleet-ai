@@ -1,14 +1,16 @@
+// Updated by CursorAI on Dec 2 2024
 'use client';
 
 import { decisionDisplayMap } from '@/drizzle/schema/enums';
 import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
+import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { createFuelBid, updateFuelBid } from '@/services/fuel/fuel-bid-client';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Pencil, Plus } from 'lucide-react';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -19,6 +21,9 @@ export default function FuelBidDialog({
   DialogType = 'view',
   triggerClassName,
   buttonSize = 'md',
+  open,
+  onOpenChange,
+  withTrigger = true,
 }: {
   bid: FuelBid | null;
   tenderId?: string; // Required when DialogType is 'add'
@@ -26,17 +31,17 @@ export default function FuelBidDialog({
   DialogType: 'add' | 'edit' | 'view';
   triggerClassName?: string;
   buttonSize?: 'sm' | 'md' | 'lg';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
-    // Bid Information & Timeline
+    // Bid Information & Timeline (matching schema)
     title: bid?.title || null,
     round: bid?.round || null,
     bidSubmittedAt: bid?.bidSubmittedAt || null,
-    aiSummary: bid?.aiSummary || null,
-    decision: bid?.decision || null,
-    decisionNotes: bid?.decisionNotes || null,
 
-    // Vendor Information
+    // Vendor Information (matching schema)
     vendorName: bid?.vendorName || null,
     vendorAddress: bid?.vendorAddress || null,
     vendorContactName: bid?.vendorContactName || null,
@@ -44,72 +49,69 @@ export default function FuelBidDialog({
     vendorContactPhone: bid?.vendorContactPhone || null,
     vendorComments: bid?.vendorComments || null,
 
-    // Pricing Structure & Terms
+    // Pricing Structure & Terms (matching schema)
     priceType: bid?.priceType || null, // fixed, index_formula
     currency: bid?.currency || 'USD',
     uom: bid?.uom || 'USG',
     paymentTerms: bid?.paymentTerms || null,
 
-    // Fixed Pricing
+    // Fixed Pricing (matching schema)
     baseUnitPrice: bid?.baseUnitPrice || null,
 
-    // Index-Linked Pricing
+    // Index-Linked Pricing (matching schema)
     indexName: bid?.indexName || null,
     indexLocation: bid?.indexLocation || null,
     differential: bid?.differential || null,
     differentialUnit: bid?.differentialUnit || null,
     formulaNotes: bid?.formulaNotes || null,
 
-    // Fees & Specifications
+    // Fees & Charges (matching schema)
     intoPlaneFee: bid?.intoPlaneFee || null,
     handlingFee: bid?.handlingFee || null,
     otherFee: bid?.otherFee || null,
     otherFeeDescription: bid?.otherFeeDescription || null,
+
+    // Inclusions & Exclusions (matching schema)
     includesTaxes: bid?.includesTaxes || false,
     includesAirportFees: bid?.includesAirportFees || false,
+
+    // Calculated Fields (matching schema)
     densityAt15C: bid?.densityAt15C || null,
     normalizedUnitPriceUsdPerUsg: bid?.normalizedUnitPriceUsdPerUsg || null,
+
+    // AI Processing (matching schema)
+    aiSummary: bid?.aiSummary || null,
+
+    // Decision Tracking (matching schema)
+    decision: bid?.decision || null,
+    decisionNotes: bid?.decisionNotes || null,
   });
-  const [isSaving, setIsSaving] = useState(false);
+
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
   // Update formData when bid prop changes
   useEffect(() => {
     setFormData({
-      // Bid Information & Timeline
       title: bid?.title || null,
       round: bid?.round || null,
       bidSubmittedAt: bid?.bidSubmittedAt || null,
-      aiSummary: bid?.aiSummary || null,
-      decision: bid?.decision || null,
-      decisionNotes: bid?.decisionNotes || null,
-
-      // Vendor Information
       vendorName: bid?.vendorName || null,
       vendorAddress: bid?.vendorAddress || null,
       vendorContactName: bid?.vendorContactName || null,
       vendorContactEmail: bid?.vendorContactEmail || null,
       vendorContactPhone: bid?.vendorContactPhone || null,
       vendorComments: bid?.vendorComments || null,
-
-      // Pricing Structure & Terms
       priceType: bid?.priceType || null,
       currency: bid?.currency || 'USD',
       uom: bid?.uom || 'USG',
       paymentTerms: bid?.paymentTerms || null,
-
-      // Fixed Pricing
       baseUnitPrice: bid?.baseUnitPrice || null,
-
-      // Index-Linked Pricing
       indexName: bid?.indexName || null,
       indexLocation: bid?.indexLocation || null,
       differential: bid?.differential || null,
       differentialUnit: bid?.differentialUnit || null,
       formulaNotes: bid?.formulaNotes || null,
-
-      // Fees & Specifications
       intoPlaneFee: bid?.intoPlaneFee || null,
       handlingFee: bid?.handlingFee || null,
       otherFee: bid?.otherFee || null,
@@ -118,6 +120,9 @@ export default function FuelBidDialog({
       includesAirportFees: bid?.includesAirportFees || false,
       densityAt15C: bid?.densityAt15C || null,
       normalizedUnitPriceUsdPerUsg: bid?.normalizedUnitPriceUsdPerUsg || null,
+      aiSummary: bid?.aiSummary || null,
+      decision: bid?.decision || null,
+      decisionNotes: bid?.decisionNotes || null,
     });
   }, [bid]);
 
@@ -126,7 +131,6 @@ export default function FuelBidDialog({
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       let savedBid: FuelBid;
 
@@ -137,6 +141,7 @@ export default function FuelBidDialog({
         }
         const createData: NewFuelBid = {
           tenderId,
+          vendorId: null, // Will be handled by backend if needed
           ...formData,
         };
         savedBid = await createFuelBid(tenderId, createData);
@@ -157,21 +162,16 @@ export default function FuelBidDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} fuel bid`);
       console.error(`Error ${action}ing fuel bid:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
   const handleCancel = () => {
     if (isAdd) {
       setFormData({
-        // Reset to default values
         title: null,
         round: null,
         bidSubmittedAt: null,
-        aiSummary: null,
-        decision: null,
-        decisionNotes: null,
         vendorName: null,
         vendorAddress: null,
         vendorContactName: null,
@@ -196,36 +196,78 @@ export default function FuelBidDialog({
         includesAirportFees: false,
         densityAt15C: null,
         normalizedUnitPriceUsdPerUsg: null,
+        aiSummary: null,
+        decision: null,
+        decisionNotes: null,
       });
     }
   };
 
-  const triggerText = isAdd ? 'Add Bid' : isEdit ? 'Edit' : `View`;
+  const handleReset = () => {
+    setFormData({
+      title: null,
+      round: null,
+      bidSubmittedAt: null,
+      vendorName: null,
+      vendorAddress: null,
+      vendorContactName: null,
+      vendorContactEmail: null,
+      vendorContactPhone: null,
+      vendorComments: null,
+      priceType: null,
+      currency: 'USD',
+      uom: 'USG',
+      paymentTerms: null,
+      baseUnitPrice: null,
+      indexName: null,
+      indexLocation: null,
+      differential: null,
+      differentialUnit: null,
+      formulaNotes: null,
+      intoPlaneFee: null,
+      handlingFee: null,
+      otherFee: null,
+      otherFeeDescription: null,
+      includesTaxes: false,
+      includesAirportFees: false,
+      densityAt15C: null,
+      normalizedUnitPriceUsdPerUsg: null,
+      aiSummary: null,
+      decision: null,
+      decisionNotes: null,
+    });
+  };
+
+  const triggerText = isAdd ? 'Add Bid' : isEdit ? 'Edit' : 'View';
   const dialogTitle = isAdd ? 'Add New Fuel Bid' : bid?.title || 'Fuel Bid Details';
-  const saveButtonText = isAdd ? 'Create Bid' : 'Save Changes';
 
   return (
     <DetailDialog
       trigger={
-        <Button
-          intent={'secondary'}
-          text={triggerText}
-          icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : undefined}
-          size={buttonSize}
-          className={triggerClassName}
-        />
+        withTrigger ? (
+          <Button
+            intent={isAdd ? 'add' : 'secondary'}
+            text={triggerText}
+            icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
+            size={buttonSize}
+            className={triggerClassName}
+          />
+        ) : null
       }
       headerGradient="from-pink-500 to-pink-500"
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
+      onReset={handleReset}
       DialogType={DialogType}
+      open={open}
+      onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bid Information & Timeline */}
-          <MainCard title="Bid Information & Timeline" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Bid Information & Timeline" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -242,7 +284,7 @@ export default function FuelBidDialog({
                 onChange={(value) => handleFieldChange('round', value)}
                 name="round"
                 min={1}
-                max={5}
+                max={10}
               />
               <KeyValuePair
                 label="Bid Submitted At"
@@ -258,7 +300,7 @@ export default function FuelBidDialog({
                 valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('decision', value)}
-                name="decis ion"
+                name="decision"
                 selectOptions={Object.entries(decisionDisplayMap).map(([key, value]) => ({
                   label: value,
                   value: key,
@@ -284,8 +326,8 @@ export default function FuelBidDialog({
           </MainCard>
 
           {/* Vendor Information */}
-          <MainCard title="Vendor Information" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Vendor Information" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -338,23 +380,31 @@ export default function FuelBidDialog({
           </MainCard>
 
           {/* Pricing Structure & Terms */}
-          <MainCard title="Pricing Structure & Terms" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Pricing Structure & Terms" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Price Type"
                 value={formData.priceType}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('priceType', value)}
                 name="priceType"
+                selectOptions={[
+                  { value: 'fixed', label: 'Fixed Price' },
+                  { value: 'index_formula', label: 'Index Formula' },
+                ]}
               />
               <KeyValuePair
                 label="Currency"
                 value={formData.currency}
-                valueType="string"
+                valueType="select"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('currency', value)}
                 name="currency"
+                selectOptions={Object.entries(CURRENCY_MAP).map(([key, value]) => ({
+                  label: value.display,
+                  value: key,
+                }))}
               />
               <KeyValuePair
                 label="Unit of Measure"
@@ -363,9 +413,9 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('uom', value)}
                 name="uom"
-                selectOptions={Object.entries(BASE_UOM_OPTIONS).map(([key, value]) => ({
-                  label: value.label,
-                  value: key,
+                selectOptions={BASE_UOM_OPTIONS.map((uom) => ({
+                  label: uom.label,
+                  value: uom.value,
                 }))}
               />
               <KeyValuePair
@@ -383,7 +433,15 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('baseUnitPrice', value)}
                 name="baseUnitPrice"
+                step={0.01}
+                min={0}
               />
+            </div>
+          </MainCard>
+
+          {/* Index-Linked Pricing */}
+          <MainCard title="Index-Linked Pricing" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Index Name"
                 value={formData.indexName}
@@ -407,6 +465,7 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('differential', value)}
                 name="differential"
+                step={0.01}
               />
               <KeyValuePair
                 label="Differential Unit"
@@ -428,8 +487,8 @@ export default function FuelBidDialog({
           </MainCard>
 
           {/* Fees & Specifications */}
-          <MainCard title="Fees & Specifications" headerGradient="from-pink-600 to-pink-400">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Fees & Specifications" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Into Plane Fee"
                 value={formData.intoPlaneFee}
@@ -437,6 +496,8 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('intoPlaneFee', value)}
                 name="intoPlaneFee"
+                step={0.01}
+                min={0}
               />
               <KeyValuePair
                 label="Handling Fee"
@@ -445,6 +506,8 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('handlingFee', value)}
                 name="handlingFee"
+                step={0.01}
+                min={0}
               />
               <KeyValuePair
                 label="Other Fee"
@@ -453,6 +516,8 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('otherFee', value)}
                 name="otherFee"
+                step={0.01}
+                min={0}
               />
               <KeyValuePair
                 label="Other Fee Description"
@@ -478,13 +543,21 @@ export default function FuelBidDialog({
                 onChange={(value) => handleFieldChange('includesAirportFees', value)}
                 name="includesAirportFees"
               />
+            </div>
+          </MainCard>
+
+          {/* Calculated Fields */}
+          <MainCard title="Calculated Fields" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
-                label="Density at 15°C"
+                label="Density at 15°C (kg/m³)"
                 value={formData.densityAt15C}
                 valueType="number"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('densityAt15C', value)}
                 name="densityAt15C"
+                step={0.01}
+                min={0}
               />
               <KeyValuePair
                 label="Normalized USD per USG"
@@ -493,6 +566,8 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('normalizedUnitPriceUsdPerUsg', value)}
                 name="normalizedUnitPriceUsdPerUsg"
+                step={0.01}
+                min={0}
               />
             </div>
           </MainCard>

@@ -1,10 +1,12 @@
 import {
-  createFuelContract,
-  deleteFuelContract,
-  getFuelContractById,
-  getFuelContractsByAirportId,
-  updateFuelContract,
-} from '@/db/fuel-contracts/db-actions';
+  createContract,
+  deleteContract,
+  getContract,
+  getContractsByAirport,
+  getContractsByAirportAndType,
+  updateContract,
+} from '@/db/contract-management/contracts/db-actions';
+import { ContractType } from '@/drizzle/schema/enums';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';
@@ -23,17 +25,23 @@ export async function GET(request: NextRequest) {
     if (!orgId) return jsonError('Unauthorized', 401);
 
     const { searchParams } = new URL(request.url);
-    const airportId = searchParams.get('airportId');
     const contractId = searchParams.get('id');
+    const airportId = searchParams.get('airportId');
+    const contractType = searchParams.get('contractType');
 
-    if (airportId) {
-      const contracts = await getFuelContractsByAirportId(airportId);
+    if (contractId) {
+      const contract = await getContract(contractId);
+      return NextResponse.json(contract);
+    }
+
+    if (contractType && airportId) {
+      const contracts = await getContractsByAirportAndType(airportId, contractType as ContractType);
       return NextResponse.json(contracts);
     }
 
-    if (contractId) {
-      const contract = await getFuelContractById(contractId);
-      return NextResponse.json(contract);
+    if (airportId) {
+      const contracts = await getContractsByAirport(airportId);
+      return NextResponse.json(contracts);
     }
 
     return jsonError('Airport ID or contract ID is required', 400);
@@ -54,16 +62,16 @@ export async function POST(request: NextRequest) {
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const body = await request.json();
-    const newFuelContract = await createFuelContract({
+    const newContract = await createContract({
       ...body,
       orgId: dbUser.orgId,
     });
 
-    if (!newFuelContract) {
+    if (!newContract) {
       return jsonError('Failed to create fuel contract', 500);
     }
 
-    return NextResponse.json(newFuelContract);
+    return NextResponse.json(newContract);
   } catch (error) {
     console.error('Error creating fuel contract:', error);
     return jsonError('Internal server error', 500);
@@ -93,7 +101,7 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date(),
     };
 
-    const updatedContract = await updateFuelContract(contractId, updateData);
+    const updatedContract = await updateContract(contractId, updateData);
 
     if (!updatedContract) {
       return jsonError('Contract not found', 404);
@@ -123,7 +131,7 @@ export async function DELETE(request: NextRequest) {
       return jsonError('Contract ID is required', 400);
     }
 
-    await deleteFuelContract(contractId);
+    await deleteContract(contractId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

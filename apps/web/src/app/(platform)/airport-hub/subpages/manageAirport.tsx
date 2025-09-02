@@ -1,9 +1,9 @@
 'use client';
 
 import { Button } from '@/stories/Button/Button';
-import { ContentSection, MetricCard } from '@/stories/Card/Card';
+import { MainCard, MetricCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Building2, Info, Pencil, Plane, Save, X } from 'lucide-react';
+import { Building2, Pencil, Plane, Save, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAirportHub } from '../ContextProvider';
 
@@ -93,41 +93,37 @@ export default function ManageAirport() {
       </div>
 
       {/* Airport Information */}
-      <ContentSection
-        header={
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5" />
-              <h3>Airport Information</h3>
-            </div>
-            <div className="flex gap-2">
-              {isEditing ? (
-                <>
-                  <Button
-                    intent="secondary"
-                    className="text-white bg-white/30"
-                    text="Cancel"
-                    icon={X}
-                    onClick={handleCancel}
-                  />
-                  <Button
-                    intent="secondary"
-                    className="text-white bg-white/30"
-                    text="Save Changes"
-                    icon={Save}
-                    onClick={handleSave}
-                  />
-                </>
-              ) : (
+      <MainCard
+        title="Airport Information"
+        neutralHeader={true}
+        headerActions={
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
                 <Button
                   intent="secondary"
                   className="text-white bg-white/30"
-                  text="Edit Airport"
-                  icon={Pencil}
-                  onClick={handleEdit}
+                  text="Cancel"
+                  icon={X}
+                  onClick={handleCancel}
                 />
-              )}
-            </div>
+                <Button
+                  intent="secondary"
+                  className="text-white bg-white/30"
+                  text="Save Changes"
+                  icon={Save}
+                  onClick={handleSave}
+                />
+              </>
+            ) : (
+              <Button
+                intent="secondary"
+                className="text-white bg-white/30"
+                text="Edit Airport"
+                icon={Pencil}
+                onClick={handleEdit}
+              />
+            )}
           </div>
         }
       >
@@ -189,7 +185,7 @@ export default function ManageAirport() {
             onChange={(value) => handleChange('isHub', value as boolean)}
           />
         </div>
-      </ContentSection>
+      </MainCard>
     </div>
   );
 }

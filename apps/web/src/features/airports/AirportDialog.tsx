@@ -1,11 +1,14 @@
+// Updated by CursorAI on Dec 2 2024
 'use client';
 
 import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { createAirport, updateAirport } from '@/services/core/airport-client';
+import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AirportAutocomplete from './AirportAutocomplete';
@@ -16,41 +19,53 @@ export default function AirportDialog({
   airport,
   DialogType = 'view',
   onChange,
+  open,
+  onOpenChange,
+  withTrigger = true,
 }: {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   airport: Airport | null;
   DialogType: 'add' | 'edit' | 'view';
   onChange: (airport: Airport) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  withTrigger?: boolean;
 }) {
   const { map: countryMap } = useCountryMap();
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
   const [formData, setFormData] = useState({
+    // Airport Identification (matching schema)
     name: airport?.name || '',
+    iata: airport?.iata || '',
+    icao: airport?.icao || '',
+
+    // Location Information (matching schema)
     city: airport?.city || '',
     state: airport?.state || '',
     country: airport?.country || '',
-    iata: airport?.iata || '',
-    icao: airport?.icao || '',
+
+    // Operational Information (matching schema)
     isHub: airport?.isHub || false,
+    internalNotes: airport?.internalNotes || '',
   });
-  const [isSaving, setIsSaving] = useState(false);
 
   // Update formData when airport prop changes
   useEffect(() => {
     setFormData({
       name: airport?.name || '',
+      iata: airport?.iata || '',
+      icao: airport?.icao || '',
       city: airport?.city || '',
       state: airport?.state || '',
       country: airport?.country || '',
-      iata: airport?.iata || '',
-      icao: airport?.icao || '',
       isHub: airport?.isHub || false,
+      internalNotes: airport?.internalNotes || '',
     });
   }, [airport]);
 
-  const handleFieldChange = (field: string, value: string | boolean | number | Date) => {
+  const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -66,12 +81,21 @@ export default function AirportDialog({
       country: countryName,
       iata: selectedAirport.iata || '',
       icao: selectedAirport.icao || '',
-      // Keep isHub as is - user should choose this manually
+      // Keep isHub and internalNotes as is - user should choose these manually
     }));
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    if (!formData.name?.trim()) {
+      toast.error('Airport name is required');
+      return;
+    }
+
+    if (!formData.country?.trim()) {
+      toast.error('Country is required');
+      return;
+    }
+
     try {
       let savedAirport: Airport;
 
@@ -94,8 +118,7 @@ export default function AirportDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} airport`);
       console.error(`Error ${action}ing airport:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
@@ -103,32 +126,59 @@ export default function AirportDialog({
     if (isAdd) {
       setFormData({
         name: '',
+        iata: '',
+        icao: '',
         city: '',
         state: '',
         country: '',
-        iata: '',
-        icao: '',
         isHub: false,
+        internalNotes: '',
       });
     }
   };
 
+  const handleReset = () => {
+    setFormData({
+      name: '',
+      iata: '',
+      icao: '',
+      city: '',
+      state: '',
+      country: '',
+      isHub: false,
+      internalNotes: '',
+    });
+  };
+
   const dialogTitle = isAdd ? 'Add New Airport' : airport?.name || 'Airport Details';
-  const saveButtonText = isAdd ? 'Upload to Database' : 'Save';
 
   return (
     <DetailDialog
-      trigger={trigger}
+      trigger={
+        withTrigger
+          ? trigger || (
+              <Button
+                intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
+                text={isAdd ? 'Add Airport' : isEdit ? 'Edit' : 'View'}
+                icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
+                size="md"
+              />
+            )
+          : null
+      }
       headerGradient="from-blue-500 to-blue-500"
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
+      onReset={handleReset}
       DialogType={DialogType}
+      open={open}
+      onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MainCard title="Information" headerGradient="from-blue-500 to-blue-300">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Airport Information" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               {isEditing && isAdd ? (
                 <AirportAutocomplete
                   label="Search Airport"
@@ -149,7 +199,7 @@ export default function AirportDialog({
                 />
               )}
               <KeyValuePair
-                label="IATA"
+                label="IATA Code"
                 valueType="string"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('iata', value)}
@@ -157,7 +207,7 @@ export default function AirportDialog({
                 value={formData.iata}
               />
               <KeyValuePair
-                label="ICAO"
+                label="ICAO Code"
                 valueType="string"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('icao', value)}
@@ -165,18 +215,26 @@ export default function AirportDialog({
                 value={formData.icao}
               />
               <KeyValuePair
-                label="Hub"
+                label="Hub Airport"
                 valueType="boolean"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('isHub', value)}
                 name="isHub"
                 value={formData.isHub}
               />
+              <KeyValuePair
+                label="Internal Notes"
+                value={formData.internalNotes}
+                valueType="string"
+                editMode={isEditing}
+                onChange={(value) => handleFieldChange('internalNotes', value)}
+                name="internalNotes"
+              />
             </div>
           </MainCard>
 
-          <MainCard title="Location" headerGradient="from-blue-500 to-blue-300">
-            <div className="flex flex-col justify-between">
+          <MainCard title="Location Information" neutralHeader={true}>
+            <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="City"
                 value={formData.city}
@@ -186,7 +244,7 @@ export default function AirportDialog({
                 name="city"
               />
               <KeyValuePair
-                label="State"
+                label="State/Province"
                 value={formData.state}
                 valueType="string"
                 editMode={isEditing}

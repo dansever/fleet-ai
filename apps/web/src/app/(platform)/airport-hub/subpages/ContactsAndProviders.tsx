@@ -73,7 +73,7 @@ export default function ContactsAndProviders() {
       sortable: true,
       accessor: (contact) => (
         <div className="flex items-center gap-2">
-          {contact.company ? (
+          {contact.vendorId ? (
             <>
               <Building2 className="w-4 h-4 text-orange-500" />
               <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
@@ -134,7 +134,7 @@ export default function ContactsAndProviders() {
             onClick={refreshContacts}
           />
           <Button
-            intent="add"
+            intent="primary"
             text="Add Contact"
             icon={UserPlus}
             onClick={() => {

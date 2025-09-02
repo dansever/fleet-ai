@@ -1,3 +1,4 @@
+// Updated by CursorAI on Dec 2 2024
 'use client';
 
 import {
@@ -12,10 +13,10 @@ import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';
 import { createQuote, CreateQuoteData, updateQuote } from '@/services/technical/quote-client';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { LucideIcon } from 'lucide-react';
+import { Eye, LucideIcon, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,36 +25,57 @@ export default function QuoteDialog({
   rfqId,
   onChange,
   DialogType = 'view',
-  triggerButtonIntent = 'info',
+  triggerButtonIntent = 'secondary',
   triggerButtonText,
   triggerButtonIcon,
   TriggerButtonSize = 'md',
   triggerButtonClassName,
+  open,
+  onOpenChange,
+  withTrigger = true,
 }: {
   quote: Quote | null;
-  rfqId?: Rfq['id']; // Required when isNew is true
+  rfqId?: Rfq['id']; // Required when DialogType is 'add'
   onChange: (quote: Quote) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerButtonIntent?: 'add' | 'primary' | 'secondary' | 'danger' | 'info' | 'success' | 'warning';
+  triggerButtonIntent?:
+    | 'primary'
+    | 'secondary'
+    | 'ghost'
+    | 'danger'
+    | 'success'
+    | 'warning'
+    | 'add';
   triggerButtonText?: string;
   triggerButtonIcon?: LucideIcon;
   TriggerButtonSize?: 'sm' | 'md' | 'lg';
   triggerButtonClassName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
+    // Quote Identification (matching schema)
     rfqNumber: quote?.rfqNumber || null,
     direction: quote?.direction || null,
+    status: quote?.status || 'pending',
+
+    // Vendor Information (matching schema)
     vendorName: quote?.vendorName || null,
     vendorAddress: quote?.vendorAddress || null,
     vendorContactName: quote?.vendorContactName || null,
     vendorContactEmail: quote?.vendorContactEmail || null,
     vendorContactPhone: quote?.vendorContactPhone || null,
+
+    // Part Details (matching schema)
     partNumber: quote?.partNumber || null,
     serialNumber: quote?.serialNumber || null,
     partDescription: quote?.partDescription || null,
-    partCondition: quote?.partCondition || null,
+    partCondition: quote?.partCondition || null, // Note: schema uses 'partCondition', not 'conditionCode'
     unitOfMeasure: quote?.unitOfMeasure || null,
     quantity: quote?.quantity || null,
+
+    // Pricing Information (matching schema)
     price: quote?.price || null,
     currency: quote?.currency || null,
     pricingType: quote?.pricingType || null,
@@ -62,19 +84,27 @@ export default function QuoteDialog({
     coreChange: quote?.coreChange || null,
     paymentTerms: quote?.paymentTerms || null,
     minimumOrderQuantity: quote?.minimumOrderQuantity || null,
+
+    // Delivery & Terms (matching schema)
     leadTime: quote?.leadTime || null,
     deliveryTerms: quote?.deliveryTerms || null,
     warranty: quote?.warranty || null,
     quoteExpirationDate: quote?.quoteExpirationDate || null,
+
+    // Compliance & Traceability (matching schema)
     certifications: quote?.certifications || [],
     traceTo: quote?.traceTo || null,
     tagType: quote?.tagType || null,
     taggedBy: quote?.taggedBy || null,
     taggedDate: quote?.taggedDate || null,
+
+    // Additional Information (matching schema)
     vendorComments: quote?.vendorComments || null,
-    status: quote?.status || 'pending',
+
+    // Timestamps (matching schema)
+    sentAt: quote?.sentAt ? new Date(quote.sentAt) : null,
   });
-  const [isSaving, setIsSaving] = useState(false);
+
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
@@ -83,6 +113,7 @@ export default function QuoteDialog({
     setFormData({
       rfqNumber: quote?.rfqNumber || null,
       direction: quote?.direction || null,
+      status: quote?.status || 'pending',
       vendorName: quote?.vendorName || null,
       vendorAddress: quote?.vendorAddress || null,
       vendorContactName: quote?.vendorContactName || null,
@@ -112,7 +143,7 @@ export default function QuoteDialog({
       taggedBy: quote?.taggedBy || null,
       taggedDate: quote?.taggedDate || null,
       vendorComments: quote?.vendorComments || null,
-      status: quote?.status || 'pending',
+      sentAt: quote?.sentAt ? new Date(quote.sentAt) : null,
     });
   }, [quote]);
 
@@ -124,7 +155,6 @@ export default function QuoteDialog({
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       let savedQuote: Quote;
 
@@ -170,6 +200,7 @@ export default function QuoteDialog({
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
           status: serializedFormData.status,
+          sentAt: formData.sentAt?.toISOString() || null,
         };
         savedQuote = await createQuote(createData);
         toast.success('Quote created successfully');
@@ -211,7 +242,7 @@ export default function QuoteDialog({
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
           status: serializedFormData.status,
-          receivedAt: serializedFormData.receivedAt,
+          sentAt: formData.sentAt?.toISOString() || null,
         };
         savedQuote = await updateQuote(quote.id, updateData);
         toast.success('Quote updated successfully');
@@ -223,8 +254,7 @@ export default function QuoteDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} quote`);
       console.error(`Error ${action}ing quote:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
@@ -233,6 +263,7 @@ export default function QuoteDialog({
       setFormData({
         rfqNumber: null,
         direction: null,
+        status: 'pending',
         vendorName: null,
         vendorAddress: null,
         vendorContactName: null,
@@ -262,35 +293,76 @@ export default function QuoteDialog({
         taggedBy: null,
         taggedDate: null,
         vendorComments: null,
-        status: 'pending',
+        sentAt: null,
       });
     }
   };
 
+  const handleReset = () => {
+    setFormData({
+      rfqNumber: null,
+      direction: null,
+      status: 'pending',
+      vendorName: null,
+      vendorAddress: null,
+      vendorContactName: null,
+      vendorContactEmail: null,
+      vendorContactPhone: null,
+      partNumber: null,
+      serialNumber: null,
+      partDescription: null,
+      partCondition: null,
+      unitOfMeasure: null,
+      quantity: null,
+      price: null,
+      currency: null,
+      pricingType: null,
+      pricingMethod: null,
+      coreDue: null,
+      coreChange: null,
+      paymentTerms: null,
+      minimumOrderQuantity: null,
+      leadTime: null,
+      deliveryTerms: null,
+      warranty: null,
+      quoteExpirationDate: null,
+      certifications: [],
+      traceTo: null,
+      tagType: null,
+      taggedBy: null,
+      taggedDate: null,
+      vendorComments: null,
+      sentAt: null,
+    });
+  };
+
   const dialogTitle = isAdd ? 'Add New Quote' : quote?.partNumber || 'Quote Details';
-  const saveButtonText = isAdd ? 'Create Quote' : 'Save Changes';
 
   return (
     <DetailDialog
       trigger={
-        <Button
-          intent={triggerButtonIntent}
-          text={triggerButtonText}
-          icon={triggerButtonIcon}
-          size={TriggerButtonSize}
-          className={triggerButtonClassName}
-        />
+        withTrigger ? (
+          <Button
+            intent={triggerButtonIntent || (isAdd ? 'add' : 'secondary')}
+            text={triggerButtonText}
+            icon={triggerButtonIcon || (isAdd ? Plus : isEdit ? Pencil : Eye)}
+            size={TriggerButtonSize}
+            className={triggerButtonClassName}
+          />
+        ) : null
       }
       headerGradient="from-green-500 to-green-500"
       title={dialogTitle}
+      DialogType={DialogType}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      onReset={handleReset}
+      open={open}
+      onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ContentSection header="Quote Information" headerGradient="from-green-500 to-green-300">
+          <MainCard title="Quote Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="RFQ Number"
@@ -324,9 +396,20 @@ export default function QuoteDialog({
                   label: getStatusDisplay(status),
                 }))}
               />
+              <KeyValuePair
+                label="Sent At"
+                value={formData.sentAt?.toISOString().split('T')[0] || ''}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) =>
+                  handleFieldChange('sentAt', value ? new Date(value as string) : null)
+                }
+                name="sentAt"
+              />
             </div>
-          </ContentSection>
-          <ContentSection header="Vendor Information" headerGradient="from-green-500 to-green-300">
+          </MainCard>
+
+          <MainCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
@@ -369,8 +452,9 @@ export default function QuoteDialog({
                 name="vendorContactPhone"
               />
             </div>
-          </ContentSection>
-          <ContentSection header="Part Details" headerGradient="from-green-500 to-green-300">
+          </MainCard>
+
+          <MainCard title="Part Details" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Part Number"
@@ -419,13 +503,12 @@ export default function QuoteDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('quantity', value)}
                 name="quantity"
+                min={1}
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Pricing & Commercial Terms"
-            headerGradient="from-green-500 to-green-300"
-          >
+          </MainCard>
+
+          <MainCard title="Pricing & Commercial Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Price"
@@ -480,8 +563,9 @@ export default function QuoteDialog({
                 name="coreChange"
               />
             </div>
-          </ContentSection>
-          <ContentSection header="Delivery & Terms" headerGradient="from-green-500 to-green-300">
+          </MainCard>
+
+          <MainCard title="Delivery & Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Payment Terms"
@@ -498,6 +582,7 @@ export default function QuoteDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('minimumOrderQuantity', value)}
                 name="minimumOrderQuantity"
+                min={1}
               />
               <KeyValuePair
                 label="Lead Time"
@@ -532,11 +617,9 @@ export default function QuoteDialog({
                 name="quoteExpirationDate"
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Compliance & Traceability"
-            headerGradient="from-green-500 to-green-300"
-          >
+          </MainCard>
+
+          <MainCard title="Compliance & Traceability" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Trace To"
@@ -579,7 +662,7 @@ export default function QuoteDialog({
                 name="vendorComments"
               />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>

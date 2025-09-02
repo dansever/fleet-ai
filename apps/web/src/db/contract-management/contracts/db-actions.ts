@@ -1,7 +1,7 @@
 import { db } from '@/drizzle';
-import { contractsTable } from '@/drizzle/schema/schema';
-import { Contract, NewContract } from '@/drizzle/types';
-import { desc, eq } from 'drizzle-orm';
+import { contractsTable, ContractType } from '@/drizzle/schema/schema';
+import { Airport, Contract, NewContract } from '@/drizzle/types';
+import { and, desc, eq } from 'drizzle-orm';
 
 /**
  * Get contract by id
@@ -18,11 +18,30 @@ export const getContract = async (id: Contract['id']): Promise<Contract> => {
  * @param airportId
  * @returns
  */
-export const getContractsByAirport = async (airportId: string): Promise<Contract[]> => {
+export const getContractsByAirport = async (airportId: Airport['id']): Promise<Contract[]> => {
   const result = await db
     .select()
     .from(contractsTable)
     .where(eq(contractsTable.airportId, airportId))
+    .orderBy(desc(contractsTable.createdAt));
+  return result;
+};
+
+/**
+ * Get contracts by airport and type
+ * @param airportId
+ * @returns
+ */
+export const getContractsByAirportAndType = async (
+  airportId: Airport['id'],
+  contractType: ContractType,
+): Promise<Contract[]> => {
+  const result = await db
+    .select()
+    .from(contractsTable)
+    .where(
+      and(eq(contractsTable.airportId, airportId), eq(contractsTable.contractType, contractType)),
+    )
     .orderBy(desc(contractsTable.createdAt));
   return result;
 };

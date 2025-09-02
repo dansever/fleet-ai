@@ -12,7 +12,7 @@ import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { FileText, RefreshCw } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
-import { useFuelProcurement } from '../ContextProvider';
+import { useFuelProcurement } from '../contexts';
 import { useFuelBidColumns } from './FuelBidsDataTableColumns';
 
 interface FuelBidsDataTableProps {
@@ -24,7 +24,9 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
   onRefresh,
   isRefreshing,
 }: FuelBidsDataTableProps) {
-  const { selectedTender, fuelBids, setFuelBids, addFuelBid } = useFuelProcurement();
+  const { tenders, fuelBids } = useFuelProcurement();
+  const { selectedTender } = tenders;
+  const { fuelBids: bids, addFuelBid } = fuelBids;
   const [newBid, setNewBid] = useState<NewFuelBid | null>(null);
   const fuelBidColumns = useFuelBidColumns();
   const [uploadFuelBidPopoverOpen, setUploadFuelBidPopoverOpen] = useState(false);
@@ -91,7 +93,7 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
       </CardHeader>
       <CardContent>
         <DataTable
-          data={fuelBids}
+          data={bids}
           columns={fuelBidColumns}
           searchable={true}
           pagination={true}

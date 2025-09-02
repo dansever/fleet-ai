@@ -51,40 +51,50 @@ export const AllCardVariants: StoryObj = {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             title="AI Processing"
-            description="Advanced machine learning capabilities for intelligent fleet management"
+            subtitle="Advanced machine learning capabilities for intelligent fleet management"
             icon={<Zap className="w-5 h-5" />}
             palette={GradientPalette.VioletPinkRose}
-          />
+          >
+            Cutting-edge models power smart decisions across your fleet.
+          </FeatureCard>
           <FeatureCard
             title="Real-time Analytics"
-            description="Live dashboards and comprehensive reporting tools"
+            subtitle="Live dashboards and comprehensive reporting tools"
             icon={<TrendingUp className="w-5 h-5" />}
             palette={GradientPalette.SkyIndigoViolet}
-          />
+          >
+            Monitor KPIs as they change, with minimal lag.
+          </FeatureCard>
           <FeatureCard
             title="Team Collaboration"
-            description="Seamless communication and project coordination"
+            subtitle="Seamless communication and project coordination"
             icon={<Users className="w-5 h-5" />}
             palette={GradientPalette.CyanBluePurple}
-          />
+          >
+            Chat, tasks, and notifications bring teams together.
+          </FeatureCard>
           <FeatureCard
             title="Global Reach"
-            description="Worldwide fleet management and optimization"
+            subtitle="Worldwide fleet management and optimization"
             icon={<Globe className="w-5 h-5" />}
             palette={GradientPalette.PinkPurpleBlue}
-          />
+          >
+            Built for global operations and multi-region deployments.
+          </FeatureCard>
           <FeatureCard
             title="Premium Features"
-            description="Advanced tools for enterprise customers"
+            subtitle="Advanced tools for enterprise customers"
             icon={<Star className="w-5 h-5" />}
             palette={GradientPalette.RoseFuchsiaIndigo}
-            bodyChildren={
+            actions={
               <div className="flex items-center gap-2 text-sm">
                 <Star className="w-4 h-4 fill-current" />
                 <span>Most Popular</span>
               </div>
             }
-          />
+          >
+            Unlock priority support and enterprise integrations.
+          </FeatureCard>
         </div>
       </section>
 
@@ -99,42 +109,44 @@ export const AllCardVariants: StoryObj = {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProjectCard
             title="Fleet Optimization"
-            description="AI-driven route optimization across the entire fleet"
+            subtitle="AI-driven route optimization across the entire fleet"
             imagePath="/images/ground_handling_catering.jpg"
-            category="Operations"
             progress={75}
             badgeText="Active"
             badgeColor="bg-gradient-to-r from-green-500 to-emerald-500"
-          />
+          >
+            <div className="text-sm text-muted-foreground">Operations</div>
+          </ProjectCard>
           <ProjectCard
             title="Maintenance Scheduler"
-            description="Automated scheduling system for aircraft maintenance"
-            category="Maintenance"
+            subtitle="Automated scheduling system for aircraft maintenance"
             progress={45}
             badgeText="In Progress"
             badgeColor="bg-gradient-to-r from-blue-500 to-purple-500"
-          />
+          >
+            <div className="text-sm text-muted-foreground">Maintenance</div>
+          </ProjectCard>
           <ProjectCard
             title="Ground Services"
-            description="Comprehensive ground handling operations"
+            subtitle="Comprehensive ground handling operations"
             imagePath="/images/ground_handling_power.jpg"
-            category="Ground Ops"
             badgeText="New"
             badgeColor="bg-gradient-to-r from-orange-500 to-red-500"
-          />
-          <ProjectCard
-            title="Crew Management"
-            description="Digital crew scheduling and communication"
-            category="Human Resources"
-          />
+          >
+            <div className="text-sm text-muted-foreground">Ground Ops</div>
+          </ProjectCard>
+          <ProjectCard title="Crew Management" subtitle="Digital crew scheduling and communication">
+            <div className="text-sm text-muted-foreground">Human Resources</div>
+          </ProjectCard>
           <ProjectCard
             title="Safety Compliance"
-            description="Automated safety reporting and tracking"
-            category="Safety"
+            subtitle="Automated safety reporting and tracking"
             progress={95}
             badgeText="Near Complete"
             badgeColor="bg-gradient-to-r from-purple-500 to-pink-500"
-          />
+          >
+            <div className="text-sm text-muted-foreground">Safety</div>
+          </ProjectCard>
         </div>
       </section>
 
@@ -184,8 +196,8 @@ export const AllCardVariants: StoryObj = {
         <p className="text-muted-foreground mb-6">Display team members and user profiles</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProfileCard
-            name="Sarah Johnson"
-            role="Fleet Manager"
+            title="Sarah Johnson"
+            subtitle="Fleet Manager"
             bio="Managing operations across 3 regions with 12+ years of experience"
             stats={[
               { label: 'Projects', value: '23' },
@@ -194,8 +206,8 @@ export const AllCardVariants: StoryObj = {
             ]}
           />
           <ProfileCard
-            name="Alex Chen"
-            role="Senior Coordinator"
+            title="Alex Chen"
+            subtitle="Senior Coordinator"
             bio="Coordinating fleet operations across North America"
             stats={[
               { label: 'Years', value: '8' },
@@ -203,8 +215,8 @@ export const AllCardVariants: StoryObj = {
             ]}
           />
           <ProfileCard
-            name="Emma Thompson"
-            role="Safety Inspector"
+            title="Emma Thompson"
+            subtitle="Safety Inspector"
             bio="Ensuring compliance and safety across all fleet operations"
           />
         </div>

@@ -1,18 +1,15 @@
 'use client';
 
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Invoice } from '@/drizzle/types';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
-import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { AlertTriangle, Diff, Edit, Plus, Sigma, Upload, X } from 'lucide-react';
-import { useState } from 'react';
-import { useFuelProcurement } from '../ContextProvider';
 import FuelInvoicesDataTable from '../_components/FuelInvoicesDataTable';
+import { useFuelProcurement } from '../contexts';
 
 export default function FuelAgreementsPage() {
-  const { selectedAirport } = useFuelProcurement();
-  const [selectedInvoices, setSelectedInvoices] = useState<number[]>([]);
+  const { airports, invoices } = useFuelProcurement();
+  const { selectedAirport } = airports;
 
   const agreementData = {
     id: 'AGR-2024-SHL-001',
@@ -33,133 +30,6 @@ export default function FuelAgreementsPage() {
     totalLeakage: 12450,
     avgVariance: 0.008,
   };
-
-  const invoiceData = [
-    {
-      id: 1,
-      invoiceNumber: 'SHL-2024-001',
-      date: '2024-01-15',
-      volume: 45000,
-      invoicePrice: 0.695,
-      expectedPrice: 0.693,
-      variance: 0.002,
-      amount: 31275,
-      leakage: 90,
-      status: 'discrepancy',
-      disputeStatus: 'pending',
-    },
-    {
-      id: 2,
-      invoiceNumber: 'SHL-2024-002',
-      date: '2024-01-16',
-      volume: 32000,
-      invoicePrice: 0.688,
-      expectedPrice: 0.693,
-      variance: -0.005,
-      amount: 22016,
-      leakage: -160,
-      status: 'matched',
-      disputeStatus: null,
-    },
-    {
-      id: 3,
-      invoiceNumber: 'SHL-2024-003',
-      date: '2024-01-17',
-      volume: 38000,
-      invoicePrice: 0.705,
-      expectedPrice: 0.693,
-      variance: 0.012,
-      amount: 26790,
-      leakage: 456,
-      status: 'discrepancy',
-      disputeStatus: 'generated',
-    },
-    {
-      id: 4,
-      invoiceNumber: 'SHL-2024-004',
-      date: '2024-01-18',
-      volume: 28000,
-      invoicePrice: 0.693,
-      expectedPrice: 0.693,
-      variance: 0,
-      amount: 19404,
-      leakage: 0,
-      status: 'matched',
-      disputeStatus: null,
-    },
-  ];
-
-  const invoiceColumns = [
-    {
-      key: 'invoiceNumber',
-      label: 'Invoice #',
-      render: (value: string) => <div className="font-mono text-sm">{value}</div>,
-    },
-    {
-      key: 'date',
-      label: 'Date',
-      render: (value: string) => <div className="text-sm">{value}</div>,
-    },
-    {
-      key: 'volume',
-      label: 'Volume (L)',
-      render: (value: number) => value.toLocaleString(),
-    },
-    {
-      key: 'invoicePrice',
-      label: 'Billed Price',
-      render: (value: number) => `$${value.toFixed(3)}/L`,
-    },
-    {
-      key: 'expectedPrice',
-      label: 'Expected Price',
-      render: (value: number) => `$${value.toFixed(3)}/L`,
-    },
-    {
-      key: 'variance',
-      label: 'Variance',
-      render: (value: number) => (
-        <span
-          className={
-            value > 0
-              ? 'text-red-600 font-medium'
-              : value < 0
-                ? 'text-green-600 font-medium'
-                : 'text-gray-600'
-          }
-        >
-          {value > 0 ? '+' : ''}${value.toFixed(3)}/L
-        </span>
-      ),
-    },
-    {
-      key: 'leakage',
-      label: 'Impact ($)',
-      render: (value: number) => (
-        <span
-          className={
-            value > 0
-              ? 'text-red-600 font-medium'
-              : value < 0
-                ? 'text-green-600 font-medium'
-                : 'text-gray-600'
-          }
-        >
-          {value > 0 ? '+' : ''}${value.toLocaleString()}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (value: string) => (
-        <StatusBadge
-          status={value === 'matched' ? 'operational' : 'warning'}
-          text={value === 'matched' ? 'Matched' : 'Variance'}
-        />
-      ),
-    },
-  ];
 
   return (
     <div className="space-y-6">
@@ -269,12 +139,12 @@ export default function FuelAgreementsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <FuelInvoicesDataTable Invoices={invoiceData as unknown as Invoice[]} />
+          <FuelInvoicesDataTable invoices={invoices} />
         </CardContent>
       </BaseCard>
 
       {/* Dispute Generation */}
-      {selectedInvoices.length > 0 && (
+      {invoices.length > 0 && (
         <MainCard
           title="Generate Dispute"
           subtitle="Review variance details before creating dispute"

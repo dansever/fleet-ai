@@ -1,8 +1,8 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
 import { Contract } from '@/drizzle/types';
-import ServiceContractDialog from '@/features/service-contracts/ServiceContractDialog';
-import { createRandomServiceContract } from '@/features/service-contracts/createRandomServiceContract';
+import { createRandomContract } from '@/features/contract-management/createRandomContract';
+import ContractDialog from '@/features/contracts/ContractDialog';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette, MetricCard, ProjectCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
@@ -22,13 +22,7 @@ import { useMemo } from 'react';
 import { useAirportHub } from '../ContextProvider';
 
 export default function ManageContracts() {
-  const {
-    addServiceContract,
-    selectedAirport,
-    serviceContracts,
-    refreshServiceContracts,
-    loading,
-  } = useAirportHub();
+  const { addContract, selectedAirport, contracts, refreshContracts, loading } = useAirportHub();
 
   const groundHandlingImages = [
     '/images/ground_handling_power.jpg',
@@ -38,8 +32,8 @@ export default function ManageContracts() {
   ];
 
   // Group contracts by type
-  const groupedContracts = serviceContracts.reduce(
-    (acc, contract) => {
+  const groupedContracts = contracts.reduce(
+    (acc: Record<string, Contract[]>, contract: Contract) => {
       const type = contract.contractType || 'other';
       if (!acc[type]) {
         acc[type] = [];
@@ -55,13 +49,13 @@ export default function ManageContracts() {
 
   // Calculate contract statistics
   const contractStats = useMemo(() => {
-    const total = serviceContracts.length;
-    const active = serviceContracts.filter((contract) => {
+    const total = contracts.length;
+    const active = contracts.filter((contract: Contract) => {
       if (!contract.effectiveTo) return true;
       return new Date(contract.effectiveTo) > new Date();
     }).length;
 
-    const expiringSoon = serviceContracts.filter((contract) => {
+    const expiringSoon = contracts.filter((contract: Contract) => {
       if (!contract.effectiveTo) return false;
       const expiryDate = new Date(contract.effectiveTo);
       const thirtyDaysFromNow = new Date();
@@ -78,7 +72,7 @@ export default function ManageContracts() {
       .filter((item) => item.count > 0);
 
     return { total, active, expiringSoon, contractsByType };
-  }, [serviceContracts, groupedContracts, contractTypes]);
+  }, [contracts, groupedContracts, contractTypes]);
 
   const getServiceIcon = (serviceType: string) => {
     switch (serviceType) {
@@ -137,10 +131,10 @@ export default function ManageContracts() {
           {/* AI Insights Feature Card */}
           <FeatureCard
             title="AI-Powered Contract Intelligence"
-            description="FleetAI monitors your contracts for compliance, cost optimization, and renewal alerts"
+            subtitle="FleetAI monitors your contracts for compliance, cost optimization, and renewal alerts"
             icon={<Zap className="w-6 h-6" />}
             palette={GradientPalette.VioletPinkRose}
-            buttonChildren={
+            actions={
               <Button
                 intent="ghost"
                 text="View Insights"
@@ -149,23 +143,22 @@ export default function ManageContracts() {
                 onClick={() => console.log('View AI insights')}
               />
             }
-            bodyChildren={
-              <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
-                <div className="text-center">
-                  <div className="font-semibold">$125K</div>
-                  <div className="text-white/80">Cost Savings</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold">97.8%</div>
-                  <div className="text-white/80">Compliance Rate</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold">3</div>
-                  <div className="text-white/80">Active Alerts</div>
-                </div>
+          >
+            <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+              <div className="text-center">
+                <div className="font-semibold">$125K</div>
+                <div className="text-white/80">Cost Savings</div>
               </div>
-            }
-          />
+              <div className="text-center">
+                <div className="font-semibold">97.8%</div>
+                <div className="text-white/80">Compliance Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold">3</div>
+                <div className="text-white/80">Active Alerts</div>
+              </div>
+            </div>
+          </FeatureCard>
         </div>
       )}
 
@@ -175,7 +168,7 @@ export default function ManageContracts() {
           icon={RefreshCw}
           className={`${loading.contracts && loading.isRefreshing && 'animate-spin'}`}
           disabled={loading.contracts && loading.isRefreshing}
-          onClick={refreshServiceContracts}
+          onClick={refreshContracts}
         />
         <FileUploadPopover
           onSend={() => {}}
@@ -195,8 +188,8 @@ export default function ManageContracts() {
               className="text-gray-500"
               onClick={async () => {
                 if (!selectedAirport) return;
-                const contract = await createRandomServiceContract(selectedAirport.id);
-                addServiceContract(contract);
+                const contract = await createRandomContract(selectedAirport.id);
+                addContract(contract);
               }}
             />
           </div>
@@ -207,7 +200,7 @@ export default function ManageContracts() {
       {loading.contracts && !loading.isRefreshing && <LoadingComponent size="md" />}
 
       {/* Display contracts grouped by type - Hide only during initial loading, keep visible during refresh */}
-      {serviceContracts.length > 0 &&
+      {contracts.length > 0 &&
         !(loading.contracts && !loading.isRefreshing) &&
         contractTypes.map((contractType) => {
           const contractsOfType = groupedContracts[contractType];
@@ -237,16 +230,15 @@ export default function ManageContracts() {
                     imagePath={
                       groundHandlingImages[Math.floor(Math.random() * groundHandlingImages.length)]
                     }
-                    description={contract.title}
-                    category={contract.contractType || ''}
+                    subtitle={contract.summary || contract.title}
                     progress={
                       contract.effectiveTo && contract.effectiveFrom
                         ? calculateProgress(contract.effectiveFrom, contract.effectiveTo)
                         : undefined
                     }
                   >
-                    <ServiceContractDialog
-                      serviceContract={contract}
+                    <ContractDialog
+                      contract={contract}
                       DialogType="view"
                       triggerIntent="secondary"
                       triggerText="View"
@@ -261,7 +253,7 @@ export default function ManageContracts() {
         })}
 
       {/* Show message if no contracts - Only show when not doing initial loading */}
-      {serviceContracts.length === 0 && !(loading.contracts && !loading.isRefreshing) && (
+      {contracts.length === 0 && !(loading.contracts && !loading.isRefreshing) && (
         <div className="text-center py-12 text-gray-500">
           {/* <p>No service contracts found for this airport.</p>
           <p className="text-sm mt-1">Upload a contract or generate a random one to get started.</p> */}

@@ -1,3 +1,4 @@
+// Updated by CursorAI on Dec 2 2024
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
@@ -30,14 +31,14 @@ function randomPhone(): string {
   return `+1 (${part()}) ${part()}-${last}`;
 }
 
-function randomDateIsoBetween(start?: string | null, end?: string | null): string {
+function randomDateBetween(start?: string | null, end?: string | null): string {
   const now = new Date();
   const startDate = start ? new Date(start) : new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const endDate = end ? new Date(end) : now;
   const startMs = startDate.getTime();
   const endMs = Math.max(startMs + 60 * 60 * 1000, endDate.getTime());
   const ts = getRandomInt(startMs, endMs);
-  return new Date(ts).toISOString();
+  return new Date(ts).toISOString().split('T')[0]; // Return date string, not full ISO
 }
 
 const VENDOR_NAMES = [
@@ -78,29 +79,30 @@ export async function createRandomFuelBid(
 
   const vendorName = pickOne(VENDOR_NAMES);
   const contactName = `${pickOne(CONTACT_FIRST_NAMES)} ${pickOne(CONTACT_LAST_NAMES)}`;
-  const currency = pickOne(Object.keys(CURRENCY_MAP).map((key) => CURRENCY_MAP[key]));
+  const currencyKey = pickOne(Object.keys(CURRENCY_MAP));
   const uom = pickOne(BASE_UOM_OPTIONS.map((option) => option.value));
 
   // Base unit price assumptions (varies by currency a bit)
   const basePrice = getRandomFloat(1.4, 3.5, 3); // typical USD/USG spot range example
 
   // Fees
-  const intoPlane = Math.random() < 0.7 ? getRandomFloat(0.02, 0.15, 3) : 0;
-  const handling = Math.random() < 0.35 ? getRandomFloat(0.02, 0.12, 3) : 0;
-  const otherFee = Math.random() < 0.2 ? getRandomFloat(0.01, 0.08, 3) : 0;
+  const intoPlane = Math.random() < 0.7 ? getRandomFloat(0.02, 0.15, 3) : null;
+  const handling = Math.random() < 0.35 ? getRandomFloat(0.02, 0.12, 3) : null;
+  const otherFee = Math.random() < 0.2 ? getRandomFloat(0.01, 0.08, 3) : null;
 
-  const differential = useIndexPricing ? getRandomFloat(-0.25, 0.25, 3) : 0;
+  const differential = useIndexPricing ? getRandomFloat(-0.25, 0.25, 3) : null;
 
   const data: CreateFuelBidData = {
     // Required linkage
     tenderId,
+    vendorId: null, // Will be handled by backend if needed
 
-    // Submission info
+    // Bid Information & Timeline
     title: `${vendorName} R${round || getRandomInt(1, 3)} Offer`,
     round: round || getRandomInt(1, 3),
-    bidSubmittedAt: randomDateIsoBetween(),
+    bidSubmittedAt: randomDateBetween(),
 
-    // Vendor
+    // Vendor Information
     vendorName,
     vendorAddress: `${getRandomInt(100, 9999)} Market St, Suite ${getRandomInt(100, 999)}, Anytown`,
     vendorContactName: contactName,
@@ -111,46 +113,47 @@ export async function createRandomFuelBid(
         ? 'Pricing inclusive of standard service levels. Volume incentives available.'
         : null,
 
-    // Pricing structure
+    // Pricing Structure & Terms
     priceType: useIndexPricing ? 'index_formula' : 'fixed',
     uom,
-    currency: currency.code,
+    currency: currencyKey,
     paymentTerms: pickOne(['Net 15', 'Net 30', 'Net 45', 'Net 60']),
 
-    // Fixed pricing
+    // Fixed Pricing
     baseUnitPrice: useIndexPricing ? null : basePrice.toString(),
 
-    // Index-linked pricing
+    // Index-Linked Pricing
     indexName: useIndexPricing ? pickOne(INDEX_NAMES) : null,
     indexLocation: useIndexPricing ? pickOne(INDEX_LOCATIONS) : null,
-    differential: useIndexPricing ? differential.toString() : null,
-    differentialUnit: useIndexPricing ? `${currency}/${uom}` : null,
+    differential: useIndexPricing ? differential?.toString() : null,
+    differentialUnit: useIndexPricing ? `${currencyKey}/${uom}` : null,
     formulaNotes: useIndexPricing ? 'Monthly average with +5 business day lag.' : null,
 
-    // Fees & charges
-    intoPlaneFee: intoPlane ? intoPlane.toString() : null,
-    handlingFee: handling ? handling.toString() : null,
-    otherFee: otherFee ? otherFee.toString() : null,
+    // Fees & Charges
+    intoPlaneFee: intoPlane?.toString() || null,
+    handlingFee: handling?.toString() || null,
+    otherFee: otherFee?.toString() || null,
     otherFeeDescription: otherFee ? 'Additional local surcharge' : null,
 
-    // Inclusions & exclusions
+    // Inclusions & Exclusions
     includesTaxes: Math.random() < 0.3,
     includesAirportFees: Math.random() < 0.25,
 
-    // Technical
+    // Calculated Fields
     densityAt15C: Math.random() < 0.2 ? getRandomFloat(780, 820, 1).toString() : null, // kg/m3
     normalizedUnitPriceUsdPerUsg: null, // calculated server-side
 
-    // AI
+    // AI Processing
     aiSummary:
       'Competitive offer with moderate fees; consider for shortlist pending volume commitments.',
 
-    // Decision tracking (left empty; handled later)
+    // Decision Tracking (left empty; handled later)
     decision: null,
     decisionNotes: null,
   };
-  await createFuelBid(tenderId, data);
-  return data;
+
+  const result = await createFuelBid(tenderId, data);
+  return result;
 }
 
 export default createRandomFuelBid;
