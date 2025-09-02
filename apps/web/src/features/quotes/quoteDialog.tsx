@@ -7,7 +7,7 @@ import {
   orderDirectionDisplayMap,
   OrderDirectionEnum,
   statusEnum,
-} from '@/drizzle/schema/enums';
+} from '@/drizzle/enums';
 import type { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { serializeQuoteDates } from '@/lib/utils/date-helpers';

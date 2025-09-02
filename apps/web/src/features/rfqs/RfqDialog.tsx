@@ -10,7 +10,7 @@ import {
   statusEnum,
   UrgencyLevel,
   urgencyLevelEnum,
-} from '@/drizzle/schema/enums';
+} from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
 import { serializeRfqDates } from '@/lib/utils/date-helpers';
 import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';

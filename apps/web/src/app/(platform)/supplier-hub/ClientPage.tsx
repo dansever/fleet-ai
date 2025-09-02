@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSidebar } from '@/components/ui/sidebar';
-import { getStatusDisplay, UrgencyLevel, urgencyLevelDisplayMap } from '@/drizzle/schema/enums';
+import { getStatusDisplay, UrgencyLevel, urgencyLevelDisplayMap } from '@/drizzle/enums';
 import { Rfq } from '@/drizzle/types';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';

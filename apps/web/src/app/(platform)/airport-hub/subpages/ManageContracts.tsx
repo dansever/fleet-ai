@@ -1,5 +1,5 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
+import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contract-management/contracts/ContractDialog';
 import { createRandomContract } from '@/features/contract-management/contracts/createRandomContract';

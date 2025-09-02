@@ -6,7 +6,7 @@ import {
   getContractsByAirportAndType,
   updateContract,
 } from '@/db/contract-management/contracts/db-actions';
-import { ContractType } from '@/drizzle/schema/enums';
+import { ContractType } from '@/drizzle/enums';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
 import { NextRequest, NextResponse } from 'next/server';

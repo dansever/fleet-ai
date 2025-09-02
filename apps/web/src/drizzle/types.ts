@@ -15,7 +15,7 @@ import {
   rfqsTable,
   usersTable,
   vendorsTable,
-} from './schema/schema';
+} from './schema';
 
 // ==================== ORGANIZATIONS ====================
 export type Organization = InferSelectModel<typeof organizationsTable>;

@@ -1,175 +1,83 @@
-import {
-  createRfq,
-  deleteRfq,
-  getRfqById,
-  getRfqsByOrgAndDirection,
-  getUserRfqs,
-  updateRfq,
-} from '@/db/technical-procurement/rfqs/db-actions';
-import { NewRfq } from '@/drizzle/types';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
-import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * GET /api/rfqs
- * Query parameters:
- * - id: string (get specific RFQ)
- * - userId: string (get RFQs by user)
- * - days: number (get recent RFQs)
- */
+import {
+  createRfq as createRfqServer,
+  listOrgRfqsByDirection,
+  listUserRfqs,
+} from '@/modules/rfqs/rfqs.server';
+
+import { RfqCreateTransportSchema, toCreateModel } from '@/modules/rfqs/rfqs.types';
+
+// Query params: optional filters
+const ListQuerySchema = z.object({
+  direction: z.enum(['sent', 'received']).optional(),
+  userId: z.string().uuid().optional(),
+});
+
 export async function GET(request: NextRequest) {
   try {
-    // Authorize user
     const { dbUser, error } = await authorizeUser();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
+    if (!dbUser.orgId) return jsonError('User has no organization', 403);
 
-    const orgId = dbUser.orgId;
-    if (!orgId) return jsonError('User has no organization', 403);
-
-    // Get query params
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const userId = searchParams.get('userId');
-    const direction = searchParams.get('direction');
-
-    // Get specific RFQ by ID
-    if (id) {
-      const rfq = await getRfqById(id);
-      if (!rfq) return jsonError('RFQ not found', 404);
-
-      // Authorize access to RFQ
-      if (!authorizeResource(rfq, dbUser)) return jsonError('Unauthorized', 401);
-
-      return NextResponse.json(rfq);
+    const parsed = ListQuerySchema.safeParse(Object.fromEntries(new URL(request.url).searchParams));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid query', details: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
 
-    // Get RFQs by user
+    const { direction, userId } = parsed.data;
+
     if (userId) {
-      const rfqs = await getUserRfqs(userId);
+      const rfqs = await listUserRfqs(userId);
       return NextResponse.json(rfqs);
     }
 
-    if (direction && ['received', 'sent'].includes(direction)) {
-      const rfqs = await getRfqsByOrgAndDirection(orgId, direction as 'received' | 'sent');
-      return NextResponse.json(rfqs);
-    }
-
-    // Default: Get all sent RFQs for organization
-    const rfqs = await getRfqsByOrgAndDirection(orgId);
+    const dir = direction ?? 'sent';
+    const rfqs = await listOrgRfqsByDirection(dbUser.orgId, dir);
     return NextResponse.json(rfqs);
-  } catch (error) {
-    console.error('Error fetching RFQs:', error);
+  } catch (err) {
+    console.error('Error fetching RFQs:', err);
     return jsonError('Failed to fetch RFQs', 500);
   }
 }
 
-/**
- * POST /api/rfqs
- * Create a new RFQ
- */
 export async function POST(request: NextRequest) {
   try {
-    // Authorize user
     const { dbUser, error } = await authorizeUser();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
-
     if (!dbUser.orgId) return jsonError('User has no organization', 403);
 
-    // Get request body
     const body = await request.json();
+    const parsed = RfqCreateTransportSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid body', details: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
 
-    // Prepare RFQ data with user and org info
-    // Convert ISO strings back to Date objects for timestamp fields
-    const rfqData: NewRfq = {
-      ...body,
-      userId: dbUser.id,
+    // Convert transport DTO to server model and inject orgId and userId
+    const model = toCreateModel(parsed.data, {
       orgId: dbUser.orgId,
-      // Convert timestamp strings to Date objects (or null)
-      sentAt: body.sentAt ? new Date(body.sentAt) : null,
-    };
+      userId: dbUser.id,
+    });
 
-    // Create RFQ
-    const newRfq = await createRfq(rfqData);
+    const newRfq = await createRfqServer(model);
 
-    return NextResponse.json(newRfq);
-  } catch (error) {
-    console.error('Error creating RFQ:', error);
+    // Optional: verify the new resource is visible to the user
+    if (!authorizeResource(newRfq, dbUser)) return jsonError('Unauthorized', 401);
+
+    return NextResponse.json(newRfq, { status: 201 });
+  } catch (err) {
+    console.error('Error creating RFQ:', err);
     return jsonError('Failed to create RFQ', 500);
-  }
-}
-
-/**
- * PUT /api/rfqs?id=123
- * Update an existing RFQ
- */
-export async function PUT(request: NextRequest) {
-  try {
-    // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (!id) return jsonError('RFQ ID is required', 400);
-
-    // Load RFQ from DB
-    const rfq = await getRfqById(id);
-    if (!rfq) return jsonError('RFQ not found', 404);
-
-    // Authorize access to RFQ
-    if (!authorizeResource(rfq, dbUser)) return jsonError('Unauthorized', 401);
-
-    // Update RFQ
-    const body = await request.json();
-
-    // Convert timestamp strings to Date objects for update data
-    const updateData = {
-      ...body,
-      // Convert timestamp strings to Date objects (or null)
-      sentAt: body.sentAt ? new Date(body.sentAt) : null,
-      receivedAt: body.receivedAt ? new Date(body.receivedAt) : null,
-    };
-
-    const updatedRfq = await updateRfq(id, updateData);
-
-    return NextResponse.json(updatedRfq);
-  } catch (error) {
-    console.error('Error updating RFQ:', error);
-    return jsonError('Failed to update RFQ', 500);
-  }
-}
-
-/**
- * DELETE /api/rfqs?id=123
- * Delete an RFQ
- */
-export async function DELETE(request: NextRequest) {
-  try {
-    // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (!id) return jsonError('RFQ ID is required', 400);
-
-    // Load RFQ from DB
-    const rfq = await getRfqById(id);
-    if (!rfq) return jsonError('RFQ not found', 404);
-
-    // Authorize access to RFQ
-    if (!authorizeResource(rfq, dbUser)) return jsonError('Unauthorized', 401);
-
-    // Delete RFQ
-    await deleteRfq(id);
-
-    return NextResponse.json({ message: 'RFQ deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting RFQ:', error);
-    return jsonError('Failed to delete RFQ', 500);
   }
 }

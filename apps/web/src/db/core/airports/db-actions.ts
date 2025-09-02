@@ -1,5 +1,5 @@
 import { db } from '@/drizzle';
-import { airportsTable } from '@/drizzle/schema/schema';
+import { airportsTable } from '@/drizzle/schema';
 import { Airport, NewAirport, Organization, UpdateAirport } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 

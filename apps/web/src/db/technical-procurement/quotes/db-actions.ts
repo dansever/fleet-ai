@@ -1,5 +1,5 @@
 import { db } from '@/drizzle';
-import { quotesTable } from '@/drizzle/schema/schema';
+import { quotesTable } from '@/drizzle/schema';
 import { NewQuote, Quote, Rfq } from '@/drizzle/types';
 import { and, eq } from 'drizzle-orm';
 

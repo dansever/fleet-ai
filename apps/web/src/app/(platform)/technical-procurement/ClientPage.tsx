@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
-import { getUrgencyLevelDisplay } from '@/drizzle/schema/enums';
+import { getUrgencyLevelDisplay } from '@/drizzle/enums';
 import { Quote } from '@/drizzle/types';
 import { createRandomQuote } from '@/features/quotes/createRandomQuote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';

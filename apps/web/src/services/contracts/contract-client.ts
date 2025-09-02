@@ -1,4 +1,4 @@
-import { ContractType } from '@/drizzle/schema/enums';
+import { ContractType } from '@/drizzle/enums';
 import type { Airport, Contract, NewContract } from '@/drizzle/types';
 import { api } from '../api-client';
 

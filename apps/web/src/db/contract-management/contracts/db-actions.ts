@@ -1,5 +1,5 @@
 import { db } from '@/drizzle';
-import { contractsTable, ContractType } from '@/drizzle/schema/schema';
+import { contractsTable, ContractType } from '@/drizzle/schema';
 import { Airport, Contract, NewContract } from '@/drizzle/types';
 import { and, desc, eq } from 'drizzle-orm';
 

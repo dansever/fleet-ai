@@ -2,7 +2,7 @@
 import { getResolvedDatabaseUrl, serverEnv } from '@/lib/env/server';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres, { Sql } from 'postgres';
-import * as schema from './schema/schema';
+import * as schema from './schema';
 
 const globalForDb = globalThis as unknown as {
   __pg?: Sql;

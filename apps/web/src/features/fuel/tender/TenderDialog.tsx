@@ -1,7 +1,7 @@
 // Updated by CursorAI on Sep 2 2025
 'use client';
 
-import { getStatusDisplay, statusEnum } from '@/drizzle/schema/enums';
+import { getStatusDisplay, statusEnum } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';

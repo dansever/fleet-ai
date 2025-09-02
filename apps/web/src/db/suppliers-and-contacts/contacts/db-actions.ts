@@ -1,5 +1,5 @@
 import { db } from '@/drizzle';
-import { contactsTable } from '@/drizzle/schema/schema';
+import { contactsTable } from '@/drizzle/schema';
 import { Airport, Contact, NewContact, Organization, UpdateContact } from '@/drizzle/types';
 import { and, eq } from 'drizzle-orm';
 

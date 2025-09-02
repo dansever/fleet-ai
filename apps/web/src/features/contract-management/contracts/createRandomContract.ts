@@ -1,5 +1,5 @@
 // Updated by CursorAI on Sep 2 2025
-import { ContractTypeEnum } from '@/drizzle/schema/enums';
+import { ContractTypeEnum } from '@/drizzle/enums';
 import type { Airport, Contract } from '@/drizzle/types';
 import { createContract, CreateContractData } from '@/services/contracts/contract-client';
 

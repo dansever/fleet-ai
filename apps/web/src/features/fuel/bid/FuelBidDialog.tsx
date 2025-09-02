@@ -1,7 +1,7 @@
 // Updated by CursorAI on Sep 2 2025
 'use client';
 
-import { decisionDisplayMap } from '@/drizzle/schema/enums';
+import { decisionDisplayMap } from '@/drizzle/enums';
 import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';

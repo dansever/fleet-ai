@@ -4,7 +4,7 @@ import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { getStatusDisplay } from '@/drizzle/schema/enums';
+import { getStatusDisplay } from '@/drizzle/enums';
 import { Quote } from '@/drizzle/types';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';

@@ -1,7 +1,7 @@
 // Updated by CursorAI on Sep 2 2025
 'use client';
 
-import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/schema/enums';
+import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import type { Contract } from '@/drizzle/types';
 import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
 import {
