@@ -43,6 +43,7 @@ export const BaseCard = ({ className, children }: BaseCardProps) => (
 export interface StandardCardProps {
   className?: string;
   // Header options (either simple or custom)
+  icon?: React.ReactNode;
   title?: string;
   subtitle?: string;
   header?: React.ReactNode; // Takes precedence over title/subtitle
@@ -58,6 +59,7 @@ export interface StandardCardProps {
 export const MainCard = ({
   title,
   subtitle,
+  icon,
   header, // Custom header option
   headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
   neutralHeader = false,
@@ -91,7 +93,10 @@ export const MainCard = ({
 
             <div className="relative z-10 flex items-center justify-between gap-2">
               <div className="flex flex-col gap-1">
-                <h3 className="text-balance">{title}</h3>
+                <div className="flex items-center gap-3">
+                  {icon && icon}
+                  <h3 className="text-balance">{title}</h3>
+                </div>
                 {subtitle && (
                   <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>
                     {subtitle}
@@ -123,7 +128,6 @@ export const FeatureCard = ({
   footer,
   className,
 }: StandardCardProps & {
-  icon?: React.ReactNode;
   palette?: GradientPalette;
 }) => {
   // Choose classes based on enum or manual override; no randomization

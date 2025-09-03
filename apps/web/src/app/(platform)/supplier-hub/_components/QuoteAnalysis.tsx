@@ -86,25 +86,32 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
 
   return (
     <BaseCard>
-      <MainCard
-        title="Quote Analysis"
-        icon={<Sparkles className="h-5 w-5 text-purple-500" />}
-        neutralHeader={true}
-        actions={
-          <Button
-            onClick={handleAnalyzeQuotes}
-            disabled={isAnalyzing || selectedRfqQuotes.length === 0}
-            intent="primary"
-            className="flex items-center gap-2"
-            text={'Analyze Quotes'}
-            icon={Sparkles}
-          />
-        }
-      ></MainCard>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-purple-500" />
+          Quote Analysis
+        </CardTitle>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <FileText className="h-4 w-4" />
+          {selectedRfq.rfqNumber || 'N/A'}
+          <Badge variant="outline" className="ml-2">
+            {selectedRfqQuotes.length} Quote{selectedRfqQuotes.length !== 1 ? 's' : ''}
+          </Badge>
+        </div>
+      </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Analysis Controls */}
         <div className="flex gap-2">
+          <Button
+            onClick={handleAnalyzeQuotes}
+            disabled={isAnalyzing || selectedRfqQuotes.length === 0}
+            intent="primary"
+            size="sm"
+            className="flex items-center gap-2"
+            text={'Analyze Quotes'}
+            icon={Sparkles}
+          />
           {analysisResult && (
             <Button onClick={clearAnalysis} intent="secondary" size="sm" text="Clear Analysis" />
           )}

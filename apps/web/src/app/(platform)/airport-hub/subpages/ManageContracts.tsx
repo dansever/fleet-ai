@@ -6,7 +6,7 @@ import { createRandomContract } from '@/features/contract-management/contracts/c
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette, MetricCard, ProjectCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
-import { calculateProgress } from '@/utils/dateUtils';
+import { calculateProgress } from '@/utils/date-helpers';
 import {
   AlertTriangle,
   Building2,

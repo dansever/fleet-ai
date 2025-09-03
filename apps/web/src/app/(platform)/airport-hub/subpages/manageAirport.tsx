@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useAirportHub } from '../ContextProvider';
 
 export default function ManageAirport() {
-  const { selectedAirport, updateAirport, serviceContracts } = useAirportHub();
+  const { selectedAirport, updateAirport, contracts } = useAirportHub();
   const [isEditing, setIsEditing] = useState(false);
   const [editedAirport, setEditedAirport] = useState(selectedAirport);
 
@@ -51,8 +51,8 @@ export default function ManageAirport() {
 
   // Calculate airport statistics
   const airportStats = {
-    totalContracts: serviceContracts.length,
-    activeContracts: serviceContracts.filter((contract) => {
+    totalContracts: contracts.length,
+    activeContracts: contracts.filter((contract) => {
       if (!contract.effectiveTo) return true;
       return new Date(contract.effectiveTo) > new Date();
     }).length,
@@ -96,7 +96,7 @@ export default function ManageAirport() {
       <MainCard
         title="Airport Information"
         neutralHeader={true}
-        headerActions={
+        actions={
           <div className="flex gap-2">
             {isEditing ? (
               <>

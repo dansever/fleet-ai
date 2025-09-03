@@ -134,7 +134,7 @@ export default function TechnicalProcurementClientPage() {
       isLoading={isLoading}
       isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
-      addedRfqDirection={'received'}
+      rfqsDirection={'sent'}
       onCreatedRfq={refreshRfqs}
     />
   );

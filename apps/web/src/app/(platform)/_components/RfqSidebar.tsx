@@ -3,6 +3,7 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
+import { OrderDirection } from '@/drizzle/enums';
 import { Rfq } from '@/drizzle/types';
 import { createRandomRfq } from '@/features/rfqs/createRandomRfq';
 import { convertPydanticToRfq, PydanticRFQ } from '@/features/rfqs/pydanticConverter';
@@ -28,7 +29,7 @@ interface RfqListProps {
   isRefreshing?: boolean;
   InsertAddRfqButton?: boolean;
   onCreatedRfq?: () => void;
-  addedRfqDirection?: 'received' | 'sent';
+  rfqsDirection?: OrderDirection;
 }
 
 export default function RfqList({
@@ -40,7 +41,7 @@ export default function RfqList({
   isRefreshing = false,
   InsertAddRfqButton = true,
   onCreatedRfq,
-  addedRfqDirection = 'sent',
+  rfqsDirection = 'sent',
 }: RfqListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -57,7 +58,7 @@ export default function RfqList({
     try {
       const result = await extractRfq(file);
       const convertedRfq = convertPydanticToRfq(result as PydanticRFQ);
-      const newRfq = await createRfq({ ...convertedRfq, direction: addedRfqDirection });
+      const newRfq = await createRfq({ ...convertedRfq, direction: rfqsDirection });
       onCreatedRfq?.();
       toast.success('RFQ extracted successfully');
     } catch (error) {
@@ -129,7 +130,8 @@ export default function RfqList({
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-2 border-b border-border">
         <div className="flex flex-row justify-between items-center">
-          <h1 className="font-light italic">RFQs</h1>
+          <h3 className="font-light italic">RFQs</h3>
+          <StatusBadge status="secondary" text={rfqsDirection} />
           <div className="flex gap-2">
             <Button
               intent="ghost"
@@ -162,7 +164,7 @@ export default function RfqList({
                       size="sm"
                       className="text-gray-500"
                       onClick={async () => {
-                        const rfq = await createRandomRfq();
+                        const rfq = await createRandomRfq(rfqsDirection);
                         onCreatedRfq?.();
                         console.log('Time to close the popover');
                         setUploadRfqPopoverOpen(false);
@@ -174,7 +176,6 @@ export default function RfqList({
             )}
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">{rfqs.length} RFQs</p>
       </div>
       {/* Search Input */}
       <div className="flex-shrink-0 px-4 py-2 border-b border-border flex flex-col gap-2">
