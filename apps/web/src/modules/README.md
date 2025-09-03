@@ -1,6 +1,6 @@
 ---
 alwaysApply: false
-applyTo: ['apps/web/src/**/*']
+applyTo: ['apps/web/src/modules/**/*']
 ---
 
 # Codebase Structure Guidelines (Modules Approach)

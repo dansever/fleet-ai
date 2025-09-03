@@ -58,13 +58,16 @@ export const CopyableText = React.forwardRef<HTMLButtonElement, CopyableTextProp
         aria-label={title ?? 'Copy to clipboard'}
         data-state={copied ? 'copied' : 'idle'}
         className={cn(
-          'cursor-pointer flex items-center hover:scale-101 transition-all gap-2',
+          'w-full cursor-pointer flex flex-row items-center text-left gap-1 hover:scale-101 transition-all',
           className,
         )}
         {...buttonProps}
       >
-        {content}
-        {content && <CopyIcon className="h-4 w-4 transition shrink-0" />}
+        {/* Text with truncation */}
+        <span className="truncate flex-1">{content}</span>
+
+        {/* Always show copy icon */}
+        <CopyIcon className="h-4 w-4 flex-shrink-0" />
       </button>
     );
   },

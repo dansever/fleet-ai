@@ -10,12 +10,13 @@ import {
 } from '@/drizzle/enums';
 import type { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
-import { serializeQuoteDates } from '@/lib/utils/date-helpers';
-import { createQuote, CreateQuoteData, updateQuote } from '@/services/technical/quote-client';
+import { client } from '@/modules/quotes';
+import { QuoteCreateInput } from '@/modules/quotes/quotes.types';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { serializeDatesForAPI } from '@/utils/date-helpers';
 import { Eye, LucideIcon, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -159,14 +160,18 @@ export default function QuoteDialog({
       let savedQuote: Quote;
 
       // Serialize dates to ISO strings before sending
-      const serializedFormData = serializeQuoteDates(formData);
+      const serializedFormData = serializeDatesForAPI(formData, [
+        'sentAt',
+        'quoteExpirationDate',
+        'taggedDate',
+      ]);
 
       if (isAdd) {
         // Create new quote (rfqId must be provided)
         if (!rfqId) {
           throw new Error('RFQ ID is required when creating a new quote');
         }
-        const createData: CreateQuoteData = {
+        const createData: QuoteCreateInput = {
           rfqId,
           rfqNumber: serializedFormData.rfqNumber,
           direction: serializedFormData.direction,
@@ -202,7 +207,7 @@ export default function QuoteDialog({
           status: serializedFormData.status,
           sentAt: formData.sentAt?.toISOString() || null,
         };
-        savedQuote = await createQuote(createData);
+        savedQuote = await client.createQuote(createData, rfqId);
         toast.success('Quote created successfully');
       } else {
         // Update existing quote
@@ -244,7 +249,7 @@ export default function QuoteDialog({
           status: serializedFormData.status,
           sentAt: formData.sentAt?.toISOString() || null,
         };
-        savedQuote = await updateQuote(quote.id, updateData);
+        savedQuote = await client.updateQuote(quote.id, updateData);
         toast.success('Quote updated successfully');
       }
 
@@ -363,7 +368,7 @@ export default function QuoteDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MainCard title="Quote Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="RFQ Number"
                 value={formData.rfqNumber}
@@ -410,7 +415,7 @@ export default function QuoteDialog({
           </MainCard>
 
           <MainCard title="Vendor Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -509,7 +514,7 @@ export default function QuoteDialog({
           </MainCard>
 
           <MainCard title="Pricing & Commercial Terms" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Price"
                 value={formData.price}
@@ -566,7 +571,7 @@ export default function QuoteDialog({
           </MainCard>
 
           <MainCard title="Delivery & Terms" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Payment Terms"
                 value={formData.paymentTerms}
@@ -620,7 +625,7 @@ export default function QuoteDialog({
           </MainCard>
 
           <MainCard title="Compliance & Traceability" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Trace To"
                 value={formData.traceTo}

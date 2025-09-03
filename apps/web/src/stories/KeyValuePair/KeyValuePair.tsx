@@ -3,7 +3,6 @@
 import type React from 'react';
 
 import { CopyableText } from '@/components/miscellaneous/CopyableText';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -120,12 +119,11 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
           );
         case 'email':
           return (
-            <Input
+            <ModernInput
               type="email"
               value={(value as string) || ''}
-              onChange={(e) => handleChange(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value)}
               placeholder={placeholder || 'Enter email address'}
-              className="rounded-xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
               name={name}
             />
           );
@@ -199,13 +197,13 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-b-0',
+        'flex flex-col sm:flex-row gap-1 sm:items-center py-1.5 border-b border-gray-100 last:border-b-0',
         className,
       )}
     >
       <div
         className={cn(
-          'text-sm font-medium text-gray-700 mb-1 sm:mb-0 sm:w-1/3 sm:pr-4',
+          'text-sm font-medium sm:w-1/3 sm:pr-1 break-words whitespace-normal',
           keyClassName,
         )}
       >

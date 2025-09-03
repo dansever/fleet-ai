@@ -1,4 +1,5 @@
 // Updated by CursorAI on Sep 2 2025
+import { OrderDirection, urgencyLevelEnum } from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
 import { createRfq, CreateRfqData } from '@/services/technical/rfq-client';
 
@@ -25,12 +26,11 @@ const VENDOR_NAMES = [
   'Eagle Aerospace',
 ];
 const CONTACT_NAMES = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'David Rodriguez'];
-const URGENCY_LEVELS = ['routine', 'urgent', 'aog']; // matching schema enum values
 const PRICING_TYPES = ['fixed', 'exchange', 'repair', 'outright'];
 const CONDITION_CODES = ['new', 'serviceable', 'overhauled', 'repaired', 'as_removed'];
 const AIRCRAFT_TYPES = ['Boeing 737', 'Airbus A320', 'Boeing 777', 'Airbus A330', 'Embraer E175'];
 
-export async function createRandomRfq(): Promise<Rfq> {
+export async function createRandomRfq(direction: OrderDirection = 'sent'): Promise<Rfq> {
   const randomNumber = Math.floor(Math.random() * 1000000);
   const vendorName = pickOne(VENDOR_NAMES);
   const contactName = pickOne(CONTACT_NAMES);
@@ -38,7 +38,7 @@ export async function createRandomRfq(): Promise<Rfq> {
 
   const generatedRfq: CreateRfqData = {
     // RFQ Identification (matching schema)
-    direction: pickOne(['sent', 'received']),
+    direction,
     rfqNumber: `RFQ-${getRandomInt(100000, 999999)}`,
 
     // Vendor Information (matching schema)
@@ -58,7 +58,7 @@ export async function createRandomRfq(): Promise<Rfq> {
 
     // Commercial Terms (matching schema)
     pricingType: pickOne(PRICING_TYPES),
-    urgencyLevel: pickOne(URGENCY_LEVELS),
+    urgencyLevel: pickOne(urgencyLevelEnum.enumValues),
     deliverTo: `Hangar ${getRandomInt(1, 20)}, Gate ${getRandomInt(1, 50)}`,
     buyerComments:
       Math.random() > 0.5

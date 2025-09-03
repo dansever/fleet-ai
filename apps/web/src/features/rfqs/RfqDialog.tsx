@@ -12,14 +12,14 @@ import {
   urgencyLevelEnum,
 } from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
-import { serializeRfqDates } from '@/lib/utils/date-helpers';
 import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';
 import { Button, ButtonProps } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { serializeDatesForAPI } from '@/utils/date-helpers';
 import { Eye, Pencil, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function RfqDialog({
@@ -45,68 +45,117 @@ export default function RfqDialog({
   onOpenChange?: (open: boolean) => void;
   withTrigger?: boolean;
 }) {
-  const [formData, setFormData] = useState({
-    // RFQ Identification (matching schema)
-    direction: rfq?.direction || null,
-    rfqNumber: rfq?.rfqNumber || null,
-    status: rfq?.status || 'pending',
-
-    // Vendor Information (matching schema)
-    vendorName: rfq?.vendorName || null,
-    vendorAddress: rfq?.vendorAddress || null,
-    vendorContactName: rfq?.vendorContactName || null,
-    vendorContactEmail: rfq?.vendorContactEmail || null,
-    vendorContactPhone: rfq?.vendorContactPhone || null,
-
-    // Part Specifications (matching schema)
-    partNumber: rfq?.partNumber || null,
-    altPartNumber: rfq?.altPartNumber || null,
-    partDescription: rfq?.partDescription || null,
-    conditionCode: rfq?.conditionCode || null,
-    unitOfMeasure: rfq?.unitOfMeasure || null,
-    quantity: rfq?.quantity || null,
-
-    // Commercial Terms (matching schema)
-    pricingType: rfq?.pricingType || null,
-    urgencyLevel: rfq?.urgencyLevel || null,
-    deliverTo: rfq?.deliverTo || null,
-    buyerComments: rfq?.buyerComments || null,
-
-    // Workflow Management (matching schema)
-    selectedQuoteId: rfq?.selectedQuoteId || null,
-
-    // Timestamps (matching schema)
-    sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
-  });
-
-  const isAdd = DialogType === 'add';
-  const isEdit = DialogType === 'edit';
-
-  // Update formData when rfq prop changes
-  useEffect(() => {
-    setFormData({
+  // Initial form data state - use memoized initialization
+  const [formData, setFormData] = useState(() => {
+    console.log('Initial formData state for RFQ:', rfq?.id || 'null');
+    return {
+      // RFQ Identification (matching schema)
       direction: rfq?.direction || null,
       rfqNumber: rfq?.rfqNumber || null,
       status: rfq?.status || 'pending',
+
+      // Vendor Information (matching schema)
       vendorName: rfq?.vendorName || null,
       vendorAddress: rfq?.vendorAddress || null,
       vendorContactName: rfq?.vendorContactName || null,
       vendorContactEmail: rfq?.vendorContactEmail || null,
       vendorContactPhone: rfq?.vendorContactPhone || null,
+
+      // Part Specifications (matching schema)
       partNumber: rfq?.partNumber || null,
       altPartNumber: rfq?.altPartNumber || null,
       partDescription: rfq?.partDescription || null,
       conditionCode: rfq?.conditionCode || null,
       unitOfMeasure: rfq?.unitOfMeasure || null,
       quantity: rfq?.quantity || null,
+
+      // Commercial Terms (matching schema)
       pricingType: rfq?.pricingType || null,
       urgencyLevel: rfq?.urgencyLevel || null,
       deliverTo: rfq?.deliverTo || null,
       buyerComments: rfq?.buyerComments || null,
+
+      // Workflow Management (matching schema)
       selectedQuoteId: rfq?.selectedQuoteId || null,
+
+      // Timestamps (matching schema)
       sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
-    });
-  }, [rfq]);
+    };
+  });
+
+  const isAdd = DialogType === 'add';
+  const isEdit = DialogType === 'edit';
+
+  // Track the previous RFQ ID to prevent unnecessary updates
+  const previousRfqIdRef = useRef<string | null>(null);
+
+  // Helper function to create form data from RFQ (not memoized to avoid stale closures)
+  const createFormDataFromRfq = (rfqData: Rfq | null) => {
+    return {
+      // RFQ Identification (matching schema)
+      direction: rfqData?.direction || null,
+      rfqNumber: rfqData?.rfqNumber || null,
+      status: rfqData?.status || 'pending',
+
+      // Vendor Information (matching schema)
+      vendorName: rfqData?.vendorName || null,
+      vendorAddress: rfqData?.vendorAddress || null,
+      vendorContactName: rfqData?.vendorContactName || null,
+      vendorContactEmail: rfqData?.vendorContactEmail || null,
+      vendorContactPhone: rfqData?.vendorContactPhone || null,
+
+      // Part Specifications (matching schema)
+      partNumber: rfqData?.partNumber || null,
+      altPartNumber: rfqData?.altPartNumber || null,
+      partDescription: rfqData?.partDescription || null,
+      conditionCode: rfqData?.conditionCode || null,
+      unitOfMeasure: rfqData?.unitOfMeasure || null,
+      quantity: rfqData?.quantity || null,
+
+      // Commercial Terms (matching schema)
+      pricingType: rfqData?.pricingType || null,
+      urgencyLevel: rfqData?.urgencyLevel || null,
+      deliverTo: rfqData?.deliverTo || null,
+      buyerComments: rfqData?.buyerComments || null,
+
+      // Workflow Management (matching schema)
+      selectedQuoteId: rfqData?.selectedQuoteId || null,
+
+      // Timestamps (matching schema)
+      sentAt: rfqData?.sentAt ? new Date(rfqData.sentAt) : null,
+    };
+  };
+
+  // Only update formData when RFQ ID actually changes
+  useEffect(() => {
+    const currentRfqId = rfq?.id || null;
+
+    // Only update if the RFQ ID has actually changed
+    if (currentRfqId !== previousRfqIdRef.current) {
+      console.log(
+        'RfqDialog: RFQ actually changed from',
+        previousRfqIdRef.current,
+        'to',
+        currentRfqId,
+      );
+      setFormData(createFormDataFromRfq(rfq));
+      previousRfqIdRef.current = currentRfqId;
+    }
+  }, [rfq?.id]);
+
+  // ONLY update when dialog opens AND it's a different RFQ than what we last processed
+  useEffect(() => {
+    if (open === true) {
+      const currentRfqId = rfq?.id || null;
+      if (currentRfqId !== previousRfqIdRef.current) {
+        console.log('RfqDialog: Dialog opened with new RFQ ID:', currentRfqId);
+        setFormData(createFormDataFromRfq(rfq));
+        previousRfqIdRef.current = currentRfqId;
+      } else {
+        console.log('RfqDialog: Dialog opened with same RFQ ID, skipping update');
+      }
+    }
+  }, [open]);
 
   const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -117,7 +166,7 @@ export default function RfqDialog({
       let savedRfq: Rfq;
 
       // Serialize dates to ISO strings before sending
-      const serializedFormData = serializeRfqDates(formData);
+      const serializedFormData = serializeDatesForAPI(formData, ['sentAt']);
 
       if (isAdd) {
         // Create new RFQ (orgId and userId are handled server-side)
@@ -141,7 +190,7 @@ export default function RfqDialog({
           buyerComments: serializedFormData.buyerComments,
           status: serializedFormData.status,
           selectedQuoteId: serializedFormData.selectedQuoteId,
-          sentAt: serializedFormData.sentAt,
+          sentAt: serializedFormData.sentAt?.toISOString() || null,
         };
         savedRfq = await createRfq(createData);
         toast.success('RFQ created successfully');
@@ -187,54 +236,17 @@ export default function RfqDialog({
 
   const handleCancel = () => {
     if (isAdd) {
-      setFormData({
-        direction: null,
-        rfqNumber: null,
-        status: 'pending',
-        vendorName: null,
-        vendorAddress: null,
-        vendorContactName: null,
-        vendorContactEmail: null,
-        vendorContactPhone: null,
-        partNumber: null,
-        altPartNumber: null,
-        partDescription: null,
-        conditionCode: null,
-        unitOfMeasure: null,
-        quantity: null,
-        pricingType: null,
-        urgencyLevel: null,
-        deliverTo: null,
-        buyerComments: null,
-        selectedQuoteId: null,
-        sentAt: null,
-      });
+      // Reset to empty form for add mode
+      setFormData(createFormDataFromRfq(null));
+    } else {
+      // Reset to original RFQ data for edit/view mode
+      setFormData(createFormDataFromRfq(rfq));
     }
   };
 
   const handleReset = () => {
-    setFormData({
-      direction: null,
-      rfqNumber: null,
-      status: 'pending',
-      vendorName: null,
-      vendorAddress: null,
-      vendorContactName: null,
-      vendorContactEmail: null,
-      vendorContactPhone: null,
-      partNumber: null,
-      altPartNumber: null,
-      partDescription: null,
-      conditionCode: null,
-      unitOfMeasure: null,
-      quantity: null,
-      pricingType: null,
-      urgencyLevel: null,
-      deliverTo: null,
-      buyerComments: null,
-      selectedQuoteId: null,
-      sentAt: null,
-    });
+    // Always reset to empty form for reset operation
+    setFormData(createFormDataFromRfq(null));
   };
 
   const dialogTitle = isAdd ? 'Add New RFQ' : rfq?.rfqNumber || 'RFQ Details';
@@ -272,7 +284,7 @@ export default function RfqDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <MainCard title="RFQ Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Direction"
                 value={formData.direction}
@@ -331,7 +343,7 @@ export default function RfqDialog({
           </MainCard>
 
           <MainCard title="Vendor Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -376,7 +388,7 @@ export default function RfqDialog({
           </MainCard>
 
           <MainCard title="Part Specifications" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Part Number"
                 value={formData.partNumber}
@@ -430,7 +442,7 @@ export default function RfqDialog({
           </MainCard>
 
           <MainCard title="Commercial Terms" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Pricing Type"
                 value={formData.pricingType}

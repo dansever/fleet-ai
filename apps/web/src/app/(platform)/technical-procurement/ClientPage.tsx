@@ -1,11 +1,10 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { Badge } from '@/components/ui/badge';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
-import { getUrgencyLevelDisplay } from '@/drizzle/enums';
+import { getUrgencyLevelDisplay, Status, statusDisplayMap } from '@/drizzle/enums';
 import { Quote } from '@/drizzle/types';
 import { createRandomQuote } from '@/features/quotes/createRandomQuote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
@@ -17,8 +16,9 @@ import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { CalendarIcon, FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
+import { FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import RfqList from '../_components/RfqSidebar';
@@ -148,21 +148,20 @@ export default function TechnicalProcurementClientPage() {
           {selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`}
         </h1>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>
-            Status:{' '}
-            <Badge className={getStatusColor(selectedRfq.status || 'pending')}>
-              {selectedRfq.status || 'pending'}
-            </Badge>
-          </span>
-          <span>Created: {formatDate(new Date(selectedRfq.createdAt))}</span>
+          <StatusBadge
+            status="default"
+            size="sm"
+            text={statusDisplayMap[selectedRfq.status as Status] || ''}
+          />
           {selectedRfq.sentAt && <span>Sent: {formatDate(new Date(selectedRfq.sentAt))}</span>}
         </div>
       </div>
 
       <div className="flex gap-2">
         <RfqDialog
+          key={selectedRfq?.id}
           rfq={selectedRfq}
-          onChange={() => {}}
+          onChange={updateRfq}
           triggerText="View Details"
           triggerIntent="secondary"
           DialogType="view"
@@ -202,56 +201,36 @@ export default function TechnicalProcurementClientPage() {
           <MainCard
             title={selectedRfq.rfqNumber || ''}
             subtitle={selectedRfq.buyerComments || 'No buyer comments available'}
-            headerActions={
-              <div className="flex flex-col gap-2">
-                <div className="flex items-start gap-2 justify-between">
-                  <h3>{selectedRfq.rfqNumber}</h3>
-                  {/* Buttons */}
-                  <div className="flex gap-2">
-                    <RfqDialog
-                      rfq={selectedRfq}
-                      onChange={updateRfq}
-                      triggerText="Edit"
-                      DialogType="edit"
-                      triggerClassName="bg-white/20 text-white-700"
-                    />
+            actions={
+              <div className="flex gap-2">
+                <RfqDialog
+                  key={selectedRfq.id}
+                  rfq={selectedRfq}
+                  onChange={updateRfq}
+                  triggerText="Edit"
+                  DialogType="edit"
+                  triggerIntent="secondaryInverted"
+                />
 
-                    <ConfirmationPopover
-                      trigger={
-                        <Button
-                          intent="secondary"
-                          icon={TrashIcon}
-                          text="Delete"
-                          className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
-                        />
-                      }
-                      popoverIntent="danger"
-                      title="Delete RFQ"
-                      onConfirm={handleDeleteRfq}
+                <ConfirmationPopover
+                  trigger={
+                    <Button
+                      intent="secondaryInverted"
+                      icon={TrashIcon}
+                      text="Delete"
+                      className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
                     />
-                  </div>
-                </div>
-                <p className="text-blue-100">
-                  {selectedRfq.buyerComments || 'No buyer comments available'}
-                </p>
+                  }
+                  popoverIntent="danger"
+                  title="Delete RFQ"
+                  onConfirm={handleDeleteRfq}
+                />
               </div>
             }
           >
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tender Information */}
-              <MainCard
-                className="col-span-1 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/50"
-                neutralHeader={true}
-                title="Details"
-                headerActions={
-                  <div className="flex items-start gap-2 text-foreground">
-                    <div className="p-2 bg-blue-600 rounded-xl">
-                      <CalendarIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <h4>Details</h4>
-                  </div>
-                }
-              >
+              <MainCard neutralHeader={true} title="Details">
                 <KeyValuePair
                   label="Part Number"
                   value={selectedRfq.partNumber || ''}
@@ -275,22 +254,7 @@ export default function TechnicalProcurementClientPage() {
                 />
               </MainCard>
               {/* Timeline */}
-              <MainCard
-                title="Vendor Information"
-                subtitle={selectedRfq.vendorName || 'No vendor name available'}
-                neutralHeader={true}
-                headerActions={
-                  <div className="flex gap-2">
-                    <RfqDialog
-                      rfq={selectedRfq}
-                      onChange={updateRfq}
-                      triggerText="Edit"
-                      DialogType="edit"
-                      triggerClassName="bg-white/20 text-white-700"
-                    />
-                  </div>
-                }
-              >
+              <MainCard title="Vendor Information" neutralHeader={true}>
                 <KeyValuePair
                   label="Name"
                   value={selectedRfq.vendorName || ''}
@@ -320,28 +284,11 @@ export default function TechnicalProcurementClientPage() {
               </MainCard>
 
               {/* Quick Stats */}
-              <MainCard
-                title="General"
-                subtitle={selectedRfq.status || ''}
-                headerActions={
-                  <div className="flex gap-2">
-                    <RfqDialog
-                      rfq={selectedRfq}
-                      onChange={updateRfq}
-                      triggerText="Edit"
-                      DialogType="edit"
-                      triggerClassName="bg-white/20 text-white-700"
-                    />
-                  </div>
-                }
-                className="col-span-1 bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200/50"
-                headerGradient="none"
-                neutralHeader={true}
-              >
+              <MainCard title="General" neutralHeader={true}>
                 <KeyValuePair
                   keyClassName="max-w-1/2"
                   label="Status"
-                  value={selectedRfq.status || ''}
+                  value={statusDisplayMap[selectedRfq.status as Status] || ''}
                   valueType="string"
                 />
                 <KeyValuePair
@@ -372,9 +319,8 @@ export default function TechnicalProcurementClientPage() {
         tabs={[
           { label: 'Quotes', value: 'quotes' },
           { label: 'Analysis', value: 'analysis' },
-          { label: 'Logistics', value: 'logistics' },
         ]}
-        selectedTab="quotes"
+        defaultTab="quotes"
         onTabChange={() => {}}
       >
         <TabsContent value="quotes">
@@ -460,11 +406,6 @@ export default function TechnicalProcurementClientPage() {
         </TabsContent>
         <TabsContent value="analysis">
           <QuoteAnalysis isRefreshing={isRefreshingQuotes} />
-        </TabsContent>
-        <TabsContent value="logistics">
-          <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Coming Soon</p>
-          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Rfq } from '@/drizzle/types';
@@ -15,6 +14,7 @@ import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { FileText, RefreshCw, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -144,9 +144,9 @@ export default function RfqList({
                 <FileUploadPopover
                   open={uploadRfqPopoverOpen}
                   onOpenChange={setUploadRfqPopoverOpen}
-                  triggerButtonIntent="add"
-                  triggerButtonText="RFQ"
-                  buttonSize="md"
+                  triggerIntent="add"
+                  triggerText="RFQ"
+                  triggerSize="md"
                   onSend={handleSendRfqFile}
                 >
                   <div className="flex flex-col gap-2 text-sm">
@@ -247,30 +247,31 @@ export default function RfqList({
                   isSelected={selectedRfq?.id === rfq.id}
                   onClick={() => onRfqSelect(rfq)}
                   icon={<FileText />}
-                  iconBackground="from-blue-400 to-blue-200"
+                  iconBackground="from-blue-400 to-blue-300"
                 >
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row gap-1 overfl">
                     {/* Left side: main RFQ info */}
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-sm font-medium">
-                        {rfq.rfqNumber || `RFQ-${rfq.id.slice(0, 8)}`} - {rfq.partNumber}
-                      </span>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {rfq.partDescription}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(new Date(rfq.createdAt))}
-                      </span>
+                    <div className="flex flex-col gap-1 flex-1 min-w-0 overflow-hidden">
+                      <p className="text-sm font-semibold">{rfq.rfqNumber}</p>
+                      <div>
+                        <p className="text-xs font-medium">{rfq.partNumber}</p>
+                        <p className="text-xs">{rfq.partDescription}</p>
+                      </div>
+                      <p className="text-xs">{formatDate(new Date(rfq.createdAt))}</p>
                     </div>
                     {/* Right side: badges */}
                     <div className="flex flex-col gap-2 items-end">
-                      <Badge variant="secondary" className={`text-xs ${rfq.status || 'pending'}`}>
-                        {getStatusDisplay(rfq.status || 'pending')}
-                      </Badge>
+                      <StatusBadge
+                        size="sm"
+                        status="secondary"
+                        text={getStatusDisplay(rfq.status || '')}
+                      />
                       {rfq.quantity && (
-                        <Badge variant="outline" className="text-xs">
-                          Qty: {rfq.quantity}
-                        </Badge>
+                        <StatusBadge
+                          size="sm"
+                          status="secondary"
+                          text={`Qty: ${rfq.quantity.toString()}`}
+                        />
                       )}
                     </div>
                   </div>

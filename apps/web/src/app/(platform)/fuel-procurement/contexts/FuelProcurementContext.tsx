@@ -64,6 +64,10 @@ function FuelProcurementInnerProvider({
     tenderId: tenders.selectedTender?.id || null,
     enabled: !!tenders.selectedTender,
   });
+  const contracts = useContracts({
+    airportId: airports.selectedAirport?.id || null,
+    enabled: !!airports.selectedAirport,
+  });
   const invoices = useInvoices({
     contractId: null, // This would be set based on selected contract
     enabled: false, // Disabled for now, can be enabled when contract selection is implemented

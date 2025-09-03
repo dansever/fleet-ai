@@ -65,22 +65,22 @@ const statusConfig = {
 };
 
 const sizeConfig = {
-  sm: 'text-xs px-2 py-1 gap-1',
-  md: 'text-sm px-3 py-1.5 gap-1.5',
-  lg: 'text-base px-4 py-2 gap-2',
+  sm: 'text-xs px-1.5 py-0.5 gap-1',
+  md: 'text-sm px-2 py-1 gap-1.5',
+  lg: 'text-base px-3 py-1.5 gap-2',
 };
 
 const iconSizeConfig = {
-  sm: 'h-3 w-3',
-  md: 'h-4 w-4',
-  lg: 'h-5 w-5',
+  sm: 'h-2.5 w-2.5',
+  md: 'h-3 w-3',
+  lg: 'h-3.5 w-3.5',
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
   status = 'default',
   text,
   size = 'sm',
-  icon,
+  icon = null,
   className,
 }) => {
   const config = statusConfig[status];
@@ -90,7 +90,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   return (
     <Badge
       className={cn(
-        'inline-flex items-center font-medium rounded-full border transition-colors',
+        'inline-flex items-center font-medium rounded-md border transition-colors',
         config.className,
         sizeConfig[size],
         className,

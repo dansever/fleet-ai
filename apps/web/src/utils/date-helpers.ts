@@ -157,136 +157,23 @@ export const isValidISOString = (value: string): boolean => {
 };
 
 /**
- * Common date field names used across the application
- * Use these constants to ensure consistency
+ * Calculate progress percentage between two dates based on today.
+ * @param startDate - contract start date (string | Date)
+ * @param endDate - contract end date (string | Date)
+ * @returns number between 0 and 100
  */
-export const DATE_FIELDS = {
-  // Audit fields
-  CREATED_AT: 'createdAt' as const,
-  UPDATED_AT: 'updatedAt' as const,
+export function calculateProgress(startDate: string | Date, endDate: string | Date): number {
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+  const today = Date.now();
 
-  // Business fields
-  SENT_AT: 'sentAt' as const,
-  RECEIVED_AT: 'receivedAt' as const,
-  LAST_SEEN_AT: 'lastSeenAt' as const,
+  if (isNaN(start) || isNaN(end) || start >= end) {
+    return 0; // invalid dates
+  }
 
-  // Tender/Contract dates
-  BIDDING_STARTS: 'biddingStarts' as const,
-  BIDDING_ENDS: 'biddingEnds' as const,
-  DELIVERY_STARTS: 'deliveryStarts' as const,
-  DELIVERY_ENDS: 'deliveryEnds' as const,
-  EFFECTIVE_FROM: 'effectiveFrom' as const,
-  EFFECTIVE_TO: 'effectiveTo' as const,
+  const fraction = (today - start) / (end - start);
+  const percentage = fraction * 100;
 
-  // Other business dates
-  INVOICE_DATE: 'invoiceDate' as const,
-  BID_SUBMITTED_AT: 'bidSubmittedAt' as const,
-  DECISION_AT: 'decisionAt' as const,
-} as const;
-
-/**
- * Type helper for date fields
- */
-export type DateFieldName = (typeof DATE_FIELDS)[keyof typeof DATE_FIELDS];
-
-/**
- * Preset configurations for common date serialization scenarios
- */
-export const DATE_FIELD_PRESETS = {
-  FUEL_TENDER: [
-    DATE_FIELDS.BIDDING_STARTS,
-    DATE_FIELDS.BIDDING_ENDS,
-    DATE_FIELDS.DELIVERY_STARTS,
-    DATE_FIELDS.DELIVERY_ENDS,
-  ] as const,
-
-  CONTRACT: [DATE_FIELDS.EFFECTIVE_FROM, DATE_FIELDS.EFFECTIVE_TO] as const,
-
-  RFQ: [DATE_FIELDS.SENT_AT, DATE_FIELDS.RECEIVED_AT] as const,
-
-  AUDIT_ONLY: [DATE_FIELDS.CREATED_AT, DATE_FIELDS.UPDATED_AT] as const,
-} as const;
-
-/**
- * Helper to serialize fuel tender dates specifically
- * Converts Date objects to ISO strings or null
- */
-export const serializeFuelTenderDates = <T extends Record<string, unknown>>(
-  data: T,
-): T & {
-  biddingStarts?: string | null;
-  biddingEnds?: string | null;
-  deliveryStarts?: string | null;
-  deliveryEnds?: string | null;
-} => {
-  return {
-    ...data,
-    biddingStarts: safeISOString(data.biddingStarts),
-    biddingEnds: safeISOString(data.biddingEnds),
-    deliveryStarts: safeISOString(data.deliveryStarts),
-    deliveryEnds: safeISOString(data.deliveryEnds),
-  } as T & {
-    biddingStarts?: string | null;
-    biddingEnds?: string | null;
-    deliveryStarts?: string | null;
-    deliveryEnds?: string | null;
-  };
-};
-
-/**
- * Helper to deserialize fuel tender dates specifically
- */
-export const deserializeFuelTenderDates = <T extends Record<string, unknown>>(data: T): T => {
-  return deserializeDatesFromAPI(data, [...DATE_FIELD_PRESETS.FUEL_TENDER]);
-};
-
-/**
- * Helper to serialize RFQ dates specifically
- * Converts Date objects to ISO strings or null
- */
-export const serializeRfqDates = <T extends Record<string, unknown>>(
-  data: T,
-): T & {
-  sentAt?: string | null;
-  receivedAt?: string | null;
-} => {
-  return {
-    ...data,
-    sentAt: safeISOString(data.sentAt),
-    receivedAt: safeISOString(data.receivedAt),
-  } as T & {
-    sentAt?: string | null;
-    receivedAt?: string | null;
-  };
-};
-
-/**
- * Helper to deserialize RFQ dates specifically
- */
-export const deserializeRfqDates = <T extends Record<string, unknown>>(data: T): T => {
-  return deserializeDatesFromAPI(data, [...DATE_FIELD_PRESETS.RFQ]);
-};
-
-/**
- * Helper to serialize Quote dates specifically
- * Converts Date objects to ISO strings or null
- */
-export const serializeQuoteDates = <T extends Record<string, unknown>>(
-  data: T,
-): T & {
-  receivedAt?: string | null;
-} => {
-  return {
-    ...data,
-    receivedAt: safeISOString(data.receivedAt),
-  } as T & {
-    receivedAt?: string | null;
-  };
-};
-
-/**
- * Helper to deserialize Quote dates specifically
- */
-export const deserializeQuoteDates = <T extends Record<string, unknown>>(data: T): T => {
-  return deserializeDatesFromAPI(data, [DATE_FIELDS.RECEIVED_AT]);
-};
+  // clamp between 0 and 100
+  return Math.min(100, Math.max(0, Math.round(percentage)));
+}

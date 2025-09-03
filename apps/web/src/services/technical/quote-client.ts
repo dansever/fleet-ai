@@ -17,7 +17,7 @@ export type UpdateQuoteData = Partial<CreateQuoteData>;
  * Get a quote by ID
  */
 export async function getQuote(id: Quote['id']): Promise<Quote> {
-  const res = await api.get(`/api/quotes?id=${id}`);
+  const res = await api.get(`/api/quotes/${id}`);
   return res.data;
 }
 
@@ -41,7 +41,7 @@ export async function createQuote(data: CreateQuoteData): Promise<Quote> {
  * Update an existing quote
  */
 export async function updateQuote(id: Quote['id'], data: UpdateQuoteData): Promise<Quote> {
-  const res = await api.put(`/api/quotes?id=${id}`, data);
+  const res = await api.put(`/api/quotes/${id}`, data);
   return res.data;
 }
 
@@ -49,7 +49,7 @@ export async function updateQuote(id: Quote['id'], data: UpdateQuoteData): Promi
  * Delete a quote
  */
 export async function deleteQuote(id: Quote['id']): Promise<void> {
-  await api.delete(`/api/quotes?id=${id}`);
+  await api.delete(`/api/quotes/${id}`);
 }
 
 /**
@@ -59,7 +59,7 @@ export async function extractQuote(file: File): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await backendApi.post('/api/v1/technical/quotes/extract', formData, {
+  const res = await backendApi.post('/api/v1/extract/quotes', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

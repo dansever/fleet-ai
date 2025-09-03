@@ -14,7 +14,7 @@ export type CreateRfqData = Omit<
  * Get an RFQ by ID
  */
 export async function getRfq(id: Rfq['id']): Promise<Rfq> {
-  const res = await api.get(`/api/rfqs?id=${id}`);
+  const res = await api.get(`/api/rfqs/${id}`);
   return res.data;
 }
 
@@ -45,8 +45,11 @@ export async function createRfq(data: CreateRfqData): Promise<Rfq> {
 /**
  * Update an existing RFQ
  */
-export async function updateRfq(id: Rfq['id'], data: Partial<NewRfq>): Promise<Rfq> {
-  const res = await api.put(`/api/rfqs?id=${id}`, data);
+export async function updateRfq(
+  id: Rfq['id'],
+  data: Partial<NewRfq> | { sentAt?: string | null },
+): Promise<Rfq> {
+  const res = await api.put(`/api/rfqs/${id}`, data);
   return res.data;
 }
 
@@ -54,7 +57,7 @@ export async function updateRfq(id: Rfq['id'], data: Partial<NewRfq>): Promise<R
  * Delete an RFQ
  */
 export async function deleteRfq(id: Rfq['id']): Promise<void> {
-  await api.delete(`/api/rfqs?id=${id}`);
+  await api.delete(`/api/rfqs/${id}`);
 }
 
 /**

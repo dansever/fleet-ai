@@ -16,6 +16,7 @@ import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import {
   Calendar,
   CheckCircle,
+  Circle,
   Clock,
   Eye,
   FileText,
@@ -80,10 +81,10 @@ const getStatusBadge = (status: string | null) => {
 
 const createQuoteColumns = (
   acceptedQuoteId: Quote['id'] | null,
-  acceptingQuoteId: Quote['id'] | null,
   onDeleteQuote: (quoteId: string) => Promise<void>,
   onUpdateQuote: (quote: Quote) => void,
   onAcceptQuote: (quoteId: string) => Promise<void>,
+  isLoading: boolean,
 ): Column<Quote>[] => [
   {
     key: 'actions',
@@ -92,18 +93,12 @@ const createQuoteColumns = (
       <div className="flex flex-col gap-1.5">
         <Button
           intent={acceptedQuoteId === quote.id ? 'success' : 'secondary'}
-          text={
-            acceptedQuoteId === quote.id
-              ? 'Accepted'
-              : acceptingQuoteId === quote.id
-                ? 'Accepting...'
-                : 'Accept'
-          }
-          icon={CheckCircle}
-          disabled={acceptedQuoteId === quote.id || acceptingQuoteId === quote.id}
+          text={acceptedQuoteId === quote.id ? 'Accepted' : 'Accept'}
+          icon={acceptedQuoteId === quote.id ? CheckCircle : Circle}
+          disabled={acceptedQuoteId === quote.id || isLoading}
           size="sm"
           onClick={() => onAcceptQuote(quote.id)}
-          className="disabled:opacity-100 disabled:pointer-arrow w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200"
+          className="disabled:opacity-100 disabled:pointer-arrow"
         />
 
         <QuoteDialog
@@ -126,7 +121,7 @@ const createQuoteColumns = (
               className="hover:bg-red-50 hover:text-red-700 hover:border-red-200"
             />
           }
-          intent="danger"
+          popoverIntent="danger"
           title="Delete Quote"
           description="Are you sure you want to delete this quote?"
           onConfirm={() => onDeleteQuote(quote.id)}
@@ -154,25 +149,29 @@ const createQuoteColumns = (
     header: 'Vendor Information',
     accessor: (quote) => (
       <div className="min-w-[180px]">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex flex-row gap-2">
+          {/* Initial Name */}
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
             {(quote.vendorName || 'U').charAt(0).toUpperCase()}
           </div>
-          <div className="font-semibold text-slate-900 text-sm">
-            {quote.vendorName || 'Unknown Vendor'}
+          {/* Vendor Info */}
+          <div className="flex flex-col">
+            <div className="font-semibold text-slate-900 text-sm">
+              {quote.vendorName || 'Unknown Vendor'}
+            </div>
+            {quote.vendorContactName && (
+              <div className="text-sm text-slate-600">{quote.vendorContactName}</div>
+            )}
+            {quote.vendorContactEmail && (
+              <div className="text-xs text-slate-500">
+                <CopyableText value={quote.vendorContactEmail} className="text-xs" />
+              </div>
+            )}
+            {quote.vendorContactPhone && (
+              <div className="text-xs text-slate-500 ">{quote.vendorContactPhone}</div>
+            )}
           </div>
         </div>
-        {quote.vendorContactName && (
-          <div className="text-sm text-slate-600 ml-10">{quote.vendorContactName}</div>
-        )}
-        {quote.vendorContactEmail && (
-          <div className="text-xs text-slate-500 ml-10">
-            <CopyableText text={quote.vendorContactEmail} className="text-xs" />
-          </div>
-        )}
-        {quote.vendorContactPhone && (
-          <div className="text-xs text-slate-500 ml-10">{quote.vendorContactPhone}</div>
-        )}
       </div>
     ),
     sortable: true,
@@ -361,6 +360,7 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
     updateRfq: updateRfqLocal,
   } = useTechnicalProcurement();
   const [acceptingQuoteId, setAcceptingQuoteId] = useState<Quote['id'] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleQuoteAccept = async (quoteId: string) => {
     try {
@@ -408,10 +408,10 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
   // Create columns with the delete handler
   const quoteColumns = createQuoteColumns(
     selectedRfq?.selectedQuoteId || null,
-    acceptingQuoteId,
     handleQuoteDelete,
     updateQuote,
     handleQuoteAccept,
+    isLoading,
   );
 
   if (!selectedRfq) {
