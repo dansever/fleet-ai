@@ -5,7 +5,6 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
 import { getUrgencyLevelDisplay, Status, statusDisplayMap } from '@/drizzle/enums';
-import { Quote } from '@/drizzle/types';
 import { createRandomQuote } from '@/features/quotes/createRandomQuote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
@@ -199,7 +198,7 @@ export default function TechnicalProcurementClientPage() {
         {/* RFQ Details */}
         {selectedRfq && (
           <MainCard
-            title={selectedRfq.rfqNumber || ''}
+            title={selectedRfq.rfqNumber || 'N/A'}
             subtitle={selectedRfq.buyerComments || 'No buyer comments available'}
             actions={
               <div className="flex gap-2">
@@ -340,18 +339,6 @@ export default function TechnicalProcurementClientPage() {
                 </p>
                 <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
                   <span>Total Quotes: {selectedRfqQuotes.length}</span>
-                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length > 0 && (
-                    <span>
-                      Pending:{' '}
-                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'pending').length}
-                    </span>
-                  )}
-                  {selectedRfqQuotes.filter((q: Quote) => q.status === 'closed').length > 0 && (
-                    <span className="text-green-600">
-                      Accepted:{' '}
-                      {selectedRfqQuotes.filter((q: Quote) => q.status === 'closed').length}
-                    </span>
-                  )}
                 </div>
               </div>
               {/* Right Side - Actions */}

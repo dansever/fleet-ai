@@ -14,7 +14,7 @@ import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { serializeFuelTenderDates } from '@/utils/date-helpers';
+import { serializeDatesForAPI } from '@/utils/date-helpers';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -105,7 +105,12 @@ export default function TenderDialog({
       let savedTender: FuelTender;
 
       // Serialize dates to ISO strings before sending
-      const serializedFormData = serializeFuelTenderDates(formData);
+      const serializedFormData = serializeDatesForAPI(formData, [
+        'biddingStarts',
+        'biddingEnds',
+        'deliveryStarts',
+        'deliveryEnds',
+      ]);
 
       if (isAdd) {
         // Create new tender (orgId is handled server-side, airportId must be provided)

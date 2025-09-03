@@ -5,9 +5,10 @@ import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { getStatusDisplay } from '@/drizzle/enums';
-import { Quote } from '@/drizzle/types';
+import { Quote, Rfq } from '@/drizzle/types';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
+import { client as rfqClient } from '@/modules/rfqs';
 import { deleteQuote } from '@/services/technical/quote-client';
 import { updateRfq } from '@/services/technical/rfq-client';
 import { Button } from '@/stories/Button/Button';
@@ -81,6 +82,7 @@ const getStatusBadge = (status: string | null) => {
 
 const createQuoteColumns = (
   acceptedQuoteId: Quote['id'] | null,
+  selectedRfqId: Rfq['id'],
   onDeleteQuote: (quoteId: string) => Promise<void>,
   onUpdateQuote: (quote: Quote) => void,
   onAcceptQuote: (quoteId: string) => Promise<void>,
@@ -124,7 +126,12 @@ const createQuoteColumns = (
           popoverIntent="danger"
           title="Delete Quote"
           description="Are you sure you want to delete this quote?"
-          onConfirm={() => onDeleteQuote(quote.id)}
+          onConfirm={() => {
+            if (acceptedQuoteId === quote.id) {
+              rfqClient.updateRfq(selectedRfqId, { selectedQuoteId: null });
+            }
+            onDeleteQuote(quote.id);
+          }}
         />
       </div>
     ),
@@ -358,6 +365,7 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
     updateQuote,
     refreshSelectedRfq,
     updateRfq: updateRfqLocal,
+    selectedRfqId,
   } = useTechnicalProcurement();
   const [acceptingQuoteId, setAcceptingQuoteId] = useState<Quote['id'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -408,6 +416,7 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
   // Create columns with the delete handler
   const quoteColumns = createQuoteColumns(
     selectedRfq?.selectedQuoteId || null,
+    selectedRfqId || '',
     handleQuoteDelete,
     updateQuote,
     handleQuoteAccept,

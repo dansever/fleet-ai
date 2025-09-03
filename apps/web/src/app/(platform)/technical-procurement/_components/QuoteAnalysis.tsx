@@ -93,7 +93,7 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
         </CardTitle>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <FileText className="h-4 w-4" />
-          RFQ: {selectedRfq.rfqNumber || 'N/A'}
+          {selectedRfq.rfqNumber || 'N/A'}
           <Badge variant="outline" className="ml-2">
             {selectedRfqQuotes.length} Quote{selectedRfqQuotes.length !== 1 ? 's' : ''}
           </Badge>
