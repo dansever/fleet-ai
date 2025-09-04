@@ -32,7 +32,7 @@ export default function ContractClientPage() {
 
   const Main = () => {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
         <MainCard title="Contract Information" icon={<FileText />}>
           <div className="grid grid-cols-2 gap-4">
             <div>
