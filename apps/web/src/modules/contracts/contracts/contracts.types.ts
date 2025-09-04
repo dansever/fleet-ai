@@ -10,9 +10,8 @@ import type { NewContract } from '@/drizzle/types';
  */
 export type ContractCreateInput = Omit<NewContract, 'id' | 'orgId' | 'createdAt' | 'updatedAt'> & {
   // Allow date fields as strings (from forms) or Date objects
-  startDate?: string | Date | null;
-  endDate?: string | Date | null;
-  signedDate?: string | Date | null;
+  effectiveFrom?: string | Date | null;
+  effectiveTo?: string | Date | null;
 };
 
 /**

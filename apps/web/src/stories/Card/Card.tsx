@@ -19,7 +19,7 @@ export enum GradientPalette {
   CyanBluePurple = 'CyanBluePurple',
 }
 
-const paletteToClasses: Record<GradientPalette, string> = {
+export const paletteToClasses: Record<GradientPalette, string> = {
   [GradientPalette.PinkPurpleBlue]: 'from-pink-500/90 via-purple-600/90 to-blue-700/90',
   [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-500/90 via-fuchsia-600/90 to-indigo-700/90',
   [GradientPalette.SkyIndigoViolet]: 'from-sky-600/90 via-indigo-700/90 to-violet-800/90',
@@ -125,8 +125,8 @@ export const FeatureCard = ({
   header,
   icon,
   palette = GradientPalette.VioletPinkRose,
-  actions, // Renamed from buttonChildren
-  children, // Renamed from bodyChildren
+  actions,
+  children,
   footer,
   className,
 }: StandardCardProps & {
@@ -138,11 +138,11 @@ export const FeatureCard = ({
   }, [palette]);
 
   return (
-    <Card className={cn('rounded-3xl border-0 overflow-hidden p-0 relative group', className)}>
+    <Card className={cn('!rounded-4xl border-0 overflow-hidden p-0 relative group', className)}>
       <div className="absolute inset-0 pointer-events-none">
         <div
           className={cn(
-            'absolute -inset-24 blur-2xl opacity-70 bg-gradient-to-br transition-all duration-500 group-hover:opacity-80',
+            'absolute -inset-24 blur-3xl opacity-70 bg-gradient-to-br transition-all duration-500 group-hover:opacity-80',
             chosenGradient,
           )}
         />
@@ -180,14 +180,14 @@ export const FeatureCard = ({
 // Project Card - For displaying projects or portfolio items
 export const ProjectCard = ({
   title,
-  subtitle, // Use instead of description for consistency
+  subtitle,
   header,
   imagePath,
   progress,
   badgeText,
   badgeColor,
-  actions, // Clarify that children are actions
-  children, // Main content
+  actions,
+  children,
   footer,
   className,
 }: StandardCardProps & {

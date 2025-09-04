@@ -31,12 +31,11 @@ export async function listContractsByAirport(airportId: Airport['id']): Promise<
  * Create a new contract
  */
 export async function createContract(data: ContractCreateInput): Promise<Contract> {
-  const payload: ContractCreateInput = {
+  const payload = {
     ...data,
     // Convert string dates to Date objects
-    startDate: data.startDate ? new Date(data.startDate) : undefined,
-    endDate: data.endDate ? new Date(data.endDate) : undefined,
-    signedDate: data.signedDate ? new Date(data.signedDate) : undefined,
+    effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
+    effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
   };
   const res = await api.post('/api/contracts', payload);
   return res.data;
@@ -49,9 +48,8 @@ export async function updateContract(id: string, data: ContractUpdateInput): Pro
   const payload = {
     ...data,
     // Convert string dates to Date objects if provided
-    startDate: data.startDate ? new Date(data.startDate) : undefined,
-    endDate: data.endDate ? new Date(data.endDate) : undefined,
-    signedDate: data.signedDate ? new Date(data.signedDate) : undefined,
+    effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
+    effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
   };
   const res = await api.put(`/api/contracts/${id}`, payload);
   return res.data;

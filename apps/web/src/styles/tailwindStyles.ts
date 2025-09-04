@@ -1,5 +1,4 @@
 // src/styles/tailwindStyles.ts
-
 /*
   Card Styles for list items
 */

@@ -6,7 +6,7 @@ import { InvoiceCreateInput, InvoiceUpdateInput } from './invoices.types';
  * Get an invoice by ID
  */
 export async function getInvoiceById(id: Invoice['id']): Promise<Invoice> {
-  const res = await api.get(`/api/invoices?id=${id}`);
+  const res = await api.get(`/api/invoices/${id}`);
   return res.data;
 }
 
@@ -35,8 +35,8 @@ export async function createInvoice(data: InvoiceCreateInput): Promise<Invoice> 
     ...data,
     // Convert string dates to Date objects
     invoiceDate: data.invoiceDate ? new Date(data.invoiceDate) : undefined,
-    dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
-    paidDate: data.paidDate ? new Date(data.paidDate) : undefined,
+    periodStart: data.periodStart ? new Date(data.periodStart) : undefined,
+    periodEnd: data.periodEnd ? new Date(data.periodEnd) : undefined,
   };
   const res = await api.post('/api/invoices', payload);
   return res.data;
@@ -50,10 +50,10 @@ export async function updateInvoice(id: string, data: InvoiceUpdateInput): Promi
     ...data,
     // Convert string dates to Date objects if provided
     invoiceDate: data.invoiceDate ? new Date(data.invoiceDate) : undefined,
-    dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
-    paidDate: data.paidDate ? new Date(data.paidDate) : undefined,
+    periodStart: data.periodStart ? new Date(data.periodStart) : undefined,
+    periodEnd: data.periodEnd ? new Date(data.periodEnd) : undefined,
   };
-  const res = await api.put(`/api/invoices?id=${id}`, payload);
+  const res = await api.put(`/api/invoices/${id}`, payload);
   return res.data;
 }
 
@@ -61,5 +61,5 @@ export async function updateInvoice(id: string, data: InvoiceUpdateInput): Promi
  * Delete an invoice
  */
 export async function deleteInvoice(id: string): Promise<void> {
-  await api.delete(`/api/invoices?id=${id}`);
+  await api.delete(`/api/invoices/${id}`);
 }

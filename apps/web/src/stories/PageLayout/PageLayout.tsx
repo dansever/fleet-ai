@@ -12,6 +12,8 @@ export interface PageLayoutProps {
   className?: string;
   /** Width of the sidebar (default: 20rem) */
   sidebarWidth?: string;
+  /** Position of the sidebar (default: left) */
+  sidebarPosition?: 'left' | 'right';
 }
 
 export const PageLayout: FC<PageLayoutProps> = ({
@@ -20,35 +22,41 @@ export const PageLayout: FC<PageLayoutProps> = ({
   mainContent,
   className,
   sidebarWidth = '20rem',
+  sidebarPosition = 'left',
 }) => {
+  const sidebarElement = sidebarContent && (
+    <div
+      className="bg-card flex flex-col overflow-hidden min-w-0 flex-shrink-0"
+      style={{
+        // Smooth width transition
+        width: 'var(--sidebar-w)',
+        transition: 'width 240ms ease',
+        // Drive width via CSS var so React prop changes animate
+        ['--sidebar-w' as string]: sidebarWidth,
+        // Helps the browser plan for width changes
+        willChange: 'width',
+      }}
+    >
+      <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
+    </div>
+  );
+
   return (
     <div className={cn('flex flex-row h-screen', className)}>
-      {/* Left Sidebar Panel - Only render if sidebarContent exists */}
-      {sidebarContent && (
-        <div
-          className=" bg-card flex flex-col overflow-hidden min-w-0 flex-shrink-0"
-          style={{
-            // Smooth width transition
-            width: 'var(--sidebar-w)',
-            transition: 'width 240ms ease',
-            // Drive width via CSS var so React prop changes animate
-            ['--sidebar-w' as string]: sidebarWidth,
-            // Helps the browser plan for width changes
-            willChange: 'width',
-          }}
-        >
-          <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
-        </div>
-      )}
+      {/* Left Sidebar Panel */}
+      {sidebarPosition === 'left' && sidebarElement}
 
       {/* Right Main Panel */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-4xl">
+      <div className="flex-1 flex flex-col gap-2 overflow-hidden min-w-4xl">
         {/* Fixed Header */}
         <header className="px-4 py-2 flex items-center flex-shrink-0">{headerContent}</header>
 
         {/* Scrollable Main Content */}
-        <main className="p-2 flex-1 overflow-y-scroll">{mainContent}</main>
+        <main className="px-4 flex-1 overflow-y-scroll">{mainContent}</main>
       </div>
+
+      {/* Render sidebar on right if position is 'right' */}
+      {sidebarPosition === 'right' && sidebarElement}
     </div>
   );
 };

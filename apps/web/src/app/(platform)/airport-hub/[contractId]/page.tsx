@@ -8,7 +8,7 @@ interface ContractPageProps {
 }
 
 export default async function ContractPage({ params }: ContractPageProps) {
-  const { contractId } = await params;
+  const { contractId } = params;
 
   // Fetch initial contract data on the server
   let initialContract = null;

@@ -11,8 +11,8 @@ import type { NewInvoice } from '@/drizzle/types';
 export type InvoiceCreateInput = Omit<NewInvoice, 'id' | 'orgId' | 'createdAt' | 'updatedAt'> & {
   // Allow date fields as strings (from forms) or Date objects
   invoiceDate?: string | Date | null;
-  dueDate?: string | Date | null;
-  paidDate?: string | Date | null;
+  periodStart?: string | Date | null;
+  periodEnd?: string | Date | null;
 };
 
 /**

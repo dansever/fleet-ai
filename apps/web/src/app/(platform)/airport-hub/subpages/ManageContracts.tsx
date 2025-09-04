@@ -9,7 +9,7 @@ import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { createRandomContract } from '@/features/contracts/contracts/createRandomContract';
 import { Button } from '@/stories/Button/Button';
-import { MetricCard, ProjectCard } from '@/stories/Card/Card';
+import { MainCard, MetricCard, ProjectCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
@@ -19,6 +19,7 @@ import {
   Building2,
   CheckCircle,
   Eye,
+  FileText,
   Fuel,
   RefreshCw,
   Users,
@@ -127,117 +128,143 @@ export default function ManageContracts() {
         </div>
       )}
 
-      {/* Contract Filters */}
-      <div className="flex flex-row justify-between items-center">
-        <ModernSelect
-          options={[
-            { label: 'All Services', value: 'all' },
-            ...contractTypes.map((type) => ({
-              label: getContractTypeDisplay(type),
-              value: type,
-            })),
-          ]}
-          value={selectedContractType}
-          onValueChange={(value: string) => setSelectedContractType(value)}
-          placeholder="Filter by service"
-        />
-        <div className="flex gap-2 flex-shrink-0">
-          <Button
-            intent="ghost"
-            icon={RefreshCw}
-            disabled={loading.contracts && loading.isRefreshing}
-            onClick={refreshContracts}
-          />
-          <FileUploadPopover
-            onSend={() => {}}
-            accept="application/pdf"
-            maxSize={10}
-            triggerIntent="secondary"
-            triggerText="Upload Contract"
-            popoverContentAlign="end"
-            triggerSize="md"
-          >
-            <div className="flex flex-col gap-2 text-sm">
-              <Button
-                intent="secondary"
-                text="Manually Add Contract"
-                size="sm"
-                onClick={() => {}}
-              />
-              <Button
-                intent="ghost"
-                text="Or generate random Contract"
-                size="sm"
-                className="text-gray-500"
-                onClick={async () => {
-                  if (!selectedAirport) return;
-                  const contract = await createRandomContract(selectedAirport.id);
-                  addContract(contract);
-                }}
-              />
-            </div>
-          </FileUploadPopover>
-        </div>
-      </div>
-
       {/* Loading State - Only show when loading contracts for initial load or airport selection, not refresh */}
       {loading.contracts && !loading.isRefreshing && <LoadingComponent size="md" />}
 
-      {/* Display contracts grouped by type - Hide only during initial loading, keep visible during refresh */}
-      {contracts.length > 0 &&
-        !(loading.contracts && !loading.isRefreshing) &&
-        (selectedContractType === 'all' ? contractTypes : [selectedContractType]).map(
-          (contractType) => {
-            const contractsOfType = groupedContracts[contractType];
-            if (!contractsOfType || contractsOfType.length === 0) return null;
-            return (
-              <div key={contractType} className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <h3>{contractTypeDisplayMap[contractType as ContractType]}</h3>
-                  <StatusBadge status="default" text={contractsOfType.length.toString()} />
+      {!loading.contracts && !loading.isRefreshing && (
+        <MainCard
+          neutralHeader={true}
+          icon={
+            <div className="p-2 bg-gradient-to-br from-pink-400 to-purple-400 rounded-xl">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+          }
+          title="Contracts"
+          subtitle="All contracts associated with this airport."
+          actions={
+            <div className="flex gap-2 flex-shrink-0">
+              <Button
+                intent="ghost"
+                icon={RefreshCw}
+                disabled={loading.contracts && loading.isRefreshing}
+                onClick={refreshContracts}
+              />
+              <FileUploadPopover
+                onSend={() => {}}
+                accept="application/pdf"
+                maxSize={10}
+                triggerIntent="secondary"
+                triggerText="Upload Contract"
+                popoverContentAlign="end"
+                triggerSize="md"
+              >
+                <div className="flex flex-col gap-2 text-sm">
+                  <Button
+                    intent="secondary"
+                    text="Manually Add Contract"
+                    size="sm"
+                    onClick={() => {}}
+                  />
+                  <Button
+                    intent="ghost"
+                    text="Or generate random Contract"
+                    size="sm"
+                    className="text-gray-500"
+                    onClick={async () => {
+                      if (!selectedAirport) return;
+                      const contract = await createRandomContract(selectedAirport.id);
+                      addContract(contract);
+                    }}
+                  />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {contractsOfType.map((contract: Contract) => (
-                    <ProjectCard
-                      key={contract.id}
-                      badgeText={
-                        contract.effectiveTo && contract.effectiveFrom
-                          ? calculateProgress(contract.effectiveFrom, contract.effectiveTo) > 70
-                            ? 'Expiring Soon'
-                            : calculateProgress(contract.effectiveFrom, contract.effectiveTo) <= 25
-                              ? 'New'
-                              : undefined
-                          : undefined
-                      }
-                      title={contract.title}
-                      subtitle={contract.summary || contract.title}
-                      progress={
-                        contract.effectiveTo && contract.effectiveFrom
-                          ? calculateProgress(contract.effectiveFrom, contract.effectiveTo)
-                          : undefined
-                      }
-                      actions={
-                        <div className="flex items-center gap-2 justify-end w-full">
-                          <ContractDialog
-                            contract={contract}
-                            DialogType="view"
-                            triggerButton={<Button intent="ghost" icon={Eye} />}
-                            onChange={() => {}}
+              </FileUploadPopover>
+            </div>
+          }
+        >
+          <div className="flex flex-col gap-4">
+            {/* Contract Filters */}
+            <div className="flex flex-row justify-between items-center">
+              <ModernSelect
+                options={[
+                  { label: 'All Services', value: 'all' },
+                  ...contractTypes.map((type) => ({
+                    label: getContractTypeDisplay(type),
+                    value: type,
+                  })),
+                ]}
+                value={selectedContractType}
+                onValueChange={(value: string) => setSelectedContractType(value)}
+                placeholder="Filter by service"
+              />
+            </div>
+            {/* Display contracts grouped by type - Hide only during initial loading, keep visible during refresh */}
+            {contracts.length > 0 &&
+              !(loading.contracts && !loading.isRefreshing) &&
+              (selectedContractType === 'all' ? contractTypes : [selectedContractType]).map(
+                (contractType) => {
+                  const contractsOfType = groupedContracts[contractType];
+                  if (!contractsOfType || contractsOfType.length === 0) return null;
+                  return (
+                    <div key={contractType} className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <h3>{contractTypeDisplayMap[contractType as ContractType]}</h3>
+                        <StatusBadge status="default" text={contractsOfType.length.toString()} />
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        {contractsOfType.map((contract: Contract) => (
+                          <ProjectCard
+                            className="bg-gradient-to-br from-blue-50 to-pink-50"
+                            key={contract.id}
+                            badgeText={
+                              contract.effectiveTo && contract.effectiveFrom
+                                ? calculateProgress(contract.effectiveFrom, contract.effectiveTo) >
+                                  70
+                                  ? 'Expiring Soon'
+                                  : calculateProgress(
+                                        contract.effectiveFrom,
+                                        contract.effectiveTo,
+                                      ) <= 25
+                                    ? 'New'
+                                    : undefined
+                                : undefined
+                            }
+                            title={contract.title}
+                            subtitle={contract.summary || contract.title}
+                            progress={
+                              contract.effectiveTo && contract.effectiveFrom
+                                ? calculateProgress(contract.effectiveFrom, contract.effectiveTo)
+                                : undefined
+                            }
+                            actions={
+                              <div className="flex items-center gap-2 justify-end w-full">
+                                <ContractDialog
+                                  contract={contract}
+                                  DialogType="view"
+                                  triggerButton={<Button intent="ghost" icon={Eye} />}
+                                  onChange={() => {}}
+                                />
+                                <Button
+                                  intent="primary"
+                                  text="Open"
+                                  onClick={() => router.push(`/airport-hub/${contract.id}`)}
+                                />
+                              </div>
+                            }
                           />
-                          <Button
-                            intent="primary"
-                            text="Open"
-                            onClick={() => router.push(`/airport-hub/${contract.id}`)}
-                          />
-                        </div>
-                      }
-                    ></ProjectCard>
-                  ))}
-                </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                },
+              )}
+            {contracts.length === 0 && !(loading.contracts && !loading.isRefreshing) && (
+              <div className="text-center py-12 text-gray-500">
+                <p>No contracts found for this airport.</p>
               </div>
-            );
-          },
-        )}
+            )}
+          </div>
+        </MainCard>
+      )}
 
       {/* Show message if no contracts - Only show when not doing initial loading */}
       {contracts.length === 0 && !(loading.contracts && !loading.isRefreshing) && (

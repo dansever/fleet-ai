@@ -1,6 +1,6 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { invoiceLines as invoiceLinesServer } from '@/modules/invoices';
+import { server as invoiceLinesServer } from '@/modules/invoices/invoice-lines';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
