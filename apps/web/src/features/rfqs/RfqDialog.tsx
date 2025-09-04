@@ -12,7 +12,8 @@ import {
   urgencyLevelEnum,
 } from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
-import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';
+import { client as rfqClient } from '@/modules/rfqs';
+import { RfqCreateInput, RfqUpdateInput } from '@/modules/rfqs/rfqs.client';
 import { Button, ButtonProps } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -170,7 +171,7 @@ export default function RfqDialog({
 
       if (isAdd) {
         // Create new RFQ (orgId and userId are handled server-side)
-        const createData: CreateRfqData = {
+        const createData: RfqCreateInput = {
           direction: serializedFormData.direction,
           rfqNumber: serializedFormData.rfqNumber,
           vendorName: serializedFormData.vendorName,
@@ -192,14 +193,14 @@ export default function RfqDialog({
           selectedQuoteId: serializedFormData.selectedQuoteId,
           sentAt: serializedFormData.sentAt?.toISOString() || null,
         };
-        savedRfq = await createRfq(createData);
+        savedRfq = await rfqClient.createRfq(createData);
         toast.success('RFQ created successfully');
       } else {
         // Update existing RFQ
         if (!rfq?.id) {
           throw new Error('RFQ ID is required for updates');
         }
-        const updateData = {
+        const updateData: RfqUpdateInput = {
           direction: serializedFormData.direction,
           rfqNumber: serializedFormData.rfqNumber,
           vendorName: serializedFormData.vendorName,
@@ -218,9 +219,8 @@ export default function RfqDialog({
           deliverTo: serializedFormData.deliverTo,
           buyerComments: serializedFormData.buyerComments,
           status: serializedFormData.status,
-          sentAt: serializedFormData.sentAt,
         };
-        savedRfq = await updateRfq(rfq.id, updateData);
+        savedRfq = await rfqClient.updateRfq(rfq.id, updateData);
         toast.success('RFQ updated successfully');
       }
 

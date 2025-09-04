@@ -3,9 +3,9 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { OrderDirection, quotesTable } from '@/drizzle/schema';
+import { quotesTable } from '@/drizzle/schema';
 import type { NewQuote, Organization, Quote, Rfq, UpdateQuote } from '@/drizzle/types';
-import { and, desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 /**
  * Get a Quote by its ID
@@ -14,59 +14,30 @@ export async function getQuoteById(id: Quote['id']): Promise<Quote | null> {
   const rows = await db.select().from(quotesTable).where(eq(quotesTable.id, id)).limit(1);
   return rows[0] ?? null;
 }
+// Backward compatible alias (to be removed after call sites are updated)
+export const getQuote = getQuoteById;
 
 /**
- * Get a Quote by its RFQ number within an organization
+ * List quotes for a given RFQ within an organization.
  */
-export async function getQuoteByRfqNumber(
-  orgId: Organization['id'],
-  rfqNumber: Quote['rfqNumber'],
-): Promise<Quote | null> {
-  const rows = await db
-    .select()
-    .from(quotesTable)
-    .where(and(eq(quotesTable.orgId, orgId), eq(quotesTable.rfqNumber, rfqNumber ?? '')))
-    .limit(1);
-  return rows[0] ?? null;
-}
-
-/**
- * List all Quotes for an organization by direction (default: 'sent')
- */
-export async function listOrgQuotesByDirection(
-  orgId: Organization['id'],
-  direction: OrderDirection = 'sent',
-): Promise<Quote[]> {
-  return db
-    .select()
-    .from(quotesTable)
-    .where(and(eq(quotesTable.orgId, orgId), eq(quotesTable.direction, direction)))
-    .orderBy(desc(quotesTable.createdAt));
-}
-
-/**
- * List all Quotes for a specific RFQ
- */
-export async function listQuotesByRfq(rfqId: Rfq['id']): Promise<Quote[]> {
-  return db
-    .select()
-    .from(quotesTable)
-    .where(eq(quotesTable.rfqId, rfqId))
-    .orderBy(desc(quotesTable.createdAt));
-}
-
-/**
- * List all Quotes for an organization and RFQ combination
- */
-export async function listOrgQuotesByRfq(
+export async function listQuotesByOrgIdAndRfqId(
   orgId: Organization['id'],
   rfqId: Rfq['id'],
 ): Promise<Quote[]> {
-  return db
-    .select()
-    .from(quotesTable)
-    .where(and(eq(quotesTable.orgId, orgId), eq(quotesTable.rfqId, rfqId)))
-    .orderBy(desc(quotesTable.createdAt));
+  return db.query.quotesTable.findMany({
+    where: (q, { eq }) => eq(q.orgId, orgId) && eq(q.rfqId, rfqId),
+    orderBy: (q, { desc }) => [desc(q.createdAt)],
+  });
+}
+
+/**
+ * Find quotes by RFQ within an organization
+ */
+export async function listQuotesByRfqId(
+  orgId: Organization['id'],
+  rfqId: Rfq['id'],
+): Promise<Quote[]> {
+  return listQuotesByOrgIdAndRfqId(orgId, rfqId);
 }
 
 /**

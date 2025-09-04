@@ -7,7 +7,7 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { Eye, MapPin } from 'lucide-react';
+import { Eye, MapPin, Star } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
@@ -62,6 +62,12 @@ export default function AirportHubClientPage() {
               <div className="flex flex-row items-center gap-1">
                 <StatusBadge status="secondary" text={selectedAirport?.icao || ''} />
                 <StatusBadge status="secondary" text={selectedAirport?.iata || ''} />
+                {selectedAirport?.isHub && (
+                  <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400">
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                    Hub
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2 text-gray-600 text-sm">

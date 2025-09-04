@@ -4,6 +4,7 @@ import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Contact } from '@/drizzle/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
+import { MainCard } from '@/stories/Card/Card';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { Building2, Mail, Phone, RefreshCw, User, UserPlus } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
@@ -113,75 +114,70 @@ export default function ContactsAndProviders() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header with actions */}
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex-1">
-          <h2>Airport Contacts</h2>
-          <p className="text-sm text-gray-500">
-            {`All contacts associated with ${
-              selectedAirport?.name || 'this airport'
-            } including direct airport contacts and vendor contacts.`}
-          </p>
-        </div>
+      <MainCard
+        title="Airport Contacts"
+        subtitle={`All contacts associated with ${selectedAirport?.name || 'this airport'} including direct airport contacts and vendor contacts.`}
+        neutralHeader={true}
+        actions={
+          <div className="flex gap-2">
+            <Button
+              intent="ghost"
+              icon={RefreshCw}
+              className={cn(loading.contacts && loading.isRefreshing && 'animate-spin')}
+              disabled={loading.contacts && loading.isRefreshing}
+              onClick={refreshContacts}
+            />
 
-        {/* Right side only takes what it needs */}
-        <div className="flex gap-2 shrink-0">
-          <Button
-            intent="ghost"
-            icon={RefreshCw}
-            className={cn(loading.contacts && loading.isRefreshing && 'animate-spin')}
-            disabled={loading.contacts && loading.isRefreshing}
-            onClick={refreshContacts}
-          />
-          <Button
-            intent="primary"
-            text="Add Contact"
-            icon={UserPlus}
-            onClick={() => {
-              // TODO: Implement add contact functionality
-              console.log('Add contact clicked');
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Contacts Table */}
-      <DataTable
-        data={contacts}
-        columns={contactColumns}
-        searchable={true}
-        filterable={false}
-        pagination={true}
-        pageSize={10}
-        onRowClick={(contact) => {
-          // TODO: Implement contact details view
-          console.log('Contact clicked:', contact);
-        }}
-        csvFilename={`${selectedAirport?.iata || 'airport'}-contacts`}
-        showNormalizedRow={false}
-      />
-
-      {/* Empty state when no contacts - Only show when not doing initial loading */}
-      {contacts.length === 0 && !(loading.contacts && !loading.isRefreshing) && (
-        <div className="text-center py-12 text-gray-500">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <User className="w-8 h-8 text-gray-400" />
+            <Button
+              intent="primary"
+              text="Add Contact"
+              icon={UserPlus}
+              onClick={() => {
+                console.log('Add contact clicked');
+              }}
+            />
           </div>
-          <h4 className="text-lg font-semibold text-gray-900 mb-2">No contacts found</h4>
-          <p className="text-sm mb-4">
-            No contacts have been added for {selectedAirport?.name || 'this airport'} yet.
-          </p>
-          <Button
-            intent="primary"
-            text="Add First Contact"
-            icon={UserPlus}
-            onClick={() => {
-              // TODO: Implement add contact functionality
-              console.log('Add first contact clicked');
-            }}
-          />
+        }
+      >
+        <div>
+          {/* Empty state when no contacts - Only show when not doing initial loading */}
+          {contacts.length === 0 && !(loading.contacts && !loading.isRefreshing) ? (
+            <div className="text-center py-12 text-gray-500">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                <User className="w-8 h-8 text-gray-400" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">No contacts found</h4>
+              <p className="text-sm mb-4">
+                No contacts have been added for {selectedAirport?.name || 'this airport'} yet.
+              </p>
+              <Button
+                intent="primary"
+                text="Add First Contact"
+                icon={UserPlus}
+                onClick={() => {
+                  // TODO: Implement add contact functionality
+                  console.log('Add first contact clicked');
+                }}
+              />
+            </div>
+          ) : (
+            <DataTable
+              data={contacts}
+              columns={contactColumns}
+              searchable={true}
+              filterable={false}
+              pagination={true}
+              pageSize={10}
+              onRowClick={(contact) => {
+                // TODO: Implement contact details view
+                console.log('Contact clicked:', contact);
+              }}
+              csvFilename={`${selectedAirport?.iata || 'airport'}-contacts`}
+              showNormalizedRow={false}
+            />
+          )}
         </div>
-      )}
+      </MainCard>
     </div>
   );
 }

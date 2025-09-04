@@ -93,15 +93,17 @@ export const MainCard = ({
 
             <div className="relative z-10 flex items-center justify-between gap-2">
               <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-row items-center gap-3">
                   {icon && icon}
-                  <h3 className="text-balance">{title}</h3>
+                  <div className="flex flex-col gap-1">
+                    <h3>{title}</h3>
+                    {subtitle && (
+                      <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>
+                        {subtitle}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {subtitle && (
-                  <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>
-                    {subtitle}
-                  </p>
-                )}
               </div>
               {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
             </div>
@@ -291,7 +293,7 @@ export const MetricCard = ({
     )}
     <div className="flex items-center justify-between">
       <div>
-        {value && <h1>{value}</h1>}
+        {value && <h3>{value}</h3>}
         {change && (
           <p
             className={cn(

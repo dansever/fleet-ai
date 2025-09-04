@@ -1,12 +1,6 @@
-import {
-  createOrg,
-  deleteOrgById,
-  getOrgByClerkOrgId,
-  getOrgById,
-  updateOrg,
-} from '@/db/core/orgs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
+import { server as orgServer } from '@/modules/core/organizations';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -18,41 +12,26 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const userOrgId = dbUser.orgId;
-    if (!userOrgId) return jsonError('User has no organization', 403);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get query params
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
     const clerkOrgId = searchParams.get('clerkOrgId');
-
-    // Get specific org by DB ID
-    if (id) {
-      // User can only access their own organization
-      if (id !== userOrgId) return jsonError('Unauthorized', 401);
-
-      const org = await getOrgById(id);
-      if (!org) return jsonError('Organization not found', 404);
-
-      return NextResponse.json(org);
-    }
 
     // Get org by Clerk ID
     if (clerkOrgId) {
-      const org = await getOrgByClerkOrgId(clerkOrgId);
+      const org = await orgServer.getOrgByClerkOrgId(clerkOrgId);
       if (!org) return jsonError('Organization not found', 404);
 
       // User can only access their own organization
-      if (org.id !== userOrgId) return jsonError('Unauthorized', 401);
+      if (org.id !== orgId) return jsonError('Unauthorized', 401);
 
       return NextResponse.json(org);
     }
 
     // Default: Get current user's organization
-    const org = await getOrgById(userOrgId);
+    const org = await orgServer.getOrgById(orgId);
     if (!org) return jsonError('Organization not found', 404);
 
     return NextResponse.json(org);
@@ -76,7 +55,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Create organization
-    const newOrg = await createOrg(body);
+    const newOrg = await orgServer.createOrg(body);
 
     return NextResponse.json(newOrg);
   } catch (error) {
@@ -104,12 +83,12 @@ export async function PUT(request: NextRequest) {
     if (id !== dbUser.orgId) return jsonError('Unauthorized', 401);
 
     // Load org from DB
-    const org = await getOrgById(id);
+    const org = await orgServer.getOrgById(id);
     if (!org) return jsonError('Organization not found', 404);
 
     // Update organization
     const body = await request.json();
-    const updatedOrg = await updateOrg(id, body);
+    const updatedOrg = await orgServer.updateOrg(id, body);
 
     return NextResponse.json(updatedOrg);
   } catch (error) {
@@ -137,11 +116,11 @@ export async function DELETE(request: NextRequest) {
     if (id !== dbUser.orgId) return jsonError('Unauthorized', 401);
 
     // Load org from DB
-    const org = await getOrgById(id);
+    const org = await orgServer.getOrgById(id);
     if (!org) return jsonError('Organization not found', 404);
 
     // Delete organization
-    await deleteOrgById(id);
+    await orgServer.deleteOrg(id);
 
     return NextResponse.json({ message: 'Organization deleted successfully' });
   } catch (error) {

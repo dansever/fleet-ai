@@ -332,7 +332,7 @@ export const ModernTextarea = ({
       rows={rows}
       className={cn(
         formStyles.input,
-        'min-h-[80px] max-h-[200px] resize-y',
+        'min-h-[40px] max-h-[200px] resize-y rounded-br-sm',
         error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
         className,
       )}
@@ -402,7 +402,7 @@ export const ModernSwitch = ({
   [key: string]: unknown;
 }) => (
   <div className="flex items-start space-x-3">
-    <Switch {...props} className="mt-1" />
+    <Switch {...props} className="cursor-pointer" />
     {(label || description) && (
       <div className="flex-1">
         {label && <p className="text-sm font-semibold text-slate-700">{label}</p>}

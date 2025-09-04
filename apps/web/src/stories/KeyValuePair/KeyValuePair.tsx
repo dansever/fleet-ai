@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { ModernSwitch } from '@/stories/Form/Form';
 import { format } from 'date-fns';
 import { DatePicker, ModernInput, NumberInput } from '../Form/Form';
 
@@ -85,11 +85,10 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
         case 'boolean':
           return (
             <div className="flex items-center">
-              <Switch
+              <ModernSwitch
                 checked={(value as boolean) || false}
                 onCheckedChange={handleChange}
                 name={name}
-                className="scale-125"
               />
               <span className="ml-2 text-sm text-gray-600">{value ? 'Enabled' : 'Disabled'}</span>
             </div>
@@ -209,7 +208,7 @@ export const KeyValuePair: React.FC<KeyValuePairProps> = ({
       >
         {label}
       </div>
-      <div className="sm:w-2/3">{renderValue()}</div>
+      <div className="sm:w-2/3 text-sm">{renderValue()}</div>
     </div>
   );
 };

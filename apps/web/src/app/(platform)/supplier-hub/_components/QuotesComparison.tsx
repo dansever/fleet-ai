@@ -8,9 +8,8 @@ import { getStatusDisplay } from '@/drizzle/enums';
 import { Quote, Rfq } from '@/drizzle/types';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
+import { client as quoteClient } from '@/modules/quotes';
 import { client as rfqClient } from '@/modules/rfqs';
-import { deleteQuote } from '@/services/technical/quote-client';
-import { updateRfq } from '@/services/technical/rfq-client';
 import { Button } from '@/stories/Button/Button';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
@@ -379,7 +378,7 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
       setAcceptingQuoteId(quoteId);
 
       // Update on server
-      await updateRfq(selectedRfq.id, { selectedQuoteId: quoteId });
+      await rfqClient.updateRfq(selectedRfq.id, { selectedQuoteId: quoteId });
 
       // Optimistically update local RFQ state
       updateRfqLocal({ ...selectedRfq, selectedQuoteId: quoteId });
@@ -401,7 +400,7 @@ export default function QuotesComparison({ isRefreshing = false }: QuotesCompari
       removeQuoteFromCache(quoteId);
 
       // Delete from server
-      await deleteQuote(quoteId);
+      await quoteClient.deleteQuote(quoteId);
 
       toast.success('Quote deleted successfully');
     } catch (error) {

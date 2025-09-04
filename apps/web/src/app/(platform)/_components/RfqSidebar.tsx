@@ -10,7 +10,7 @@ import { convertPydanticToRfq, PydanticRFQ } from '@/features/rfqs/pydanticConve
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
-import { createRfq, extractRfq } from '@/services/technical/rfq-client';
+import { client as rfqClient } from '@/modules/rfqs';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
@@ -56,9 +56,9 @@ export default function RfqList({
 
   const handleSendRfqFile = async (file: File) => {
     try {
-      const result = await extractRfq(file);
+      const result = await rfqClient.extractRfqFromFile(file);
       const convertedRfq = convertPydanticToRfq(result as PydanticRFQ);
-      const newRfq = await createRfq({ ...convertedRfq, direction: rfqsDirection });
+      const newRfq = await rfqClient.createRfq({ ...convertedRfq, direction: rfqsDirection });
       onCreatedRfq?.();
       toast.success('RFQ extracted successfully');
     } catch (error) {

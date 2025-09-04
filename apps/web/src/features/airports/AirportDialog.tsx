@@ -3,7 +3,8 @@
 
 import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
-import { createAirport, updateAirport } from '@/services/core/airport-client';
+import { client as airportClient } from '@/modules/core/airports';
+import { AirportCreateInput } from '@/modules/core/airports/airports.types';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -101,14 +102,14 @@ export default function AirportDialog({
 
       if (isAdd) {
         // Create new airport (orgId is handled server-side)
-        savedAirport = await createAirport(formData);
+        savedAirport = await airportClient.createAirport(formData as AirportCreateInput);
         toast.success('Airport created successfully');
       } else {
         // Update existing airport
         if (!airport?.id) {
           throw new Error('Airport ID is required for updates');
         }
-        savedAirport = await updateAirport(airport.id, formData);
+        savedAirport = await airportClient.updateAirport(airport.id, formData);
         toast.success('Airport updated successfully');
       }
 
@@ -178,7 +179,7 @@ export default function AirportDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MainCard title="Airport Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between ">
               {isEditing && isAdd ? (
                 <AirportAutocomplete
                   label="Search Airport"
@@ -234,7 +235,7 @@ export default function AirportDialog({
           </MainCard>
 
           <MainCard title="Location Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="City"
                 value={formData.city}

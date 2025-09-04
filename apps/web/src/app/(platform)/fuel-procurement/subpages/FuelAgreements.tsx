@@ -1,7 +1,7 @@
 'use client';
 
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { createRandomContract } from '@/features/contract-management/contracts/createRandomContract';
+import { createRandomContract } from '@/features/contracts/contracts/createRandomContract';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { AlertTriangle, Diff, Edit, Plus, Sigma, Upload, X } from 'lucide-react';

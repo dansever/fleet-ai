@@ -1,54 +1,21 @@
 // src/modules/quotes/quotes.client.ts
 
-import type { Quote, Rfq, User } from '@/drizzle/types';
+import type { Quote, Rfq } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
 import { QuoteCreateInput, QuoteUpdateInput } from './quotes.types';
 
 /** Get a Quote by ID */
-export async function getQuoteById(
-  id: Quote['id'],
-  opts?: { signal?: AbortSignal },
-): Promise<Quote> {
-  const response = await api.get<Quote>(`/api/quotes/${id}`, { signal: opts?.signal as any });
+export async function getQuote(id: Quote['id'], signal?: AbortSignal): Promise<Quote> {
+  const response = await api.get<Quote>(`/api/quotes/${id}`, { signal: signal as any });
   return response.data;
 }
 
-/** List all Quotes for the current org (server resolves org) */
-export async function listQuotes(opts?: {
-  direction?: 'sent' | 'received';
-  rfqId?: Rfq['id'];
-  userId?: User['id'];
-  signal?: AbortSignal;
-}): Promise<Quote[]> {
-  const response = await api.get<Quote[]>('/api/quotes', {
-    params: { direction: opts?.direction, rfqId: opts?.rfqId, userId: opts?.userId },
-    signal: opts?.signal as any,
+/** List all Quotes for of a specific RFQ */
+export async function listQuotesByRfqId(rfqId: Rfq['id'], signal?: AbortSignal): Promise<Quote[]> {
+  const response = await api.get<Quote[]>(`/api/quotes?rfqId=${rfqId}`, {
+    signal: signal as any,
   });
   return response.data;
-}
-
-/** Convenience wrapper for quotes by direction */
-export async function listQuotesByDirection(
-  direction: 'sent' | 'received',
-  opts?: { signal?: AbortSignal },
-): Promise<Quote[]> {
-  return listQuotes({ direction, signal: opts?.signal });
-}
-
-/** Convenience wrapper for quotes by RFQ */
-export async function listQuotesByRfq(
-  rfqId: Rfq['id'],
-  opts?: { signal?: AbortSignal },
-): Promise<Quote[]> {
-  return listQuotes({ rfqId, signal: opts?.signal });
-}
-
-/** Convenience wrapper for quotes by user */
-export async function listQuotesByUser(
-  userId: User['id'],
-  opts?: { signal?: AbortSignal },
-): Promise<Quote[]> {
-  return listQuotes({ userId, signal: opts?.signal });
 }
 
 /** Create a new Quote */
@@ -91,5 +58,13 @@ export async function extractQuoteFromFile(file: File): Promise<unknown> {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 
+  return response.data.data;
+}
+
+/** Analyze quotes */
+export async function compareQuotesByRfqId(rfqId: Quote['rfqId']): Promise<unknown> {
+  const response = await backendApi.post<{ data: unknown }>('/api/v1/quotes/compare', null, {
+    params: { rfqId },
+  });
   return response.data.data;
 }

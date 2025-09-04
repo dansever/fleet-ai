@@ -1,15 +1,8 @@
-import {
-  createAirport,
-  deleteAirport,
-  getAirportById,
-  getAirportsByOrgId,
-  updateAirport,
-} from '@/db/core/airports/db-actions';
-import { NewAirport, UpdateAirport } from '@/drizzle/types';
+import { NewAirport } from '@/drizzle/types';
 import { loadAirportDataset } from '@/features/airports/airportDatasetService';
-import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
+import { server as airportServer } from '@/modules/core/airports';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -54,32 +47,16 @@ export async function GET(request: NextRequest) {
     }
 
     // For non-dataset requests, require authorization
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const userOrgId = dbUser.orgId;
-    if (!userOrgId) return jsonError('User has no organization', 403);
-
-    const id = searchParams.get('id');
-    const requestedOrgId = searchParams.get('orgId') || userOrgId;
+    const requestedOrgId = searchParams.get('orgId') || orgId;
 
     // User can only access airports from their own organization
-    if (requestedOrgId !== userOrgId) return jsonError('Unauthorized', 401);
-
-    // Get specific airport by ID
-    if (id) {
-      const airport = await getAirportById(id);
-      if (!airport) return jsonError('Airport not found', 404);
-
-      // Authorize access
-      if (!authorizeResource(airport, dbUser)) return jsonError('Unauthorized', 401);
-
-      // Return the airport
-      return NextResponse.json(airport);
-    }
+    if (requestedOrgId !== orgId) return jsonError('Unauthorized', 401);
 
     // Default: Get all airports for organization
-    const airports = await getAirportsByOrgId(userOrgId);
+    const airports = await airportServer.listAirportsByOrgId(orgId);
     return NextResponse.json(airports);
   } catch (error) {
     console.error('Error fetching airports:', error);
@@ -94,16 +71,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Authorize user
-    const { error, dbUser } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    // Get the organization ID
-    const orgId = dbUser.orgId;
-    if (!orgId) return jsonError('Organization not found', 404);
-
-    // Create the airport
+    // Get body & create airport
     const body: NewAirport = await request.json();
-    const newAirport = await createAirport({ ...body, orgId });
+    const newAirport = await airportServer.createAirport({ ...body, orgId });
     return NextResponse.json(newAirport);
   } catch (error) {
     console.error('Error creating airport:', error);
@@ -115,67 +88,10 @@ export async function POST(request: NextRequest) {
  * PUT /api/airports
  * Update an airport by ID (passed as query parameter)
  */
-export async function PUT(request: NextRequest) {
-  try {
-    // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const userOrgId = dbUser.orgId;
-    if (!userOrgId) return jsonError('User has no organization', 403);
-
-    // Get airport ID from query params
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    if (!id) return jsonError('Airport ID is required', 400);
-
-    // Load airport from DB
-    const airport = await getAirportById(id);
-    if (!airport) return jsonError('Airport not found', 404);
-
-    // Authorize access
-    if (!authorizeResource(airport, dbUser)) return jsonError('Unauthorized', 401);
-
-    // Update the airport
-    const body: UpdateAirport = await request.json();
-    const updatedAirport = await updateAirport(id, body);
-    return NextResponse.json(updatedAirport);
-  } catch (error) {
-    console.error('Error updating airport:', error);
-    return jsonError('Failed to update airport', 500);
-  }
-}
+// PUT moved to /api/airports/[id]
 
 /**
  * DELETE /api/airports
  * Delete an airport by ID (passed as query parameter)
  */
-export async function DELETE(request: NextRequest) {
-  try {
-    // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const userOrgId = dbUser.orgId;
-    if (!userOrgId) return jsonError('User has no organization', 403);
-
-    // Get airport ID from query params
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    if (!id) return jsonError('Airport ID is required', 400);
-
-    // Load airport from DB
-    const airport = await getAirportById(id);
-    if (!airport) return jsonError('Airport not found', 404);
-
-    // Authorize access
-    if (!authorizeResource(airport, dbUser)) return jsonError('Unauthorized', 401);
-
-    // Delete the airport
-    await deleteAirport(id);
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting airport:', error);
-    return jsonError('Failed to delete airport', 500);
-  }
-}
+// DELETE moved to /api/airports/[id]

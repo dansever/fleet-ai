@@ -1,10 +1,6 @@
-import {
-  deleteQuote,
-  getQuoteById,
-  updateQuote,
-} from '@/db/technical-procurement/quotes/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
+import { server as quoteServer } from '@/modules/quotes';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: { id: string } };
@@ -15,10 +11,10 @@ type RouteParams = { params: { id: string } };
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const quote = await getQuoteById(params.id);
+    const quote = await quoteServer.getQuoteById(params.id);
     if (!quote) return jsonError('Quote not found', 404);
     if (quote.orgId !== dbUser.orgId) return jsonError('Forbidden', 403);
 
@@ -35,10 +31,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const existing = await getQuoteById(params.id);
+    const existing = await quoteServer.getQuoteById(params.id);
     if (!existing) return jsonError('Quote not found', 404);
     if (existing.orgId !== dbUser.orgId) return jsonError('Forbidden', 403);
 
@@ -49,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       ...(body.sentAt !== undefined ? { sentAt: body.sentAt ? new Date(body.sentAt) : null } : {}),
     };
 
-    const updated = await updateQuote(params.id, payload);
+    const updated = await quoteServer.updateQuote(params.id, payload);
     return NextResponse.json(updated);
   } catch (err) {
     console.error('Error updating quote:', err);
@@ -63,14 +59,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const existing = await getQuoteById(params.id);
+    const existing = await quoteServer.getQuoteById(params.id);
     if (!existing) return jsonError('Quote not found', 404);
     if (existing.orgId !== dbUser.orgId) return jsonError('Forbidden', 403);
 
-    await deleteQuote(params.id);
+    await quoteServer.deleteQuote(params.id);
     return NextResponse.json({ message: 'Quote deleted successfully' });
   } catch (err) {
     console.error('Error deleting quote:', err);

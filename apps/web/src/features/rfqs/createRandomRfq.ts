@@ -1,7 +1,8 @@
 // Updated by CursorAI on Sep 2 2025
 import { OrderDirection, statusEnum, urgencyLevelEnum } from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
-import { createRfq, CreateRfqData } from '@/services/technical/rfq-client';
+import { client as rfqClient } from '@/modules/rfqs';
+import { RfqCreateInput } from '@/modules/rfqs/rfqs.client';
 
 function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -153,7 +154,7 @@ export async function createRandomRfq(direction: OrderDirection = 'sent'): Promi
   const partCategory = pickOne(PART_CATEGORIES);
   const aircraftType = pickOne(AIRCRAFT_TYPES);
 
-  const generatedRfq: CreateRfqData = {
+  const generatedRfq: RfqCreateInput = {
     // RFQ Identification (matching schema)
     direction,
     rfqNumber: Math.random() > 0.2 ? `RFQ-${getRandomInt(100000, 999999)}` : null,
@@ -194,6 +195,6 @@ export async function createRandomRfq(direction: OrderDirection = 'sent'): Promi
         : null,
   };
 
-  const res = await createRfq(generatedRfq);
+  const res = await rfqClient.createRfq(generatedRfq);
   return res;
 }

@@ -1,9 +1,9 @@
 'use client';
 
 import { Airport, Contact, Contract, User } from '@/drizzle/types';
-import { getContractsByAirport } from '@/services/contracts/contract-client';
-import { getAirports } from '@/services/core/airport-client';
-import { getContactsByAirport } from '@/services/vendors/contact-client';
+import { server as contractServer } from '@/modules/contracts/contracts';
+import { server as airportServer } from '@/modules/core/airports';
+import { server as contactServer } from '@/modules/vendors/contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type LoadingState = {
@@ -23,12 +23,12 @@ export type ErrorState = {
 export type AirportHubContextType = {
   // User and airports
   dbUser: User;
+
+  // Airports
   airports: Airport[];
   setAirports: (airports: Airport[]) => void;
   selectedAirport: Airport | null;
   setSelectedAirport: (airport: Airport | null) => void;
-
-  // Refresh, Update, Add, Remove airports
   refreshAirports: () => Promise<void>;
   updateAirport: (updatedAirport: Airport) => void;
   addAirport: (newAirport: Airport) => void;
@@ -39,8 +39,6 @@ export type AirportHubContextType = {
   setContracts: (contracts: Contract[]) => void;
   selectedContract: Contract | null;
   setSelectedContract: (contract: Contract | null) => void;
-
-  // Refresh, Update, Add, Remove contracts
   refreshContracts: () => Promise<void>;
   updateContract: (updatedContract: Contract) => void;
   addContract: (newContract: Contract) => void;
@@ -51,8 +49,6 @@ export type AirportHubContextType = {
   setContacts: (contacts: Contact[]) => void;
   selectedContact: Contact | null;
   setSelectedContact: (contact: Contact | null) => void;
-
-  // Refresh, Update, Add, Remove contacts
   refreshContacts: () => Promise<void>;
   updateContact: (updatedContact: Contact) => void;
   addContact: (newContact: Contact) => void;
@@ -154,7 +150,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contracts: null }));
 
       try {
-        const contracts = await getContractsByAirport(selectedAirport.id);
+        const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
         setContracts(contracts);
 
         // Cache the service contracts for this airport
@@ -204,7 +200,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contacts: null }));
 
       try {
-        const contacts = await getContactsByAirport(selectedAirport.id);
+        const contacts = await contactServer.listContactsByAirport(selectedAirport.id);
         setContacts(contacts);
 
         // Cache the contacts for this airport
@@ -241,7 +237,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, airports: null }));
 
     try {
-      const freshAirports = await getAirports();
+      const freshAirports = await airportServer.listAirportsByOrgId(dbUser.orgId);
       const sortedAirports = sortAirports(freshAirports);
       setAirports(sortedAirports);
 
@@ -283,7 +279,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contracts: null }));
 
     try {
-      const contracts = await getContractsByAirport(selectedAirport.id);
+      const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
       setContracts(contracts);
 
       // Update cache with fresh data
@@ -294,7 +290,9 @@ export default function AirportHubProvider({
 
       // Preserve the currently selected contract if it still exists, otherwise select first
       if (selectedContract) {
-        const updatedSelectedContract = contracts.find((c) => c.id === selectedContract.id);
+        const updatedSelectedContract = contracts.find(
+          (c: Contract) => c.id === selectedContract.id,
+        );
         setSelectedContract(
           updatedSelectedContract || (contracts.length > 0 ? contracts[0] : null),
         );
@@ -442,7 +440,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contacts: null }));
 
     try {
-      const contacts = await getContactsByAirport(selectedAirport.id);
+      const contacts = await contactServer.listContactsByAirport(selectedAirport.id);
       setContacts(contacts);
 
       // Update cache with fresh data
@@ -453,7 +451,7 @@ export default function AirportHubProvider({
 
       // Preserve the currently selected contact if it still exists, otherwise select first
       if (selectedContact) {
-        const updatedSelectedContact = contacts.find((c: Contact) => c.id === selectedContact.id);
+        const updatedSelectedContact = contacts.find((c) => c.id === selectedContact.id);
         setSelectedContact(updatedSelectedContact || (contacts.length > 0 ? contacts[0] : null));
       } else if (contacts.length > 0) {
         setSelectedContact(contacts[0]);

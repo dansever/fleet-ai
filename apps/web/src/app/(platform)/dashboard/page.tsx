@@ -1,6 +1,6 @@
-import { getAirportsByOrgId } from '@/db/core/airports/db-actions';
-import { getRfqsByOrgAndDirection } from '@/db/technical-procurement/rfqs/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { server as airportServer } from '@/modules/core/airports';
+import { server as rfqServer } from '@/modules/rfqs';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import DashboardClientPage from './ClientPage';
 
@@ -15,14 +15,14 @@ export default async function DashboardPage() {
 
   // Fetch RFQs and quotes in parallel
   const [rfqs, airports] = await Promise.all([
-    getRfqsByOrgAndDirection(dbUser.orgId, 'sent'),
-    getAirportsByOrgId(dbUser.orgId),
+    rfqServer.listOrgRfqsByDirection(dbUser.orgId, 'sent'),
+    airportServer.listAirportsByOrgId(dbUser.orgId),
   ]);
 
   return (
     <PageLayout
       sidebarContent={null}
-      headerContent={<h1>Hello {dbUser?.displayName}</h1>}
+      headerContent={<h1>Hello {dbUser?.firstName}</h1>}
       mainContent={
         <div>
           <DashboardClientPage airports={airports} rfqs={rfqs} />

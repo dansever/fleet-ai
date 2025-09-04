@@ -4,7 +4,7 @@ import 'server-only';
 
 import { db } from '@/drizzle';
 import { OrderDirection, rfqsTable } from '@/drizzle/schema';
-import type { NewRfq, Organization, Rfq, UpdateRfq, User } from '@/drizzle/types';
+import type { NewRfq, Organization, Rfq, UpdateRfq } from '@/drizzle/types';
 import { and, desc, eq } from 'drizzle-orm';
 
 /**
@@ -16,24 +16,9 @@ export async function getRfqById(id: Rfq['id']): Promise<Rfq | null> {
 }
 
 /**
- * Get an RFQ by its RFQ number within an organization
- */
-export async function getRfqByNumber(
-  orgId: Organization['id'],
-  rfqNumber: Rfq['rfqNumber'],
-): Promise<Rfq | null> {
-  const rows = await db
-    .select()
-    .from(rfqsTable)
-    .where(and(eq(rfqsTable.orgId, orgId), eq(rfqsTable.rfqNumber, rfqNumber ?? '')))
-    .limit(1);
-  return rows[0] ?? null;
-}
-
-/**
  * List all RFQs for an organization by direction (default: 'sent')
  */
-export async function listOrgRfqsByDirection(
+export async function listRfqsByOrgIdAndDirection(
   orgId: Organization['id'],
   direction: OrderDirection = 'sent',
 ): Promise<Rfq[]> {
@@ -41,17 +26,6 @@ export async function listOrgRfqsByDirection(
     .select()
     .from(rfqsTable)
     .where(and(eq(rfqsTable.orgId, orgId), eq(rfqsTable.direction, direction)))
-    .orderBy(desc(rfqsTable.createdAt));
-}
-
-/**
- * List all RFQs created by a specific user
- */
-export async function listUserRfqs(userId: User['id']): Promise<Rfq[]> {
-  return db
-    .select()
-    .from(rfqsTable)
-    .where(eq(rfqsTable.userId, userId))
     .orderBy(desc(rfqsTable.createdAt));
 }
 

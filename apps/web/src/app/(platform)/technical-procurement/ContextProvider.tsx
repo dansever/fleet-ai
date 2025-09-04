@@ -131,7 +131,7 @@ export function TechnicalProcurementContextProvider({
     setLoadingQuotesForRfq((prev) => new Set([...prev, rfqId]));
 
     try {
-      const quotes = await quoteClient.listQuotesByRfq(rfqId);
+      const quotes = await quoteClient.listQuotesByRfqId(rfqId);
 
       // Cache the results
       setQuotesCache((prev) => new Map(prev).set(rfqId, quotes));
@@ -195,7 +195,7 @@ export function TechnicalProcurementContextProvider({
 
     try {
       // Fetch fresh quotes directly (don't clear cache until we have new data)
-      const quotes = await quoteClient.listQuotesByRfq(selectedRfqId);
+      const quotes = await quoteClient.listQuotesByRfqId(selectedRfqId);
 
       // Update cache with fresh results
       setQuotesCache((prev) => new Map(prev).set(selectedRfqId, quotes));

@@ -1,6 +1,6 @@
 'use client';
 
-import { simpleLLM } from '@/services/ai/llm-client';
+import { simpleLLM } from '@/modules/ai/ai.client';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';

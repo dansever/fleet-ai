@@ -1,5 +1,5 @@
 import { FuelTender } from '@/drizzle/types';
-import { getFuelTendersByAirport } from '@/services/fuel/fuel-tender-client';
+import { server as fuelTenderServer } from '@/modules/fuel-mgmt/tenders';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
@@ -58,7 +58,7 @@ export function useFuelTenders({
     setError(null);
 
     try {
-      const data = await getFuelTendersByAirport(airportId);
+      const data = await fuelTenderServer.listFuelTendersByAirportId(airportId);
       setTenders(data);
       setSelectedTender(data.length > 0 ? data[0] : null);
 

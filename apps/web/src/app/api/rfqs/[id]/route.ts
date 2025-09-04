@@ -1,27 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-
-import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
-
-import {
-  deleteRfq as deleteRfqServer,
-  getRfqById,
-  updateRfq as updateRfqServer,
-} from '@/modules/rfqs/rfqs.server';
-
-import { RfqUpdateTransportSchema, toUpdateModel } from '@/modules/rfqs/rfqs.types';
+import { server as rfqServer } from '@/modules/rfqs/';
+import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: { id: string } };
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const rfq = await getRfqById(params.id);
+    const rfq = await rfqServer.getRfqById(params.id);
     if (!rfq) return jsonError('RFQ not found', 404);
-    if (!authorizeResource(rfq, dbUser)) return jsonError('Unauthorized', 401);
+    if (rfq.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     return NextResponse.json(rfq);
   } catch (err) {
@@ -30,27 +21,24 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * PUT /api/rfqs/[id] -  Update an existing RFQ
+ * @param request - The request body
+ * @param params - The route parameters
+ * @returns
+ */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const existing = await getRfqById(params.id);
-    if (!existing) return jsonError('RFQ not found', 404);
-    if (!authorizeResource(existing, dbUser)) return jsonError('Unauthorized', 401);
+    const existingRfq = await rfqServer.getRfqById(params.id);
+    if (!existingRfq) return jsonError('RFQ not found', 404);
+    if (existingRfq.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     const body = await request.json();
-    const parsed = RfqUpdateTransportSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid body', details: parsed.error.flatten() },
-        { status: 400 },
-      );
-    }
 
-    const model = toUpdateModel(parsed.data);
-
-    const updated = await updateRfqServer(params.id, model);
+    const updated = await rfqServer.updateRfq(params.id, body);
     if (!updated) return jsonError('RFQ not found', 404);
 
     return NextResponse.json(updated);
@@ -60,16 +48,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * DELETE /api/rfqs/[id] - Delete an existing RFQ
+ * @param _req - The request
+ * @param params - The route parameters
+ * @returns
+ */
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const rfq = await getRfqById(params.id);
+    const rfq = await rfqServer.getRfqById(params.id);
     if (!rfq) return jsonError('RFQ not found', 404);
-    if (!authorizeResource(rfq, dbUser)) return jsonError('Unauthorized', 401);
+    if (rfq.orgId !== orgId) return jsonError('Unauthorized', 401);
 
-    await deleteRfqServer(params.id);
+    await rfqServer.deleteRfq(params.id);
     return NextResponse.json({ message: 'RFQ deleted successfully' });
   } catch (err) {
     console.error('Error deleting RFQ:', err);

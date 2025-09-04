@@ -2,7 +2,8 @@
 import { OrderDirection, statusEnum } from '@/drizzle/enums';
 import { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
-import { createQuote, CreateQuoteData } from '@/services/technical/quote-client';
+import { client as quoteClient } from '@/modules/quotes';
+import { QuoteCreateInput } from '@/modules/quotes/quotes.types';
 
 function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -143,7 +144,7 @@ export async function createRandomQuote(rfqId: Rfq['id']): Promise<Quote> {
   const partCategory = pickOne(PART_CATEGORIES);
   const aircraftType = pickOne(AIRCRAFT_TYPES);
 
-  const generatedQuote: CreateQuoteData = {
+  const generatedQuote: QuoteCreateInput = {
     // Required linkage (matching schema)
     rfqId,
 
@@ -214,6 +215,6 @@ export async function createRandomQuote(rfqId: Rfq['id']): Promise<Quote> {
         : null,
   };
 
-  const res = await createQuote(generatedQuote);
+  const res = await quoteClient.createQuote(generatedQuote, rfqId);
   return res;
 }

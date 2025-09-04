@@ -1,8 +1,8 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
-import ContractDialog from '@/features/contract-management/contracts/ContractDialog';
-import { createRandomContract } from '@/features/contract-management/contracts/createRandomContract';
+import ContractDialog from '@/features/contracts/contracts/ContractDialog';
+import { createRandomContract } from '@/features/contracts/contracts/createRandomContract';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette, MetricCard, ProjectCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
@@ -166,7 +166,6 @@ export default function ManageContracts() {
         <Button
           intent="ghost"
           icon={RefreshCw}
-          className={`${loading.contracts && loading.isRefreshing && 'animate-spin'}`}
           disabled={loading.contracts && loading.isRefreshing}
           onClick={refreshContracts}
         />

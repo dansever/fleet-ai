@@ -9,7 +9,7 @@ import { createRandomQuote } from '@/features/quotes/createRandomQuote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
-import { compareQuotes, createQuote, extractQuote } from '@/services/technical/quote-client';
+import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
@@ -74,13 +74,13 @@ export default function TechnicalProcurementClientPage() {
       toast.info('Extracting quote from file...');
 
       // Extract quote data from file
-      const extractedData = await extractQuote(file);
+      const extractedData = await quoteClient.extractQuoteFromFile(file);
 
       // Convert to database format
       const convertedQuote = convertPydanticToQuote(extractedData as any, selectedRfq.id);
 
       // Create the quote in the database
-      const newQuote = await createQuote({ ...convertedQuote, sentAt: null });
+      const newQuote = await quoteClient.createQuote({ ...convertedQuote }, selectedRfq.id);
 
       // Add to local cache
       addQuote(newQuote);
@@ -98,7 +98,7 @@ export default function TechnicalProcurementClientPage() {
       return;
     }
     try {
-      const res = await compareQuotes(selectedRfq.id);
+      const res = await quoteClient.compareQuotes(selectedRfq.id);
       setQuoteComparisonResult(res as unknown as JSON);
       toast.success('Quotes analyzed successfully');
     } catch (error) {

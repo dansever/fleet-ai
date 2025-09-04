@@ -1,6 +1,6 @@
-import { createQuote, getQuotesByRfq } from '@/db/technical-procurement/quotes/db-actions';
 import { authorizeUser } from '@/lib/authorization/authorize-user';
 import { jsonError } from '@/lib/core/errors';
+import { server as quoteServer } from '@/modules/quotes';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -13,11 +13,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const orgId = dbUser.orgId;
-    if (!orgId) return jsonError('User has no organization', 403);
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get query params
     const { searchParams } = new URL(request.url);
@@ -25,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     // Get quotes by RFQ
     if (rfqId) {
-      const quotes = await getQuotesByRfq(rfqId);
+      const quotes = await quoteServer.listQuotesByRfqId(orgId, rfqId);
       return NextResponse.json(quotes);
     }
 
@@ -45,12 +42,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    // Get orgId from request body
-    if (!dbUser.orgId) return jsonError('User has no organization', 403);
-    const dbOrgId = dbUser.orgId;
+    const { dbUser, orgId, error } = await authorizeUser();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get request body
     const body = await request.json();
@@ -58,11 +51,11 @@ export async function POST(request: NextRequest) {
     // Normalize sentAt when provided as string
     const payload = {
       ...body,
-      orgId: dbOrgId,
+      orgId: orgId,
       ...(body.sentAt !== undefined ? { sentAt: body.sentAt ? new Date(body.sentAt) : null } : {}),
     };
 
-    const newQuote = await createQuote(payload);
+    const newQuote = await quoteServer.createQuote(payload);
 
     return NextResponse.json(newQuote);
   } catch (error) {
@@ -70,9 +63,3 @@ export async function POST(request: NextRequest) {
     return jsonError('Failed to create quote', 500);
   }
 }
-
-/**
- * PUT /api/quotes?id=123
- * Update an existing quote
- */
-// Note: PUT/DELETE moved to /api/quotes/[id]
