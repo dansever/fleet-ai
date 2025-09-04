@@ -1,13 +1,12 @@
 'use client';
 
 import { useSidebar } from '@/components/ui/sidebar';
-import { TabsContent } from '@/components/ui/tabs';
 import AirportDialog from '@/features/airports/AirportDialog';
 import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Tabs } from '@/stories/Tabs/Tabs';
-import { Eye, MapPin, Star } from 'lucide-react';
+import { AnimatedTabs, MenuTabs, TabsContent } from '@/stories/Tabs/TabsNew';
+import { Eye, FileText, MapPin, Star, Users } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
@@ -15,7 +14,7 @@ import ContactsAndProviders from './subpages/ContactsAndProviders';
 import ManageAirport from './subpages/ManageAirport';
 import ServiceContracts from './subpages/ManageContracts';
 
-type TabValue = 'manage-contracts' | 'contacts-and-providers' | 'manage-airport';
+type TabValue = 'service-agreements' | 'contacts-and-providers' | 'manage-airport';
 
 export default function AirportHubClientPage() {
   const {
@@ -94,7 +93,7 @@ export default function AirportHubClientPage() {
 }
 
 function MainContentSection() {
-  const [selectedTab, setSelectedTab] = useState<TabValue>('manage-contracts');
+  const [selectedTab, setSelectedTab] = useState<TabValue>('service-agreements');
   const { selectedAirport } = useAirportHub();
 
   if (!selectedAirport) {
@@ -111,15 +110,16 @@ function MainContentSection() {
   }
 
   return (
-    <Tabs
-      tabs={[
-        { label: 'Service Agreements', value: 'service-agreements' },
-        { label: 'Contacts & Providers', value: 'contacts-and-providers' },
-        { label: 'Manage Airport', value: 'manage-airport' },
-      ]}
-      defaultTab="service-agreements"
-      onTabChange={(tab) => setSelectedTab(tab as TabValue)}
-    >
+    <AnimatedTabs defaultTab="service-agreements" className="gap-4">
+      <MenuTabs
+        menuItems={[
+          { label: 'Service Agreements', value: 'service-agreements', icon: <FileText /> },
+          { label: 'Contacts & Providers', value: 'contacts-and-providers', icon: <Users /> },
+          { label: 'Manage Airport', value: 'manage-airport', icon: <MapPin /> },
+        ]}
+        defaultTab="service-agreements"
+        onTabChange={(tab) => setSelectedTab(tab as TabValue)}
+      />
       <TabsContent value="service-agreements">
         <ServiceContracts />
       </TabsContent>
@@ -129,6 +129,6 @@ function MainContentSection() {
       <TabsContent value="manage-airport">
         <ManageAirport />
       </TabsContent>
-    </Tabs>
+    </AnimatedTabs>
   );
 }

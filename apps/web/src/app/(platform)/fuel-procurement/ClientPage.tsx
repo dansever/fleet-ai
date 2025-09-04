@@ -7,7 +7,7 @@ import AirportDialog from '@/features/airports/AirportDialog';
 import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Tabs } from '@/stories/Tabs/Tabs';
+import { Tabs } from '@/stories/Tabs/TabsNew';
 import { Eye, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';

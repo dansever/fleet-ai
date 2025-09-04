@@ -4,11 +4,11 @@ import ContractClientPage from './ClientPage';
 import ContractContextProvider from './ContextProvider';
 
 interface ContractPageProps {
-  params: { contractId: string };
+  params: Promise<{ contractId: string }>;
 }
 
 export default async function ContractPage({ params }: ContractPageProps) {
-  const { contractId } = params;
+  const { contractId } = await params;
 
   // Fetch initial contract data on the server
   let initialContract = null;

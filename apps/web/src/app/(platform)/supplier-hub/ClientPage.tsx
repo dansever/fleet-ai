@@ -16,7 +16,7 @@ import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Tabs } from '@/stories/Tabs/Tabs';
+import { Tabs } from '@/stories/Tabs/TabsNew';
 import { FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';

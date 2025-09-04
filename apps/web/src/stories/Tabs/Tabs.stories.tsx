@@ -1,7 +1,7 @@
 import { TabsContent } from '@/components/ui/tabs';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { BarChart3, Calendar, FileText, Globe, MapPin, Plane, Settings, Users } from 'lucide-react';
-import { Tabs } from './Tabs';
+import { Tabs } from './TabsNew';
 
 const meta: Meta<typeof Tabs> = {
   title: 'Components/Tabs',

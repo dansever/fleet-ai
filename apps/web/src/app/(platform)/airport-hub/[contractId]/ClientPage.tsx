@@ -4,7 +4,7 @@ import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { ArrowLeft, FileText, ReceiptText } from 'lucide-react';
+import { ArrowLeft, FileText, Plus, ReceiptText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ContractTermsDataTable from './_components/ContractTermsDataTable';
 import { useContract } from './ContextProvider';
@@ -51,32 +51,28 @@ export default function ContractClientPage() {
               <KeyValuePair label="Effective To" value={contract?.effectiveTo} valueType="string" />
             </div>
             <div>
-              <KeyValuePair label="Vendor Name" value={contract?.vendorName} valueType="string" />
+              <KeyValuePair label="Vendor" value={contract?.vendorName} valueType="string" />
               <KeyValuePair
                 label="Vendor Address"
                 value={contract?.vendorAddress}
                 valueType="string"
               />
               <KeyValuePair
-                label="Vendor Contact Name"
+                label="Contact Name"
                 value={contract?.vendorContactName}
                 valueType="string"
               />
               <KeyValuePair
-                label="Vendor Contact Email"
+                label="Contact Email"
                 value={contract?.vendorContactEmail}
                 valueType="string"
               />
               <KeyValuePair
-                label="Vendor Contact Phone"
+                label="Contact Phone"
                 value={contract?.vendorContactPhone}
                 valueType="string"
               />
-              <KeyValuePair
-                label="Vendor Comments"
-                value={contract?.vendorComments}
-                valueType="string"
-              />
+              <KeyValuePair label="Comments" value={contract?.vendorComments} valueType="string" />
             </div>
           </div>
         </MainCard>
@@ -88,6 +84,7 @@ export default function ContractClientPage() {
             </div>
           }
           neutralHeader={true}
+          actions={<Button intent="add" text="Add Term" icon={Plus} />}
         >
           <ContractTermsDataTable />
         </MainCard>
