@@ -198,7 +198,7 @@ export const ProjectCard = ({
 }) => (
   <Card
     className={cn(
-      'rounded-3xl overflow-hidden shadow-none border-0',
+      'rounded-3xl overflow-hidden shadow-none border-0 gap-2',
       imagePath && 'pt-0',
       className,
     )}
@@ -226,7 +226,7 @@ export const ProjectCard = ({
       </div>
     )}
     {(header || title) && (
-      <CardHeader>
+      <CardHeader className="px-4">
         {header ? (
           header
         ) : (
@@ -235,12 +235,14 @@ export const ProjectCard = ({
               <CardTitle className="text-lg font-bold">{title}</CardTitle>
               {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
             </div>
-            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
           </div>
         )}
       </CardHeader>
     )}
-    <CardContent>{children}</CardContent>
+    <CardContent className="px-4">
+      {children}
+      {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+    </CardContent>
     {footer && <CardContent>{footer}</CardContent>}
     {progress !== undefined && (
       <CardContent className="pt-0">

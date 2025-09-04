@@ -2,9 +2,10 @@ import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as quoteServer } from '@/modules/quotes';
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 type RouteParams = { params: { id: string } };
-
+const IdParam = z.string().uuid();
 /**
  * GET /api/quotes/[id]
  * Fetch a single quote by id
@@ -34,7 +35,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const existing = await quoteServer.getQuoteById(params.id);
+    const parsedId = IdParam.safeParse(decodeURIComponent(params.id));
+    if (!parsedId.success) return jsonError('Invalid quote id', 400);
+    const quoteId = parsedId.data;
+
+    const existing = await quoteServer.getQuoteById(quoteId);
     if (!existing) return jsonError('Quote not found', 404);
     if (existing.orgId !== dbUser.orgId) return jsonError('Forbidden', 403);
 
@@ -45,7 +50,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       ...(body.sentAt !== undefined ? { sentAt: body.sentAt ? new Date(body.sentAt) : null } : {}),
     };
 
-    const updated = await quoteServer.updateQuote(params.id, payload);
+    const updated = await quoteServer.updateQuote(quoteId, payload);
     return NextResponse.json(updated);
   } catch (err) {
     console.error('Error updating quote:', err);

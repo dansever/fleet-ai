@@ -6,11 +6,9 @@ import type { Contract } from '@/drizzle/types';
 import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
 import { client as contractClient } from '@/modules/contracts/contracts';
 import { type ContractCreateInput } from '@/modules/contracts/contracts/contracts.types';
-import { Button, ButtonProps } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Eye, LucideIcon, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -19,24 +17,16 @@ export default function ContractDialog({
   airportId,
   onChange,
   DialogType = 'view',
-  triggerText,
-  triggerIcon,
-  triggerClassName,
-  buttonSize = 'md',
-  triggerIntent,
+  withTrigger = true,
+  triggerButton,
   open,
   onOpenChange,
-  withTrigger = true,
 }: {
   contract: Contract | null;
   airportId?: string; // Required when DialogType is 'add'
   onChange: (contract: Contract) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerText?: string;
-  triggerIcon?: LucideIcon;
-  triggerClassName?: string;
-  buttonSize?: ButtonProps['size'];
-  triggerIntent?: ButtonProps['intent'];
+  triggerButton?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   withTrigger?: boolean;
@@ -237,26 +227,7 @@ export default function ContractDialog({
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger ? (
-          <Button
-            intent={triggerIntent || (isAdd ? 'add' : isEdit ? 'secondary' : 'primary')}
-            text={triggerText}
-            icon={
-              triggerIcon ||
-              (isAdd
-                ? Plus
-                : DialogType === 'edit'
-                  ? Pencil
-                  : DialogType === 'view'
-                    ? Eye
-                    : undefined)
-            }
-            size={buttonSize}
-            className={triggerClassName}
-          />
-        ) : null
-      }
+      trigger={withTrigger ? triggerButton : null}
       headerGradient="from-green-500 to-green-500"
       title={dialogTitle}
       onSave={handleSave}
@@ -269,7 +240,7 @@ export default function ContractDialog({
       {(isEditing: boolean) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <MainCard title="Contract Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -326,7 +297,7 @@ export default function ContractDialog({
           </MainCard>
 
           <MainCard title="Vendor Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -379,7 +350,7 @@ export default function ContractDialog({
           </MainCard>
 
           <MainCard title="Contract Period" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Effective From"
                 value={formData.effectiveFrom?.toISOString().split('T')[0] || ''}

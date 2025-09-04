@@ -1,4 +1,3 @@
-// Updated by CursorAI on Sep 2 2025
 'use client';
 
 import type { Airport } from '@/drizzle/types';

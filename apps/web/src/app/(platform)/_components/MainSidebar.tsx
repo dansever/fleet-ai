@@ -25,6 +25,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { sidebarTabs } from './MainSidebarTabs';
 
+function isPathActive(pathname: string, baseUrl: string) {
+  const normalize = (p: string) => (p === '/' ? '/' : p.replace(/\/\/+$/, ''));
+  const current = normalize(pathname);
+  const base = normalize(baseUrl);
+  return current === base || current.startsWith(base + '/');
+}
+
 const SIDEBAR_MENU_BUTTON_SIZES = {
   md: 'text-base pl-3 pr-1 py-5',
   lg: 'text-lg pl-3 pr-1 py-6',
@@ -169,7 +176,7 @@ export function MainSidebar({
                   <SidebarNavItem
                     key={item.title}
                     item={item}
-                    isActive={pathname === item.url}
+                    isActive={isPathActive(pathname, item.url)}
                     isCollapsed={isCollapsed}
                   />
                 ))}
@@ -184,7 +191,7 @@ export function MainSidebar({
                   <SidebarNavItem
                     key={item.title}
                     item={item}
-                    isActive={pathname === item.url}
+                    isActive={isPathActive(pathname, item.url)}
                     isCollapsed={isCollapsed}
                   />
                 ))}
@@ -199,7 +206,7 @@ export function MainSidebar({
                   <SidebarNavItem
                     key={item.title}
                     item={item}
-                    isActive={pathname === item.url}
+                    isActive={isPathActive(pathname, item.url)}
                     isCollapsed={isCollapsed}
                   />
                 ))}
@@ -215,7 +222,7 @@ export function MainSidebar({
                   <SidebarNavItem
                     key={item.title}
                     item={item}
-                    isActive={pathname === item.url}
+                    isActive={isPathActive(pathname, item.url)}
                     isCollapsed={isCollapsed}
                   />
                 ))}
@@ -230,7 +237,7 @@ export function MainSidebar({
                   <SidebarNavItem
                     key={item.title}
                     item={item}
-                    isActive={pathname === item.url}
+                    isActive={isPathActive(pathname, item.url)}
                     isCollapsed={isCollapsed}
                   />
                 ))}
