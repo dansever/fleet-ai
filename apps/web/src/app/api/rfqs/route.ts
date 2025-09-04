@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (!parsed.success) return jsonError('Invalid query parameters', 400);
     const { direction } = parsed.data;
 
-    const rfqs = await rfqServer.listRfqsByOrgIdAndDirection(orgId, direction);
+    const rfqs = await rfqServer.listRfqsByDirection(direction, orgId);
     return NextResponse.json(rfqs);
   } catch (err) {
     console.error('[rfqs.GET]', err);

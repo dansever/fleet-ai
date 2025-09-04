@@ -1,20 +1,9 @@
 // src/modules/rfqs/rfqs.client.ts
 
-import type { NewRfq, Rfq } from '@/drizzle/types';
+import { OrderDirection } from '@/drizzle/enums';
+import type { Rfq } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
-
-/** Client-side DTO for creating RFQs
- * orgId and userId are injected on the server
- */
-export type RfqCreateInput = Omit<
-  NewRfq,
-  'orgId' | 'userId' | 'id' | 'createdAt' | 'updatedAt' | 'statusHistory' | 'sentAt'
-> & {
-  // ISO string for transport. If you have a Date in UI, convert to ISO before calling.
-  sentAt?: string | null;
-};
-
-export type RfqUpdateInput = Partial<RfqCreateInput>;
+import { RfqCreateInput, RfqUpdateInput } from './rfqs.types';
 
 /** Get an RFQ by ID */
 export async function getRfqById(id: Rfq['id'], opts?: { signal?: AbortSignal }): Promise<Rfq> {
@@ -24,7 +13,7 @@ export async function getRfqById(id: Rfq['id'], opts?: { signal?: AbortSignal })
 
 /** List all RFQs for the current org and direction */
 export async function listRfqsByDirection(opts?: {
-  direction?: 'sent' | 'received';
+  direction?: OrderDirection;
   signal?: AbortSignal;
 }): Promise<Rfq[]> {
   const response = await api.get<Rfq[]>('/api/rfqs', {
@@ -58,10 +47,8 @@ export async function deleteRfq(id: Rfq['id']): Promise<void> {
 export async function extractRfqFromFile(file: File): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
-
   const response = await backendApi.post<{ data: unknown }>('/api/v1/extract/rfq', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-
   return response.data.data;
 }

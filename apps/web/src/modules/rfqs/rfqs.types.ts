@@ -9,7 +9,10 @@ import type { NewRfq } from '@/drizzle/types';
  * For creating RFQs from forms - excludes server-managed fields
  * Date fields accept strings (from forms) and get converted to Date objects
  */
-export type RfqCreateInput = Omit<NewRfq, 'id' | 'orgId' | 'createdAt' | 'updatedAt' | 'sentAt'> & {
+export type RfqCreateInput = Omit<
+  NewRfq,
+  'orgId' | 'userId' | 'id' | 'createdAt' | 'updatedAt' | 'sentAt'
+> & {
   // Allow date fields as strings (from forms) or Date objects
   sentAt?: string | Date | null;
 };
