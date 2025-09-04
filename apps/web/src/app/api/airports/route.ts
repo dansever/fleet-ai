@@ -1,6 +1,6 @@
 import { NewAirport } from '@/drizzle/types';
 import { loadAirportDataset } from '@/features/airports/airportDatasetService';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
 import { NextRequest, NextResponse } from 'next/server';
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // For non-dataset requests, require authorization
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const requestedOrgId = searchParams.get('orgId') || orgId;
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get body & create airport

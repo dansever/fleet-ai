@@ -1,5 +1,5 @@
 import { NewUser } from '@/drizzle/types';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as userServer } from '@/modules/core/users';
 import { NextRequest, NextResponse } from 'next/server';
@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     if (!dbUser.orgId) return jsonError('User has no organization', 403);

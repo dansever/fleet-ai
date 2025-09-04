@@ -1,5 +1,5 @@
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
 import { server as contactServer } from '@/modules/vendors/contacts';
@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Autherize user
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) {
       return jsonError('Unauthorized', 401);
     }
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Autherize user
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) {
       return jsonError('Unauthorized', 401);
     }

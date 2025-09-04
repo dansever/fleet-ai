@@ -1,10 +1,10 @@
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { server } from '@/modules/rfqs';
 import TechnicalProcurementClientPage from './ClientPage';
 import { TechnicalProcurementContextProvider } from './ContextProvider';
 
 export default async function TechnicalProcurementPage() {
-  const { dbUser, error } = await authorizeUser();
+  const { dbUser, error } = await getAuthContext();
   if (error || !dbUser) {
     return <div>Error: {error}</div>;
   }

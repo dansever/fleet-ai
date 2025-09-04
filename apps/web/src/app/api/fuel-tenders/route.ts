@@ -1,6 +1,6 @@
 import type { NewFuelTender } from '@/drizzle/types';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as fuelTenderServer } from '@/modules/fuel-mgmt/tenders';
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get query params
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;
@@ -124,7 +124,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;

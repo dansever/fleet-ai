@@ -1,4 +1,4 @@
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as fuelBidServer } from '@/modules/fuel-mgmt/bids';
 import { server as fuelTenderServer } from '@/modules/fuel-mgmt/tenders';
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) {
       return jsonError('Unauthorized', 401);
     }
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;

@@ -1,4 +1,4 @@
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as fuelBidServer } from '@/modules/fuel-mgmt/bids';
 import { NextRequest, NextResponse } from 'next/server';
@@ -7,7 +7,7 @@ type RouteParams = { params: { id: string } };
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const bid = await fuelBidServer.getFuelBidById(params.id);
@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const existing = await fuelBidServer.getFuelBidById(params.id);
@@ -39,7 +39,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const bid = await fuelBidServer.getFuelBidById(params.id);

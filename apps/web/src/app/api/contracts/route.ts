@@ -1,5 +1,5 @@
 import { ContractType } from '@/drizzle/enums';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as contractServer } from '@/modules/contracts/contracts';
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const { searchParams } = new URL(request.url);
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const body = await request.json();

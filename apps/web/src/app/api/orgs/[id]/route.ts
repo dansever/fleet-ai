@@ -1,4 +1,4 @@
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as orgServer } from '@/modules/core/organizations';
 import { NextRequest, NextResponse } from 'next/server';
@@ -7,7 +7,7 @@ type RouteParams = { params: { id: string } };
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     if (params.id !== orgId) return jsonError('Unauthorized', 401);
@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     if (params.id !== orgId) return jsonError('Unauthorized', 401);
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, orgId, error } = await authorizeUser();
+    const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     if (params.id !== orgId) return jsonError('Unauthorized', 401);

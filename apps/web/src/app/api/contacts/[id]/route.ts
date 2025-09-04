@@ -1,5 +1,5 @@
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as contactServer } from '@/modules/vendors/contacts';
 import { ContactUpdateInput } from '@/modules/vendors/contacts/contacts.types';
@@ -9,7 +9,7 @@ type RouteParams = { params: { id: string } };
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const contact = await contactServer.getContactById(params.id);
@@ -25,7 +25,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const existing = await contactServer.getContactById(params.id);
@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const existing = await contactServer.getContactById(params.id);

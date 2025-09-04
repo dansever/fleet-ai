@@ -10,7 +10,7 @@ applyTo: ['apps/web/**/*']
 
 ```typescript
 // page.tsx (server)
-const { dbUser } = await authorizeUser();
+const { dbUser } = await getAuthContext();
 const data = await getDataByOrg(dbUser.orgId);
 return <ClientPage dbUser={dbUser} initialData={data} />;
 ```

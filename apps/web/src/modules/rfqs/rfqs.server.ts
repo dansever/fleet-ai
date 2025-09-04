@@ -10,30 +10,35 @@ import { and, desc, eq } from 'drizzle-orm';
 /**
  * Get an RFQ by its ID
  */
-export async function getRfqById(id: Rfq['id']): Promise<Rfq | null> {
-  const rows = await db.select().from(rfqsTable).where(eq(rfqsTable.id, id)).limit(1);
-  return rows[0] ?? null;
+export async function getRfqById(id: Rfq['id'], orgId: Organization['id']): Promise<Rfq | null> {
+  const row = await db.query.rfqsTable.findFirst({
+    where: and(eq(rfqsTable.id, id), eq(rfqsTable.orgId, orgId)),
+  });
+
+  return row ?? null;
 }
 
 /**
  * List all RFQs for an organization by direction (default: 'sent')
  */
-export async function listRfqsByOrgIdAndDirection(
-  orgId: Organization['id'],
+export async function listRfqsByDirection(
   direction: OrderDirection = 'sent',
+  orgId: Organization['id'],
 ): Promise<Rfq[]> {
-  return db
-    .select()
-    .from(rfqsTable)
-    .where(and(eq(rfqsTable.orgId, orgId), eq(rfqsTable.direction, direction)))
-    .orderBy(desc(rfqsTable.createdAt));
+  return db.query.rfqsTable.findMany({
+    where: and(eq(rfqsTable.orgId, orgId), eq(rfqsTable.direction, direction)),
+    orderBy: desc(rfqsTable.createdAt),
+  });
 }
 
 /**
  * Create a new RFQ
  */
 export async function createRfq(data: NewRfq): Promise<Rfq> {
-  const [row] = await db.insert(rfqsTable).values(data).returning();
+  const [row] = await db
+    .insert(rfqsTable)
+    .values({ ...data })
+    .returning();
   return row;
 }
 

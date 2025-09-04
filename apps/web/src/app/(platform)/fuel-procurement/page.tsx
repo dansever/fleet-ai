@@ -1,11 +1,11 @@
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
 import FuelProcurementClientPage from './ClientPage';
 import { FuelProcurementProvider } from './contexts';
 
 export default async function FuelProcurementPage() {
-  const { dbUser, error } = await authorizeUser();
+  const { dbUser, error } = await getAuthContext();
   if (error || !dbUser) {
     return jsonError('Unauthorized', 401);
   }

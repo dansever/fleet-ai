@@ -41,7 +41,7 @@ Platform feature folders follow: `page.tsx` (server), `ClientPage.tsx` (client),
 ### Auth
 
 - `middleware.ts` protects routes (Clerk).
-- `authorizeUser()` in server components; redirect if unauthenticated or missing `orgId`.
+- `getAuthContext()` in server components; redirect if unauthenticated or missing `orgId`.
 
 ### UI/UX
 

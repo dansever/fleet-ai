@@ -1,6 +1,6 @@
 // src/modules/rfqs/rfqs.client.ts
 
-import type { NewRfq, Rfq, User } from '@/drizzle/types';
+import type { NewRfq, Rfq } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
 
 /** Client-side DTO for creating RFQs
@@ -22,33 +22,16 @@ export async function getRfqById(id: Rfq['id'], opts?: { signal?: AbortSignal })
   return response.data;
 }
 
-/** List all RFQs for the current org (server resolves org) */
-export async function listRfqs(opts?: {
+/** List all RFQs for the current org and direction */
+export async function listRfqsByDirection(opts?: {
   direction?: 'sent' | 'received';
-  userId?: User['id'];
   signal?: AbortSignal;
 }): Promise<Rfq[]> {
   const response = await api.get<Rfq[]>('/api/rfqs', {
-    params: { direction: opts?.direction, userId: opts?.userId },
+    params: { direction: opts?.direction },
     signal: opts?.signal as any,
   });
   return response.data;
-}
-
-/** Convenience wrapper if you like explicit functions */
-export async function listRfqsByDirection(
-  direction: 'sent' | 'received',
-  opts?: { signal?: AbortSignal },
-): Promise<Rfq[]> {
-  return listRfqs({ direction, signal: opts?.signal });
-}
-
-/** Convenience wrapper if you like explicit functions */
-export async function listRfqsByUser(
-  userId: User['id'],
-  opts?: { signal?: AbortSignal },
-): Promise<Rfq[]> {
-  return listRfqs({ userId, signal: opts?.signal });
 }
 
 /** Create a new RFQ */
