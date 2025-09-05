@@ -4,6 +4,11 @@ import { server as fuelBidServer } from '@/modules/fuel-mgmt/bids';
 import { server as fuelTenderServer } from '@/modules/fuel-mgmt/tenders';
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * GET /api/fuel-bids - Get all fuel bids
+ * @param request
+ * @returns
+ */
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
@@ -15,8 +20,6 @@ export async function GET(request: NextRequest) {
     // Get tender ID from query params
     const { searchParams } = new URL(request.url);
     const tenderId = searchParams.get('tenderId');
-
-    // Check if tender ID is provided
     if (!tenderId) {
       return jsonError('Tender ID is required', 400);
     }
@@ -37,17 +40,14 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/fuel-bids
+ * POST /api/fuel-bids - Create a new fuel bid
  * Body: NewFuelBid
  * Returns: FuelBid
  */
 export async function POST(request: NextRequest) {
   try {
-    const { dbUser, error } = await getAuthContext();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const orgId = dbUser.orgId;
-    if (!orgId) return jsonError('User has no organization', 403);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get tender ID from query params
     const { searchParams } = new URL(request.url);
@@ -62,24 +62,4 @@ export async function POST(request: NextRequest) {
     console.error('Error creating fuel bid:', error);
     return jsonError('Failed to create fuel bid', 500);
   }
-}
-
-/**
- * PUT /api/fuel-bids
- * Body: UpdateFuelBid
- * Returns: FuelBid
- */
-// PUT moved to /api/fuel-bids/[id]
-export async function PUT(_request: NextRequest) {
-  return jsonError('Use /api/fuel-bids/[id] for updates', 405);
-}
-
-/**
- * DELETE /api/fuel-bids
- * Body: FuelBid
- * Returns: void
- */
-// DELETE moved to /api/fuel-bids/[id]
-export async function DELETE(_request: NextRequest) {
-  return jsonError('Use /api/fuel-bids/[id] for deletion', 405);
 }

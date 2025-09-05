@@ -1,20 +1,21 @@
 'use client';
 
 import { useSidebar } from '@/components/ui/sidebar';
+import { TabsContent } from '@/components/ui/tabs';
 import AirportDialog from '@/features/airports/AirportDialog';
 import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { AnimatedTabs, MenuTabs, TabsContent } from '@/stories/Tabs/TabsNew';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import { Eye, FileText, MapPin, Star, Users } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
-import ContactsAndProviders from './subpages/ContactsAndProviders';
-import ManageAirport from './subpages/ManageAirport';
-import ServiceContracts from './subpages/ManageContracts';
+import AirportPage from './subpages/Airport';
+import ContractsPage from './subpages/Contracts';
+import VendorsPage from './subpages/Vendors';
 
-type TabValue = 'service-agreements' | 'contacts-and-providers' | 'manage-airport';
+type TabValue = 'manage-contracts' | 'contacts-and-providers' | 'manage-airport';
 
 export default function AirportHubClientPage() {
   const {
@@ -23,6 +24,7 @@ export default function AirportHubClientPage() {
     selectedAirport,
     setSelectedAirport,
     addAirport,
+    updateAirport,
     loading,
     errors,
     clearError,
@@ -78,22 +80,24 @@ export default function AirportHubClientPage() {
               </span>
             </div>
           </div>
-          <AirportDialog
-            trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
-            airport={selectedAirport}
-            onChange={() => {}}
-            DialogType="view"
-          />
+          <div className="flex gap-2">
+            <AirportDialog
+              trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
+              airport={selectedAirport}
+              onChange={updateAirport}
+              DialogType="view"
+            />
+          </div>
         </div>
       }
       mainContent={<MainContentSection />}
-      sidebarWidth={isCollapsed ? '20rem' : '18rem'}
+      sidebarWidth={isCollapsed ? '18rem' : '14rem'}
     />
   );
 }
 
 function MainContentSection() {
-  const [selectedTab, setSelectedTab] = useState<TabValue>('service-agreements');
+  const [selectedTab, setSelectedTab] = useState<TabValue>('manage-contracts');
   const { selectedAirport } = useAirportHub();
 
   if (!selectedAirport) {
@@ -110,25 +114,24 @@ function MainContentSection() {
   }
 
   return (
-    <AnimatedTabs defaultTab="service-agreements" className="gap-4">
-      <MenuTabs
-        menuItems={[
-          { label: 'Service Agreements', value: 'service-agreements', icon: <FileText /> },
-          { label: 'Contacts & Providers', value: 'contacts-and-providers', icon: <Users /> },
-          { label: 'Manage Airport', value: 'manage-airport', icon: <MapPin /> },
-        ]}
-        defaultTab="service-agreements"
-        onTabChange={(tab) => setSelectedTab(tab as TabValue)}
-      />
+    <Tabs
+      tabs={[
+        { label: 'Service Agreements', value: 'service-agreements', icon: <FileText /> },
+        { label: 'Contacts & Providers', value: 'contacts-and-providers', icon: <Users /> },
+        { label: 'Manage Airport', value: 'manage-airport', icon: <MapPin /> },
+      ]}
+      defaultTab="service-agreements"
+      onTabChange={(tab) => setSelectedTab(tab as TabValue)}
+    >
       <TabsContent value="service-agreements">
-        <ServiceContracts />
+        <ContractsPage />
       </TabsContent>
       <TabsContent value="contacts-and-providers">
-        <ContactsAndProviders />
+        <VendorsPage />
       </TabsContent>
       <TabsContent value="manage-airport">
-        <ManageAirport />
+        <AirportPage />
       </TabsContent>
-    </AnimatedTabs>
+    </Tabs>
   );
 }

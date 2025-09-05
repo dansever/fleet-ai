@@ -4,6 +4,7 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
 from app.features.quotes import extract_quotes
+from app.features.rfqs import extract_rfq
 from app.features.fuel import extract_fuel_bid
 
 logger = get_logger(__name__)

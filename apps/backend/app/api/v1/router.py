@@ -1,16 +1,16 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import extraction_router, quotes_router, llm_router
+from app.api.v1.endpoints import extract_router, quotes_router, llm_router
 
 api_router = APIRouter()
 
 # ======= Document extraction endpoints =======
-# POST /api/v1/extraction/extract/quotes - Extract quotes
+# POST /api/v1/extract/quotes - Extract quotes
 # POST /api/v1/extraction/extract/rfqs - Extract RFQs  
-# POST /api/v1/extraction/extract/fuel/bids - Extract fuel bids
-# POST /api/v1/extraction/extract/fuel/contracts - Extract fuel contracts
-# POST /api/v1/extraction/extract/service-contracts - Extract service contracts
+# POST /api/v1/extract/fuel/bids - Extract fuel bids
+# POST /api/v1/extract/fuel/contracts - Extract fuel contracts
+# POST /api/v1/extract/service-contracts - Extract service contracts
 api_router.include_router(
-    extraction_router,
+    extract_router,
     tags=["extraction"]
 )
 

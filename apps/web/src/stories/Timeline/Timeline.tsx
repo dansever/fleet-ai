@@ -61,7 +61,7 @@ export const Timeline = ({ items, className }: TimelineProps) => {
   };
 
   return (
-    <Card className={cn('rounded-2xl p-6', className)}>
+    <Card className={cn('rounded-2xl py-0 border-0 shadow-none', className)}>
       <CardContent className="p-0">
         <div className="space-y-4">
           {items.map((item, index) => (

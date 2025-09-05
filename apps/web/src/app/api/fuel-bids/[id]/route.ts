@@ -5,21 +5,31 @@ import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: { id: string } };
 
+/**
+ * GET /api/fuel-bids/[id] - Get an existing fuel bid
+ * @param _request
+ * @param param1
+ * @returns
+ */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await getAuthContext();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const bid = await fuelBidServer.getFuelBidById(params.id);
     if (!bid) return jsonError('Fuel bid not found', 404);
-    if (bid.orgId !== dbUser.orgId) return jsonError('Unauthorized', 401);
-
     return NextResponse.json(bid);
   } catch (error) {
     return jsonError('Failed to fetch fuel bid', 500);
   }
 }
 
+/**
+ * PUT /api/fuel-bids/[id] - Update an existing fuel bid
+ * @param request
+ * @param param1
+ * @returns
+ */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, error } = await getAuthContext();
@@ -37,6 +47,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * DELETE /api/fuel-bids/[id] - Delete an existing fuel bid
+ * @param _request
+ * @param param1
+ * @returns
+ */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, error } = await getAuthContext();

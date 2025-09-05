@@ -1,12 +1,13 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { getStatusDisplay } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
-import { deleteFuelTender } from '@/services/fuel/fuel-tender-client';
+import { client as fuelTenderClient } from '@/modules/fuel-mgmt/tenders';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
@@ -31,7 +32,7 @@ import { toast } from 'sonner';
 import FuelBidsDataTable from '../_components/FuelBidsDataTable';
 import { useFuelProcurement } from '../contexts';
 
-const FuelTendersPage = memo(function FuelTendersPage() {
+const FuelTendersPage = memo(function TendersPage() {
   const { airports, tenders, fuelBids } = useFuelProcurement();
   const { selectedAirport } = airports;
   const {
@@ -87,7 +88,7 @@ const FuelTendersPage = memo(function FuelTendersPage() {
   const handleTenderDelete = async () => {
     if (!selectedTender) return;
     try {
-      await deleteFuelTender(selectedTender.id);
+      await fuelTenderClient.deleteFuelTender(selectedTender.id);
       toast.success('Tender deleted successfully');
       setIsDeletePopoverOpen(false); // Close the popover after successful deletion
       refreshTenders();
@@ -295,7 +296,10 @@ const FuelTendersPage = memo(function FuelTendersPage() {
                       <FileText className="h-4 w-4" />
                       Status
                     </div>
-                    <StatusBadge status="operational" text={currentTender.status || ''} />
+                    <StatusBadge
+                      status="operational"
+                      text={getStatusDisplay(currentTender.status)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-500">

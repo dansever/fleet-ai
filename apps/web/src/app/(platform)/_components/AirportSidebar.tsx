@@ -80,7 +80,7 @@ export default function AirportList({
   const hasActiveFilters = searchTerm || selectedCountries.length > 0;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-card">
       {/* Header */}
       <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2">
         <h2>Airports</h2>
@@ -159,7 +159,7 @@ export default function AirportList({
                   isSelected={isSelected}
                   onClick={() => onAirportSelect(airport)}
                   icon={airport.isHub ? <Home /> : <Plane />}
-                  iconBackground={
+                  iconBackgroundClassName={
                     airport.isHub ? 'from-yellow-400 to-yellow-200' : 'from-blue-300 to-blue-200'
                   }
                 >

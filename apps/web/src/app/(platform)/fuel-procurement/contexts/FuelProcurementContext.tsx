@@ -2,6 +2,7 @@
 
 import { User } from '@/drizzle/types';
 import { createContext, useContext } from 'react';
+import { useContracts } from '../hooks/useContracts';
 import { useFuelBids } from '../hooks/useFuelBids';
 import { useFuelTenders } from '../hooks/useFuelTenders';
 import { useInvoices } from '../hooks/useInvoices';

@@ -7,14 +7,14 @@ import AirportDialog from '@/features/airports/AirportDialog';
 import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Tabs } from '@/stories/Tabs/TabsNew';
-import { Eye, MapPin } from 'lucide-react';
+import { Tabs } from '@/stories/Tabs/Tabs';
+import { ChartBar, Eye, FileText, MapPin, TrendingUpDown } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useFuelProcurement } from './contexts';
-import FuelAgreementsPage from './subpages/FuelAgreements';
-import FuelTendersPage from './subpages/FuelTenders';
+import AgreementsPage from './subpages/Agreements';
 import HistoricalDataPage from './subpages/HistoricalData';
+import TendersPage from './subpages/Tenders';
 
 type TabValue = 'fuel-tenders' | 'fuel-agreements' | 'historical-data';
 
@@ -108,18 +108,18 @@ function MainContentSection() {
   return (
     <Tabs
       tabs={[
-        { label: 'Fuel Tenders', value: 'fuel-tenders' },
-        { label: 'Fuel Agreements', value: 'fuel-agreements' },
-        { label: 'Historical Data', value: 'historical-data' },
+        { label: 'Fuel Tenders', value: 'fuel-tenders', icon: <TrendingUpDown /> },
+        { label: 'Fuel Agreements', value: 'fuel-agreements', icon: <FileText /> },
+        { label: 'Historical Data', value: 'historical-data', icon: <ChartBar /> },
       ]}
       defaultTab="fuel-tenders"
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
     >
       <TabsContent value="fuel-tenders">
-        <FuelTendersPage />
+        <TendersPage />
       </TabsContent>
       <TabsContent value="fuel-agreements">
-        <FuelAgreementsPage />
+        <AgreementsPage />
       </TabsContent>
       <TabsContent value="historical-data">
         <HistoricalDataPage />

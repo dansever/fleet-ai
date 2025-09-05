@@ -1,5 +1,5 @@
 import { Contract, UpdateContract } from '@/drizzle/types';
-import { getContractsByAirport } from '@/services/contracts/contract-client';
+import { client as contractClient } from '@/modules/contracts/contracts';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
@@ -47,7 +47,7 @@ export function useContracts({
     setError(null);
 
     try {
-      const data = await getContractsByAirport(airportId);
+      const data = await contractClient.listContractsByAirport(airportId);
       setContracts(data);
 
       // Update cache

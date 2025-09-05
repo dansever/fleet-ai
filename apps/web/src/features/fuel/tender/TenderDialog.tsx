@@ -5,11 +5,11 @@ import { getStatusDisplay, statusEnum } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
+import { client as fuelTenderClient } from '@/modules/fuel-mgmt/tenders';
 import {
-  createFuelTender,
-  updateFuelTender,
-  type CreateFuelTenderData,
-} from '@/services/fuel/fuel-tender-client';
+  FuelTenderCreateInput,
+  FuelTenderUpdateInput,
+} from '@/modules/fuel-mgmt/tenders/tenders.types';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -117,7 +117,7 @@ export default function TenderDialog({
         if (!airportId) {
           throw new Error('Airport ID is required when creating a new tender');
         }
-        const createData: CreateFuelTenderData = {
+        const createData: FuelTenderCreateInput = {
           airportId,
           title: serializedFormData.title as string,
           description: serializedFormData.description,
@@ -130,7 +130,7 @@ export default function TenderDialog({
           deliveryStarts: serializedFormData.deliveryStarts,
           deliveryEnds: serializedFormData.deliveryEnds,
         };
-        savedTender = await createFuelTender(createData);
+        savedTender = await fuelTenderClient.createFuelTender(airportId, createData);
         toast.success('Tender created successfully');
       } else {
         // Update existing tender
@@ -151,9 +151,9 @@ export default function TenderDialog({
           deliveryEnds: serializedFormData.deliveryEnds,
           status: serializedFormData.status,
         };
-        savedTender = await updateFuelTender(
+        savedTender = await fuelTenderClient.updateFuelTender(
           tender.id,
-          updateData as Partial<CreateFuelTenderData>,
+          updateData as Partial<FuelTenderUpdateInput>,
         );
         toast.success('Tender updated successfully');
       }

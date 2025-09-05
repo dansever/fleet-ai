@@ -1,70 +1,62 @@
-import type { FuelBid, FuelTender, NewFuelBid } from '@/drizzle/types';
+import type { FuelTender } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
-
-// Client-side type for creating Fuel Bids (server handles system fields)
-export type CreateFuelBidData = Omit<
-  NewFuelBid,
-  'id' | 'createdAt' | 'updatedAt' | 'decisionAt'
-> & {
-  // ISO string for API transport (null becomes undefined for optional fields)
-  bidSubmittedAt?: string | null;
-};
-
-// Client-side type for updating Fuel Bids
-export type UpdateFuelBidData = Partial<CreateFuelBidData>;
+import { FuelTenderCreateInput, FuelTenderUpdateInput } from './tenders.types';
 
 /**
- * Get a fuel bid by ID
+ * Get a fuel tender by ID
  */
-export async function getFuelBid(id: FuelBid['id']): Promise<FuelBid> {
-  const res = await api.get(`/api/fuel-bids/${id}`);
+export async function getFuelTender(id: FuelTender['id']): Promise<FuelTender> {
+  const res = await api.get(`/api/fuel-tenders/${id}`);
   return res.data;
 }
 
 /**
- * Get fuel bids by tender ID
+ * Get fuel tenders by tender ID
  */
-export async function listFuelBidsByTender(tenderId: string): Promise<FuelBid[]> {
-  const res = await api.get(`/api/fuel-bids?tenderId=${tenderId}`);
+export async function listFuelBidsByTender(tenderId: string): Promise<FuelTender[]> {
+  const res = await api.get(`/api/fuel-tenders?tenderId=${tenderId}`);
   return res.data;
 }
 
 /**
- * Get fuel bids by organization
+ * Get fuel tenders by organization
  */
-export async function listFuelBidsByOrg(): Promise<FuelBid[]> {
-  const res = await api.get('/api/fuel-bids');
+export async function listFuelTendersByOrg(): Promise<FuelTender[]> {
+  const res = await api.get('/api/fuel-tenders');
   return res.data;
 }
 
 /**
  * Create a new fuel bid
  */
-export async function createFuelBid(
+export async function createFuelTender(
   tenderId: FuelTender['id'],
-  data: CreateFuelBidData,
-): Promise<FuelBid> {
-  const res = await api.post(`/api/fuel-bids?tenderId=${tenderId}`, data);
+  data: FuelTenderCreateInput,
+): Promise<FuelTender> {
+  const res = await api.post(`/api/fuel-tenders?tenderId=${tenderId}`, data);
   return res.data;
 }
 
 /**
- * Update an existing fuel bid
+ * Update an existing fuel tender
  */
-export async function updateFuelBid(id: string, data: UpdateFuelBidData): Promise<FuelBid> {
-  const res = await api.put(`/api/fuel-bids?id=${id}`, data);
+export async function updateFuelTender(
+  id: string,
+  data: FuelTenderUpdateInput,
+): Promise<FuelTender> {
+  const res = await api.put(`/api/fuel-tenders?id=${id}`, data);
   return res.data;
 }
 
 /**
- * Delete a fuel bid
+ * Delete a fuel tender
  */
-export async function deleteFuelBid(id: FuelBid['id']): Promise<void> {
-  await api.delete(`/api/fuel-bids/${id}`);
+export async function deleteFuelTender(id: FuelTender['id']): Promise<void> {
+  await api.delete(`/api/fuel-tenders/${id}`);
 }
 
 // Type for the extracted fuel bid data from backend
-export interface ExtractedFuelBidData {
+export interface ExtractedFuelTenderData {
   vendorName?: string;
   vendorContactName?: string;
   vendorContactEmail?: string;
@@ -91,18 +83,18 @@ export interface ExtractedFuelBidData {
 }
 
 /**
- * Extract fuel bid from file
+ * Extract fuel tender from file
  */
-export async function extractFuelBid(file: File): Promise<ExtractedFuelBidData> {
+export async function extractFuelTender(file: File): Promise<ExtractedFuelTenderData> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await backendApi.post('/api/v1/fuel/bids/extract', formData, {
+  const res = await backendApi.post('/api/v1/fuel/tenders/extract', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
 
   // The backend returns a ResponseEnvelope, so extract the data
-  return res.data.data as ExtractedFuelBidData;
+  return res.data.data as ExtractedFuelTenderData;
 }

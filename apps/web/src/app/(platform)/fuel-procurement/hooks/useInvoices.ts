@@ -1,5 +1,5 @@
 import { Invoice, UpdateInvoice } from '@/drizzle/types';
-import { getInvoicesByContract } from '@/services/contracts/invoice-client';
+import { client as invoiceClient } from '@/modules/invoices/invoices';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
@@ -48,7 +48,7 @@ export function useInvoices({ contractId, enabled = true }: UseInvoicesOptions):
     setError(null);
 
     try {
-      const data = await getInvoicesByContract(contractId);
+      const data = await invoiceClient.listInvoicesByContract(contractId);
       setInvoices(data);
 
       // Update cache

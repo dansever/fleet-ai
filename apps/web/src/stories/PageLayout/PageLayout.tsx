@@ -26,7 +26,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
 }) => {
   const sidebarElement = sidebarContent && (
     <div
-      className="bg-card flex flex-col overflow-hidden min-w-0 flex-shrink-0"
+      className="flex bg-transparent flex-col overflow-hidden min-w-0 flex-shrink-0"
       style={{
         // Smooth width transition
         width: 'var(--sidebar-w)',

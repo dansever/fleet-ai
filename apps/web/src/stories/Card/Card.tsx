@@ -378,7 +378,7 @@ export const ListItemCard = ({
   subtitle,
   header,
   icon = null,
-  iconBackground,
+  iconBackgroundClassName,
   isSelected = false,
   onClick,
   actions,
@@ -387,7 +387,7 @@ export const ListItemCard = ({
   className,
 }: StandardCardProps & {
   icon?: React.ReactNode;
-  iconBackground?: string;
+  iconBackgroundClassName?: string;
   isSelected?: boolean;
   onClick?: () => void;
 }) => (
@@ -410,7 +410,7 @@ export const ListItemCard = ({
             <div
               className={cn(
                 'w-10 h-10 bg-gradient-to-r text-gray-700 rounded-lg p-2 flex items-center justify-center shrink-0 self-start',
-                iconBackground,
+                iconBackgroundClassName,
               )}
             >
               {icon}

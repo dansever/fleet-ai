@@ -2,6 +2,7 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { useSidebar } from '@/components/ui/sidebar';
+import { TabsContent } from '@/components/ui/tabs';
 import { getUrgencyLevelDisplay, Status, statusDisplayMap } from '@/drizzle/enums';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
@@ -14,8 +15,7 @@ import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { TabsContent } from '@/stories/Tabs/TabsNew';
-import { FileText, TrashIcon } from 'lucide-react';
+import { ChartBar, FileText, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import RfqList from '../_components/RfqSidebar';
@@ -296,8 +296,8 @@ export default function TechnicalProcurementClientPage() {
 
       <Tabs
         tabs={[
-          { label: 'Quotes', value: 'quotes' },
-          { label: 'Analysis', value: 'analysis' },
+          { label: 'Quotes', value: 'quotes', icon: <FileText /> },
+          { label: 'Analysis', value: 'analysis', icon: <ChartBar /> },
         ]}
         defaultTab="quotes"
         onTabChange={() => {}}

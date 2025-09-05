@@ -1,5 +1,5 @@
 import { FuelBid } from '@/drizzle/types';
-import { getFuelBidsByTender } from '@/services/fuel/fuel-bid-client';
+import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 
@@ -48,7 +48,7 @@ export function useFuelBids({ tenderId, enabled = true }: UseFuelBidsOptions): U
     setError(null);
 
     try {
-      const data = await getFuelBidsByTender(tenderId);
+      const data = await fuelBidClient.listFuelBidsByTender(tenderId);
       setFuelBids(data);
 
       // Update cache

@@ -47,6 +47,7 @@ export const organizationsRelations = relations(organizationsTable, ({ many }) =
   contracts: many(contractsTable),
   invoices: many(invoicesTable),
   fuelTenders: many(fuelTendersTable),
+  fuelBids: many(fuelBidsTable),
 }));
 
 /* -------------------- Users -------------------- */
@@ -455,6 +456,7 @@ export const fuelBidsTable = pgTable(
   {
     // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), //fk to orgs table
     tenderId: uuid('tender_id').notNull(), //fk to fuel tenders table
     vendorId: uuid('vendor_id'), //fk to vendors table
 
@@ -516,6 +518,11 @@ export const fuelBidsTable = pgTable(
   },
   (table) => [
     foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_fuel_bids_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
       columns: [table.tenderId],
       foreignColumns: [fuelTendersTable.id],
       name: 'fk_fuel_bids_tender_id',
@@ -552,6 +559,10 @@ export const fuelTendersRelations = relations(fuelTendersTable, ({ one, many }) 
 
 /* -------------------- Fuel Bids Relations -------------------- */
 export const fuelBidsRelations = relations(fuelBidsTable, ({ one }) => ({
+  organization: one(organizationsTable, {
+    fields: [fuelBidsTable.orgId],
+    references: [organizationsTable.id],
+  }),
   tender: one(fuelTendersTable, {
     fields: [fuelBidsTable.tenderId],
     references: [fuelTendersTable.id],

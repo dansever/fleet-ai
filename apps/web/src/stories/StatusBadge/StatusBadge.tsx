@@ -19,6 +19,7 @@ export interface StatusBadgeProps {
   size?: 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
   className?: string | null;
+  children?: React.ReactNode;
 }
 
 const statusConfig = {
@@ -82,6 +83,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   size = 'sm',
   icon = null,
   className,
+  children,
 }) => {
   const config = statusConfig[status];
   const Icon = icon || config.icon;
@@ -98,6 +100,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     >
       {Icon && <Icon className={iconSizeConfig[size]} />}
       {displayText}
+      {children}
     </Badge>
   );
 };

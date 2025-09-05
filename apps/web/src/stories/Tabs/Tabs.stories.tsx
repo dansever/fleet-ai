@@ -1,7 +1,19 @@
 import { TabsContent } from '@/components/ui/tabs';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { BarChart3, Calendar, FileText, Globe, MapPin, Plane, Settings, Users } from 'lucide-react';
-import { Tabs } from './TabsNew';
+import {
+  BarChart3,
+  BarChartIcon,
+  Calendar,
+  FileText,
+  Globe,
+  Info,
+  MapPin,
+  Plane,
+  Settings,
+  SettingsIcon,
+  Users,
+} from 'lucide-react';
+import { Tabs } from './Tabs';
 
 const meta: Meta<typeof Tabs> = {
   title: 'Components/Tabs',
@@ -49,10 +61,10 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium text-sm text-muted-foreground">TWO TABS</h4>
             <Tabs
               tabs={[
-                { label: 'Overview', value: 'overview' },
-                { label: 'Details', value: 'details' },
+                { label: 'Overview', icon: <BarChartIcon />, value: 'overview' },
+                { label: 'Details', icon: <BarChartIcon />, value: 'details' },
               ]}
-              selectedTab="overview"
+              defaultTab="overview"
               onTabChange={() => {}}
             >
               <TabsContent value="overview" className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -75,11 +87,11 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium text-sm text-muted-foreground">THREE TABS</h4>
             <Tabs
               tabs={[
-                { label: 'Dashboard', value: 'dashboard' },
-                { label: 'Analytics', value: 'analytics' },
-                { label: 'Settings', value: 'settings' },
+                { label: 'Dashboard', icon: <BarChartIcon />, value: 'dashboard' },
+                { label: 'Analytics', icon: <BarChartIcon />, value: 'analytics' },
+                { label: 'Settings', icon: <SettingsIcon />, value: 'settings' },
               ]}
-              selectedTab="dashboard"
+              defaultTab="dashboard"
               onTabChange={() => {}}
             >
               <TabsContent value="dashboard" className="mt-4 p-4 bg-blue-50 rounded-lg">
@@ -108,12 +120,12 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium text-sm text-muted-foreground">FOUR TABS</h4>
             <Tabs
               tabs={[
-                { label: 'Fleet', value: 'fleet' },
-                { label: 'Routes', value: 'routes' },
-                { label: 'Crew', value: 'crew' },
-                { label: 'Reports', value: 'reports' },
+                { label: 'Fleet', icon: <Users />, value: 'fleet' },
+                { label: 'Routes', icon: <Globe />, value: 'routes' },
+                { label: 'Crew', icon: <Users />, value: 'crew' },
+                { label: 'Reports', icon: <BarChartIcon />, value: 'reports' },
               ]}
-              selectedTab="fleet"
+              defaultTab="fleet"
               onTabChange={() => {}}
             >
               <TabsContent value="fleet" className="mt-4 p-4 bg-green-50 rounded-lg">
@@ -148,13 +160,13 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium text-sm text-muted-foreground">FIVE TABS</h4>
             <Tabs
               tabs={[
-                { label: 'Operations', value: 'operations' },
-                { label: 'Maintenance', value: 'maintenance' },
-                { label: 'Finance', value: 'finance' },
-                { label: 'Safety', value: 'safety' },
-                { label: 'Admin', value: 'admin' },
+                { label: 'Operations', icon: <Users />, value: 'operations' },
+                { label: 'Maintenance', icon: <Users />, value: 'maintenance' },
+                { label: 'Finance', icon: <Users />, value: 'finance' },
+                { label: 'Safety', icon: <Users />, value: 'safety' },
+                { label: 'Admin', icon: <Users />, value: 'admin' },
               ]}
-              selectedTab="operations"
+              defaultTab="operations"
               onTabChange={() => {}}
             >
               <TabsContent value="operations" className="mt-4 p-4 bg-purple-50 rounded-lg">
@@ -207,12 +219,12 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium">Aircraft Details View</h4>
             <Tabs
               tabs={[
-                { label: 'General Info', value: 'general' },
-                { label: 'Maintenance', value: 'maintenance' },
-                { label: 'Flight History', value: 'history' },
-                { label: 'Documentation', value: 'docs' },
+                { label: 'General Info', icon: <Plane />, value: 'general' },
+                { label: 'Maintenance', icon: <Settings />, value: 'maintenance' },
+                { label: 'Flight History', icon: <BarChart3 />, value: 'history' },
+                { label: 'Documentation', icon: <FileText />, value: 'docs' },
               ]}
-              selectedTab="general"
+              defaultTab="general"
               onTabChange={() => {}}
             >
               <TabsContent value="general" className="mt-4 p-6 bg-white border rounded-lg">
@@ -289,11 +301,11 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium">Route Management Dashboard</h4>
             <Tabs
               tabs={[
-                { label: 'Active Routes', value: 'active' },
-                { label: 'Schedule', value: 'schedule' },
-                { label: 'Performance', value: 'performance' },
+                { label: 'Active Routes', icon: <MapPin />, value: 'active' },
+                { label: 'Schedule', icon: <Calendar />, value: 'schedule' },
+                { label: 'Performance', icon: <BarChart3 />, value: 'performance' },
               ]}
-              selectedTab="active"
+              defaultTab="active"
               onTabChange={() => {}}
             >
               <TabsContent value="active" className="mt-4 p-6 bg-white border rounded-lg">
@@ -366,13 +378,13 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium">Crew Management System</h4>
             <Tabs
               tabs={[
-                { label: 'Pilots', value: 'pilots' },
-                { label: 'Cabin Crew', value: 'cabin' },
-                { label: 'Ground Staff', value: 'ground' },
-                { label: 'Schedules', value: 'schedules' },
-                { label: 'Training', value: 'training' },
+                { label: 'Pilots', icon: <Users />, value: 'pilots' },
+                { label: 'Cabin Crew', icon: <Users />, value: 'cabin' },
+                { label: 'Ground Staff', icon: <Globe />, value: 'ground' },
+                { label: 'Schedules', icon: <Calendar />, value: 'schedules' },
+                { label: 'Training', icon: <FileText />, value: 'training' },
               ]}
-              selectedTab="pilots"
+              defaultTab="pilots"
               onTabChange={() => {}}
             >
               <TabsContent value="pilots" className="mt-4 p-6 bg-white border rounded-lg">
@@ -511,10 +523,10 @@ export const AllTabsVariants: Story = {
             <div className="max-w-md">
               <Tabs
                 tabs={[
-                  { label: 'Info', value: 'info' },
-                  { label: 'Stats', value: 'stats' },
+                  { label: 'Info', icon: <Info />, value: 'info' },
+                  { label: 'Stats', icon: <BarChart3 />, value: 'stats' },
                 ]}
-                selectedTab="info"
+                defaultTab="info"
                 onTabChange={() => {}}
               >
                 <TabsContent value="info" className="mt-4 p-3 bg-gray-50 rounded text-sm">
@@ -532,11 +544,11 @@ export const AllTabsVariants: Story = {
             <h4 className="font-medium text-sm text-muted-foreground">FULL WIDTH LAYOUT</h4>
             <Tabs
               tabs={[
-                { label: 'Fleet Overview', value: 'overview' },
-                { label: 'Performance Metrics', value: 'metrics' },
-                { label: 'Operational Status', value: 'status' },
+                { label: 'Fleet Overview', icon: <Users />, value: 'overview' },
+                { label: 'Performance Metrics', icon: <BarChart3 />, value: 'metrics' },
+                { label: 'Operational Status', icon: <Users />, value: 'status' },
               ]}
-              selectedTab="overview"
+              defaultTab="overview"
               onTabChange={() => {}}
               className="w-full"
             >

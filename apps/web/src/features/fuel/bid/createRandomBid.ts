@@ -1,9 +1,10 @@
 // Updated by CursorAI on Sep 2 2025
 import { decisionEnum } from '@/drizzle/enums';
-import type { FuelTender } from '@/drizzle/types';
+import type { FuelBid, FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
-import { createFuelBid, type CreateFuelBidData } from '@/services/fuel/fuel-bid-client';
+import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
+import { FuelBidCreateInput } from '@/modules/fuel-mgmt/bids/bids.types';
 
 function getRandomInt(min: number, max: number): number {
   const ceilMin = Math.ceil(min);
@@ -191,7 +192,7 @@ const FORMULA_NOTES_OPTIONS = [
 export async function createRandomFuelBid(
   tenderId: FuelTender['id'],
   round?: number,
-): Promise<CreateFuelBidData> {
+): Promise<FuelBid> {
   const useIndexPricing = Math.random() < 0.5; // 50% chance of index-linked pricing
 
   const vendorName = pickOne(VENDOR_NAMES);
@@ -209,7 +210,7 @@ export async function createRandomFuelBid(
 
   const differential = useIndexPricing ? getRandomFloat(-0.35, 0.35, 4) : null;
 
-  const data: CreateFuelBidData = {
+  const data: FuelBidCreateInput = {
     // Required linkage
     tenderId,
     vendorId: null, // Will be handled by backend if needed
@@ -279,7 +280,7 @@ export async function createRandomFuelBid(
     decisionNotes: Math.random() < 0.2 ? pickOne(DECISION_NOTES_OPTIONS) : null,
   };
 
-  const result = await createFuelBid(tenderId, data);
+  const result = await fuelBidClient.createFuelBid(tenderId, data);
   return result;
 }
 

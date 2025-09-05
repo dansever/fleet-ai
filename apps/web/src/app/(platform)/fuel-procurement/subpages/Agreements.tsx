@@ -9,7 +9,7 @@ import FuelInvoicesDataTable from '../_components/FuelInvoicesDataTable';
 import { useFuelProcurement } from '../contexts';
 import { useContracts } from '../hooks';
 
-export default function FuelAgreementsPage() {
+export default function AgreementsPage() {
   const { airports, invoices } = useFuelProcurement();
   const { contracts, addContract } = useContracts({
     airportId: airports.selectedAirport?.id || null,
@@ -156,7 +156,7 @@ export default function FuelAgreementsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <FuelInvoicesDataTable invoices={invoices} />
+          <FuelInvoicesDataTable invoices={[] as Invoice[]} />
         </CardContent>
       </BaseCard>
 

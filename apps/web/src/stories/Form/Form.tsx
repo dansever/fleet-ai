@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -360,7 +361,7 @@ export const ModernSelect = ({
   TriggerClassName?: string;
   [key: string]: unknown;
 }) => (
-  <div className="w-full">
+  <div>
     {label && <label className={formStyles.label}>{label}</label>}
     <Select {...props}>
       <SelectTrigger
@@ -385,6 +386,36 @@ export const ModernSelect = ({
         ))}
       </SelectContent>
     </Select>
+    {error && <p className={formStyles.error}>{error}</p>}
+    {helper && !error && <p className={formStyles.helper}>{helper}</p>}
+  </div>
+);
+
+export const ModernMultiSelect = ({
+  label,
+  error,
+  helper,
+  options,
+  onValueChange,
+  ...props
+}: {
+  label?: string;
+  error?: string;
+  helper?: string;
+  options: { value: string; label: string }[];
+  onValueChange?: (values: string[]) => void;
+  [key: string]: unknown;
+}) => (
+  <div className="w-fit">
+    {label && <label className={formStyles.label}>{label}</label>}
+    <MultiSelect
+      options={options}
+      onValueChange={onValueChange || (() => {})}
+      placeholder="Select options"
+      className={formStyles.input}
+      popoverClassName="bg-white rounded-2xl"
+      {...props}
+    />
     {error && <p className={formStyles.error}>{error}</p>}
     {helper && !error && <p className={formStyles.helper}>{helper}</p>}
   </div>

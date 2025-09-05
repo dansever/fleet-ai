@@ -7,7 +7,7 @@ import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Building2, Plane, Star, Trash } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
-export default function ManageAirport() {
+export default function AirportPage() {
   const { selectedAirport, updateAirport, contracts, removeAirport } = useAirportHub();
 
   if (!selectedAirport) {

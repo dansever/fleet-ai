@@ -5,7 +5,7 @@ import { decisionDisplayMap } from '@/drizzle/enums';
 import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
-import { createFuelBid, updateFuelBid } from '@/services/fuel/fuel-bid-client';
+import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -144,7 +144,7 @@ export default function FuelBidDialog({
           vendorId: null, // Will be handled by backend if needed
           ...formData,
         };
-        savedBid = await createFuelBid(tenderId, createData);
+        savedBid = await fuelBidClient.createFuelBid(tenderId, createData);
         toast.success('Fuel bid created successfully');
       } else {
         // Update existing bid
@@ -152,7 +152,7 @@ export default function FuelBidDialog({
           throw new Error('Bid ID is required for updates');
         }
         const updateData: UpdateFuelBid = formData;
-        savedBid = await updateFuelBid(bid.id, updateData);
+        savedBid = await fuelBidClient.updateFuelBid(bid.id, updateData);
         toast.success('Fuel bid updated successfully');
       }
 

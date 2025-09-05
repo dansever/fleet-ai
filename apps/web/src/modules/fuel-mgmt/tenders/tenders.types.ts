@@ -9,7 +9,10 @@ import type { NewFuelTender } from '@/drizzle/types';
  * For creating fuel tenders from forms - excludes server-managed fields
  * Date fields accept strings (from forms) and get converted to Date objects
  */
-export type FuelTenderCreateInput = Omit<NewFuelTender, 'id' | 'createdAt' | 'updatedAt'> & {
+export type FuelTenderCreateInput = Omit<
+  NewFuelTender,
+  'id' | 'orgId' | 'createdAt' | 'updatedAt'
+> & {
   // Allow date fields as strings (from forms) or Date objects
   biddingStarts?: string | Date | null;
   biddingEnds?: string | Date | null;

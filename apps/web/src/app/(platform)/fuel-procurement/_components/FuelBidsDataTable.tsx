@@ -4,7 +4,7 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FuelBid, NewFuelBid } from '@/drizzle/types';
 import { createRandomFuelBid } from '@/features/fuel/bid/createRandomBid';
 import { convertPydanticToFuelBid } from '@/features/fuel/bid/pydanticConverter';
-import { createFuelBid, extractFuelBid } from '@/services/fuel/fuel-bid-client';
+import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { DataTable } from '@/stories/DataTable/DataTable';
@@ -37,9 +37,9 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
 
   const handleSendFuelBidFile = async (file: File) => {
     try {
-      const result = await extractFuelBid(file);
+      const result = await fuelBidClient.extractFuelBid(file);
       const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
-      const createdBid = await createFuelBid(selectedTender.id, convertedBid);
+      const createdBid = await fuelBidClient.createFuelBid(selectedTender.id, convertedBid);
       addFuelBid(createdBid);
       toast.success('Fuel bid extracted successfully');
     } catch (error) {

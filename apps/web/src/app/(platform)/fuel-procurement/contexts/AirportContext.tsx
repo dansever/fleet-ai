@@ -1,7 +1,7 @@
 'use client';
 
 import { Airport } from '@/drizzle/types';
-import { getAirports } from '@/services/core/airport-client';
+import { client as airportClient } from '@/modules/core/airports';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 type AirportContextType = {
@@ -53,7 +53,7 @@ export function AirportProvider({
     setLoading(true);
     setError(null);
     try {
-      const freshAirports = await getAirports();
+      const freshAirports = await airportClient.listAirports();
       const sortedAirports = sortAirports(freshAirports);
       setAirports(sortedAirports);
 

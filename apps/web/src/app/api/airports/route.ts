@@ -70,7 +70,6 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Authorize user
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
@@ -83,15 +82,3 @@ export async function POST(request: NextRequest) {
     return jsonError('Internal server error', 500);
   }
 }
-
-/**
- * PUT /api/airports
- * Update an airport by ID (passed as query parameter)
- */
-// PUT moved to /api/airports/[id]
-
-/**
- * DELETE /api/airports
- * Delete an airport by ID (passed as query parameter)
- */
-// DELETE moved to /api/airports/[id]
