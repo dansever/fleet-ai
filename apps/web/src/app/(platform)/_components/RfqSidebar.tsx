@@ -248,7 +248,7 @@ export default function RfqList({
                   isSelected={selectedRfq?.id === rfq.id}
                   onClick={() => onRfqSelect(rfq)}
                   icon={<FileText />}
-                  iconBackground="from-blue-400 to-blue-300"
+                  iconBackgroundClassName="from-blue-400 to-blue-300"
                 >
                   <div className="flex flex-row gap-1 overfl">
                     {/* Left side: main RFQ info */}

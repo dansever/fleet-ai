@@ -137,6 +137,10 @@ export default function AirportHubProvider({
       return;
     }
 
+    // Immediately clear contracts when switching airports to prevent stale data
+    setContracts([]);
+    setSelectedContract(null);
+
     const loadContracts = async () => {
       // Check cache first
       if (contractsCache[selectedAirport.id]) {
@@ -175,7 +179,7 @@ export default function AirportHubProvider({
     };
 
     loadContracts();
-  }, [selectedAirport, contractsCache]); // Depend on selectedAirport and contractsCache
+  }, [selectedAirport]); // Remove contractsCache dependency to avoid unnecessary re-runs
 
   /**
    * Load contacts for the selected airport (only when airport changes)
@@ -186,6 +190,10 @@ export default function AirportHubProvider({
       setSelectedContact(null);
       return;
     }
+
+    // Immediately clear contacts when switching airports to prevent stale data
+    setContacts([]);
+    setSelectedContact(null);
 
     const loadContacts = async () => {
       // Check cache first
@@ -225,7 +233,7 @@ export default function AirportHubProvider({
     };
 
     loadContacts();
-  }, [selectedAirport, contactsCache]); // Depend on selectedAirport and contactsCache
+  }, [selectedAirport]); // Remove contactsCache dependency to avoid unnecessary re-runs
 
   /**
    * Refresh airports

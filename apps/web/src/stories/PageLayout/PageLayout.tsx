@@ -49,7 +49,9 @@ export const PageLayout: FC<PageLayoutProps> = ({
       {/* Right Main Panel */}
       <div className="flex-1 flex flex-col gap-2 overflow-hidden min-w-4xl">
         {/* Fixed Header */}
-        <header className="px-4 py-2 flex items-center flex-shrink-0">{headerContent}</header>
+        {headerContent && (
+          <header className="px-4 py-2 flex items-center flex-shrink-0">{headerContent}</header>
+        )}
 
         {/* Scrollable Main Content */}
         <main className="px-4 flex-1 overflow-y-scroll">{mainContent}</main>

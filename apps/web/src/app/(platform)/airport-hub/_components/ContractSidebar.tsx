@@ -1,13 +1,14 @@
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ContractType } from '@/drizzle/enums';
+import { getContractTypeDisplay, getStatusDisplay, Status } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
-import { Building2, Fuel, Plus, Users, Wrench } from 'lucide-react';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 interface ContractListProps {
@@ -17,20 +18,6 @@ interface ContractListProps {
   InsertAddContractButton: boolean;
   onContractAdd?: (contract: Contract) => void;
 }
-
-const contractTypeIconMap = {
-  ground_handling: <Users className="h-4 w-4" />,
-  fuel: <Fuel className="h-4 w-4" />,
-  catering: <Building2 className="h-4 w-4" />,
-  technical_mro_parts: <Wrench className="h-4 w-4" />,
-  airport_and_nav_charges: <Building2 className="h-4 w-4" />,
-  security_compliance: <Building2 className="h-4 w-4" />,
-  it_data_comms: <Building2 className="h-4 w-4" />,
-  logistics_freight: <Building2 className="h-4 w-4" />,
-  training_and_crew: <Building2 className="h-4 w-4" />,
-  insurance_and_finance: <Building2 className="h-4 w-4" />,
-  other: <Building2 className="h-4 w-4" />,
-};
 
 export default function ContractList({
   contracts,
@@ -42,16 +29,30 @@ export default function ContractList({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
 
+  function getIsContractActive(contract: Contract): 'pending' | 'active' | 'inactive' | null {
+    const today = new Date();
+    return contract.effectiveFrom &&
+      new Date(contract.effectiveFrom) < today &&
+      contract.effectiveTo &&
+      new Date(contract.effectiveTo) > today
+      ? 'active'
+      : contract.effectiveFrom && new Date(contract.effectiveFrom) > today
+        ? 'pending'
+        : 'inactive';
+  }
+
   return (
     <div className="h-fit flex flex-col rounded-2xl bg-card">
       {/* Header */}
       <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2">
-        <h2>Contracts</h2>
+        <div className="text-sm text-muted-foreground">
+          {contracts.length} of {contracts.length} contracts
+        </div>
         {InsertAddContractButton && (
           <ContractDialog
             contract={null}
             DialogType="add"
-            triggerButton={<Button intent="add" text="Add" icon={Plus} size="md" />}
+            triggerButton={<Button intent="add" icon={Plus} size="md" />}
             onChange={(newContract) => {
               if (onContractAdd) {
                 onContractAdd(newContract);
@@ -61,14 +62,6 @@ export default function ContractList({
             }}
           />
         )}
-      </div>
-
-      {/* Filters */}
-      <div className="flex-shrink-0 px-4 py-2 border-b border-border flex flex-col gap-2">
-        {/* Results Count */}
-        <div className="text-sm text-muted-foreground">
-          {contracts.length} of {contracts.length} contracts
-        </div>
       </div>
 
       {/* Contract List */}
@@ -85,15 +78,31 @@ export default function ContractList({
                   key={contract.id}
                   isSelected={isSelected}
                   onClick={() => onContractSelect(contract)}
-                  icon={contractTypeIconMap[contract.contractType as ContractType]}
                   className={cn(
-                    isSelected && 'from-sky-200/30 via-sky-200 to-sky-200/50 opacity-80',
+                    isSelected
+                      ? 'border-sky-100 from-sky-200/20 via-sky-200 to-sky-200/40 opacity-100'
+                      : 'bg-gradient-to-br from-sky-50/80 via-sky-50 to-sky-50/60 opacity-80 hover:bg-gradient-to-br hover:from-sky-100 hover:via-sky-100 hover:to-sky-100',
                   )}
-                  iconBackgroundClassName="h-8 w-8 from-blue-200 to-cyan-200"
                 >
                   <div className="flex flex-col gap-1 items-start">
+                    <div className="flex flex-row justify-between gap-2">
+                      <StatusBadge
+                        status={'default'}
+                        text={getContractTypeDisplay(contract.contractType || '')}
+                      />
+                      <StatusBadge
+                        status={
+                          getIsContractActive(contract) === 'active'
+                            ? 'operational'
+                            : getIsContractActive(contract) === 'pending'
+                              ? 'pending'
+                              : 'error'
+                        }
+                        text={getStatusDisplay(getIsContractActive(contract) as Status)}
+                      />
+                    </div>
+                    <span className="text-sm font-bold">{contract.title}</span>
                     <span className="text-xs">{contract.vendorName}</span>
-                    <span className="text-sm font-medium">{contract.title}</span>
                   </div>
                 </ListItemCard>
               );

@@ -91,7 +91,7 @@ export default function AirportHubClientPage() {
         </div>
       }
       mainContent={<MainContentSection />}
-      sidebarWidth={isCollapsed ? '18rem' : '14rem'}
+      sidebarWidth={isCollapsed ? '18rem' : '18rem'}
     />
   );
 }

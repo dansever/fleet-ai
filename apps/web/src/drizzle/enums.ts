@@ -77,12 +77,12 @@ export const contractTypeDisplayMap: Record<ContractType, string> = {
   ground_handling: 'Ground Handling',
   catering: 'Catering',
   technical_mro_parts: 'Technical MRO Parts',
-  airport_and_nav_charges: 'Airport and Nav Charges',
+  airport_and_nav_charges: 'Airport & Nav Charges',
   security_compliance: 'Security and Compliance',
   it_data_comms: 'IT Data Comms',
   logistics_freight: 'Logistics Freight',
   training_and_crew: 'Training and Crew',
-  insurance_and_finance: 'Insurance and Finance',
+  insurance_and_finance: 'Insurance & Finance',
   other: 'Other',
 };
 
