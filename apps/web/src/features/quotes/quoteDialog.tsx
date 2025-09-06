@@ -2,11 +2,11 @@
 'use client';
 
 import {
-  getStatusDisplay,
+  getProcessStatusDisplay,
   OrderDirection,
   orderDirectionDisplayMap,
   OrderDirectionEnum,
-  statusEnum,
+  ProcessStatusEnum,
 } from '@/drizzle/enums';
 import type { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
@@ -59,7 +59,7 @@ export default function QuoteDialog({
     // Quote Identification (matching schema)
     rfqNumber: quote?.rfqNumber || null,
     direction: quote?.direction || null,
-    status: quote?.status || 'pending',
+    processStatus: quote?.processStatus || 'pending',
 
     // Vendor Information (matching schema)
     vendorName: quote?.vendorName || null,
@@ -114,7 +114,7 @@ export default function QuoteDialog({
     setFormData({
       rfqNumber: quote?.rfqNumber || null,
       direction: quote?.direction || null,
-      status: quote?.status || 'pending',
+      processStatus: quote?.processStatus || 'pending',
       vendorName: quote?.vendorName || null,
       vendorAddress: quote?.vendorAddress || null,
       vendorContactName: quote?.vendorContactName || null,
@@ -204,7 +204,7 @@ export default function QuoteDialog({
           taggedBy: serializedFormData.taggedBy,
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
-          status: serializedFormData.status,
+          processStatus: serializedFormData.processStatus,
           sentAt: formData.sentAt?.toISOString() || null,
         };
         savedQuote = await client.createQuote(createData, rfqId);
@@ -246,7 +246,7 @@ export default function QuoteDialog({
           taggedBy: serializedFormData.taggedBy,
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
-          status: serializedFormData.status,
+          processStatus: serializedFormData.processStatus,
           sentAt: formData.sentAt?.toISOString() || null,
         };
         savedQuote = await client.updateQuote(quote.id, updateData);
@@ -268,7 +268,7 @@ export default function QuoteDialog({
       setFormData({
         rfqNumber: null,
         direction: null,
-        status: 'pending',
+        processStatus: 'pending',
         vendorName: null,
         vendorAddress: null,
         vendorContactName: null,
@@ -307,7 +307,7 @@ export default function QuoteDialog({
     setFormData({
       rfqNumber: null,
       direction: null,
-      status: 'pending',
+      processStatus: 'pending',
       vendorName: null,
       vendorAddress: null,
       vendorContactName: null,
@@ -391,14 +391,14 @@ export default function QuoteDialog({
               />
               <KeyValuePair
                 label="Status"
-                value={formData.status}
+                value={formData.processStatus}
                 valueType="select"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('status', value)}
-                name="status"
-                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                onChange={(value) => handleFieldChange('processStatus', value)}
+                name="processStatus"
+                selectOptions={Object.values(ProcessStatusEnum.enumValues).map((status) => ({
                   value: status,
-                  label: getStatusDisplay(status),
+                  label: getProcessStatusDisplay(status),
                 }))}
               />
               <KeyValuePair

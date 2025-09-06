@@ -64,17 +64,17 @@ export const ConfirmationPopover = ({
 
   const intentStyles = {
     danger: {
-      gradient: 'from-red-500 to-red-600',
+      gradient: 'bg-red-500 opacity-80',
       confirmButton: 'danger' as const,
       icon: '⚠️',
     },
     warning: {
-      gradient: 'from-orange-500 to-orange-600',
+      gradient: 'bg-orange-500 opacity-80',
       confirmButton: 'warning' as const,
       icon: '⚠️',
     },
     info: {
-      gradient: 'from-blue-500 to-blue-600',
+      gradient: 'bg-blue-500 opacity-80',
       confirmButton: 'primary' as const,
       icon: 'ℹ️',
     },

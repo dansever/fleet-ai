@@ -35,7 +35,7 @@ const buttonStyles = cva(
           'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white',
         // Danger action - destructive actions, deletions, critical operations
         danger:
-          'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white',
+          'bg-gradient-to-r from-red-500 to-red-500 opacity-80 hover:from-red-600 hover:to-red-700 text-white',
         // Ghost action - minimal prominence, tertiary actions, icon buttons
         ghost: 'bg-transparent hover:bg-muted/80 text-primary/70 shadow-none hover:shadow-none',
       },

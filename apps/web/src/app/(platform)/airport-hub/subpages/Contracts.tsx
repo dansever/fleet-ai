@@ -1,9 +1,11 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
+import { deleteContract } from '@/modules/contracts/contracts/contracts.server';
 import { Button } from '@/stories/Button/Button';
-import { BaseCard, MainCard } from '@/stories/Card/Card';
-import { Building2, Eye, Fuel, RefreshCw, Users, Wrench } from 'lucide-react';
+import { MainCard } from '@/stories/Card/Card';
+import { ConfirmationPopover } from '@/stories/Popover/Popover';
+import { Eye, RefreshCw, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import ContractList from '../_components/ContractSidebar';
@@ -63,23 +65,8 @@ export default function ContractsPage() {
     return { total, active, expiringSoon, contractsByType };
   }, [contracts, groupedContracts, contractTypes]);
 
-  const getServiceIcon = (serviceType: string) => {
-    switch (serviceType) {
-      case 'ground_handling':
-        return <Users className="w-4 h-4" />;
-      case 'fuel_supply':
-        return <Fuel className="w-4 h-4" />;
-      case 'catering':
-        return <Building2 className="w-4 h-4" />;
-      case 'maintenance':
-        return <Wrench className="w-4 h-4" />;
-      default:
-        return <Building2 className="w-4 h-4" />;
-    }
-  };
-
   return (
-    <BaseCard className="flex flex-row gap-4 bg-transparent">
+    <div className="flex flex-row gap-4">
       <div
         className="flex flex-col overflow-hidden min-w-0"
         style={{
@@ -109,9 +96,32 @@ export default function ContractsPage() {
           <div className="flex flex-row gap-2">
             <Button intent="secondaryInverted" icon={Eye} onClick={() => {}} />
             <Button intent="secondaryInverted" icon={RefreshCw} onClick={refreshContracts} />
+            <ConfirmationPopover
+              onConfirm={() => {
+                deleteContract(selectedContract?.id || '').then(() => {
+                  refreshContracts();
+                  setSelectedContract(null);
+                });
+              }}
+              trigger={
+                <Button intent="secondaryInverted" icon={Trash} className="hover:bg-red-500" />
+              }
+              popoverIntent="danger"
+              title="Delete Contract"
+              description="Are you sure you want to delete this contract?"
+            />
           </div>
         }
-      ></MainCard>
-    </BaseCard>
+      >
+        {!selectedContract && (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-center">
+              <h3 className="text-lg font-medium mb-2">No Contract Selected</h3>
+              <p className="text-sm">Please select a contract to manage its information.</p>
+            </div>
+          </div>
+        )}
+      </MainCard>
+    </div>
   );
 }

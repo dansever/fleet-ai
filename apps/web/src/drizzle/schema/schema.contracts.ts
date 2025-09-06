@@ -11,7 +11,7 @@ import {
   uuid,
   vector,
 } from 'drizzle-orm/pg-core';
-import { ContractTypeEnum, statusEnum } from '../enums';
+import { ContractTypeEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
 import { airportsTable, organizationsTable, vendorsTable } from './schema';
 
@@ -40,7 +40,7 @@ export const contractsTable = pgTable(
     // Period
     effectiveFrom: date('effective_from').notNull(),
     effectiveTo: date('effective_to').notNull(),
-    status: statusEnum('status').default('pending'),
+    processStatus: ProcessStatusEnum('process_status').default('pending'),
 
     // Source
     docUrl: text('doc_url'),

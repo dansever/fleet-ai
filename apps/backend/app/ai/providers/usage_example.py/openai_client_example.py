@@ -1,17 +1,18 @@
+# app/ai/providers/openai_client_example.py
 """
-Example usage of the OpenAIClient with various parameter combinations.
-This demonstrates the flexibility and modularity of the new implementation.
+Minimal examples for OpenAIClient:
+- simple prompt
+- messages
+- structured output with schema
+- streaming
+- embeddings (single and batch)
 """
 
 from typing import List
 from pydantic import BaseModel
 from app.ai.providers.openai_client import OpenAIClient
-from app.shared.schemas.llm_schemas import (
-    LLMParams, 
-    LLMMessage, 
-    MessageRole,
-    LLMResponse
-)
+from app.shared.schemas.llm_schemas import LLMParams, LLMMessage, MessageRole
+
 
 # Example schema for structured output
 class UserProfile(BaseModel):
@@ -20,88 +21,51 @@ class UserProfile(BaseModel):
     interests: List[str]
     bio: str
 
-async def example_usage():
-    """Demonstrate various ways to use the OpenAIClient"""
-    
-    # Initialize client
+
+async def main():
     client = OpenAIClient()
-    
-    # Example 1: Simple text generation with prompt
-    response1 = client.generate(
-        prompt="Tell me a short joke about programming",
-        temperature=0.8,
-        max_output_tokens=100
-    )
-    print(f"Joke: {response1.content}")
-    print(f"Tokens used: {response1.usage.total_tokens}")
-    
-    # Example 2: Using messages for conversation
-    messages = [
-        LLMMessage(role=MessageRole.SYSTEM, content="You are a helpful coding assistant."),
-        LLMMessage(role=MessageRole.USER, content="How do I implement a binary search?")
+
+    # 1) Simple prompt
+    r1 = client.generate(prompt="Give me one short programming joke.", temperature=0.7, max_output_tokens=80)
+    print("Joke:", r1.content)
+
+    # 2) Messages conversation
+    msgs = [
+        LLMMessage(role=MessageRole.SYSTEM, content="You are a concise coding tutor."),
+        LLMMessage(role=MessageRole.USER, content="Explain binary search in Python with a tiny example."),
     ]
-    
-    response2 = client.generate(
-        messages=messages,
-        temperature=0.3,
-        max_output_tokens=200
-    )
-    print(f"Binary search explanation: {response2.content}")
-    
-    # Example 3: Structured output with schema
-    response3 = client.generate(
+    r2 = client.generate(messages=msgs, temperature=0.3, max_output_tokens=180)
+    print("\nBinary search:", r2.content)
+
+    # 3) Structured output with a Pydantic schema
+    r3 = client.generate(
         schema=UserProfile,
-        prompt="Create a user profile for John, a 28-year-old software developer who loves Python and hiking",
-        temperature=0.7
+        prompt="Create a user profile for Dana, age 29, who enjoys AI, travel, and chess. Add a short bio.",
+        temperature=0.6,
+        max_output_tokens=200,
     )
-    print(f"Structured profile: {response3.content}")
-    
-    # Example 4: Using LLMParams object
-    params = LLMParams(
-        prompt="Explain quantum computing in simple terms",
-        temperature=0.5,
-        max_output_tokens=150,
-        top_p=0.9,
-        stop=["\n\n", "In conclusion"]
-    )
-    
-    response4 = client.generate(params=params)
-    print(f"Quantum explanation: {response4.content}")
-    
-    # Example 5: Streaming with tools
+    print("\nStructured profile JSON:", r3.content)
+
+    # 4) Streaming
+    print("\nStreaming Fibonacci function:")
     async for chunk in client.stream_generate(
-        prompt="Write a Python function to calculate fibonacci numbers",
+        prompt="Write a tiny Python function that returns the nth Fibonacci number.",
         temperature=0.2,
-        max_output_tokens=300
+        max_output_tokens=200,
     ):
-        print(f"Streaming: {chunk.content}")
-    
-    # Example 6: Using tools (function calling)
-    tools = [
-        {
-            "type": "function",
-            "function": {
-                "name": "get_weather",
-                "description": "Get weather information for a location",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "location": {"type": "string"},
-                        "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
-                    },
-                    "required": ["location"]
-                }
-            }
-        }
-    ]
-    
-    response5 = client.generate(
-        prompt="What's the weather like in New York?",
-        tools=tools,
-        tool_choice="auto"
-    )
-    print(f"Tool response: {response5.content}")
+        # Prints partial content as it streams
+        print(chunk.content, end="", flush=True)
+    print("\n")  # newline after stream
+
+    # 5) Embeddings: single input
+    vec = client.embed("Vectorize this short sentence.")
+    print("Single embedding length:", len(vec[0]))
+
+    # 6) Embeddings: batch input
+    batch_vecs = client.embed(["alpha", "beta", "gamma"])
+    print("Batch embeddings count:", len(batch_vecs))
+
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(example_usage())
+    asyncio.run(main())

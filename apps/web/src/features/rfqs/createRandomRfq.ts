@@ -1,8 +1,8 @@
 // Updated by CursorAI on Sep 2 2025
-import { OrderDirection, statusEnum, urgencyLevelEnum } from '@/drizzle/enums';
+import { OrderDirection, ProcessStatusEnum, UrgencyLevelEnum } from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
 import { client as rfqClient } from '@/modules/rfqs';
-import { RfqCreateInput } from '@/modules/rfqs/rfqs.client';
+import { RfqCreateInput } from '@/modules/rfqs/rfqs.types';
 
 function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -180,12 +180,12 @@ export async function createRandomRfq(direction: OrderDirection = 'sent'): Promi
 
     // Commercial Terms (matching schema)
     pricingType: Math.random() > 0.3 ? pickOne(PRICING_TYPES) : null,
-    urgencyLevel: Math.random() > 0.2 ? pickOne(urgencyLevelEnum.enumValues) : null,
+    urgencyLevel: Math.random() > 0.2 ? pickOne(UrgencyLevelEnum.enumValues) : null,
     deliverTo: Math.random() > 0.4 ? pickOne(DELIVERY_LOCATIONS) : null,
     buyerComments: Math.random() > 0.4 ? pickOne(BUYER_COMMENTS) : null,
 
     // Workflow Management (matching schema)
-    status: pickOne(statusEnum.enumValues),
+    processStatus: pickOne(ProcessStatusEnum.enumValues),
     selectedQuoteId: null, // This would be set later when a quote is selected
 
     // Timestamps (matching schema)

@@ -2,7 +2,6 @@ import { relations } from 'drizzle-orm';
 import {
   foreignKey,
   integer,
-  jsonb,
   numeric,
   pgTable,
   text,
@@ -10,7 +9,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { OrderDirectionEnum, statusEnum } from '../enums';
+import { OrderDirectionEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
 import { organizationsTable, usersTable } from './schema';
 
@@ -49,8 +48,7 @@ export const rfqsTable = pgTable(
     buyerComments: text('buyer_comments'),
 
     // Workflow Management
-    status: statusEnum('status').default('pending'),
-    statusHistory: jsonb('status_history').default([]),
+    processStatus: ProcessStatusEnum('process_status').default('pending'),
     selectedQuoteId: uuid('selected_quote_id'),
 
     // Timestamps
@@ -144,7 +142,7 @@ export const quotesTable = pgTable(
     vendorComments: text('vendor_comments'),
 
     // Workflow Management
-    status: statusEnum('status').default('pending'),
+    processStatus: ProcessStatusEnum('process_status').default('pending'),
 
     // Timestamps
     sentAt: timestamp('sent_at', { withTimezone: true }),

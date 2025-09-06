@@ -1,7 +1,7 @@
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getContractTypeDisplay, getStatusDisplay, Status } from '@/drizzle/enums';
+import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { cn } from '@/lib/utils';
@@ -101,7 +101,9 @@ export default function ContractList({
                               ? 'pending'
                               : 'error'
                         }
-                        text={getStatusDisplay(getIsContractActive(contract) as Status)}
+                        text={getProcessStatusDisplay(
+                          getIsContractActive(contract) as ProcessStatus,
+                        )}
                       />
                     </div>
                     <span className="text-sm font-bold">{contract.title}</span>

@@ -3,7 +3,7 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
-import { OrderDirection } from '@/drizzle/enums';
+import { getProcessStatusDisplay, OrderDirection } from '@/drizzle/enums';
 import { Rfq } from '@/drizzle/types';
 import { createRandomRfq } from '@/features/rfqs/createRandomRfq';
 import { convertPydanticToRfq, PydanticRFQ } from '@/features/rfqs/pydanticConverter';
@@ -66,30 +66,13 @@ export default function RfqList({
     }
   };
 
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'sent':
-        return 'Sent';
-      case 'quoted':
-        return 'Quoted';
-      case 'approved':
-        return 'Approved';
-      case 'rejected':
-        return 'Rejected';
-      default:
-        return status;
-    }
-  };
-
   // Create status options for multi-select
   const statusOptions = useMemo(() => {
-    const uniqueStatuses = [...new Set(rfqs.map((rfq) => rfq.status || 'pending'))];
+    const uniqueStatuses = [...new Set(rfqs.map((rfq) => rfq.processStatus || 'pending'))];
     return uniqueStatuses
       .map((status) => ({
         value: status,
-        label: getStatusDisplay(status),
+        label: getProcessStatusDisplay(status),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [rfqs]);
@@ -107,7 +90,7 @@ export default function RfqList({
 
       // Apply status filter
       const matchesStatus =
-        selectedStatuses.length === 0 || selectedStatuses.includes(rfq.status || 'pending');
+        selectedStatuses.length === 0 || selectedStatuses.includes(rfq.processStatus || 'pending');
 
       return matchesSearch && matchesStatus;
     });
@@ -263,7 +246,7 @@ export default function RfqList({
                       <StatusBadge
                         size="sm"
                         status="secondary"
-                        text={getStatusDisplay(rfq.status || '')}
+                        text={getProcessStatusDisplay(rfq.processStatus || '')}
                       />
                       {rfq.quantity && (
                         <StatusBadge

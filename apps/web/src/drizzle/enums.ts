@@ -21,28 +21,31 @@ export function getOrderDirectionDisplay(
 }
 
 // --------------------  Process Status Enum --------------------
-export const statusEnum = pgEnum('status', ['pending', 'in_progress', 'closed']);
-export type Status = (typeof statusEnum.enumValues)[number];
-export const statusDisplayMap: Record<Status, string> = {
+export const ProcessStatusEnum = pgEnum('process_status', ['pending', 'in_progress', 'closed']);
+export type ProcessStatus = (typeof ProcessStatusEnum.enumValues)[number];
+export const processStatusDisplayMap: Record<ProcessStatus, string> = {
   pending: 'Pending',
   in_progress: 'In Progress',
   closed: 'Closed',
 };
-export function getStatusDisplay(status: Status | string | null | undefined): string {
+export function getProcessStatusDisplay(status: ProcessStatus | string | null | undefined): string {
   if (!status) return 'Unknown';
-  return statusDisplayMap[status as Status] || status.charAt(0).toUpperCase() + status.slice(1);
+  return (
+    processStatusDisplayMap[status as ProcessStatus] ||
+    status.charAt(0).toUpperCase() + status.slice(1)
+  );
 }
 
 // ------------------------- Invoice Status Enum -------------------------
-export const invoiceStatusEnum = pgEnum('invoice_status', [
-  'recieved',
+export const InvoiceStatusEnum = pgEnum('invoice_status', [
+  'received',
   'approved',
   'paid',
   'disputed',
 ]);
-export type InvoiceStatus = (typeof invoiceStatusEnum.enumValues)[number];
+export type InvoiceStatus = (typeof InvoiceStatusEnum.enumValues)[number];
 export const invoiceStatusDisplayMap: Record<InvoiceStatus, string> = {
-  recieved: 'Recieved',
+  received: 'Received',
   approved: 'Approved',
   paid: 'Paid',
   disputed: 'Disputed',
@@ -115,8 +118,8 @@ export function getContractTypeDisplay(
 }
 
 // --------------------  Urgency Level Enum --------------------
-export const urgencyLevelEnum = pgEnum('urgency_level', ['routine', 'urgent', 'aog']);
-export type UrgencyLevel = (typeof urgencyLevelEnum.enumValues)[number];
+export const UrgencyLevelEnum = pgEnum('urgency_level', ['routine', 'urgent', 'aog']);
+export type UrgencyLevel = (typeof UrgencyLevelEnum.enumValues)[number];
 export const urgencyLevelDisplayMap: Record<UrgencyLevel, string> = {
   routine: 'Routine',
   urgent: 'Urgent',

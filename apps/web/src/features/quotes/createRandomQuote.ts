@@ -1,5 +1,5 @@
 // Updated by CursorAI on Sep 2 2025
-import { OrderDirection, statusEnum } from '@/drizzle/enums';
+import { OrderDirection, ProcessStatusEnum } from '@/drizzle/enums';
 import { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { client as quoteClient } from '@/modules/quotes';
@@ -206,7 +206,7 @@ export async function createRandomQuote(rfqId: Rfq['id']): Promise<Quote> {
         : null,
 
     // Workflow Management (matching schema)
-    status: pickOne(statusEnum.enumValues),
+    processStatus: pickOne(ProcessStatusEnum.enumValues),
 
     // Timestamps (matching schema)
     sentAt:

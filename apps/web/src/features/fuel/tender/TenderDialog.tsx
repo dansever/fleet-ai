@@ -1,7 +1,7 @@
 // Updated by CursorAI on Sep 2 2025
 'use client';
 
-import { getStatusDisplay, statusEnum } from '@/drizzle/enums';
+import { getProcessStatusDisplay, ProcessStatusEnum } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
@@ -79,7 +79,7 @@ export default function TenderDialog({
       biddingEnds: tender?.biddingEnds || null,
       deliveryStarts: tender?.deliveryStarts || null,
       deliveryEnds: tender?.deliveryEnds || null,
-      status: tender?.status || 'pending',
+      processStatus: tender?.processStatus || 'pending',
       winningBidId: tender?.winningBidId || null,
     };
   }, [DialogType, tender]);
@@ -149,7 +149,7 @@ export default function TenderDialog({
           biddingEnds: serializedFormData.biddingEnds,
           deliveryStarts: serializedFormData.deliveryStarts,
           deliveryEnds: serializedFormData.deliveryEnds,
-          status: serializedFormData.status,
+          processStatus: serializedFormData.processStatus,
         };
         savedTender = await fuelTenderClient.updateFuelTender(
           tender.id,
@@ -248,9 +248,9 @@ export default function TenderDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('status', value)}
                 name="status"
-                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                selectOptions={Object.values(ProcessStatusEnum.enumValues).map((status) => ({
                   value: status,
-                  label: getStatusDisplay(status),
+                  label: getProcessStatusDisplay(status),
                 }))}
               />
             </div>

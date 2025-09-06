@@ -12,7 +12,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { decisionEnum, statusEnum } from '../enums';
+import { decisionEnum, ProcessStatusEnum } from '../enums';
 import { airportsTable, organizationsTable, usersTable, vendorsTable } from './schema';
 
 // -------------------- Fuel Tenders --------------------
@@ -41,7 +41,7 @@ export const fuelTendersTable = pgTable(
     deliveryEnds: date('delivery_ends'),
 
     // Workflow Management
-    status: statusEnum('status').default('pending'),
+    processStatus: ProcessStatusEnum('process_status').default('pending'),
     winningBidId: uuid('winning_bid_id'),
 
     // Timestamps

@@ -4,7 +4,7 @@ import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { getStatusDisplay } from '@/drizzle/enums';
+import { getProcessStatusDisplay } from '@/drizzle/enums';
 import { Quote, Rfq } from '@/drizzle/types';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
@@ -33,7 +33,7 @@ import { useTechnicalProcurement } from '../ContextProvider';
 const getStatusBadge = (status: string | null) => {
   if (!status) return <Badge variant="secondary">Unknown</Badge>;
 
-  const displayText = getStatusDisplay(status);
+  const displayText = getProcessStatusDisplay(status);
 
   switch (status.toLowerCase()) {
     case 'completed':
@@ -136,7 +136,7 @@ const QuoteDataTableColumns = (
     header: 'Status',
     accessor: (quote) => (
       <div className="min-w-[120px] flex flex-col gap-1">
-        {getStatusBadge(quote.status)}
+        {getStatusBadge(quote.processStatus)}
         {quote.sentAt && (
           <div className="text-xs text-slate-500">Received {formatDate(quote.sentAt)}</div>
         )}

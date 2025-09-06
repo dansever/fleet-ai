@@ -4,7 +4,7 @@ import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
-import { getUrgencyLevelDisplay, Status, statusDisplayMap } from '@/drizzle/enums';
+import { getUrgencyLevelDisplay, ProcessStatus, processStatusDisplayMap } from '@/drizzle/enums';
 import { createRandomQuote } from '@/features/quotes/createRandomQuote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
@@ -16,8 +16,8 @@ import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Tabs } from '@/stories/Tabs/TabsNew';
-import { FileText, Package, RefreshCw, Sparkles, TrashIcon } from 'lucide-react';
+import { Tabs } from '@/stories/Tabs/Tabs';
+import { FileText, Package, RefreshCw, Sparkles, TrashIcon, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import RfqList from '../_components/RfqSidebar';
@@ -98,29 +98,12 @@ export default function TechnicalProcurementClientPage() {
       return;
     }
     try {
-      const res = await quoteClient.compareQuotes(selectedRfq.id);
+      const res = await quoteClient.compareQuotesByRfqId(selectedRfq.id);
       setQuoteComparisonResult(res as unknown as JSON);
       toast.success('Quotes analyzed successfully');
     } catch (error) {
       console.error('Error analyzing quotes:', error);
       toast.error('Error analyzing quotes');
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'quoted':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'approved':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -150,7 +133,7 @@ export default function TechnicalProcurementClientPage() {
           <StatusBadge
             status="default"
             size="sm"
-            text={statusDisplayMap[selectedRfq.status as Status] || ''}
+            text={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
           />
           {selectedRfq.sentAt && <span>Sent: {formatDate(new Date(selectedRfq.sentAt))}</span>}
         </div>
@@ -168,10 +151,7 @@ export default function TechnicalProcurementClientPage() {
       </div>
     </div>
   ) : (
-    <div className="flex items-center justify-between w-full">
-      <h1 className="text-xl font-semibold">Technical Procurement</h1>
-      <p className="text-sm text-muted-foreground">Select an RFQ to view details</p>
-    </div>
+
   );
 
   // Show loading component when initially loading (no data yet)
@@ -287,7 +267,7 @@ export default function TechnicalProcurementClientPage() {
                 <KeyValuePair
                   keyClassName="max-w-1/2"
                   label="Status"
-                  value={statusDisplayMap[selectedRfq.status as Status] || ''}
+                  value={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
                   valueType="string"
                 />
                 <KeyValuePair
@@ -316,8 +296,8 @@ export default function TechnicalProcurementClientPage() {
 
       <Tabs
         tabs={[
-          { label: 'Quotes', value: 'quotes' },
-          { label: 'Analysis', value: 'analysis' },
+          { label: 'Quotes', value: 'quotes', icon: <FileText /> },
+          { label: 'Analysis', value: 'analysis', icon: <ChartBar /> },
         ]}
         defaultTab="quotes"
         onTabChange={() => {}}
@@ -359,8 +339,9 @@ export default function TechnicalProcurementClientPage() {
                 <FileUploadPopover
                   open={uploadQuotePopoverOpen}
                   onOpenChange={setUploadQuotePopoverOpen}
-                  triggerIntent="secondary"
-                  triggerText="Upload Quote"
+                  trigger={
+                    <Button intent="secondary" icon={Upload} text="Upload Quote" size="sm" />
+                  }
                   onSend={() => {}}
                 >
                   <div className="flex flex-col gap-2 text-sm">

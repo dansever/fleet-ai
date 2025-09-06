@@ -11,7 +11,7 @@ import {
   uuid,
   vector,
 } from 'drizzle-orm/pg-core';
-import { invoiceStatusEnum } from '../enums';
+import { InvoiceStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
 import { airportsTable, organizationsTable, vendorsTable } from './schema';
 import { contractsTable } from './schema.contracts';
@@ -30,7 +30,6 @@ export const invoicesTable = pgTable(
     // Identity
     invoiceNumber: text('invoice_number').notNull(), // number of the invoice
     invoiceDate: date('invoice_date'), // date when the invoice was issued
-    status: invoiceStatusEnum('status').default('recieved'),
 
     // Vendor Information
     vendorName: text('vendor_name'),
@@ -49,6 +48,9 @@ export const invoicesTable = pgTable(
     // Period
     periodStart: date('period_start'), // start date of the invoice period
     periodEnd: date('period_end'), // end date of the invoice period
+
+    // Invoice Status
+    invoiceStatus: InvoiceStatusEnum('invoice_status').default('received'),
 
     // Timestamps
     createdAt,
@@ -78,8 +80,8 @@ export const invoicesTable = pgTable(
 
     // Unique index on orgId, vendorId, invoiceNumber
     uniqueIndex('invoices_vendor_number_uniq').on(table.orgId, table.vendorId, table.invoiceNumber),
-    // Index on status
-    index('invoices_status_idx').on(table.status),
+    // Index on invoiceStatus
+    index('invoices_status_idx').on(table.invoiceStatus),
     // Index on periodStart and periodEnd
     index('invoices_period_idx').on(table.periodStart, table.periodEnd),
     // Index on tags

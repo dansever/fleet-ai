@@ -2,18 +2,18 @@
 'use client';
 
 import {
-  getStatusDisplay,
+  getProcessStatusDisplay,
   getUrgencyLevelDisplay,
   OrderDirection,
   orderDirectionDisplayMap,
   OrderDirectionEnum,
-  statusEnum,
+  ProcessStatusEnum,
   UrgencyLevel,
-  urgencyLevelEnum,
+  UrgencyLevelEnum,
 } from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
 import { client as rfqClient } from '@/modules/rfqs';
-import { RfqCreateInput, RfqUpdateInput } from '@/modules/rfqs/rfqs.client';
+import { RfqCreateInput, RfqUpdateInput } from '@/modules/rfqs/rfqs.types';
 import { Button, ButtonProps } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -53,7 +53,7 @@ export default function RfqDialog({
       // RFQ Identification (matching schema)
       direction: rfq?.direction || null,
       rfqNumber: rfq?.rfqNumber || null,
-      status: rfq?.status || 'pending',
+      processStatus: rfq?.processStatus || 'pending',
 
       // Vendor Information (matching schema)
       vendorName: rfq?.vendorName || null,
@@ -96,7 +96,7 @@ export default function RfqDialog({
       // RFQ Identification (matching schema)
       direction: rfqData?.direction || null,
       rfqNumber: rfqData?.rfqNumber || null,
-      status: rfqData?.status || 'pending',
+      processStatus: rfqData?.processStatus || 'pending',
 
       // Vendor Information (matching schema)
       vendorName: rfqData?.vendorName || null,
@@ -189,7 +189,7 @@ export default function RfqDialog({
           urgencyLevel: serializedFormData.urgencyLevel,
           deliverTo: serializedFormData.deliverTo,
           buyerComments: serializedFormData.buyerComments,
-          status: serializedFormData.status,
+          processStatus: serializedFormData.processStatus,
           selectedQuoteId: serializedFormData.selectedQuoteId,
           sentAt: serializedFormData.sentAt?.toISOString() || null,
         };
@@ -218,7 +218,7 @@ export default function RfqDialog({
           urgencyLevel: serializedFormData.urgencyLevel,
           deliverTo: serializedFormData.deliverTo,
           buyerComments: serializedFormData.buyerComments,
-          status: serializedFormData.status,
+          processStatus: serializedFormData.processStatus,
         };
         savedRfq = await rfqClient.updateRfq(rfq.id, updateData);
         toast.success('RFQ updated successfully');
@@ -307,14 +307,14 @@ export default function RfqDialog({
               />
               <KeyValuePair
                 label="Status"
-                value={formData.status}
+                value={formData.processStatus}
                 valueType="select"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('status', value)}
-                name="status"
-                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                onChange={(value) => handleFieldChange('processStatus', value)}
+                name="processStatus"
+                selectOptions={Object.values(ProcessStatusEnum.enumValues).map((status) => ({
                   value: status,
-                  label: getStatusDisplay(status),
+                  label: getProcessStatusDisplay(status),
                 }))}
               />
               <KeyValuePair
@@ -324,7 +324,7 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('urgencyLevel', value)}
                 name="urgencyLevel"
-                selectOptions={Object.values(urgencyLevelEnum.enumValues).map((level) => ({
+                selectOptions={Object.values(UrgencyLevelEnum.enumValues).map((level) => ({
                   value: level,
                   label: getUrgencyLevelDisplay(level as UrgencyLevel),
                 }))}

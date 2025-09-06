@@ -8,7 +8,8 @@ import { Building2, Plane, Star, Trash } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
 export default function AirportPage() {
-  const { selectedAirport, updateAirport, contracts, removeAirport } = useAirportHub();
+  const { selectedAirport, updateAirport, contracts, removeAirport, setSelectedAirport } =
+    useAirportHub();
 
   if (!selectedAirport) {
     return (
@@ -40,10 +41,13 @@ export default function AirportPage() {
         neutralHeader={true}
         actions={
           <ConfirmationPopover
-            trigger={<Button intent="secondaryInverted" icon={Trash} />}
+            trigger={<Button intent="danger" text="Delete" icon={Trash} />}
             popoverIntent="danger"
             title="Delete Airport"
-            onConfirm={() => removeAirport(selectedAirport.id)}
+            onConfirm={() => {
+              removeAirport(selectedAirport.id);
+              setSelectedAirport(null);
+            }}
           />
         }
       >

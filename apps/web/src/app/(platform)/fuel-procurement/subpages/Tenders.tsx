@@ -1,7 +1,7 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { getStatusDisplay } from '@/drizzle/enums';
+import { getProcessStatusDisplay } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
@@ -298,7 +298,7 @@ const FuelTendersPage = memo(function TendersPage() {
                     </div>
                     <StatusBadge
                       status="operational"
-                      text={getStatusDisplay(currentTender.status)}
+                      text={getProcessStatusDisplay(currentTender.processStatus)}
                     />
                   </div>
                   <div className="space-y-2">

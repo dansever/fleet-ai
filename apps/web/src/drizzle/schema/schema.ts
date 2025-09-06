@@ -95,18 +95,15 @@ export const airportsTable = pgTable(
     orgId: uuid('org_id').notNull(), //fk to orgs table
 
     // Airport Identification
+    name: text('name').notNull(),
     iata: text('iata'), // 3-letter geo-code (many can have same code)
     icao: text('icao'), // 4-letter aerodrome identifier
-    name: text('name').notNull(),
+    isHub: boolean('is_hub').default(false),
 
     // Location Information
     city: text('city'),
     state: text('state'),
     country: text('country').notNull(),
-
-    // Operational Information
-    isHub: boolean('is_hub').default(false),
-    internalNotes: text('internal_notes'),
 
     // Timestamps
     createdAt,

@@ -3,7 +3,7 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
-import { getUrgencyLevelDisplay, Status, statusDisplayMap } from '@/drizzle/enums';
+import { getUrgencyLevelDisplay, ProcessStatus, processStatusDisplayMap } from '@/drizzle/enums';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
@@ -130,7 +130,7 @@ export default function TechnicalProcurementClientPage() {
           <StatusBadge
             status="default"
             size="sm"
-            text={statusDisplayMap[selectedRfq.status as Status] || ''}
+            text={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
           />
           {selectedRfq.sentAt && <span>Sent: {formatDate(new Date(selectedRfq.sentAt))}</span>}
         </div>
@@ -148,10 +148,7 @@ export default function TechnicalProcurementClientPage() {
       </div>
     </div>
   ) : (
-    <div className="flex items-center justify-between w-full">
-      <h1 className="text-xl font-semibold">Technical Procurement</h1>
-      <p className="text-sm text-muted-foreground">Select an RFQ to view details</p>
-    </div>
+    <div> </div>
   );
 
   // Show loading component when initially loading (no data yet)
@@ -267,7 +264,7 @@ export default function TechnicalProcurementClientPage() {
                 <KeyValuePair
                   keyClassName="max-w-1/2"
                   label="Status"
-                  value={statusDisplayMap[selectedRfq.status as Status] || ''}
+                  value={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
                   valueType="string"
                 />
                 <KeyValuePair

@@ -112,7 +112,7 @@ importers:
         specifier: ^16.5.0
         version: 16.6.1
       drizzle-kit:
-        specifier: ^0.31.1
+        specifier: ^0.31.4
         version: 0.31.4
       drizzle-orm:
         specifier: ^0.43.1
@@ -1908,8 +1908,8 @@ packages:
     peerDependencies:
       '@supabase/supabase-js': ^2.43.4
 
-  '@supabase/storage-js@2.11.0':
-    resolution: {integrity: sha512-Y+kx/wDgd4oasAgoAq0bsbQojwQ+ejIif8uczZ9qufRHWFLMU5cODT+ApHsSrDufqUcVKt+eyxtOXSkeh2v9ww==}
+  '@supabase/storage-js@2.11.1':
+    resolution: {integrity: sha512-kaKCJZcZrHDCO9L76bEPzNv2caCStOigOUioHw7CvdEzvcSKjVuomRfN2Y9EqXmJH4tEHoBi3tCs/Ye2e3HwDw==}
 
   '@supabase/supabase-js@2.55.0':
     resolution: {integrity: sha512-Y1uV4nEMjQV1x83DGn7+Z9LOisVVRlY1geSARrUHbXWgbyKLZ6/08dvc0Us1r6AJ4tcKpwpCZWG9yDQYo1JgHg==}
@@ -2132,6 +2132,9 @@ packages:
 
   '@types/node@22.17.2':
     resolution: {integrity: sha512-gL6z5N9Jm9mhY+U2KXZpteb+09zyffliRkZyZOHODGATyC5B1Jt/7TzuuiLkFsSUMLbS1OLmlj/E+/3KF4Q/4w==}
+
+  '@types/node@22.18.1':
+    resolution: {integrity: sha512-rzSDyhn4cYznVG+PCzGe1lwuMYJrcBS1fc3JqSa2PvtABwWo+dZ1ij5OVok3tqfpEBCBoaR4d7upFJk73HRJDw==}
 
   '@types/papaparse@5.3.16':
     resolution: {integrity: sha512-T3VuKMC2H0lgsjI9buTB3uuKj3EMD2eap1MOuEQuBQ44EnDx/IkGhU6EwiTf9zG3za4SKlmwKAImdDKdNnCsXg==}
@@ -6265,7 +6268,7 @@ snapshots:
       '@supabase/supabase-js': 2.55.0
       cookie: 1.0.2
 
-  '@supabase/storage-js@2.11.0':
+  '@supabase/storage-js@2.11.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
@@ -6276,7 +6279,7 @@ snapshots:
       '@supabase/node-fetch': 2.6.15
       '@supabase/postgrest-js': 1.19.4
       '@supabase/realtime-js': 2.15.1
-      '@supabase/storage-js': 2.11.0
+      '@supabase/storage-js': 2.11.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -6473,6 +6476,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/node@22.18.1':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/papaparse@5.3.16':
     dependencies:
       '@types/node': 22.17.2
@@ -6491,7 +6498,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 22.17.2
+      '@types/node': 22.18.1
 
   '@typescript-eslint/eslint-plugin@8.40.0(@typescript-eslint/parser@8.40.0(eslint@9.33.0(jiti@2.5.1))(typescript@5.9.2))(eslint@9.33.0(jiti@2.5.1))(typescript@5.9.2)':
     dependencies:

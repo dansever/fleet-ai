@@ -3,7 +3,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { OrderDirection, rfqsTable } from '@/drizzle/schema/schema';
+import { OrderDirection, rfqsTable } from '@/drizzle/schema/index';
 import type { NewRfq, Organization, Rfq, UpdateRfq } from '@/drizzle/types';
 import { and, desc, eq } from 'drizzle-orm';
 
@@ -11,11 +11,12 @@ import { and, desc, eq } from 'drizzle-orm';
  * Get an RFQ by its ID
  */
 export async function getRfqById(id: Rfq['id'], orgId: Organization['id']): Promise<Rfq | null> {
-  const row = await db.query.rfqsTable.findFirst({
-    where: and(eq(rfqsTable.id, id), eq(rfqsTable.orgId, orgId)),
-  });
-
-  return row ?? null;
+  const row = await db
+    .select()
+    .from(rfqsTable)
+    .where(and(eq(rfqsTable.id, id), eq(rfqsTable.orgId, orgId)))
+    .limit(1);
+  return row[0] ?? null;
 }
 
 /**
@@ -25,10 +26,12 @@ export async function listRfqsByDirection(
   direction: OrderDirection = 'sent',
   orgId: Organization['id'],
 ): Promise<Rfq[]> {
-  return db.query.rfqsTable.findMany({
-    where: and(eq(rfqsTable.orgId, orgId), eq(rfqsTable.direction, direction)),
-    orderBy: desc(rfqsTable.createdAt),
-  });
+  const rows = await db
+    .select()
+    .from(rfqsTable)
+    .where(and(eq(rfqsTable.orgId, orgId), eq(rfqsTable.direction, direction)))
+    .orderBy(desc(rfqsTable.createdAt));
+  return rows;
 }
 
 /**
