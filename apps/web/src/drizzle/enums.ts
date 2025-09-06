@@ -20,7 +20,7 @@ export function getOrderDirectionDisplay(
   );
 }
 
-// --------------------  Status Enum --------------------
+// --------------------  Process Status Enum --------------------
 export const statusEnum = pgEnum('status', ['pending', 'in_progress', 'closed']);
 export type Status = (typeof statusEnum.enumValues)[number];
 export const statusDisplayMap: Record<Status, string> = {
@@ -33,21 +33,39 @@ export function getStatusDisplay(status: Status | string | null | undefined): st
   return statusDisplayMap[status as Status] || status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-// -------------------- Decision Enum --------------------
-export const decisionEnum = pgEnum('decision', [
-  'open',
-  'shortlisted',
-  'rejected',
-  'accepted',
+// ------------------------- Invoice Status Enum -------------------------
+export const invoiceStatusEnum = pgEnum('invoice_status', [
+  'recieved',
+  'approved',
+  'paid',
   'disputed',
 ]);
+export type InvoiceStatus = (typeof invoiceStatusEnum.enumValues)[number];
+export const invoiceStatusDisplayMap: Record<InvoiceStatus, string> = {
+  recieved: 'Recieved',
+  approved: 'Approved',
+  paid: 'Paid',
+  disputed: 'Disputed',
+};
+
+export function getInvoiceStatusDisplay(
+  invoiceStatus: InvoiceStatus | string | null | undefined,
+): string {
+  if (!invoiceStatus) return 'Unknown';
+  return (
+    invoiceStatusDisplayMap[invoiceStatus as InvoiceStatus] ||
+    invoiceStatus.charAt(0).toUpperCase() + invoiceStatus.slice(1)
+  );
+}
+
+// -------------------- Decision Enum --------------------
+export const decisionEnum = pgEnum('decision', ['open', 'shortlisted', 'rejected', 'accepted']);
 export type Decision = (typeof decisionEnum.enumValues)[number];
 export const decisionDisplayMap: Record<Decision, string> = {
   open: 'Open',
   shortlisted: 'Shortlisted',
   rejected: 'Rejected',
   accepted: 'Accepted',
-  disputed: 'Disputed',
 };
 export function getDecisionDisplay(decision: Decision | string | null | undefined): string {
   if (!decision) return 'Unknown';

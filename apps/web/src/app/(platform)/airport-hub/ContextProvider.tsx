@@ -208,7 +208,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contacts: null }));
 
       try {
-        const contacts = await contactServer.listContactsByAirport(selectedAirport.id);
+        const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
         setContacts(contacts);
 
         // Cache the contacts for this airport
@@ -448,7 +448,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contacts: null }));
 
     try {
-      const contacts = await contactServer.listContactsByAirport(selectedAirport.id);
+      const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
       setContacts(contacts);
 
       // Update cache with fresh data

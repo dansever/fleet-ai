@@ -3,7 +3,7 @@ import 'server-only';
 
 import { db } from '@/drizzle';
 import { ContractType } from '@/drizzle/enums';
-import { contractsTable } from '@/drizzle/schema';
+import { contractsTable } from '@/drizzle/schema/schema.contracts';
 import { Airport, Contract, NewContract, Organization, UpdateContract } from '@/drizzle/types';
 import { and, desc, eq } from 'drizzle-orm';
 

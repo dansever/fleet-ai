@@ -7,6 +7,7 @@ import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
+import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -23,7 +24,6 @@ export default function ContractList({
   contracts,
   onContractSelect,
   selectedContract,
-  InsertAddContractButton = false,
   onContractAdd,
 }: ContractListProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,20 +48,23 @@ export default function ContractList({
         <div className="text-sm text-muted-foreground">
           {contracts.length} of {contracts.length} contracts
         </div>
-        {InsertAddContractButton && (
-          <ContractDialog
-            contract={null}
-            DialogType="add"
-            triggerButton={<Button intent="add" icon={Plus} size="md" />}
-            onChange={(newContract) => {
-              if (onContractAdd) {
-                onContractAdd(newContract);
-                // Automatically select the newly created airport
-                onContractSelect(newContract);
-              }
-            }}
-          />
-        )}
+        <FileUploadPopover onSend={() => {}} trigger={<Button intent="add" icon={Plus} />}>
+          <div className="flex flex-col gap-1 w-full">
+            <ContractDialog
+              contract={null}
+              DialogType="add"
+              trigger={<Button intent="secondary" text="Manually Add Contract" size="sm" />}
+              onChange={(newContract) => {
+                if (onContractAdd) {
+                  onContractAdd(newContract);
+                  // Automatically select the newly created airport
+                  onContractSelect(newContract);
+                }
+              }}
+            />
+            <Button intent="ghost" text="Or generate a random contract" size="sm" />
+          </div>
+        </FileUploadPopover>
       </div>
 
       {/* Contract List */}

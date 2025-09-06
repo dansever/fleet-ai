@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { Button, type ButtonProps } from '../Button/Button';
+import { Button } from '../Button/Button';
 import { MainCard } from '../Card/Card';
 
 // Confirmation Popover Component for direct actions
@@ -127,9 +127,7 @@ export interface FileUploadPopoverProps {
   accept?: string;
   maxSize?: number; // in MB
   className?: string;
-  triggerIntent?: ButtonProps['intent'];
-  triggerText?: string;
-  triggerSize?: ButtonProps['size'];
+  trigger: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   popoverContentAlign?: 'start' | 'center' | 'end';
@@ -141,9 +139,7 @@ export const FileUploadPopover = ({
   accept = '*/*',
   maxSize = 10,
   className,
-  triggerIntent = 'primary',
-  triggerText = 'Upload',
-  triggerSize = 'md',
+  trigger,
   popoverContentAlign = 'end',
   open,
   onOpenChange,
@@ -226,10 +222,7 @@ export const FileUploadPopover = ({
   return (
     <div className={cn('space-y-3 flex flex-row gap-2', className)}>
       <Popover open={isOpen} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button intent={triggerIntent} text={triggerText} icon={Upload} size={triggerSize} />
-        </PopoverTrigger>
-
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
         <PopoverContent
           align={popoverContentAlign}
           className={cn(

@@ -1,21 +1,15 @@
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import {
   airportsTable,
-  claimsTable,
   contactsTable,
-  contractRulesTable,
-  contractsTable,
-  fuelBidsTable,
-  fuelTendersTable,
-  invoiceLinesTable,
-  invoicesTable,
-  opsEvidenceTable,
   organizationsTable,
-  quotesTable,
-  rfqsTable,
   usersTable,
   vendorsTable,
-} from './schema';
+} from './schema/schema';
+import { contractsTable } from './schema/schema.contracts';
+import { fuelBidsTable, fuelTendersTable } from './schema/schema.fuel';
+import { invoicesTable } from './schema/schema.invoices';
+import { quotesTable, rfqsTable } from './schema/schema.technical';
 
 // ==================== ORGANIZATIONS ====================
 export type Organization = InferSelectModel<typeof organizationsTable>;
@@ -57,20 +51,10 @@ export type Contract = InferSelectModel<typeof contractsTable>;
 export type NewContract = InferInsertModel<typeof contractsTable>;
 export type UpdateContract = Partial<NewContract>;
 
-// ==================== CONTRACT RULES ====================
-export type ContractRule = InferSelectModel<typeof contractRulesTable>;
-export type NewContractRule = InferInsertModel<typeof contractRulesTable>;
-export type UpdateContractRule = Partial<NewContractRule>;
-
 // ==================== INVOICES ====================
 export type Invoice = InferSelectModel<typeof invoicesTable>;
 export type NewInvoice = InferInsertModel<typeof invoicesTable>;
 export type UpdateInvoice = Partial<NewInvoice>;
-
-// ==================== INVOICE LINES ====================
-export type InvoiceLine = InferSelectModel<typeof invoiceLinesTable>;
-export type NewInvoiceLine = InferInsertModel<typeof invoiceLinesTable>;
-export type UpdateInvoiceLine = Partial<NewInvoiceLine>;
 
 // ==================== FUEL TENDERS ====================
 export type FuelTender = InferSelectModel<typeof fuelTendersTable>;
@@ -81,13 +65,3 @@ export type UpdateFuelTender = Partial<NewFuelTender>;
 export type FuelBid = InferSelectModel<typeof fuelBidsTable>;
 export type NewFuelBid = InferInsertModel<typeof fuelBidsTable>;
 export type UpdateFuelBid = Partial<NewFuelBid>;
-
-// ==================== OPS EVIDENCE ====================
-export type OpsEvidence = InferSelectModel<typeof opsEvidenceTable>;
-export type NewOpsEvidence = InferInsertModel<typeof opsEvidenceTable>;
-export type UpdateOpsEvidence = Partial<NewOpsEvidence>;
-
-// ==================== CLAIMS ====================
-export type Claim = InferSelectModel<typeof claimsTable>;
-export type NewClaim = InferInsertModel<typeof claimsTable>;
-export type UpdateClaim = Partial<NewClaim>;

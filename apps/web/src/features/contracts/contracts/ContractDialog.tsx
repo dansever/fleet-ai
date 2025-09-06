@@ -10,7 +10,7 @@ import { type ContractCreateInput } from '@/modules/contracts/contracts/contract
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Timeline } from '@/stories/Timeline/Timeline';
+import { ModernTimeline } from '@/stories/Timeline/Timeline';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -20,7 +20,7 @@ export default function ContractDialog({
   onChange,
   DialogType = 'view',
   withTrigger = true,
-  triggerButton,
+  trigger,
   open,
   onOpenChange,
 }: {
@@ -28,7 +28,7 @@ export default function ContractDialog({
   airportId?: string; // Required when DialogType is 'add'
   onChange: (contract: Contract) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerButton?: React.ReactNode;
+  trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   withTrigger?: boolean;
@@ -229,7 +229,7 @@ export default function ContractDialog({
 
   return (
     <DetailDialog
-      trigger={withTrigger ? triggerButton : null}
+      trigger={withTrigger ? trigger : null}
       headerGradient="from-green-500 to-green-500"
       title={dialogTitle}
       onSave={handleSave}
@@ -353,7 +353,7 @@ export default function ContractDialog({
 
           <MainCard title="Contract Period" neutralHeader={true}>
             {!isEditing && (
-              <Timeline
+              <ModernTimeline
                 items={[
                   {
                     id: '1',

@@ -3,7 +3,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { quotesTable } from '@/drizzle/schema';
+import { quotesTable } from '@/drizzle/schema/schema';
 import type { NewQuote, Organization, Quote, Rfq, UpdateQuote } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 

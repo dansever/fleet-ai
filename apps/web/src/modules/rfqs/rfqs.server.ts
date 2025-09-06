@@ -3,7 +3,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { OrderDirection, rfqsTable } from '@/drizzle/schema';
+import { OrderDirection, rfqsTable } from '@/drizzle/schema/schema';
 import type { NewRfq, Organization, Rfq, UpdateRfq } from '@/drizzle/types';
 import { and, desc, eq } from 'drizzle-orm';
 

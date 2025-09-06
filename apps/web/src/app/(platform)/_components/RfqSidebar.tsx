@@ -16,7 +16,7 @@ import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { FileText, RefreshCw, Search, X } from 'lucide-react';
+import { FileText, Plus, RefreshCw, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -146,9 +146,7 @@ export default function RfqList({
                 <FileUploadPopover
                   open={uploadRfqPopoverOpen}
                   onOpenChange={setUploadRfqPopoverOpen}
-                  triggerIntent="add"
-                  triggerText="RFQ"
-                  triggerSize="md"
+                  trigger={<Button intent="add" icon={Plus} />}
                   onSend={handleSendRfqFile}
                 >
                   <div className="flex flex-col gap-2 text-sm">

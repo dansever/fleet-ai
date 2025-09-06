@@ -2,8 +2,8 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { contactsTable } from '@/drizzle/schema';
-import { Airport, Contact, NewContact, Organization, UpdateContact, Vendor } from '@/drizzle/types';
+import { contactsTable } from '@/drizzle/schema/schema';
+import { Contact, NewContact, Organization, UpdateContact, Vendor } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -21,17 +21,6 @@ export const getContact = getContactById;
  */
 export async function listContactsByOrg(orgId: Organization['id']): Promise<Contact[]> {
   const contacts = await db.select().from(contactsTable).where(eq(contactsTable.orgId, orgId));
-  return contacts;
-}
-
-/**
- * Get all contacts for an airport
- */
-export async function listContactsByAirport(airportId: Airport['id']): Promise<Contact[]> {
-  const contacts = await db
-    .select()
-    .from(contactsTable)
-    .where(eq(contactsTable.airportId, airportId));
   return contacts;
 }
 

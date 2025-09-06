@@ -2,7 +2,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { usersTable } from '@/drizzle/schema';
+import { usersTable } from '@/drizzle/schema/schema';
 import { NewUser, Organization, UpdateUser, User } from '@/drizzle/types';
 import { eq, sql } from 'drizzle-orm';
 
