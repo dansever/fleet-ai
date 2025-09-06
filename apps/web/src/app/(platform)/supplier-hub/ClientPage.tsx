@@ -17,7 +17,15 @@ import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { FileText, Package, RefreshCw, Sparkles, TrashIcon, Upload } from 'lucide-react';
+import {
+  ChartBarIcon,
+  FileText,
+  Package,
+  RefreshCw,
+  Sparkles,
+  TrashIcon,
+  Upload,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import RfqList from '../_components/RfqSidebar';
@@ -151,7 +159,7 @@ export default function TechnicalProcurementClientPage() {
       </div>
     </div>
   ) : (
-
+    <div> </div>
   );
 
   // Show loading component when initially loading (no data yet)
@@ -297,7 +305,7 @@ export default function TechnicalProcurementClientPage() {
       <Tabs
         tabs={[
           { label: 'Quotes', value: 'quotes', icon: <FileText /> },
-          { label: 'Analysis', value: 'analysis', icon: <ChartBar /> },
+          { label: 'Analysis', value: 'analysis', icon: <ChartBarIcon /> },
         ]}
         defaultTab="quotes"
         onTabChange={() => {}}

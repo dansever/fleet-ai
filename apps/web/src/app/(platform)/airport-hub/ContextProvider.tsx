@@ -21,7 +21,7 @@ export type ErrorState = {
 };
 
 export type AirportHubContextType = {
-  // User and airports
+  // User
   dbUser: User;
 
   // Airports

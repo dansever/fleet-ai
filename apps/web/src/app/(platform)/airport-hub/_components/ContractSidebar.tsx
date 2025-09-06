@@ -5,12 +5,13 @@ import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { cn } from '@/lib/utils';
+import { client as storageClient } from '@/modules/storage';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface ContractListProps {
   contracts: Contract[];
@@ -26,8 +27,16 @@ export default function ContractList({
   selectedContract,
   onContractAdd,
 }: ContractListProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
+  // Upload Contract File
+  const handleUploadContractFile = async (file: File) => {
+    try {
+      await storageClient.uploadFile(file, 'contracts');
+      toast.success('Contract file uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload contract file');
+      console.error(error);
+    }
+  };
 
   function getIsContractActive(contract: Contract): 'pending' | 'active' | 'inactive' | null {
     const today = new Date();
@@ -48,7 +57,10 @@ export default function ContractList({
         <div className="text-sm text-muted-foreground">
           {contracts.length} of {contracts.length} contracts
         </div>
-        <FileUploadPopover onSend={() => {}} trigger={<Button intent="add" icon={Plus} />}>
+        <FileUploadPopover
+          onSend={handleUploadContractFile}
+          trigger={<Button intent="add" icon={Plus} />}
+        >
           <div className="flex flex-col gap-1 w-full">
             <ContractDialog
               contract={null}
@@ -57,7 +69,7 @@ export default function ContractList({
               onChange={(newContract) => {
                 if (onContractAdd) {
                   onContractAdd(newContract);
-                  // Automatically select the newly created airport
+                  // Automatically select the newly created contract
                   onContractSelect(newContract);
                 }
               }}

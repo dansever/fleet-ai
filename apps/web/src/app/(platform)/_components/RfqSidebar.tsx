@@ -16,9 +16,98 @@ import { ListItemCard } from '@/stories/Card/Card';
 import { ModernInput, ModernSelect } from '@/stories/Form/Form';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { FileText, Plus, RefreshCw, Search, X } from 'lucide-react';
+import {
+  BarChart,
+  FileText,
+  Fuel,
+  LayoutDashboard,
+  Package,
+  Plane,
+  Plus,
+  RefreshCw,
+  Search,
+  Settings,
+  Settings2,
+  ShoppingCart,
+  X,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+interface SidebarTab {
+  title: string;
+  description?: string;
+  url: string;
+  icon: React.ElementType;
+  isReady?: boolean;
+}
+
+export const sidebarTabs: Record<string, SidebarTab[]> = {
+  dashboard: [
+    {
+      title: 'Dashboard',
+      description: 'Overview & Analytics',
+      url: '/dashboard',
+      icon: LayoutDashboard,
+      isReady: true,
+    },
+    {
+      title: 'Analytics',
+      description: 'Analytics',
+      url: '/analytics',
+      icon: BarChart,
+      isReady: false,
+    },
+  ],
+  procurement: [
+    {
+      title: 'Technical',
+      description: 'Parts & Services RFQs',
+      url: '/technical-procurement',
+      icon: Package,
+      isReady: true,
+    },
+    {
+      title: 'Fuel',
+      description: 'Fuel Tenders & Contracts',
+      url: '/fuel-procurement',
+      icon: Fuel,
+      isReady: true,
+    },
+    {
+      title: 'Airport Hub',
+      description: 'Airport Operations & Contracts',
+      url: '/airport-hub',
+      icon: Plane,
+      isReady: true,
+    },
+  ],
+  supplier: [
+    {
+      title: 'Supplier Hub',
+      description: 'Supplier Management',
+      url: '/supplier-hub',
+      icon: ShoppingCart,
+      isReady: true,
+    },
+  ],
+  dev: [
+    {
+      title: 'Dev Page',
+      url: '/dev-page',
+      icon: Settings2,
+      isReady: true,
+    },
+  ],
+  administration: [
+    {
+      title: 'Settings',
+      url: '/settings',
+      icon: Settings,
+      isReady: true,
+    },
+  ],
+};
 
 interface RfqListProps {
   rfqs: Rfq[];
@@ -109,12 +198,14 @@ export default function RfqList({
   const hasActiveFilters = searchTerm || selectedStatuses.length > 0;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-card">
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-2 border-b border-border">
         <div className="flex flex-row justify-between items-center">
-          <h3 className="font-light italic">RFQs</h3>
-          <StatusBadge status="secondary" text={rfqsDirection} />
+          <div className="flex flex-row gap-4">
+            <h3 className="font-light italic">RFQs</h3>
+            <StatusBadge status="secondary" text={rfqsDirection} />
+          </div>
           <div className="flex gap-2">
             <Button
               intent="ghost"

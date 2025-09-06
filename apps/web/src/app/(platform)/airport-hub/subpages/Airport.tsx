@@ -63,11 +63,6 @@ export default function AirportPage() {
           <KeyValuePair label="State" value={selectedAirport?.state || ''} valueType="string" />
           <KeyValuePair label="Country" value={selectedAirport?.country || ''} valueType="string" />
           <KeyValuePair
-            label="Internal Notes"
-            value={selectedAirport?.internalNotes || ''}
-            valueType="string"
-          />
-          <KeyValuePair
             label="Is Hub Airport"
             value={selectedAirport?.isHub || false}
             valueType="boolean"
