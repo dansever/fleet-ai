@@ -1,4 +1,4 @@
-import { CreateRfqData } from '@/services/technical/rfq-client';
+import { RfqCreateInput } from '@/modules/rfqs/rfqs.client';
 import { PydanticPart, PydanticVendor } from '../pydantic-models/shared-pydantic-models';
 
 export interface PydanticRFQ {
@@ -26,12 +26,12 @@ export interface PydanticRFQ {
  * @param pydanticRfq - The RFQ object from the backend
  * @returns CreateRfqData object ready for API submission
  */
-export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): CreateRfqData {
+export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): RfqCreateInput {
   if (!pydanticRfq) {
     throw new Error('No RFQ data found in the extracted data');
   }
 
-  const createRfqData: CreateRfqData = {
+  const createRfqData: RfqCreateInput = {
     // RFQ Identification
     rfqNumber: pydanticRfq.rfq_number,
 

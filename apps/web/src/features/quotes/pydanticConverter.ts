@@ -1,4 +1,4 @@
-import { CreateQuoteData } from '@/services/technical/quote-client';
+import { QuoteCreateInput } from '@/modules/quotes/quotes.types';
 
 // Pydantic schema interfaces matching the backend Quote and QuoteSchema
 interface PydanticVendor {
@@ -69,7 +69,7 @@ interface PydanticQuoteSchema {
 export function convertPydanticToQuote(
   pydanticQuoteSchema: PydanticQuoteSchema,
   rfqId: string,
-): CreateQuoteData {
+): QuoteCreateInput {
   // For now, we'll take the first quote from the array
   // In the future, we might want to handle multiple quotes differently
   const pydanticQuote = pydanticQuoteSchema.quotes[0];
@@ -79,7 +79,7 @@ export function convertPydanticToQuote(
     throw new Error('No quotes found in the extracted data');
   }
 
-  const CreateQuoteData: CreateQuoteData = {
+  const CreateQuoteData: QuoteCreateInput = {
     // System fields
     rfqId,
 

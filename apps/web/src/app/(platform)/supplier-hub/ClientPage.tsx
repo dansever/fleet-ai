@@ -1,182 +1,134 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
-import { getStatusDisplay, UrgencyLevel, urgencyLevelDisplayMap } from '@/drizzle/schema/enums';
-import { Rfq } from '@/drizzle/types';
+import { TabsContent } from '@/components/ui/tabs';
+import { getUrgencyLevelDisplay, ProcessStatus, processStatusDisplayMap } from '@/drizzle/enums';
+import { createRandomQuote } from '@/features/quotes/createRandomQuote';
+import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
+import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
-import { DatePicker, ModernInput, ModernSelect, ModernTextarea } from '@/stories/Form/Form';
+import { BaseCard, MainCard } from '@/stories/Card/Card';
+import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
+import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import {
-  Building2,
-  Calculator,
-  CheckCircle,
-  DollarSign,
+  ChartBarIcon,
+  Eye,
   FileText,
   Package,
-  Send,
+  Pencil,
+  RefreshCw,
   Sparkles,
+  TrashIcon,
+  Upload,
 } from 'lucide-react';
 import { useState } from 'react';
-import RfqList from '../_components/RfqList';
-import { useSupplierHub } from './ContextProvider';
+import { toast } from 'sonner';
+import RfqList from '../_components/RfqSidebar';
+import { useTechnicalProcurement } from './ContextProvider';
+import QuoteAnalysis from './_components/QuoteAnalysis';
+import QuotesComparison from './_components/QuotesComparison';
 
-// Mock inventory data - will be replaced with real API calls later
-const mockInventoryData = {
-  partNumber: 'CFM56-7B26-1AF',
-  partDescription: 'Engine Turbine Blade Assembly',
-  availableQuantity: 5,
-  condition: 'New',
-  location: 'Warehouse A-12',
-  internalCost: 85000,
-  suggestedPrice: 125000,
-  lastSold: 118000,
-  leadTime: '14 days',
-  certifications: ['FAA 8130-3', 'EASA Form 1'],
-};
-
-export default function SupplierHubClientPage() {
+export default function TechnicalProcurementClientPage() {
   const {
-    incomingRfqs,
-    orgId,
-    refreshIncomingRfqs,
+    rfqs,
     selectedRfq,
-    setSelectedRfq,
-    addRfq,
+    selectedRfqQuotes,
+    setSelectedRfqId,
+    refreshData,
+    isLoading,
+    refreshSelectedRfqQuotes,
+    isLoadingQuotes,
+    isRefreshing,
+    isRefreshingQuotes,
     updateRfq,
-    loading,
-    errors,
-  } = useSupplierHub();
-
+    addRfq,
+    addQuote,
+    deleteRfqAndSelectAdjacent,
+    quoteComparisonResult,
+    setQuoteComparisonResult,
+    refreshRfqs,
+  } = useTechnicalProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const [uploadQuotePopoverOpen, setUploadQuotePopoverOpen] = useState(false);
 
-  // Helper function to create default quote form (will be replaced with API data loading)
-  const createDefaultQuoteForm = () => ({
-    unitPrice: '',
-    quantity: 1,
-    totalPrice: '',
-    leadTime: '12 hours',
-    validUntil: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
-    notes: '',
-    terms: 'Net 30',
-  });
-
-  // Quote form state
-  const [quoteForm, setQuoteForm] = useState(createDefaultQuoteForm());
-
-  const handleQuoteInputChange = (field: string, value: string | number) => {
-    setQuoteForm((prev) => {
-      const updated = { ...prev, [field]: value };
-
-      // Auto-calculate total price when unit price or quantity changes
-      if (field === 'unitPrice' || field === 'quantity') {
-        const unitPrice =
-          parseFloat(field === 'unitPrice' ? value.toString() : prev.unitPrice) || 0;
-        const quantity = field === 'quantity' ? Number(value) : prev.quantity;
-        updated.totalPrice = (unitPrice * quantity).toFixed(2);
-      }
-
-      return updated;
-    });
+  const handleDeleteRfq = async () => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+    try {
+      await deleteRfqAndSelectAdjacent(selectedRfq.id);
+      toast.success('RFQ deleted successfully');
+    } catch (error) {
+      console.error('Error deleting RFQ:', error);
+      toast.error('Error deleting RFQ');
+    }
   };
 
-  // Email preview state
-  const [showEmailPreview, setShowEmailPreview] = useState(false);
-  const [emailContent, setEmailContent] = useState('');
+  // Handle file upload for quote extraction
+  const handleQuoteFileUpload = async (file: File) => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
 
-  // Reset form and related state when switching RFQs
-  const resetQuoteForm = () => {
-    setQuoteForm(createDefaultQuoteForm());
-    setShowEmailPreview(false);
-    setEmailContent('');
+    try {
+      toast.info('Extracting quote from file...');
+
+      // Extract quote data from file
+      const extractedData = await quoteClient.extractQuoteFromFile(file);
+
+      // Convert to database format
+      const convertedQuote = convertPydanticToQuote(extractedData as any, selectedRfq.id);
+
+      // Create the quote in the database
+      const newQuote = await quoteClient.createQuote({ ...convertedQuote }, selectedRfq.id);
+
+      // Add to local cache
+      addQuote(newQuote);
+
+      toast.success('Quote extracted and added successfully');
+    } catch (error) {
+      console.error('Error extracting quote:', error);
+      toast.error('Error extracting quote from file');
+    }
   };
 
-  const generateEmailContent = () => {
-    if (!selectedRfq) return '';
-
-    const rfqNumber = selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`;
-    const partNumber = selectedRfq.partNumber;
-    const partDescription = selectedRfq.partDescription;
-    const validUntilDate = new Date(quoteForm.validUntil).toLocaleDateString();
-
-    return `Subject: Quote Response for ${rfqNumber} - ${partNumber}
-
-Dear Procurement Team,
-
-Thank you for your RFQ regarding the following part:
-
-RFQ Number: ${rfqNumber}
-Part Number: ${partNumber}
-Part Description: ${partDescription}
-Requested Quantity: ${selectedRfq.quantity}
-
-QUOTE DETAILS:
-- Quoted Quantity: ${quoteForm.quantity}
-- Unit Price: $${parseFloat(quoteForm.unitPrice || '0').toLocaleString()}
-- Total Price: $${parseFloat(quoteForm.totalPrice || '0').toLocaleString()}
-- Lead Time: ${quoteForm.leadTime}
-- Payment Terms: ${quoteForm.terms}
-- Quote Valid Until: ${validUntilDate}
-
-INVENTORY STATUS:
-- Condition: ${mockInventoryData.condition}
-- Location: ${mockInventoryData.location}
-- Certifications: ${mockInventoryData.certifications.join(', ')}
-
-${
-  quoteForm.notes
-    ? `ADDITIONAL NOTES:
-${quoteForm.notes}`
-    : ''
-}
-
-We look forward to your response and the opportunity to work with you.
-
-Best regards,
-${mockInventoryData.partNumber} Supply Team
-
----
-This quote is valid until ${validUntilDate} and subject to the terms and conditions outlined above.`;
+  const handleAnalyzeQuotes = async () => {
+    if (!selectedRfq) {
+      toast.error('Please select an RFQ first');
+      return;
+    }
+    try {
+      const res = await quoteClient.compareQuotesByRfqId(selectedRfq.id);
+      setQuoteComparisonResult(res as unknown as JSON);
+      toast.success('Quotes analyzed successfully');
+    } catch (error) {
+      console.error('Error analyzing quotes:', error);
+      toast.error('Error analyzing quotes');
+    }
   };
 
-  const handleSendQuote = () => {
-    const content = generateEmailContent();
-    setEmailContent(content);
-    setShowEmailPreview(true);
-  };
-
-  const handleConfirmSendQuote = () => {
-    // TODO: Implement actual quote sending logic
-    console.log('Sending quote:', quoteForm);
-    console.log('Email content:', emailContent);
-    setShowEmailPreview(false);
-    alert('Quote sent successfully!');
-  };
-
-  // Sidebar content
+  // Sidebar content - RFQ List
   const sidebarContent = (
     <RfqList
-      rfqs={incomingRfqs}
-      onRfqSelect={(rfq) => {
-        const selectedRfq = incomingRfqs.find((r: Rfq) => r.id === rfq.id);
-        setSelectedRfq(selectedRfq || null);
-
-        // Reset quote form when selecting new RFQ
-        // TODO: Replace with API call to load existing quote data for this RFQ
-        resetQuoteForm();
-      }}
+      rfqs={rfqs}
       selectedRfq={selectedRfq}
-      onRefresh={() => refreshIncomingRfqs(true)}
-      isRefreshing={loading.isRefreshing}
-      isLoading={loading.incomingRfqs}
-      onCreatedRfq={refreshIncomingRfqs}
-      addedRfqDirection={'received'}
+      onRfqSelect={(rfq) => setSelectedRfqId(rfq.id)}
+      onRefresh={refreshData}
+      isLoading={isLoading}
+      isRefreshing={isRefreshing}
+      InsertAddRfqButton={true}
+      rfqsDirection={'received'}
+      onCreatedRfq={addRfq}
     />
   );
 
@@ -188,400 +140,261 @@ This quote is valid until ${validUntilDate} and subject to the terms and conditi
           {selectedRfq.rfqNumber || `RFQ-${selectedRfq.id.slice(0, 8)}`}
         </h1>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>
-            Status: <Badge>{getStatusDisplay(selectedRfq.status)}</Badge>
-          </span>
-          <span>Created: {formatDate(new Date(selectedRfq.createdAt))}</span>
+          <StatusBadge
+            status="default"
+            size="sm"
+            text={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
+          />
           {selectedRfq.sentAt && <span>Sent: {formatDate(new Date(selectedRfq.sentAt))}</span>}
         </div>
       </div>
 
       <div className="flex gap-2">
         <RfqDialog
+          key={selectedRfq?.id}
           rfq={selectedRfq}
-          onChange={(updatedRfq) => {
-            updateRfq(updatedRfq);
-          }}
-          triggerText="View Details"
-          triggerIntent="secondary"
+          onChange={updateRfq}
+          trigger={<Button intent="secondary" icon={Eye} />}
           DialogType="view"
         />
       </div>
     </div>
   ) : (
-    <div className="flex items-center justify-between w-full">
-      <h1 className="text-xl font-semibold">Supplier Hub</h1>
-      <p className="text-sm text-muted-foreground">Select an RFQ to respond with a quote</p>
-    </div>
+    <div> </div>
   );
+
+  // Show loading component when initially loading (no data yet)
+  if (isLoading && rfqs.length === 0) {
+    return (
+      <PageLayout
+        sidebarContent={sidebarContent}
+        headerContent={
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-xl font-semibold">Technical Procurement</h1>
+            <p className="text-sm text-muted-foreground">Loading RFQs...</p>
+          </div>
+        }
+        mainContent={<LoadingComponent text="Loading Technical Procurement data..." />}
+        sidebarWidth={isCollapsed ? '20rem' : '18rem'}
+      />
+    );
+  }
 
   // Main content
   const mainContent = selectedRfq ? (
-    <div className="grid grid-cols-5 gap-4">
-      {/* RFQ Details Section */}
-      <ContentSection
-        header={
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            <span className="font-semibold">RFQ Details</span>
-          </div>
-        }
-        headerGradient="from-emerald-500 to-emerald-500"
-        className="col-span-3"
+    <div className="space-y-6">
+      <div>
+        {/* RFQ Details */}
+        {selectedRfq && (
+          <MainCard
+            title={selectedRfq.rfqNumber || 'N/A'}
+            subtitle={selectedRfq.buyerComments || 'No buyer comments available'}
+            actions={
+              <div className="flex gap-2">
+                <RfqDialog
+                  key={selectedRfq.id}
+                  rfq={selectedRfq}
+                  onChange={updateRfq}
+                  DialogType="edit"
+                  trigger={<Button intent="secondaryInverted" icon={Pencil} />}
+                />
+
+                <ConfirmationPopover
+                  trigger={<Button intent="secondaryInverted" icon={TrashIcon} />}
+                  popoverIntent="danger"
+                  title="Delete RFQ"
+                  onConfirm={handleDeleteRfq}
+                />
+              </div>
+            }
+          >
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Tender Information */}
+              <MainCard neutralHeader={true} title="Details">
+                <KeyValuePair
+                  label="Part Number"
+                  value={selectedRfq.partNumber || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Alt. Part Number"
+                  value={selectedRfq.altPartNumber || ''}
+                  valueType="string"
+                />
+
+                <KeyValuePair
+                  label="Description"
+                  value={selectedRfq.partDescription || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Quantity"
+                  value={selectedRfq.quantity || ''}
+                  valueType="number"
+                />
+              </MainCard>
+              {/* Timeline */}
+              <MainCard title="Vendor Information" neutralHeader={true}>
+                <KeyValuePair
+                  label="Name"
+                  value={selectedRfq.vendorName || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Address"
+                  value={selectedRfq.vendorAddress || ''}
+                  valueType="string"
+                />
+
+                <KeyValuePair
+                  label="Contact"
+                  value={selectedRfq.vendorContactName || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  label="Email"
+                  value={selectedRfq.vendorContactEmail || ''}
+                  valueType="email"
+                />
+                <KeyValuePair
+                  label="Phone"
+                  value={selectedRfq.vendorContactPhone || ''}
+                  valueType="string"
+                />
+              </MainCard>
+
+              {/* Quick Stats */}
+              <MainCard title="General" neutralHeader={true}>
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Status"
+                  value={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Urgency"
+                  value={getUrgencyLevelDisplay(selectedRfq.urgencyLevel)}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Deliver To"
+                  value={selectedRfq.deliverTo || ''}
+                  valueType="string"
+                />
+                <KeyValuePair
+                  keyClassName="max-w-1/2"
+                  label="Buyer Comments"
+                  value={selectedRfq.buyerComments || ''}
+                  valueType="string"
+                />
+              </MainCard>
+            </div>
+          </MainCard>
+        )}
+      </div>
+
+      <Tabs
+        tabs={[
+          { label: 'Quotes', value: 'quotes', icon: <FileText /> },
+          { label: 'Analysis', value: 'analysis', icon: <ChartBarIcon /> },
+        ]}
+        defaultTab="quotes"
+        onTabChange={() => {}}
       >
-        <div className="grid grid-cols-2 gap-6">
-          {/* General RFQ Details */}
-          <div>
-            <h4 className="font-medium text-gray-900 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-green-600" />
-              RFQ Details
-            </h4>
-            <KeyValuePair label="Part Number" value={selectedRfq.partNumber} valueType="string" />
-            <KeyValuePair
-              label="Alt. Part Number"
-              value={selectedRfq.altPartNumber}
-              valueType="string"
-            />
-            <KeyValuePair label="Quantity" value={selectedRfq.quantity} valueType="string" />
-            <KeyValuePair
-              label="Unit of Measure"
-              value={selectedRfq.unitOfMeasure}
-              valueType="string"
-            />
-            <KeyValuePair
-              label="Urgency Level"
-              value={urgencyLevelDisplayMap[selectedRfq.urgencyLevel as UrgencyLevel]}
-              valueType="string"
-            />
-            <KeyValuePair
-              label="Part Description"
-              value={selectedRfq.partDescription}
-              valueType="string"
-            />
-            <KeyValuePair
-              label="Date Sent"
-              value={selectedRfq.sentAt && formatDate(new Date(selectedRfq.sentAt))}
-              valueType="string"
-            />
-          </div>
-
-          {/* Vendor Information */}
-          <div>
-            <h4 className="font-medium text-gray-900 flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-600" />
-              Vendor Information
-            </h4>
-            <KeyValuePair label="Name" value={selectedRfq.vendorName} valueType="string" />
-            <KeyValuePair label="Address" value={selectedRfq.vendorAddress} valueType="string" />
-            <KeyValuePair
-              label="Contact Name"
-              value={selectedRfq.vendorContactName}
-              valueType="string"
-            />
-            <KeyValuePair label="Email" value={selectedRfq.vendorContactEmail} valueType="email" />
-            <KeyValuePair
-              label=" Phone"
-              value={selectedRfq.vendorContactPhone}
-              valueType="string"
-            />
-          </div>
-          <KeyValuePair
-            className="col-span-full"
-            label="Buyer Comments"
-            valueClassName="justify-start w-full"
-            value={selectedRfq.buyerComments}
-            valueType="string"
-          />
-        </div>
-      </ContentSection>
-
-      {/* Inventory Status Section */}
-      <ContentSection
-        header={
-          <div className="flex items-center gap-2">
-            <Package className="w-5 h-5" />
-            <span className="font-semibold">Inventory Status</span>
-          </div>
-        }
-        headerGradient="from-emerald-500 to-emerald-400"
-        className="col-span-2"
-      >
-        <div className="flex flex-col gap-4">
-          {/* Availability Status */}
-          <div>
-            <h4 className="font-medium text-gray-900 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              Availability
-            </h4>
-
-            <KeyValuePair
-              label="In Stock"
-              value={mockInventoryData.availableQuantity}
-              valueType="number"
-            />
-            <KeyValuePair
-              label="Condition"
-              value={mockInventoryData.condition}
-              valueType="string"
-            />
-            <KeyValuePair label="Location" value={mockInventoryData.location} valueType="string" />
-            <KeyValuePair label="Lead Time" value={mockInventoryData.leadTime} valueType="string" />
-          </div>
-
-          {/* Pricing Information */}
-          <div>
-            <h4 className="font-medium text-gray-900 flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-green-600" />
-              Internal Pricing
-            </h4>
-            <div>
-              <KeyValuePair
-                label="Internal Cost"
-                value={`$${mockInventoryData.internalCost.toLocaleString()}`}
-                valueType="string"
-              />
-              <KeyValuePair
-                label="Suggested Price"
-                value={`$${mockInventoryData.suggestedPrice.toLocaleString()}`}
-                valueType="string"
-              />
-              <KeyValuePair
-                label="Last Sold For"
-                value={`$${mockInventoryData.lastSold.toLocaleString()}`}
-                valueType="string"
-              />
-              <KeyValuePair
-                label="Margin"
-                value={`${Math.round(((mockInventoryData.suggestedPrice - mockInventoryData.internalCost) / mockInventoryData.internalCost) * 100)}%`}
-                valueType="string"
-              />
-            </div>
-          </div>
-
-          {/* Certifications */}
-          <div>
-            <h4 className="font-medium text-gray-900 flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-600" />
-              Certifications
-            </h4>
-            <div className="space-y-2">
-              {mockInventoryData.certifications.map((cert, index) => (
-                <Badge key={index} className="mr-2 mb-1 bg-blue-100 text-blue-800 border-blue-200">
-                  {cert}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      </ContentSection>
-
-      {/* Quote Generator Section */}
-      <ContentSection
-        className="col-span-full"
-        header={
-          <div className="flex flex-row items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <Calculator className="w-5 h-5" />
-              <span className="font-semibold">Quote Generator</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                intent="secondary"
-                className="bg-white/20 text-white "
-                icon={Sparkles}
-                text="Auto Generate"
-              />
-            </div>
-          </div>
-        }
-        headerGradient="from-blue-500 via-violet-500 to-purple-600"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Pricing Inputs */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900">Pricing Details</h4>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quoted Quantity
-                {selectedRfq?.quantity && (
-                  <span className="text-xs text-muted-foreground ml-1">
-                    (Requested: {selectedRfq.quantity})
-                  </span>
-                )}
-              </label>
-              <ModernInput
-                type="number"
-                min="1"
-                max={selectedRfq?.quantity || undefined}
-                placeholder="1"
-                value={quoteForm.quantity}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleQuoteInputChange('quantity', parseInt(e.target.value) || 1)
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Unit Price ($)</label>
-              <ModernInput
-                type="number"
-                min={0}
-                placeholder={mockInventoryData.suggestedPrice.toString()}
-                value={quoteForm.unitPrice}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleQuoteInputChange('unitPrice', e.target.value)
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Total Price ($)
-              </label>
-              <ModernInput
-                type="number"
-                min={0}
-                placeholder="Auto-calculated"
-                value={quoteForm.totalPrice}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleQuoteInputChange('totalPrice', e.target.value)
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Lead Time</label>
-              <ModernInput
-                type="text"
-                placeholder="14 days"
-                value={quoteForm.leadTime}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleQuoteInputChange('leadTime', e.target.value)
-                }
-              />
-            </div>
-          </div>
-
-          {/* Terms and Notes */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900">Terms & Conditions</h4>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Payment Terms</label>
-              <ModernSelect
-                value={quoteForm.terms}
-                onValueChange={(value: string) => handleQuoteInputChange('terms', value)}
-                options={[
-                  { value: 'Net 30', label: 'Net 30 Days' },
-                  { value: 'Net 15', label: 'Net 15 Days' },
-                  { value: 'Due on Receipt', label: 'Due on Receipt' },
-                  { value: '2/10 Net 30', label: '2% 10 Days, Net 30' },
-                ]}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quote Valid Until
-              </label>
-              <DatePicker
-                value={quoteForm.validUntil}
-                onChange={(value: string) => handleQuoteInputChange('validUntil', value)}
-              />
-              {/* <ModernInput
-                type="date"
-                value={quoteForm.validUntil}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleQuoteInputChange('validUntil', e.target.value)
-                }
-              /> */}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Additional Notes
-              </label>
-              <ModernTextarea
-                placeholder="Any additional terms, conditions, or notes..."
-                value={quoteForm.notes}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  handleQuoteInputChange('notes', e.target.value)
-                }
-                className="min-h-[100px]"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Send Quote Button */}
-        <div className="mt-6 pt-6 border-t border-gray-200 flex justify-end">
-          <Button
-            intent="success"
-            size="lg"
-            icon={Send}
-            text="Preview & Send Quote"
-            onClick={handleSendQuote}
-            disabled={!quoteForm.unitPrice || !quoteForm.totalPrice || !quoteForm.quantity}
-          />
-        </div>
-      </ContentSection>
+        <TabsContent value="quotes">
+          <BaseCard>
+            <CardHeader className="flex items-start justify-between">
+              {/* Left Side - Title and Description */}
+              <div>
+                <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  Technical Quotes Comparison
+                </CardTitle>
+                <p className="text-slate-600 mt-2 ml-12">
+                  Compare and evaluate quotes for{' '}
+                  <span className="font-semibold text-slate-800">{selectedRfq?.rfqNumber}</span>
+                </p>
+                <div className="flex items-center gap-4 mt-2 ml-12 text-sm text-slate-500">
+                  <span>Total Quotes: {selectedRfqQuotes.length}</span>
+                </div>
+              </div>
+              {/* Right Side - Actions */}
+              <div className="flex gap-2">
+                <Button
+                  intent="ghost"
+                  onClick={refreshSelectedRfqQuotes}
+                  disabled={isLoadingQuotes}
+                  icon={RefreshCw}
+                  className={`${isRefreshingQuotes ? 'animate-spin' : ''}`}
+                />
+                <Button
+                  intent="primary"
+                  icon={Sparkles}
+                  text="Analyze"
+                  onClick={handleAnalyzeQuotes}
+                />
+                <FileUploadPopover
+                  open={uploadQuotePopoverOpen}
+                  onOpenChange={setUploadQuotePopoverOpen}
+                  trigger={
+                    <Button intent="secondary" icon={Upload} text="Upload Quote" size="sm" />
+                  }
+                  onSend={() => {}}
+                >
+                  <div className="flex flex-col gap-2 text-sm">
+                    <Button
+                      intent="secondary"
+                      text="Manually Add Quote"
+                      size="sm"
+                      onClick={() => {}}
+                    />
+                    <Button
+                      intent="ghost"
+                      text="Or generate random Quote"
+                      size="sm"
+                      className="text-gray-500"
+                      onClick={async () => {
+                        const quote = await createRandomQuote(selectedRfq.id);
+                        addQuote(quote);
+                        console.log('Time to close the popover');
+                        setUploadQuotePopoverOpen(false);
+                      }}
+                    />
+                  </div>
+                </FileUploadPopover>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <QuotesComparison isRefreshing={isRefreshingQuotes} />
+            </CardContent>
+          </BaseCard>
+        </TabsContent>
+        <TabsContent value="analysis">
+          <QuoteAnalysis isRefreshing={isRefreshingQuotes} />
+        </TabsContent>
+      </Tabs>
     </div>
   ) : (
-    <div className="flex flex-col items-center justify-center h-full text-center">
-      <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-violet-100 rounded-full flex items-center justify-center mb-4">
-        <FileText className="w-12 h-12 text-blue-600" />
+    // No RFQ selected
+    <div className="flex-1 flex items-center justify-center text-muted-foreground">
+      <div className="text-center">
+        <FileText className="h-12 w-12 mx-auto mb-4" />
+        <h2 className="text-lg font-medium mb-2">No RFQ Selected</h2>
+        <p>Select an RFQ from the sidebar to view details and manage quotes</p>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">No RFQ Selected</h3>
-      <p className="text-gray-600 max-w-sm">
-        Select an RFQ from the sidebar to view details and generate a quote response.
-      </p>
     </div>
   );
 
   return (
-    <>
-      <PageLayout
-        sidebarContent={sidebarContent}
-        headerContent={headerContent}
-        mainContent={mainContent}
-        sidebarWidth={isCollapsed ? '20rem' : '18rem'}
-      />
-
-      {/* Email Preview Dialog */}
-      <Dialog open={showEmailPreview} onOpenChange={setShowEmailPreview}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Send className="w-5 h-5" />
-              Review Quote Email
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Email Preview:</p>
-              <div className="bg-white p-4 rounded border">
-                <pre className="whitespace-pre-wrap text-sm font-mono">{emailContent}</pre>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button
-                intent="secondary"
-                text="Edit Quote"
-                onClick={() => setShowEmailPreview(false)}
-              />
-              <Button
-                intent="success"
-                icon={Send}
-                text="Send Quote"
-                onClick={handleConfirmSendQuote}
-              />
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    <PageLayout
+      sidebarContent={sidebarContent}
+      headerContent={headerContent}
+      mainContent={mainContent}
+      sidebarWidth={isCollapsed ? '20rem' : '18rem'}
+    />
   );
 }

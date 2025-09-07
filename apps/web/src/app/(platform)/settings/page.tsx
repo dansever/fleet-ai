@@ -1,7 +1,7 @@
 'use client';
 
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { Tabs } from '@/stories/Tabs/Tabs';
+import { Tabs } from '@/stories/Tabs/TabsNew';
 
 export default function SettingsPage() {
   return (

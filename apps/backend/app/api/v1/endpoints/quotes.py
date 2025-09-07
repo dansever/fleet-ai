@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.shared.schemas import ResponseEnvelope
 from app.utils.logger import get_logger
-from app.features.technical.quotes import compare_quotes
+from app.features.quotes import compare_quotes
 from app.db.session import get_db
 
 logger = get_logger(__name__)

@@ -1,5 +1,5 @@
-import { createUser, deleteUser } from '@/db/users/db-actions';
 import { serverEnv } from '@/lib/env/server';
+import { server as userServer } from '@/modules/core/users';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -52,9 +52,10 @@ export async function POST(req: Request) {
         "\nInserting new user to 'users' in Neon...",
       );
       const orgId = event.data.organization_memberships?.[0]?.organization.id;
-      await createUser({
+      await userServer.createUser({
         clerkUserId: event.data.id,
-        displayName: `${event.data.first_name} ${event.data.last_name}`,
+        firstName: event.data.first_name ?? '',
+        lastName: event.data.last_name ?? '',
         email: event.data.email_addresses[0].email_address,
         orgId: orgId ?? '',
       });
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
     }
     case 'user.deleted': {
       if (event.data.id != null) {
-        await deleteUser(event.data.id);
+        await userServer.deleteUser(event.data.id);
       }
     }
   }

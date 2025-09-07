@@ -1,29 +1,22 @@
-import { getAirportsByOrgId } from '@/db/airports/db-actions';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
+import { server as airportServer } from '@/modules/core/airports';
 import AirportHubClientPage from './ClientPage';
 import AirportHubProvider from './ContextProvider';
 
 export default async function AirportHubPage() {
-  const { dbUser, error } = await authorizeUser();
-  if (error || !dbUser) {
+  const { dbUser, orgId, error } = await getAuthContext();
+  if (error || !dbUser || !orgId) {
     return jsonError('Unauthorized', 401);
   }
-  if (!dbUser.orgId) {
-    return jsonError('Organization not found', 404);
-  }
 
-  try {
-    // Fetch initial data in parallel
-    const [airports] = await Promise.all([getAirportsByOrgId(dbUser.orgId)]);
-    if (!airports) return jsonError('Failed to fetch airports', 500);
+  // Fetch initial data in parallel
+  const [airports] = await Promise.all([airportServer.listAirportsByOrgId(orgId)]);
+  if (!airports) return jsonError('Failed to fetch airports', 500);
 
-    return (
-      <AirportHubProvider dbUser={dbUser} initialAirports={airports} hasServerData={true}>
-        <AirportHubClientPage />
-      </AirportHubProvider>
-    );
-  } catch (error) {
-    return jsonError('Failed to load fuel procurement data', 500);
-  }
+  return (
+    <AirportHubProvider dbUser={dbUser} initialAirports={airports} hasServerData={true}>
+      <AirportHubClientPage />
+    </AirportHubProvider>
+  );
 }

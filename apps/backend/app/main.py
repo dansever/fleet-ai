@@ -2,9 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.utils import get_logger
-from app.db import get_db_connection, close_db_connection
-from app.db.models_auto import Base 
 import os
+from app.config import ai_config
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -36,6 +35,10 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         allow_headers=["*"],
     )
+
+    # Validate configuration before routers are included
+    ai_config.validate()
+    app.state.ai_config = ai_config  # make available to routes and deps
     
     # Include API routes
     app.include_router(api_router, prefix="/api/v1")
@@ -49,28 +52,11 @@ def create_app() -> FastAPI:
             "version": app_version
         }
     
-    @app.on_event("startup")
-    async def startup_event():
-        """Initialize database connection on startup"""
-        try:
-            await get_db_connection()
-            logger.info("🚀 Application startup completed successfully")
-        except Exception as e:
-            logger.error(f"❌ Failed to initialize database connection: {e}")
-            raise
-    
-    @app.on_event("shutdown")
-    async def shutdown_event():
-        """Clean up database connections on shutdown"""
-        try:
-            await close_db_connection()
-            logger.info("🛑 Application shutdown completed successfully")
-        except Exception as e:
-            logger.error(f"❌ Error during shutdown: {e}")
-    
     return app
 
+
 app = create_app()
+
 
 if __name__ == "__main__":
     import uvicorn

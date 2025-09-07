@@ -1,11 +1,11 @@
-import { getAirportsByOrgId } from '@/db/airports/db-actions';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
+import { server as airportServer } from '@/modules/core/airports';
 import FuelProcurementClientPage from './ClientPage';
-import FuelProcurementProvider from './ContextProvider';
+import { FuelProcurementProvider } from './contexts';
 
 export default async function FuelProcurementPage() {
-  const { dbUser, error } = await authorizeUser();
+  const { dbUser, error } = await getAuthContext();
   if (error || !dbUser) {
     return jsonError('Unauthorized', 401);
   }
@@ -15,7 +15,7 @@ export default async function FuelProcurementPage() {
 
   try {
     // Fetch initial data in parallel
-    const [airports] = await Promise.all([getAirportsByOrgId(dbUser.orgId)]);
+    const [airports] = await Promise.all([airportServer.listAirportsByOrgId(dbUser.orgId)]);
 
     if (!airports) return jsonError('Failed to fetch airports', 500);
 

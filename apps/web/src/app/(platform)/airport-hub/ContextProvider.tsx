@@ -1,10 +1,11 @@
 'use client';
 
-import { Airport, Contact, ServiceContract, User } from '@/drizzle/types';
-import { getServiceContractsByAirport } from '@/services/contracts/service-contract-client';
-import { getAirports } from '@/services/core/airport-client';
-import { getContactsByAirport } from '@/services/vendors/contact-client';
+import { Airport, Contact, Contract, User } from '@/drizzle/types';
+import { server as contractServer } from '@/modules/contracts/contracts';
+import { server as airportServer } from '@/modules/core/airports';
+import { server as contactServer } from '@/modules/vendors/contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export type LoadingState = {
   airports: boolean;
@@ -21,42 +22,38 @@ export type ErrorState = {
 };
 
 export type AirportHubContextType = {
-  // User and airports
+  // User
   dbUser: User;
+
+  // Airports
   airports: Airport[];
   setAirports: (airports: Airport[]) => void;
   selectedAirport: Airport | null;
   setSelectedAirport: (airport: Airport | null) => void;
-
-  // Refresh, Update, Add, Remove airports
   refreshAirports: () => Promise<void>;
   updateAirport: (updatedAirport: Airport) => void;
   addAirport: (newAirport: Airport) => void;
-  removeAirport: (airportId: string) => void;
+  deleteAirport: (airportId: Airport['id']) => Promise<void>;
 
-  // Service Contracts
-  serviceContracts: ServiceContract[];
-  setServiceContracts: (contracts: ServiceContract[]) => void;
-  selectedServiceContract: ServiceContract | null;
-  setSelectedServiceContract: (contract: ServiceContract | null) => void;
-
-  // Refresh, Update, Add, Remove contracts
-  refreshServiceContracts: () => Promise<void>;
-  updateServiceContract: (updatedContract: ServiceContract) => void;
-  addServiceContract: (newContract: ServiceContract) => void;
-  removeServiceContract: (contractId: string) => void;
+  // Contracts
+  contracts: Contract[];
+  setContracts: (contracts: Contract[]) => void;
+  selectedContract: Contract | null;
+  setSelectedContract: (contract: Contract | null) => void;
+  refreshContracts: () => Promise<void>;
+  updateContract: (updatedContract: Contract) => void;
+  addContract: (newContract: Contract) => void;
+  removeContract: (contractId: Contract['id']) => void;
 
   // Contacts
   contacts: Contact[];
   setContacts: (contacts: Contact[]) => void;
   selectedContact: Contact | null;
   setSelectedContact: (contact: Contact | null) => void;
-
-  // Refresh, Update, Add, Remove contacts
   refreshContacts: () => Promise<void>;
   updateContact: (updatedContact: Contact) => void;
   addContact: (newContact: Contact) => void;
-  removeContact: (contactId: string) => void;
+  removeContact: (contactId: Contact['id']) => void;
 
   // Loading and error states
   loading: LoadingState;
@@ -80,17 +77,13 @@ export default function AirportHubProvider({
 }) {
   const [airports, setAirports] = useState<Airport[]>(initialAirports);
   const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
-  const [serviceContracts, setServiceContracts] = useState<ServiceContract[]>([]);
-  const [selectedServiceContract, setSelectedServiceContract] = useState<ServiceContract | null>(
-    null,
-  );
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  // Cache to avoid refetching service contracts for the same airport
-  const [serviceContractsCache, setServiceContractsCache] = useState<
-    Record<string, ServiceContract[]>
-  >({});
+  // Cache to avoid refetching contracts for the same airport
+  const [contractsCache, setContractsCache] = useState<Record<string, Contract[]>>({});
 
   // Cache to avoid refetching contacts for the same airport
   const [contactsCache, setContactsCache] = useState<Record<string, Contact[]>>({});
@@ -140,17 +133,21 @@ export default function AirportHubProvider({
    */
   useEffect(() => {
     if (!selectedAirport) {
-      setServiceContracts([]);
-      setSelectedServiceContract(null);
+      setContracts([]);
+      setSelectedContract(null);
       return;
     }
 
-    const loadServiceContracts = async () => {
+    // Immediately clear contracts when switching airports to prevent stale data
+    setContracts([]);
+    setSelectedContract(null);
+
+    const loadContracts = async () => {
       // Check cache first
-      if (serviceContractsCache[selectedAirport.id]) {
-        const cachedContracts = serviceContractsCache[selectedAirport.id];
-        setServiceContracts(cachedContracts);
-        setSelectedServiceContract(cachedContracts.length > 0 ? cachedContracts[0] : null);
+      if (contractsCache[selectedAirport.id]) {
+        const cachedContracts = contractsCache[selectedAirport.id];
+        setContracts(cachedContracts);
+        setSelectedContract(cachedContracts.length > 0 ? cachedContracts[0] : null);
         return;
       }
 
@@ -158,32 +155,32 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contracts: null }));
 
       try {
-        const contracts = await getServiceContractsByAirport(selectedAirport.id);
-        setServiceContracts(contracts);
+        const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
+        setContracts(contracts);
 
         // Cache the service contracts for this airport
-        setServiceContractsCache((prev) => ({
+        setContractsCache((prev) => ({
           ...prev,
           [selectedAirport.id]: contracts,
         }));
 
         // Always set first contract as selected when loading contracts for a new airport
-        setSelectedServiceContract(contracts.length > 0 ? contracts[0] : null);
+        setSelectedContract(contracts.length > 0 ? contracts[0] : null);
       } catch (error) {
         console.error('Error loading service contracts:', error);
         setErrors((prev) => ({
           ...prev,
           contracts: error instanceof Error ? error.message : 'Failed to load service contracts',
         }));
-        setServiceContracts([]);
-        setSelectedServiceContract(null);
+        setContracts([]);
+        setSelectedContract(null);
       } finally {
         setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
       }
     };
 
-    loadServiceContracts();
-  }, [selectedAirport, serviceContractsCache]); // Depend on selectedAirport and serviceContractsCache
+    loadContracts();
+  }, [selectedAirport]); // Remove contractsCache dependency to avoid unnecessary re-runs
 
   /**
    * Load contacts for the selected airport (only when airport changes)
@@ -194,6 +191,10 @@ export default function AirportHubProvider({
       setSelectedContact(null);
       return;
     }
+
+    // Immediately clear contacts when switching airports to prevent stale data
+    setContacts([]);
+    setSelectedContact(null);
 
     const loadContacts = async () => {
       // Check cache first
@@ -208,7 +209,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contacts: null }));
 
       try {
-        const contacts = await getContactsByAirport(selectedAirport.id);
+        const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
         setContacts(contacts);
 
         // Cache the contacts for this airport
@@ -233,7 +234,7 @@ export default function AirportHubProvider({
     };
 
     loadContacts();
-  }, [selectedAirport, contactsCache]); // Depend on selectedAirport and contactsCache
+  }, [selectedAirport]); // Remove contactsCache dependency to avoid unnecessary re-runs
 
   /**
    * Refresh airports
@@ -245,7 +246,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, airports: null }));
 
     try {
-      const freshAirports = await getAirports();
+      const freshAirports = await airportServer.listAirportsByOrgId(dbUser.orgId);
       const sortedAirports = sortAirports(freshAirports);
       setAirports(sortedAirports);
 
@@ -273,11 +274,11 @@ export default function AirportHubProvider({
   /**
    * Refresh service contracts for the currently selected airport (clears cache)
    */
-  const refreshServiceContracts = useCallback(async () => {
+  const refreshContracts = useCallback(async () => {
     if (!selectedAirport) return;
 
     // Clear cache for this airport to force fresh data
-    setServiceContractsCache((prev) => {
+    setContractsCache((prev) => {
       const updated = { ...prev };
       delete updated[selectedAirport.id];
       return updated;
@@ -287,23 +288,25 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contracts: null }));
 
     try {
-      const contracts = await getServiceContractsByAirport(selectedAirport.id);
-      setServiceContracts(contracts);
+      const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
+      setContracts(contracts);
 
       // Update cache with fresh data
-      setServiceContractsCache((prev) => ({
+      setContractsCache((prev) => ({
         ...prev,
         [selectedAirport.id]: contracts,
       }));
 
       // Preserve the currently selected contract if it still exists, otherwise select first
-      if (selectedServiceContract) {
-        const updatedSelectedContract = contracts.find((c) => c.id === selectedServiceContract.id);
-        setSelectedServiceContract(
+      if (selectedContract) {
+        const updatedSelectedContract = contracts.find(
+          (c: Contract) => c.id === selectedContract.id,
+        );
+        setSelectedContract(
           updatedSelectedContract || (contracts.length > 0 ? contracts[0] : null),
         );
       } else if (contracts.length > 0) {
-        setSelectedServiceContract(contracts[0]);
+        setSelectedContract(contracts[0]);
       }
     } catch (error) {
       console.error('Error refreshing service contracts:', error);
@@ -314,19 +317,19 @@ export default function AirportHubProvider({
     } finally {
       setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
     }
-  }, [selectedAirport, selectedServiceContract]);
+  }, [selectedAirport, selectedContract]);
 
   /**
    * Select service contract by ID without refetching (instant selection)
    */
-  const selectServiceContractById = useCallback(
+  const selectcontractById = useCallback(
     (contractId: string) => {
-      const contract = serviceContracts.find((c) => c.id === contractId);
+      const contract = contracts.find((c) => c.id === contractId);
       if (contract) {
-        setSelectedServiceContract(contract);
+        setSelectedContract(contract);
       }
     },
-    [serviceContracts],
+    [contracts],
   );
 
   /**
@@ -362,58 +365,92 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Remove airport
+   * Delete airport
    */
-  const removeAirport = useCallback(
-    (airportId: string) => {
-      setAirports((prevAirports) => prevAirports.filter((airport) => airport.id !== airportId));
-      if (selectedAirport?.id === airportId) {
-        // Select first available airport or null
-        setSelectedAirport(airports.find((a) => a.id !== airportId) || null);
+  const deleteAirport = useCallback(
+    async (airportId: string) => {
+      try {
+        // Delete from the server
+        await airportServer.deleteAirport(airportId);
+
+        // Remove from local state
+        setAirports((prevAirports) => {
+          const filteredAirports = prevAirports.filter((airport) => airport.id !== airportId);
+
+          // If we're deleting the currently selected airport, select the first available one
+          if (selectedAirport?.id === airportId) {
+            setSelectedAirport(filteredAirports.length > 0 ? filteredAirports[0] : null);
+          }
+
+          return filteredAirports;
+        });
+
+        toast.success('Airport deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete airport:', error);
+        toast.error('Failed to delete airport');
+        throw error; // Re-throw so the UI can handle the error
       }
     },
-    [selectedAirport, airports],
+    [selectedAirport],
   );
 
   /**
    * Update service contract
    */
-  const updateServiceContract = useCallback(
-    (updatedContract: ServiceContract) => {
-      setServiceContracts((prevContracts) =>
+  const updatecontract = useCallback(
+    (updatedContract: Contract) => {
+      setContracts((prevContracts) =>
         prevContracts.map((contract) =>
           contract.id === updatedContract.id ? updatedContract : contract,
         ),
       );
 
-      if (selectedServiceContract?.id === updatedContract.id) {
-        setSelectedServiceContract(updatedContract);
+      if (selectedContract?.id === updatedContract.id) {
+        setSelectedContract(updatedContract);
       }
     },
-    [selectedServiceContract],
+    [selectedContract],
   );
 
   /**
    * Add service contract
    */
-  const addServiceContract = useCallback((newContract: ServiceContract) => {
-    setServiceContracts((prevContracts) => [newContract, ...prevContracts]);
+  const addContract = useCallback((newContract: Contract) => {
+    setContracts((prevContracts) => [newContract, ...prevContracts]);
   }, []);
 
   /**
    * Remove service contract
    */
-  const removeServiceContract = useCallback(
+  const removeContract = useCallback(
     (contractId: string) => {
-      setServiceContracts((prevContracts) =>
-        prevContracts.filter((contract) => contract.id !== contractId),
-      );
+      setContracts((prevContracts) => {
+        const filteredContracts = prevContracts.filter((contract) => contract.id !== contractId);
 
-      if (selectedServiceContract?.id === contractId) {
-        setSelectedServiceContract(null);
-      }
+        // If we're removing the currently selected contract, select the first available one
+        if (selectedContract?.id === contractId) {
+          setSelectedContract(filteredContracts.length > 0 ? filteredContracts[0] : null);
+        }
+
+        return filteredContracts;
+      });
     },
-    [selectedServiceContract],
+    [selectedContract],
+  );
+
+  /**
+   * Update service contract
+   */
+  const updateContract = useCallback(
+    (updatedContract: Contract) => {
+      setContracts((prevContracts) =>
+        prevContracts.map((contract) =>
+          contract.id === updatedContract.id ? updatedContract : contract,
+        ),
+      );
+    },
+    [selectedContract],
   );
 
   /**
@@ -433,7 +470,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contacts: null }));
 
     try {
-      const contacts = await getContactsByAirport(selectedAirport.id);
+      const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
       setContacts(contacts);
 
       // Update cache with fresh data
@@ -444,7 +481,7 @@ export default function AirportHubProvider({
 
       // Preserve the currently selected contact if it still exists, otherwise select first
       if (selectedContact) {
-        const updatedSelectedContact = contacts.find((c: Contact) => c.id === selectedContact.id);
+        const updatedSelectedContact = contacts.find((c) => c.id === selectedContact.id);
         setSelectedContact(updatedSelectedContact || (contacts.length > 0 ? contacts[0] : null));
       } else if (contacts.length > 0) {
         setSelectedContact(contacts[0]);
@@ -512,11 +549,16 @@ export default function AirportHubProvider({
    */
   const removeContact = useCallback(
     (contactId: string) => {
-      setContacts((prevContacts) => prevContacts.filter((contact) => contact.id !== contactId));
+      setContacts((prevContacts) => {
+        const filteredContacts = prevContacts.filter((contact) => contact.id !== contactId);
 
-      if (selectedContact?.id === contactId) {
-        setSelectedContact(null);
-      }
+        // If we're removing the currently selected contact, select the first available one
+        if (selectedContact?.id === contactId) {
+          setSelectedContact(filteredContacts.length > 0 ? filteredContacts[0] : null);
+        }
+
+        return filteredContacts;
+      });
 
       // Update cache as well
       if (selectedAirport) {
@@ -559,17 +601,17 @@ export default function AirportHubProvider({
     refreshAirports,
     updateAirport,
     addAirport,
-    removeAirport,
+    deleteAirport,
     selectedAirport,
     setSelectedAirport,
-    serviceContracts,
-    setServiceContracts,
-    selectedServiceContract,
-    setSelectedServiceContract,
-    refreshServiceContracts,
-    updateServiceContract,
-    addServiceContract,
-    removeServiceContract,
+    contracts,
+    setContracts,
+    selectedContract,
+    setSelectedContract,
+    refreshContracts,
+    updateContract,
+    addContract,
+    removeContract,
     contacts,
     setContacts,
     selectedContact,

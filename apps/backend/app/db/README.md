@@ -31,7 +31,7 @@ Use `sqlacodegen` to auto-generate SQLAlchemy models from your Postgres DB (popu
    ```powershell
      1) # read from backend folder that contains .env
      $envLine = Get-Content .env | Where-Object { $_ -match '^DATABASE_URL=' }
-     if (-not $envLine) { throw "DATABASE_URL not found in .env" }
+     if (-not $envLine) {throw "DATABASE_URL not found in .env" }
 
      2) # sanitize: strip key, quotes, spaces, then ensure correct driver prefix
      $dbUrl = ($envLine -replace '^DATABASE_URL=', '' -replace '^"|"$', '').Trim()

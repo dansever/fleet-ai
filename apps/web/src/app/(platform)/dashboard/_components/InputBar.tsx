@@ -1,8 +1,8 @@
 'use client';
 
-import { simpleLLM } from '@/services/ai/llm-client';
+import { simpleLLM } from '@/modules/ai/ai.client';
 import { Button } from '@/stories/Button/Button';
-import { FeatureCard } from '@/stories/Card/Card';
+import { FeatureCard, GradientPalette } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
 import { LLMResponse } from '@/types/llm';
 import { Bot, RefreshCcw } from 'lucide-react';
@@ -48,23 +48,24 @@ export default function InputBar() {
           text="Ask AI"
           onClick={handleAskAI}
           disabled={isLoading}
+          className="flex-shrink-0"
         />
       </div>
       <FeatureCard
         title="AI Response"
-        description={response?.content || 'No response yet'}
+        subtitle={response?.content || 'No response yet'}
         icon={<Bot />}
-        gradient="linear-to-r from-blue-500 to-pink-300"
+        palette={GradientPalette.SkyIndigoViolet}
         className="flex-1 min-h-10"
-        buttonChildren={
+        actions={
           <Button
-            intent="ghost"
+            intent="secondaryInverted"
             icon={RefreshCcw}
             onClick={() => setResponse(null)}
             className={`${isLoading && 'animate-spin'}`}
           />
         }
-        bodyChildren={<span className="text-white/80">{response?.content}</span>}
+        children={<span className="text-white/80">{response?.content}</span>}
       />
     </div>
   );

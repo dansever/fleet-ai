@@ -1,64 +1,127 @@
+from app.db.session import get_table, get_db
+from sqlalchemy import update, select, insert, delete
+
+__all__ = [
+    "get_quote",
+    "list_quotes",
+    "list_quotes_by_status",
+    "list_quotes_by_rfq",
+    "list_quotes_by_vendor",
+    "create_quote",
+    "update_quote",
+    "delete_quote",
+]
+
+
 """
-Quote database operations
-Handles all CRUD operations for quotes
+Get a quote by ID from the database of the current organization.
+- Returns: A single quote or None if not found.
 """
-
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
-from sqlalchemy.orm import selectinload
-
-from ..models_auto import Quotes
+async def get_quote(quote_id: str, organization_id: str):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        query = select(quotes).where(
+          quotes.c.id == quote_id, 
+          quotes.c.org_id == organization_id) 
+        res = await session.execute(query)
+        return res.mappings().first()
 
 """
-Methods:
-- get_quote_by_id
-- get_quotes_by_rfq_id
-- update_quote
+List all quotes from the database of the current organization.
+- Returns: A list of quotes.
 """
+async def list_quotes(organization_id: str):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        query = select(quotes).where(quotes.c.org_id == organization_id)
+        res = await session.execute(query)
+        return res.mappings().all()
 
+"""
+List quotes by status from the database of the current organization.
+- Returns: A list of quotes with the specified status.
+"""
+async def list_quotes_by_status(organization_id: str, status: str):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        query = select(quotes).where(
+            quotes.c.org_id == organization_id,
+            quotes.c.status == status
+        )
+        res = await session.execute(query)
+        return res.mappings().all()
 
-# get_quote_by_id - Get a quote by its ID
-async def get_quote_by_id(
-    session: AsyncSession,
-    quote_id: str
-) -> Optional[Quotes]:
-    """Get quote by ID"""
-    result = await session.execute(
-        select(Quotes).where(Quotes.id == quote_id)
-    )
-    return result.scalar_one_or_none()
+"""
+List quotes by RFQ from the database of the current organization.
+- Returns: A list of quotes for the specified RFQ.
+"""
+async def list_quotes_by_rfq(organization_id: str, rfq_id: str):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        query = select(quotes).where(
+            quotes.c.org_id == organization_id,
+            quotes.c.rfq_id == rfq_id
+        )
+        res = await session.execute(query)
+        return res.mappings().all()
 
+"""
+List quotes by vendor from the database of the current organization.
+- Returns: A list of quotes from the specified vendor.
+"""
+async def list_quotes_by_vendor(organization_id: str, vendor_id: str):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        query = select(quotes).where(
+            quotes.c.org_id == organization_id,
+            quotes.c.vendor_id == vendor_id
+        )
+        res = await session.execute(query)
+        return res.mappings().all()
 
-# get_quotes_by_rfq_id - Get all quotes for an RFQ
-async def get_quotes_by_rfq_id(
-    session: AsyncSession,
-    rfq_id: str
-) -> List[Quotes]:
-    """Get all quotes for an RFQ"""
-    result = await session.execute(
-        select(Quotes).where(Quotes.rfq_id == rfq_id)
-    )
-    return result.scalars().all()
+"""
+Create a new quote in the database of the current organization.
+- Returns: The created quote.
+"""
+async def create_quote(organization_id: str, quote: dict):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        quote['org_id'] = organization_id
+        stmt = insert(quotes).values(**quote).returning(quotes)
+        res = await session.execute(stmt)
+        await session.commit()
+        return res.mappings().first()
 
+"""
+Update a quote in the database of the current organization.
+- Returns: The updated quote.
+"""
+async def update_quote(quote_id: str, organization_id: str, quote: dict):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+          # build UPDATE statement with returning
+          stmt = (
+              update(quotes)
+              .where(quotes.c.id == quote_id, quotes.c.org_id == organization_id)
+              .values(**quote)
+              .returning(quotes)  # return the updated row
+          )
+          res = await session.execute(stmt)
+          await session.commit()
+          return res.mappings().first()
 
-# update_quote - Update a quote's fields
-async def update_quote(
-    session: AsyncSession,
-    quote_id: str,
-    **kwargs
-) -> Optional[Quotes]:
-    """Update quote fields"""
-    update_data = {k: v for k, v in kwargs.items() if v is not None}
-    
-    if not update_data:
-        return None
-    
-    await session.execute(
-        update(Quotes)
-        .where(Quotes.id == quote_id)
-        .values(**update_data)
-    )
-    await session.commit()
-
-    return await get_quote_by_id(session, quote_id)
+"""
+Delete a quote from the database of the current organization.
+- Returns: The deleted quote.
+"""
+async def delete_quote(quote_id: str, organization_id: str):
+    quotes = await get_table("quotes")
+    async for session in get_db():
+        stmt = (
+            delete(quotes)
+            .where(quotes.c.id == quote_id, quotes.c.org_id == organization_id)
+            .returning(quotes)
+        )
+        res = await session.execute(stmt)
+        await session.commit()
+        return res.mappings().first()

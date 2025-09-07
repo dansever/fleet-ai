@@ -3,7 +3,7 @@
 from app.utils.io.file_helpers import validate_file_type
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from app.db.operations import get_quotes_by_rfq_id
+from app.db.operations import list_quotes_by_rfq
 from app.ai.providers import OpenAIClient
 import json
 from decimal import Decimal
@@ -24,7 +24,7 @@ async def compare_quotes(db: AsyncSession, rfq_id: UUID) -> QuoteComparisonResul
     """
     Compare quotes for an RFQ and provide insights and recommendations.
     """
-    quotes = await get_quotes_by_rfq_id(db, rfq_id)
+    quotes = await list_quotes_by_rfq(db.org_id, rfq_id)
 
     if not quotes:
         return QuoteComparisonResult(

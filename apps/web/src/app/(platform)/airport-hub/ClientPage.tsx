@@ -1,19 +1,21 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
+import AirportDialog from '@/features/airports/AirportDialog';
+import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { MapPin } from 'lucide-react';
+import { Eye, FileText, MapPin, Star, Users } from 'lucide-react';
 import { useState } from 'react';
-import AirportList from '../_components/AirportList';
+import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
-import ContactsAndProviders from './subpages/ContactsAndProviders';
-import ManageAirport from './subpages/ManageAirport';
-import ServiceContracts from './subpages/ServiceContracts';
+import AirportPage from './subpages/Airport';
+import ContractsPage from './subpages/Contracts';
+import VendorsPage from './subpages/Vendors';
 
-type TabValue = 'service-agreements' | 'contacts-and-providers' | 'manage-airport';
+type TabValue = 'manage-contracts' | 'contacts-and-providers' | 'manage-airport';
 
 export default function AirportHubClientPage() {
   const {
@@ -22,6 +24,7 @@ export default function AirportHubClientPage() {
     selectedAirport,
     setSelectedAirport,
     addAirport,
+    updateAirport,
     loading,
     errors,
     clearError,
@@ -53,16 +56,22 @@ export default function AirportHubClientPage() {
         />
       }
       headerContent={
-        <div className="flex flex-row items-center gap-4 justify-between">
+        <div className="flex flex-row items-center gap-4 justify-between w-full">
           <div className="flex flex-col">
             <div className="flex flex-row items-center gap-4">
-              <h3 className="text-2xl font-bold text-gray-900">{selectedAirport?.name}</h3>
-              <div className="flex flex-row items-center gap-2">
-                <Badge>{selectedAirport?.icao}</Badge>
-                <Badge>{selectedAirport?.iata}</Badge>
+              <h1>{selectedAirport?.name}</h1>
+              <div className="flex flex-row items-center gap-1">
+                <StatusBadge status="secondary" text={selectedAirport?.icao || ''} />
+                <StatusBadge status="secondary" text={selectedAirport?.iata || ''} />
+                {selectedAirport?.isHub && (
+                  <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400">
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                    Hub
+                  </div>
+                )}
               </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600 text-sm">
               <MapPin className="w-4 h-4" />
               <span>
                 {selectedAirport?.city}
@@ -71,16 +80,24 @@ export default function AirportHubClientPage() {
               </span>
             </div>
           </div>
+          <div className="flex gap-2">
+            <AirportDialog
+              trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
+              airport={selectedAirport}
+              onChange={updateAirport}
+              DialogType="view"
+            />
+          </div>
         </div>
       }
       mainContent={<MainContentSection />}
-      sidebarWidth={isCollapsed ? '20rem' : '18rem'}
+      sidebarWidth={isCollapsed ? '18rem' : '18rem'}
     />
   );
 }
 
 function MainContentSection() {
-  const [selectedTab, setSelectedTab] = useState<TabValue>('service-agreements');
+  const [selectedTab, setSelectedTab] = useState<TabValue>('manage-contracts');
   const { selectedAirport } = useAirportHub();
 
   if (!selectedAirport) {
@@ -99,21 +116,21 @@ function MainContentSection() {
   return (
     <Tabs
       tabs={[
-        { label: 'Service Agreements', value: 'service-agreements' },
-        { label: 'Contacts & Providers', value: 'contacts-and-providers' },
-        { label: 'Manage Airport', value: 'manage-airport' },
+        { label: 'Service Agreements', value: 'service-agreements', icon: <FileText /> },
+        { label: 'Contacts & Providers', value: 'contacts-and-providers', icon: <Users /> },
+        { label: 'Manage Airport', value: 'manage-airport', icon: <MapPin /> },
       ]}
-      selectedTab={selectedTab}
+      defaultTab="service-agreements"
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
     >
       <TabsContent value="service-agreements">
-        <ServiceContracts />
+        <ContractsPage />
       </TabsContent>
       <TabsContent value="contacts-and-providers">
-        <ContactsAndProviders />
+        <VendorsPage />
       </TabsContent>
       <TabsContent value="manage-airport">
-        <ManageAirport />
+        <AirportPage />
       </TabsContent>
     </Tabs>
   );

@@ -1,6 +1,12 @@
 import logging
 
 def get_logger(name: str) -> logging.Logger:
+    """
+    Get a logger with the given name.
+    - name: The name of the logger.
+    - Returns: A logger object with format: 
+    [ time | name | level | filename:line_number | message ]
+    """
     logger = logging.getLogger(name)    
     logger.propagate = False  # Prevent logs from bubbling up to root logger
     

@@ -1,9 +1,9 @@
 'use client';
 
 import { Quote, Rfq } from '@/drizzle/types';
-import { getQuotesByRfq } from '@/services/technical/quote-client';
-import { deleteRfq, getRfq, getRfqs } from '@/services/technical/rfq-client';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { client as quoteClient } from '@/modules/quotes';
+import { client as rfqClient } from '@/modules/rfqs';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 export interface TechnicalProcurementContextValue {
   // Data
@@ -73,9 +73,15 @@ export function TechnicalProcurementContextProvider({
   const [isLoadingRfqs, setIsLoadingRfqs] = useState(false);
   const [isRefreshingRfqs, setIsRefreshingRfqs] = useState(false);
 
-  // Computed values
-  const selectedRfq = selectedRfqId ? rfqs.find((rfq) => rfq.id === selectedRfqId) || null : null;
-  const selectedRfqQuotes = selectedRfqId ? quotesCache.get(selectedRfqId) || [] : [];
+  // Computed values - memoized to prevent unnecessary re-renders
+  const selectedRfq = useMemo(() => {
+    return selectedRfqId ? rfqs.find((rfq) => rfq.id === selectedRfqId) || null : null;
+  }, [selectedRfqId, rfqs]);
+
+  const selectedRfqQuotes = useMemo(() => {
+    return selectedRfqId ? quotesCache.get(selectedRfqId) || [] : [];
+  }, [selectedRfqId, quotesCache]);
+
   const isLoadingQuotes = selectedRfqId ? loadingQuotesForRfq.has(selectedRfqId) : false;
   const isLoading = isLoadingRfqs || isLoadingQuotes;
 
@@ -125,7 +131,7 @@ export function TechnicalProcurementContextProvider({
     setLoadingQuotesForRfq((prev) => new Set([...prev, rfqId]));
 
     try {
-      const quotes = await getQuotesByRfq(rfqId);
+      const quotes = await quoteClient.listQuotesByRfqId(rfqId);
 
       // Cache the results
       setQuotesCache((prev) => new Map(prev).set(rfqId, quotes));
@@ -156,7 +162,7 @@ export function TechnicalProcurementContextProvider({
     }
 
     try {
-      const freshRfqs = await getRfqs();
+      const freshRfqs = await rfqClient.listRfqsByDirection({ direction: 'sent' });
       setRfqs(freshRfqs);
 
       // If selected RFQ no longer exists, select an adjacent one
@@ -177,7 +183,7 @@ export function TechnicalProcurementContextProvider({
 
   const refreshSelectedRfq = async () => {
     if (!selectedRfqId) return;
-    const freshRfq = await getRfq(selectedRfqId);
+    const freshRfq = await rfqClient.getRfqById(selectedRfqId);
     setRfqs((prev) => prev.map((rfq) => (rfq.id === selectedRfqId ? freshRfq : rfq)));
   };
 
@@ -189,7 +195,7 @@ export function TechnicalProcurementContextProvider({
 
     try {
       // Fetch fresh quotes directly (don't clear cache until we have new data)
-      const quotes = await getQuotesByRfq(selectedRfqId);
+      const quotes = await quoteClient.listQuotesByRfqId(selectedRfqId);
 
       // Update cache with fresh results
       setQuotesCache((prev) => new Map(prev).set(selectedRfqId, quotes));
@@ -282,7 +288,7 @@ export function TechnicalProcurementContextProvider({
   const deleteRfqAndSelectAdjacent = async (rfqId: string) => {
     try {
       // Delete from the server
-      await deleteRfq(rfqId);
+      await rfqClient.deleteRfq(rfqId);
 
       // Find the adjacent RFQ before removing the current one
       const newSelectedRfqId = findAdjacentRfqId(rfqs, rfqId);

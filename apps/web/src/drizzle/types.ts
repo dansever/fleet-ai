@@ -2,17 +2,14 @@ import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import {
   airportsTable,
   contactsTable,
-  contractsTable,
-  fuelBidsTable,
-  fuelContractsTable,
-  fuelTendersTable,
-  invoicesTable,
   organizationsTable,
-  quotesTable,
-  rfqsTable,
   usersTable,
   vendorsTable,
 } from './schema/schema';
+import { contractsTable } from './schema/schema.contracts';
+import { fuelBidsTable, fuelTendersTable } from './schema/schema.fuel';
+import { invoicesTable } from './schema/schema.invoices';
+import { quotesTable, rfqsTable } from './schema/schema.technical';
 
 // ==================== ORGANIZATIONS ====================
 export type Organization = InferSelectModel<typeof organizationsTable>;
@@ -68,8 +65,3 @@ export type UpdateFuelTender = Partial<NewFuelTender>;
 export type FuelBid = InferSelectModel<typeof fuelBidsTable>;
 export type NewFuelBid = InferInsertModel<typeof fuelBidsTable>;
 export type UpdateFuelBid = Partial<NewFuelBid>;
-
-// ==================== FUEL CONTRACTS ====================
-export type FuelContract = InferSelectModel<typeof fuelContractsTable>;
-export type NewFuelContract = InferInsertModel<typeof fuelContractsTable>;
-export type UpdateFuelContract = Partial<NewFuelContract>;

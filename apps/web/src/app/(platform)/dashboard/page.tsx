@@ -1,28 +1,25 @@
-import { getAirportsByOrgId } from '@/db/airports/db-actions';
-import { getRfqsByOrgAndDirection } from '@/db/rfqs/db-actions';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { server as airportServer } from '@/modules/core/airports';
+import { server as rfqServer } from '@/modules/rfqs';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import DashboardClientPage from './ClientPage';
 
 export default async function DashboardPage() {
-  const { dbUser, error } = await authorizeUser();
-  if (error || !dbUser) {
+  const { dbUser, orgId, error } = await getAuthContext();
+  if (error || !dbUser || !orgId) {
     return <div>Error: {error}</div>;
-  }
-  if (!dbUser.orgId) {
-    return <div>Error: User has no organization</div>;
   }
 
   // Fetch RFQs and quotes in parallel
   const [rfqs, airports] = await Promise.all([
-    getRfqsByOrgAndDirection(dbUser.orgId, 'sent'),
-    getAirportsByOrgId(dbUser.orgId),
+    rfqServer.listRfqsByDirection('sent', orgId),
+    airportServer.listAirportsByOrgId(orgId),
   ]);
 
   return (
     <PageLayout
       sidebarContent={null}
-      headerContent={<h1>Hello {dbUser?.displayName}</h1>}
+      headerContent={<h1>Hello {dbUser?.firstName}</h1>}
       mainContent={
         <div>
           <DashboardClientPage airports={airports} rfqs={rfqs} />

@@ -1,36 +1,43 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const buttonStyles = cva(
   [
-    'inline-flex items-center justify-center',
-    'rounded-2xl',
+    'border border-transparent inline-flex items-center justify-center',
+    'rounded-2xl shadow-sm hover:shadow-md ',
     'transition-colors duration-200',
     'font-normal text-center',
-    'cursor-pointer',
+    'cursor-pointer flex-shrink-0',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],
   {
     variants: {
       intent: {
+        // Primary action - main call-to-action, most important actions
         primary:
-          'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-primary-foreground',
-        secondary: 'bg-transparent hover:bg-muted/40 border-2 border-muted text-primary/70',
+          'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white',
+        // Secondary action - less prominent, alternative actions
+        secondary:
+          'bg-white border border-primary/20 text-gray-600 hover:text-gray-800 hover:border-primary/40',
+        // Secondary inverted - for use on dark/colored backgrounds
+        secondaryInverted: 'bg-white/30 hover:bg-white/40 text-white',
+        // Add action - for creating new items, bright and inviting
+        add: 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white',
+        // Success action - confirmations, completions, positive outcomes
         success:
-          'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white',
+          'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white',
+        // Warning action - caution required, potentially risky actions
         warning:
           'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white',
+        // Danger action - destructive actions, deletions, critical operations
         danger:
-          'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white',
-        ghost: 'bg-transparent hover:bg-muted/50',
-        info: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-primary-foreground',
-        add: 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white',
-        favorite: 'border border-pink-200 text-pink-600 hover:bg-pink-50',
-        edit: 'border border-blue-200 text-blue-600 hover:bg-blue-50',
+          'bg-gradient-to-r from-red-500 to-red-500 opacity-80 hover:from-red-600 hover:to-red-700 text-white',
+        // Ghost action - minimal prominence, tertiary actions, icon buttons
+        ghost: 'bg-transparent hover:bg-muted/80 text-primary/70 shadow-none hover:shadow-none',
       },
       size: {
         sm: 'h-8 p-3 text-sm',
@@ -46,29 +53,36 @@ const buttonStyles = cva(
 );
 
 type ButtonStyleProps = VariantProps<typeof buttonStyles>;
+type ButtonIntent =
+  | 'primary'
+  | 'secondary'
+  | 'secondaryInverted'
+  | 'add'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'ghost';
+type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonType = 'button' | 'submit' | 'reset';
+type ButtonIconPosition = 'left' | 'right';
 
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     ButtonStyleProps {
-  /** The text to display in the button */
-  text?: string | null;
-  /** Optional icon to display before the text */
-  icon?: LucideIcon;
-  /** Position of the icon relative to text */
-  iconPosition?: 'left' | 'right';
-  /** Show loading state */
-  isLoading?: boolean;
-  /** Link to navigate to (if provided, renders as Link instead of button) */
-  href?: string;
-  /** Open link in new tab */
-  external?: boolean;
+  intent?: ButtonIntent;
+  size?: ButtonSize;
+  type?: ButtonType;
+  text?: string | null; // The text to display in the button
+  icon?: LucideIcon; // Optional icon to display before the text
+  iconPosition?: ButtonIconPosition; // Position of the icon relative to text
+  isLoading?: boolean; // Show loading state
+  href?: string; // Link to navigate to (renders as Link instead of button)
+  external?: boolean; // Open link in new tab
 }
 
-// ========= Text / Icon + Text Button =========
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      className,
       intent,
       size,
       type = 'button',
@@ -78,6 +92,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       isLoading = false,
       href,
       external = false,
+      className,
       ...props
     },
     ref,

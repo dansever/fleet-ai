@@ -1,15 +1,8 @@
-import {
-  createFuelTender,
-  deleteFuelTender,
-  getFuelTenderById,
-  getFuelTendersByAirportId,
-  getFuelTendersByOrgId,
-  updateFuelTender,
-} from '@/db/fuel-tenders/db-actions';
-import type { NewFuelTender, UpdateFuelTender } from '@/drizzle/types';
+import type { NewFuelTender } from '@/drizzle/types';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
+import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -22,37 +15,20 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
-
-    const orgId = dbUser.orgId;
-    if (!orgId) return jsonError('User has no organization', 403);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Get query params
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
     const airportId = searchParams.get('airportId');
     const requestedOrgId = searchParams.get('orgId') || orgId;
 
     // User can only access fuel tenders from their own organization
     if (requestedOrgId !== orgId) return jsonError('Unauthorized', 401);
 
-    // Get specific fuel tender by ID
-    if (id) {
-      const fuelTender = await getFuelTenderById(id);
-      if (!fuelTender) return jsonError('Fuel tender not found', 404);
-
-      // Authorize access to fuel tender
-      if (!authorizeResource(fuelTender, dbUser)) {
-        return jsonError('Unauthorized', 401);
-      }
-
-      return NextResponse.json(fuelTender);
-    }
-
     // Get fuel tenders by airport
     if (airportId) {
-      const fuelTenders = await getFuelTendersByAirportId(airportId);
+      const fuelTenders = await fuelTenderServer.listFuelTendersByAirportId(airportId);
 
       // Filter to only include tenders from user's organization
       const authorizedTenders = fuelTenders.filter((tender) => authorizeResource(tender, dbUser));
@@ -61,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Default: Get all fuel tenders for organization
-    const fuelTenders = await getFuelTendersByOrgId(orgId);
+    const fuelTenders = await fuelTenderServer.listFuelTendersByOrgId(orgId);
     return NextResponse.json(fuelTenders);
   } catch (error) {
     console.error('Error fetching fuel tenders:', error);
@@ -76,7 +52,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;
@@ -95,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create fuel tender
-    const fuelTender = await createFuelTender(fuelTenderData);
+    const fuelTender = await fuelTenderServer.createFuelTender(fuelTenderData);
     return NextResponse.json(fuelTender, { status: 201 });
   } catch (error) {
     console.error('Error creating fuel tender:', error);
@@ -109,10 +85,8 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    console.log('PUT /api/fuel-tenders');
-
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;
@@ -124,7 +98,7 @@ export async function PUT(request: NextRequest) {
     if (!id) return jsonError('Fuel tender ID is required', 400);
 
     // Check if fuel tender exists and user has access
-    const existingFuelTender = await getFuelTenderById(id);
+    const existingFuelTender = await fuelTenderServer.getFuelTender(id);
     if (!existingFuelTender) return jsonError('Fuel tender not found', 404);
 
     if (!authorizeResource(existingFuelTender, dbUser)) {
@@ -134,23 +108,8 @@ export async function PUT(request: NextRequest) {
     // Parse request body and handle date conversion
     const body = await request.json();
 
-    // Create update data from body, excluding system fields
-    const updateData: UpdateFuelTender = {
-      title: body.title,
-      description: body.description,
-      fuelType: body.fuelType,
-      baseCurrency: body.baseCurrency,
-      baseUom: body.baseUom,
-      biddingStarts: body.biddingStarts,
-      biddingEnds: body.biddingEnds,
-      deliveryStarts: body.deliveryStarts,
-      deliveryEnds: body.deliveryEnds,
-      status: body.status,
-      // Don't include orgId, id, createdAt, updatedAt - these are managed by the system
-    };
-
     // Update fuel tender
-    const updatedFuelTender = await updateFuelTender(id, updateData);
+    const updatedFuelTender = await fuelTenderServer.updateFuelTender(id, body);
     return NextResponse.json(updatedFuelTender);
   } catch (error) {
     console.error('Error updating fuel tender:', error);
@@ -165,7 +124,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Authorize user
-    const { dbUser, error } = await authorizeUser();
+    const { dbUser, error } = await getAuthContext();
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const orgId = dbUser.orgId;
@@ -177,7 +136,7 @@ export async function DELETE(request: NextRequest) {
     if (!id) return jsonError('Fuel tender ID is required', 400);
 
     // Check if fuel tender exists and user has access
-    const existingFuelTender = await getFuelTenderById(id);
+    const existingFuelTender = await fuelTenderServer.getFuelTender(id);
     if (!existingFuelTender) return jsonError('Fuel tender not found', 404);
 
     if (!authorizeResource(existingFuelTender, dbUser)) {
@@ -185,7 +144,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete fuel tender
-    await deleteFuelTender(id);
+    await fuelTenderServer.deleteFuelTender(id);
     return NextResponse.json({ message: 'Fuel tender deleted successfully' });
   } catch (error) {
     console.error('Error deleting fuel tender:', error);

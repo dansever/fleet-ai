@@ -1,21 +1,23 @@
-import { getRfqsByOrgAndDirection } from '@/db/rfqs/db-actions';
-import { authorizeUser } from '@/lib/authorization/authorize-user';
-import { jsonError } from '@/lib/core/errors';
-import SupplierHubClientPage from './ClientPage';
-import { SupplierHubContextProvider } from './ContextProvider';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { server as rfqServer } from '@/modules/rfqs';
+import TechnicalProcurementClientPage from './ClientPage';
+import { TechnicalProcurementContextProvider } from './ContextProvider';
 
-export default async function SupplierHubPage() {
-  const { dbUser, error } = await authorizeUser();
-  if (error || !dbUser) return jsonError('Unauthorized', 401);
+export default async function TechnicalProcurementPage() {
+  const { dbUser, error } = await getAuthContext();
+  if (error || !dbUser) {
+    return <div>Error: {error}</div>;
+  }
+  if (!dbUser.orgId) {
+    return <div>Error: User has no organization</div>;
+  }
 
-  const orgId = dbUser.orgId;
-  if (!orgId) return jsonError('User has no organization', 403);
-
-  const incomingRfqs = await getRfqsByOrgAndDirection(orgId, 'received');
+  // Fetch RFQs and quotes in parallel
+  const [rfqs] = await Promise.all([rfqServer.listRfqsByDirection('received', dbUser.orgId)]);
 
   return (
-    <SupplierHubContextProvider orgId={orgId} initialRfqs={incomingRfqs} hasServerData={true}>
-      <SupplierHubClientPage />
-    </SupplierHubContextProvider>
+    <TechnicalProcurementContextProvider initialRfqs={rfqs} hasServerData={true}>
+      <TechnicalProcurementClientPage />
+    </TechnicalProcurementContextProvider>
   );
 }

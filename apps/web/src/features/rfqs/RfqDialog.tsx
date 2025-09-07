@@ -1,111 +1,169 @@
+// Updated by CursorAI on Sep 2 2025
 'use client';
 
 import {
-  getStatusDisplay,
+  getProcessStatusDisplay,
   getUrgencyLevelDisplay,
-  statusEnum,
+  OrderDirection,
+  orderDirectionDisplayMap,
+  OrderDirectionEnum,
+  ProcessStatusEnum,
   UrgencyLevel,
-  urgencyLevelEnum,
-} from '@/drizzle/schema/enums';
+  UrgencyLevelEnum,
+} from '@/drizzle/enums';
 import type { Rfq } from '@/drizzle/types';
-import { serializeRfqDates } from '@/lib/utils/date-helpers';
-import { createRfq, CreateRfqData, updateRfq } from '@/services/technical/rfq-client';
-import { Button, ButtonProps } from '@/stories/Button/Button';
-import { ContentSection } from '@/stories/Card/Card';
+import { client as rfqClient } from '@/modules/rfqs';
+import { RfqCreateInput, RfqUpdateInput } from '@/modules/rfqs/rfqs.types';
+import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
-import { KeyValuePair } from '@/stories/Utilities/KeyValuePair';
-import { Eye, Pencil, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { serializeDatesForAPI } from '@/utils/date-helpers';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function RfqDialog({
   rfq,
   onChange,
   DialogType = 'view',
-  triggerClassName,
-  buttonSize = 'md',
   triggerText,
+  trigger,
   open,
   onOpenChange,
-  withTrigger = true,
-  triggerIntent,
 }: {
   rfq: Rfq | null;
   onChange: (rfq: Rfq) => void;
   DialogType: 'add' | 'edit' | 'view';
   triggerText?: string;
-  triggerClassName?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
-  triggerIntent?: 'primary' | 'secondary' | 'add' | 'delete' | 'info';
+  trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
-  const [formData, setFormData] = useState({
-    direction: rfq?.direction || null,
-    rfqNumber: rfq?.rfqNumber || null,
-    vendorName: rfq?.vendorName || null,
-    vendorAddress: rfq?.vendorAddress || null,
-    vendorContactName: rfq?.vendorContactName || null,
-    vendorContactEmail: rfq?.vendorContactEmail || null,
-    vendorContactPhone: rfq?.vendorContactPhone || null,
-    partNumber: rfq?.partNumber || null,
-    altPartNumber: rfq?.altPartNumber || null,
-    partDescription: rfq?.partDescription || null,
-    conditionCode: rfq?.conditionCode || null,
-    unitOfMeasure: rfq?.unitOfMeasure || null,
-    quantity: rfq?.quantity || null,
-    pricingType: rfq?.pricingType || null,
-    urgencyLevel: rfq?.urgencyLevel || null,
-    deliverTo: rfq?.deliverTo || null,
-    buyerComments: rfq?.buyerComments || null,
-    status: rfq?.status || 'pending',
-    sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const isAdd = DialogType === 'add';
-  const isEdit = DialogType === 'edit';
-
-  // Update formData when rfq prop changes
-  useEffect(() => {
-    setFormData({
+  // Initial form data state - use memoized initialization
+  const [formData, setFormData] = useState(() => {
+    console.log('Initial formData state for RFQ:', rfq?.id || 'null');
+    return {
+      // RFQ Identification (matching schema)
       direction: rfq?.direction || null,
       rfqNumber: rfq?.rfqNumber || null,
+      processStatus: rfq?.processStatus || 'pending',
+
+      // Vendor Information (matching schema)
       vendorName: rfq?.vendorName || null,
       vendorAddress: rfq?.vendorAddress || null,
       vendorContactName: rfq?.vendorContactName || null,
       vendorContactEmail: rfq?.vendorContactEmail || null,
       vendorContactPhone: rfq?.vendorContactPhone || null,
+
+      // Part Specifications (matching schema)
       partNumber: rfq?.partNumber || null,
       altPartNumber: rfq?.altPartNumber || null,
       partDescription: rfq?.partDescription || null,
       conditionCode: rfq?.conditionCode || null,
       unitOfMeasure: rfq?.unitOfMeasure || null,
       quantity: rfq?.quantity || null,
+
+      // Commercial Terms (matching schema)
       pricingType: rfq?.pricingType || null,
       urgencyLevel: rfq?.urgencyLevel || null,
       deliverTo: rfq?.deliverTo || null,
       buyerComments: rfq?.buyerComments || null,
-      status: rfq?.status || 'pending',
+
+      // Workflow Management (matching schema)
+      selectedQuoteId: rfq?.selectedQuoteId || null,
+
+      // Timestamps (matching schema)
       sentAt: rfq?.sentAt ? new Date(rfq.sentAt) : null,
-    });
-  }, [rfq]);
+    };
+  });
+
+  const isAdd = DialogType === 'add';
+  const isEdit = DialogType === 'edit';
+
+  // Track the previous RFQ ID to prevent unnecessary updates
+  const previousRfqIdRef = useRef<string | null>(null);
+
+  // Helper function to create form data from RFQ (not memoized to avoid stale closures)
+  const createFormDataFromRfq = (rfqData: Rfq | null) => {
+    return {
+      // RFQ Identification (matching schema)
+      direction: rfqData?.direction || null,
+      rfqNumber: rfqData?.rfqNumber || null,
+      processStatus: rfqData?.processStatus || 'pending',
+
+      // Vendor Information (matching schema)
+      vendorName: rfqData?.vendorName || null,
+      vendorAddress: rfqData?.vendorAddress || null,
+      vendorContactName: rfqData?.vendorContactName || null,
+      vendorContactEmail: rfqData?.vendorContactEmail || null,
+      vendorContactPhone: rfqData?.vendorContactPhone || null,
+
+      // Part Specifications (matching schema)
+      partNumber: rfqData?.partNumber || null,
+      altPartNumber: rfqData?.altPartNumber || null,
+      partDescription: rfqData?.partDescription || null,
+      conditionCode: rfqData?.conditionCode || null,
+      unitOfMeasure: rfqData?.unitOfMeasure || null,
+      quantity: rfqData?.quantity || null,
+
+      // Commercial Terms (matching schema)
+      pricingType: rfqData?.pricingType || null,
+      urgencyLevel: rfqData?.urgencyLevel || null,
+      deliverTo: rfqData?.deliverTo || null,
+      buyerComments: rfqData?.buyerComments || null,
+
+      // Workflow Management (matching schema)
+      selectedQuoteId: rfqData?.selectedQuoteId || null,
+
+      // Timestamps (matching schema)
+      sentAt: rfqData?.sentAt ? new Date(rfqData.sentAt) : null,
+    };
+  };
+
+  // Only update formData when RFQ ID actually changes
+  useEffect(() => {
+    const currentRfqId = rfq?.id || null;
+
+    // Only update if the RFQ ID has actually changed
+    if (currentRfqId !== previousRfqIdRef.current) {
+      console.log(
+        'RfqDialog: RFQ actually changed from',
+        previousRfqIdRef.current,
+        'to',
+        currentRfqId,
+      );
+      setFormData(createFormDataFromRfq(rfq));
+      previousRfqIdRef.current = currentRfqId;
+    }
+  }, [rfq?.id]);
+
+  // ONLY update when dialog opens AND it's a different RFQ than what we last processed
+  useEffect(() => {
+    if (open === true) {
+      const currentRfqId = rfq?.id || null;
+      if (currentRfqId !== previousRfqIdRef.current) {
+        console.log('RfqDialog: Dialog opened with new RFQ ID:', currentRfqId);
+        setFormData(createFormDataFromRfq(rfq));
+        previousRfqIdRef.current = currentRfqId;
+      } else {
+        console.log('RfqDialog: Dialog opened with same RFQ ID, skipping update');
+      }
+    }
+  }, [open]);
 
   const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       let savedRfq: Rfq;
 
       // Serialize dates to ISO strings before sending
-      const serializedFormData = serializeRfqDates(formData);
+      const serializedFormData = serializeDatesForAPI(formData, ['sentAt']);
 
       if (isAdd) {
         // Create new RFQ (orgId and userId are handled server-side)
-        const createData: CreateRfqData = {
+        const createData: RfqCreateInput = {
           direction: serializedFormData.direction,
           rfqNumber: serializedFormData.rfqNumber,
           vendorName: serializedFormData.vendorName,
@@ -123,18 +181,18 @@ export default function RfqDialog({
           urgencyLevel: serializedFormData.urgencyLevel,
           deliverTo: serializedFormData.deliverTo,
           buyerComments: serializedFormData.buyerComments,
-          status: serializedFormData.status,
-          selectedQuoteId: null,
-          sentAt: serializedFormData.sentAt,
+          processStatus: serializedFormData.processStatus,
+          selectedQuoteId: serializedFormData.selectedQuoteId,
+          sentAt: serializedFormData.sentAt?.toISOString() || null,
         };
-        savedRfq = await createRfq(createData);
+        savedRfq = await rfqClient.createRfq(createData);
         toast.success('RFQ created successfully');
       } else {
         // Update existing RFQ
         if (!rfq?.id) {
           throw new Error('RFQ ID is required for updates');
         }
-        const updateData = {
+        const updateData: RfqUpdateInput = {
           direction: serializedFormData.direction,
           rfqNumber: serializedFormData.rfqNumber,
           vendorName: serializedFormData.vendorName,
@@ -152,11 +210,9 @@ export default function RfqDialog({
           urgencyLevel: serializedFormData.urgencyLevel,
           deliverTo: serializedFormData.deliverTo,
           buyerComments: serializedFormData.buyerComments,
-          status: serializedFormData.status,
-          sentAt: serializedFormData.sentAt,
-          receivedAt: serializedFormData.receivedAt,
+          processStatus: serializedFormData.processStatus,
         };
-        savedRfq = await updateRfq(rfq.id, updateData);
+        savedRfq = await rfqClient.updateRfq(rfq.id, updateData);
         toast.success('RFQ updated successfully');
       }
 
@@ -166,82 +222,43 @@ export default function RfqDialog({
       const action = isAdd ? 'create' : 'update';
       toast.error(`Failed to ${action} RFQ`);
       console.error(`Error ${action}ing RFQ:`, error);
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
   const handleCancel = () => {
     if (isAdd) {
-      setFormData({
-        direction: null,
-        rfqNumber: null,
-        vendorName: null,
-        vendorAddress: null,
-        vendorContactName: null,
-        vendorContactEmail: null,
-        vendorContactPhone: null,
-        partNumber: null,
-        altPartNumber: null,
-        partDescription: null,
-        conditionCode: null,
-        unitOfMeasure: null,
-        quantity: null,
-        pricingType: null,
-        urgencyLevel: null,
-        deliverTo: null,
-        buyerComments: null,
-        status: 'pending',
-        sentAt: null,
-      });
+      // Reset to empty form for add mode
+      setFormData(createFormDataFromRfq(null));
+    } else {
+      // Reset to original RFQ data for edit/view mode
+      setFormData(createFormDataFromRfq(rfq));
     }
   };
 
+  const handleReset = () => {
+    // Always reset to empty form for reset operation
+    setFormData(createFormDataFromRfq(null));
+  };
+
   const dialogTitle = isAdd ? 'Add New RFQ' : rfq?.rfqNumber || 'RFQ Details';
-  const saveButtonText = isAdd ? 'Create RFQ' : 'Save Changes';
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger ? (
-          <Button
-            intent={
-              triggerIntent
-                ? (triggerIntent as ButtonProps['intent'])
-                : isAdd
-                  ? 'add'
-                  : isEdit
-                    ? 'secondary'
-                    : 'primary'
-            }
-            text={triggerText}
-            icon={
-              isAdd
-                ? Plus
-                : DialogType === 'edit'
-                  ? Pencil
-                  : DialogType === 'view'
-                    ? Eye
-                    : undefined
-            }
-            size={buttonSize}
-            className={triggerClassName}
-          />
-        ) : null
-      }
+      trigger={trigger ? trigger : null}
       headerGradient="from-purple-500 to-purple-500"
       title={dialogTitle}
       onSave={handleSave}
       onCancel={handleCancel}
-      initialEditing={isEdit || isAdd}
-      saveButtonText={saveButtonText}
+      onReset={handleReset}
+      DialogType={DialogType}
       open={open}
       onOpenChange={onOpenChange}
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ContentSection header="RFQ Information" headerGradient="from-purple-500 to-purple-300">
-            <div className="flex flex-col justify-between space-y-4">
+          <MainCard title="RFQ Information" neutralHeader={true}>
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Direction"
                 value={formData.direction}
@@ -249,10 +266,10 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('direction', value)}
                 name="direction"
-                selectOptions={[
-                  { value: 'sent', label: 'Sent' },
-                  { value: 'received', label: 'Received' },
-                ]}
+                selectOptions={Object.values(OrderDirectionEnum.enumValues).map((direction) => ({
+                  value: direction,
+                  label: orderDirectionDisplayMap[direction as OrderDirection],
+                }))}
               />
               <KeyValuePair
                 label="RFQ Number"
@@ -264,14 +281,14 @@ export default function RfqDialog({
               />
               <KeyValuePair
                 label="Status"
-                value={formData.status}
+                value={formData.processStatus}
                 valueType="select"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('status', value)}
-                name="status"
-                selectOptions={Object.values(statusEnum.enumValues).map((status) => ({
+                onChange={(value) => handleFieldChange('processStatus', value)}
+                name="processStatus"
+                selectOptions={Object.values(ProcessStatusEnum.enumValues).map((status) => ({
                   value: status,
-                  label: getStatusDisplay(status),
+                  label: getProcessStatusDisplay(status),
                 }))}
               />
               <KeyValuePair
@@ -281,18 +298,26 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('urgencyLevel', value)}
                 name="urgencyLevel"
-                selectOptions={Object.values(urgencyLevelEnum.enumValues).map((level) => ({
+                selectOptions={Object.values(UrgencyLevelEnum.enumValues).map((level) => ({
                   value: level,
                   label: getUrgencyLevelDisplay(level as UrgencyLevel),
                 }))}
               />
+              <KeyValuePair
+                label="Sent At"
+                value={formData.sentAt?.toISOString().split('T')[0] || ''}
+                valueType="date"
+                editMode={isEditing}
+                onChange={(value) =>
+                  handleFieldChange('sentAt', value ? new Date(value as string) : null)
+                }
+                name="sentAt"
+              />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Vendor Information"
-            headerGradient="from-purple-500 to-purple-300"
-          >
-            <div className="flex flex-col justify-between space-y-4">
+          </MainCard>
+
+          <MainCard title="Vendor Information" neutralHeader={true}>
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -334,12 +359,10 @@ export default function RfqDialog({
                 name="vendorContactPhone"
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Part Specifications"
-            headerGradient="from-purple-500 to-purple-300"
-          >
-            <div className="flex flex-col justify-between space-y-4">
+          </MainCard>
+
+          <MainCard title="Part Specifications" neutralHeader={true}>
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Part Number"
                 value={formData.partNumber}
@@ -387,14 +410,13 @@ export default function RfqDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('quantity', value)}
                 name="quantity"
+                min={1}
               />
             </div>
-          </ContentSection>
-          <ContentSection
-            header="Commercial Terms & Timeline"
-            headerGradient="from-purple-500 to-purple-300"
-          >
-            <div className="flex flex-col justify-between space-y-4">
+          </MainCard>
+
+          <MainCard title="Commercial Terms" neutralHeader={true}>
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Pricing Type"
                 value={formData.pricingType}
@@ -419,16 +441,8 @@ export default function RfqDialog({
                 onChange={(value) => handleFieldChange('buyerComments', value)}
                 name="buyerComments"
               />
-              <KeyValuePair
-                label="Sent At"
-                value={formData.sentAt}
-                valueType="date"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('sentAt', value)}
-                name="sentAt"
-              />
             </div>
-          </ContentSection>
+          </MainCard>
         </div>
       )}
     </DetailDialog>
