@@ -1,6 +1,14 @@
 from app.db.session import get_table, get_db
 from sqlalchemy import update, select, insert, delete
 
+__all__ = [
+    "get_airport",
+    "list_airports",
+    "create_airport",
+    "update_airport",
+    "delete_airport",
+]
+
 """
 Get an airport by ID from the database of the current organization.
 - Returns: A single airport or None if not found.

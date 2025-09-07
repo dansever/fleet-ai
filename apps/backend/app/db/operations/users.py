@@ -1,6 +1,16 @@
 from app.db.session import get_table, get_db
 from sqlalchemy import update, select, insert, delete
 
+__all__ = [
+    "get_user",
+    "get_user_by_clerk_id",
+    "list_users",
+    "create_user",
+    "update_user",
+    "delete_user",
+]
+
+
 """
 Get a user by ID from the database of the current organization.
 - Returns: A single user or None if not found.

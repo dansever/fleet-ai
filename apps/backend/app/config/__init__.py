@@ -6,14 +6,12 @@ Provides typed enums, settings classes, and a top-level AIConfig instance.
 from .ai_config import (
     AIConfig,
     AIPlatform,
-    OpenAITextModel,
+    OpenAIChatModel,
     OpenAIEmbeddingModel,
-    GeminiTextModel,
     LlamaSettings,
     FeatureFlags,
     ActiveModels,
     OpenAISettings,
-    GeminiSettings,
     TavilySettings,
 )
 
@@ -24,9 +22,12 @@ __all__ = [
     "ai_config", # Singleton instance
     "AIConfig", # Class
     "AIPlatform", # Enum for switching/checking platforms
-    "OpenAITextModel",
+    "OpenAIChatModel",
     "OpenAIEmbeddingModel",
+    "OpenAISettings",
     "LlamaSettings",
+    "FeatureFlags",
+    "ActiveModels",
     "TavilySettings",
     "FeatureFlags",
     "ActiveModels",    

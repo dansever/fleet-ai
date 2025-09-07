@@ -12,8 +12,14 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 
+langchain-text-splitters
 langchain-google-genai
+langchain-postgres
+langchain-community
+langchain-openai
 langchain-core
+langchain
+langgraph
 
 protobuf
 
@@ -23,6 +29,7 @@ pydantic[email]
 
 llama-cloud
 llama-cloud-services
+llama-index-embeddings-openai
 
 PyJWT[crypto]
 
@@ -47,3 +54,5 @@ pillow
 
 strands-agents 
 strands-agents-tools
+
+pypdf

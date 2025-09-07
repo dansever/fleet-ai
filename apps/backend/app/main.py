@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.utils import get_logger
 import os
+from app.config import ai_config
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -34,6 +35,10 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         allow_headers=["*"],
     )
+
+    # Validate configuration before routers are included
+    ai_config.validate()
+    app.state.ai_config = ai_config  # make available to routes and deps
     
     # Include API routes
     app.include_router(api_router, prefix="/api/v1")
@@ -49,7 +54,9 @@ def create_app() -> FastAPI:
     
     return app
 
+
 app = create_app()
+
 
 if __name__ == "__main__":
     import uvicorn

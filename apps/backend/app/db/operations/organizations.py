@@ -1,6 +1,14 @@
 from app.db.session import get_table, get_db
 from sqlalchemy import update, select, insert, delete
 
+__all__ = [
+    "get_organization",
+    "create_organization",
+    "update_organization",
+    "delete_organization",
+]
+
+
 """
 Get an organization by ID from the database.
 - Returns: A single organization or None if not found.
@@ -12,27 +20,6 @@ async def get_organization(organization_id: str):
         res = await session.execute(query)
         return res.mappings().first()
 
-"""
-Get an organization by Clerk organization ID from the database.
-- Returns: A single organization or None if not found.
-"""
-async def get_organization_by_clerk_id(clerk_org_id: str):
-    organizations = await get_table("organizations")
-    async for session in get_db():
-        query = select(organizations).where(organizations.c.clerk_org_id == clerk_org_id)
-        res = await session.execute(query)
-        return res.mappings().first()
-
-"""
-List all organizations from the database.
-- Returns: A list of organizations.
-"""
-async def list_organizations():
-    organizations = await get_table("organizations")
-    async for session in get_db():
-        query = select(organizations)
-        res = await session.execute(query)
-        return res.mappings().all()
 
 """
 Create a new organization in the database.
