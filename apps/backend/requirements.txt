@@ -30,6 +30,8 @@ sqlalchemy
 asyncpg
 psycopg
 psycopg2-binary
+sqlacodegen[pgvector]
+pgvector
 
 python-multipart
 

@@ -1,64 +1,73 @@
-"""
-Airport database operations
-Handles all CRUD operations for airports
-"""
-
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
-from sqlalchemy.orm import selectinload
-
-from ..models_auto import Airports
+from app.db.session import get_table, get_db
+from sqlalchemy import update, select, insert, delete
 
 """
-Methods:
-- get_airport_by_id
-- get_airports_by_org
-- update_airport
+Get an airport by ID from the database of the current organization.
+- Returns: A single airport or None if not found.
 """
+async def get_airport(airport_id: str, organization_id: str):
+    airports = await get_table("airports")
+    async for session in get_db():
+        query = select(airports).where(
+          airports.c.id == airport_id, 
+          airports.c.org_id == organization_id) 
+        res = await session.execute(query)
+        return res.mappings().first()
 
+"""
+List all airports from the database of the current organization.
+- Returns: A list of airports.
+"""
+async def list_airports(organization_id: str):
+    airports = await get_table("airports")
+    async for session in get_db():
+        query = select(airports).where(airports.c.org_id == organization_id)
+        res = await session.execute(query)
+        return res.mappings().all()
 
-# get_airport_by_id - Get an airport by its ID
-async def get_airport_by_id(
-    session: AsyncSession,
-    airport_id: str
-) -> Optional[Airports]:
-    """Get airport by ID"""
-    result = await session.execute(
-        select(Airports).where(Airports.id == airport_id)
-    )
-    return result.scalar_one_or_none()
+"""
+Create a new airport in the database of the current organization.
+- Returns: The created airport.
+"""
+async def create_airport(organization_id: str, airport: dict):
+    airports = await get_table("airports")
+    async for session in get_db():
+        airport['org_id'] = organization_id
+        stmt = insert(airports).values(**airport).returning(airports)
+        res = await session.execute(stmt)
+        await session.commit()
+        return res.mappings().first()
 
+"""
+Update a airport in the database of the current organization.
+- Returns: The updated airport.
+"""
+async def update_airport(airport_id: str, organization_id: str, airport: dict):
+    airports = await get_table("airports")
+    async for session in get_db():
+          # build UPDATE statement with returning
+          stmt = (
+              update(airports)
+              .where(airports.c.id == airport_id, airports.c.org_id == organization_id)
+              .values(**airport)
+              .returning(airports)  # return the updated row
+          )
+          res = await session.execute(stmt)
+          await session.commit()
+          return res.mappings().first()
 
-# get_airports_by_org - Get all airports for an organization
-async def get_airports_by_org(
-    session: AsyncSession,
-    org_id: str
-) -> List[Airports]:
-    """Get all airports for an organization"""
-    result = await session.execute(
-        select(Airports).where(Airports.org_id == org_id)
-    )
-    return result.scalars().all()
-
-
-# update_airport - Update an airport's fields
-async def update_airport(
-    session: AsyncSession,
-    airport_id: str,
-    **kwargs
-) -> Optional[Airports]:
-    """Update airport fields"""
-    update_data = {k: v for k, v in kwargs.items() if v is not None}
-    
-    if not update_data:
-        return None
-    
-    await session.execute(
-        update(Airports)
-        .where(Airports.id == airport_id)
-        .values(**update_data)
-    )
-    await session.commit()
-    
-    return await get_airport_by_id(session, airport_id)
+"""
+Delete a airport from the database of the current organization.
+- Returns: The deleted airport.
+"""
+async def delete_airport(airport_id: str, organization_id: str):
+    airports = await get_table("airports")
+    async for session in get_db():
+        stmt = (
+            delete(airports)
+            .where(airports.c.id == airport_id, airports.c.org_id == organization_id)
+            .returning(airports)
+        )
+        res = await session.execute(stmt)
+        await session.commit()
+        return res.mappings().first()
