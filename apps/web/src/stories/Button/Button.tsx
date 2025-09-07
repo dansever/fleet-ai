@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge';
 
 const buttonStyles = cva(
   [
-    'inline-flex items-center justify-center',
+    'border border-transparent inline-flex items-center justify-center',
     'rounded-2xl shadow-sm hover:shadow-md ',
     'transition-colors duration-200',
     'font-normal text-center',

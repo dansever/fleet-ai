@@ -1,5 +1,5 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
-import { server } from '@/modules/rfqs';
+import { server as rfqServer } from '@/modules/rfqs';
 import TechnicalProcurementClientPage from './ClientPage';
 import { TechnicalProcurementContextProvider } from './ContextProvider';
 
@@ -13,7 +13,7 @@ export default async function TechnicalProcurementPage() {
   }
 
   // Fetch RFQs and quotes in parallel
-  const [rfqs] = await Promise.all([server.listOrgRfqsByDirection(dbUser.orgId, 'received')]);
+  const [rfqs] = await Promise.all([rfqServer.listRfqsByDirection('received', dbUser.orgId)]);
 
   return (
     <TechnicalProcurementContextProvider initialRfqs={rfqs} hasServerData={true}>

@@ -37,45 +37,43 @@ interface QuotesComparisonProps {
 const getStatusBadge = (status: string | null) => {
   if (!status) return <Badge variant="secondary">Unknown</Badge>;
 
-  const displayText = getProcessStatusDisplay(status);
-
   switch (status.toLowerCase()) {
     case 'completed':
       return (
         <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
           <CheckCircle className="w-3 h-3 mr-1" />
-          {displayText}
+          {getProcessStatusDisplay(status)}
         </Badge>
       );
     case 'in_progress':
       return (
         <Badge variant="default" className="bg-blue-100 text-blue-800 border-blue-200">
           <Clock className="w-3 h-3 mr-1" />
-          {displayText}
+          {getProcessStatusDisplay(status)}
         </Badge>
       );
     case 'pending':
       return (
         <Badge variant="secondary">
           <Clock className="w-3 h-3 mr-1" />
-          {displayText}
+          {getProcessStatusDisplay(status)}
         </Badge>
       );
     case 'draft':
       return (
         <Badge variant="outline">
           <FileText className="w-3 h-3 mr-1" />
-          {displayText}
+          {getProcessStatusDisplay(status)}
         </Badge>
       );
     case 'closed':
       return (
         <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200">
-          {displayText}
+          {getProcessStatusDisplay(status)}
         </Badge>
       );
     default:
-      return <Badge variant="secondary">{displayText}</Badge>;
+      return <Badge variant="secondary">{getProcessStatusDisplay(status)}</Badge>;
   }
 };
 
@@ -106,10 +104,7 @@ const createQuoteColumns = (
           quote={quote}
           onChange={onUpdateQuote}
           DialogType="view"
-          triggerButtonText="View"
-          triggerButtonIntent="secondary"
-          triggerButtonIcon={Eye}
-          TriggerButtonSize="sm"
+          trigger={<Button intent="secondary" text="view" icon={Eye} size="sm" />}
         />
         <ConfirmationPopover
           trigger={

@@ -187,12 +187,6 @@ export async function createRandomRfq(direction: OrderDirection = 'sent'): Promi
     // Workflow Management (matching schema)
     processStatus: pickOne(ProcessStatusEnum.enumValues),
     selectedQuoteId: null, // This would be set later when a quote is selected
-
-    // Timestamps (matching schema)
-    sentAt:
-      Math.random() > 0.3
-        ? new Date(Date.now() - getRandomInt(0, 30) * 24 * 60 * 60 * 1000).toISOString()
-        : null,
   };
 
   const res = await rfqClient.createRfq(generatedRfq);

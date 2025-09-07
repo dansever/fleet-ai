@@ -12,12 +12,10 @@ import type { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { client } from '@/modules/quotes';
 import { QuoteCreateInput } from '@/modules/quotes/quotes.types';
-import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { serializeDatesForAPI } from '@/utils/date-helpers';
-import { Eye, LucideIcon, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -26,34 +24,17 @@ export default function QuoteDialog({
   rfqId,
   onChange,
   DialogType = 'view',
-  triggerButtonIntent = 'secondary',
-  triggerButtonText,
-  triggerButtonIcon,
-  TriggerButtonSize = 'md',
-  triggerButtonClassName,
+  trigger,
   open,
   onOpenChange,
-  withTrigger = true,
 }: {
   quote: Quote | null;
   rfqId?: Rfq['id']; // Required when DialogType is 'add'
   onChange: (quote: Quote) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerButtonIntent?:
-    | 'primary'
-    | 'secondary'
-    | 'ghost'
-    | 'danger'
-    | 'success'
-    | 'warning'
-    | 'add';
-  triggerButtonText?: string;
-  triggerButtonIcon?: LucideIcon;
-  TriggerButtonSize?: 'sm' | 'md' | 'lg';
-  triggerButtonClassName?: string;
+  trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
     // Quote Identification (matching schema)
@@ -345,17 +326,7 @@ export default function QuoteDialog({
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger ? (
-          <Button
-            intent={triggerButtonIntent || (isAdd ? 'add' : 'secondary')}
-            text={triggerButtonText}
-            icon={triggerButtonIcon || (isAdd ? Plus : isEdit ? Pencil : Eye)}
-            size={TriggerButtonSize}
-            className={triggerButtonClassName}
-          />
-        ) : null
-      }
+      trigger={trigger ? trigger : null}
       headerGradient="from-green-500 to-green-500"
       title={dialogTitle}
       DialogType={DialogType}

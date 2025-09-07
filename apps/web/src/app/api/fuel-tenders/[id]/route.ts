@@ -1,7 +1,7 @@
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as fuelTenderServer } from '@/modules/fuel-mgmt/tenders';
+import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: { id: string } };

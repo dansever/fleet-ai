@@ -19,7 +19,6 @@ export default function ContractDialog({
   airportId,
   onChange,
   DialogType = 'view',
-  withTrigger = true,
   trigger,
   open,
   onOpenChange,
@@ -31,13 +30,11 @@ export default function ContractDialog({
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
     // Contract Information (matching schema)
     title: contract?.title || '',
     contractType: contract?.contractType || null,
-    internalNotes: contract?.internalNotes || null,
     summary: contract?.summary || null,
     terms: contract?.terms || null,
     docUrl: contract?.docUrl || null,
@@ -73,7 +70,6 @@ export default function ContractDialog({
     setFormData({
       title: contract?.title || '',
       contractType: contract?.contractType || null,
-      internalNotes: contract?.internalNotes || null,
       summary: contract?.summary || null,
       terms: contract?.terms || null,
       docUrl: contract?.docUrl || null,
@@ -127,7 +123,6 @@ export default function ContractDialog({
           vendorId: null, // Will be handled by backend if needed
           title: serializedFormData.title as string,
           contractType: serializedFormData.contractType!,
-          internalNotes: serializedFormData.internalNotes,
           summary: serializedFormData.summary,
           terms: serializedFormData.terms,
           docUrl: serializedFormData.docUrl,
@@ -137,8 +132,8 @@ export default function ContractDialog({
           vendorContactEmail: serializedFormData.vendorContactEmail,
           vendorContactPhone: serializedFormData.vendorContactPhone,
           vendorComments: serializedFormData.vendorComments,
-          effectiveFrom: serializedFormData.effectiveFrom,
-          effectiveTo: serializedFormData.effectiveTo,
+          effectiveFrom: serializedFormData.effectiveFrom as string,
+          effectiveTo: serializedFormData.effectiveTo as string,
         };
 
         savedContract = await contractClient.createContract(createData);
@@ -152,7 +147,6 @@ export default function ContractDialog({
         const updateData = {
           title: serializedFormData.title,
           contractType: serializedFormData.contractType || undefined,
-          internalNotes: serializedFormData.internalNotes,
           summary: serializedFormData.summary,
           terms: serializedFormData.terms,
           docUrl: serializedFormData.docUrl,
@@ -188,7 +182,6 @@ export default function ContractDialog({
       setFormData({
         title: '',
         contractType: null,
-        internalNotes: null,
         summary: null,
         terms: null,
         docUrl: null,
@@ -209,7 +202,6 @@ export default function ContractDialog({
     setFormData({
       title: '',
       contractType: null,
-      internalNotes: null,
       summary: null,
       terms: null,
       docUrl: null,
@@ -229,7 +221,7 @@ export default function ContractDialog({
 
   return (
     <DetailDialog
-      trigger={withTrigger ? trigger : null}
+      trigger={trigger ? trigger : null}
       headerGradient="from-green-500 to-green-500"
       title={dialogTitle}
       onSave={handleSave}
@@ -271,14 +263,7 @@ export default function ContractDialog({
                 onChange={(value) => handleFieldChange('summary', value)}
                 name="summary"
               />
-              <KeyValuePair
-                label="Internal Notes"
-                value={formData.internalNotes}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('internalNotes', value)}
-                name="internalNotes"
-              />
+
               <KeyValuePair
                 label="Terms"
                 value={formData.terms}

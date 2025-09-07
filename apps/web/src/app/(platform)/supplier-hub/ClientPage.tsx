@@ -19,8 +19,10 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import {
   ChartBarIcon,
+  Eye,
   FileText,
   Package,
+  Pencil,
   RefreshCw,
   Sparkles,
   TrashIcon,
@@ -126,7 +128,7 @@ export default function TechnicalProcurementClientPage() {
       isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
       rfqsDirection={'received'}
-      onCreatedRfq={refreshRfqs}
+      onCreatedRfq={addRfq}
     />
   );
 
@@ -152,8 +154,7 @@ export default function TechnicalProcurementClientPage() {
           key={selectedRfq?.id}
           rfq={selectedRfq}
           onChange={updateRfq}
-          triggerText="View Details"
-          triggerIntent="secondary"
+          trigger={<Button intent="secondary" icon={Eye} />}
           DialogType="view"
         />
       </div>
@@ -194,20 +195,12 @@ export default function TechnicalProcurementClientPage() {
                   key={selectedRfq.id}
                   rfq={selectedRfq}
                   onChange={updateRfq}
-                  triggerText="Edit"
                   DialogType="edit"
-                  triggerIntent="secondaryInverted"
+                  trigger={<Button intent="secondaryInverted" icon={Pencil} />}
                 />
 
                 <ConfirmationPopover
-                  trigger={
-                    <Button
-                      intent="secondaryInverted"
-                      icon={TrashIcon}
-                      text="Delete"
-                      className="bg-white/20 text-white-700 hover:border-red-500 hover:bg-red-500"
-                    />
-                  }
+                  trigger={<Button intent="secondaryInverted" icon={TrashIcon} />}
                   popoverIntent="danger"
                   title="Delete RFQ"
                   onConfirm={handleDeleteRfq}

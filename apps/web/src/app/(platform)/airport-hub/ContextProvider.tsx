@@ -368,13 +368,18 @@ export default function AirportHubProvider({
    */
   const removeAirport = useCallback(
     (airportId: string) => {
-      setAirports((prevAirports) => prevAirports.filter((airport) => airport.id !== airportId));
-      if (selectedAirport?.id === airportId) {
-        // Select first available airport or null
-        setSelectedAirport(airports.find((a) => a.id !== airportId) || null);
-      }
+      setAirports((prevAirports) => {
+        const filteredAirports = prevAirports.filter((airport) => airport.id !== airportId);
+
+        // If we're removing the currently selected airport, select the first available one
+        if (selectedAirport?.id === airportId) {
+          setSelectedAirport(filteredAirports.length > 0 ? filteredAirports[0] : null);
+        }
+
+        return filteredAirports;
+      });
     },
-    [selectedAirport, airports],
+    [selectedAirport],
   );
 
   /**
@@ -407,12 +412,16 @@ export default function AirportHubProvider({
    */
   const removeContract = useCallback(
     (contractId: string) => {
-      setContracts((prevContracts) =>
-        prevContracts.filter((contract) => contract.id !== contractId),
-      );
-      if (selectedContract?.id === contractId) {
-        setSelectedContract(null);
-      }
+      setContracts((prevContracts) => {
+        const filteredContracts = prevContracts.filter((contract) => contract.id !== contractId);
+
+        // If we're removing the currently selected contract, select the first available one
+        if (selectedContract?.id === contractId) {
+          setSelectedContract(filteredContracts.length > 0 ? filteredContracts[0] : null);
+        }
+
+        return filteredContracts;
+      });
     },
     [selectedContract],
   );
@@ -527,11 +536,16 @@ export default function AirportHubProvider({
    */
   const removeContact = useCallback(
     (contactId: string) => {
-      setContacts((prevContacts) => prevContacts.filter((contact) => contact.id !== contactId));
+      setContacts((prevContacts) => {
+        const filteredContacts = prevContacts.filter((contact) => contact.id !== contactId);
 
-      if (selectedContact?.id === contactId) {
-        setSelectedContact(null);
-      }
+        // If we're removing the currently selected contact, select the first available one
+        if (selectedContact?.id === contactId) {
+          setSelectedContact(filteredContacts.length > 0 ? filteredContacts[0] : null);
+        }
+
+        return filteredContacts;
+      });
 
       // Update cache as well
       if (selectedAirport) {

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import type { FuelBid } from '@/drizzle/types';
 import FuelBidDialog from '@/features/fuel/bid/FuelBidDialog';
 import { formatCurrency, formatDate } from '@/lib/core/formatters';
-import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { Button } from '@/stories/Button/Button';
 import type { Column } from '@/stories/DataTable/DataTable';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';

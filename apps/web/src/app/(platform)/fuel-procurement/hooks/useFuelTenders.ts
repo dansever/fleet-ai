@@ -1,5 +1,5 @@
 import { FuelTender } from '@/drizzle/types';
-import { server as fuelTenderServer } from '@/modules/fuel-mgmt/tenders';
+import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 

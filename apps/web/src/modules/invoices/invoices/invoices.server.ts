@@ -2,7 +2,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { invoicesTable } from '@/drizzle/schema/schema';
+import { invoicesTable } from '@/drizzle/schema/schema.invoices';
 import { Contract, Invoice, NewInvoice, Organization, UpdateInvoice } from '@/drizzle/types';
 import { desc, eq } from 'drizzle-orm';
 

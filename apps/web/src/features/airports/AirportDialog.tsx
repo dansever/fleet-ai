@@ -4,11 +4,9 @@ import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { client as airportClient } from '@/modules/core/airports';
 import { AirportCreateInput } from '@/modules/core/airports/airports.types';
-import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import AirportAutocomplete from './AirportAutocomplete';
@@ -21,7 +19,6 @@ export default function AirportDialog({
   onChange,
   open,
   onOpenChange,
-  withTrigger = true,
 }: {
   trigger?: React.ReactNode;
   airport: Airport | null;
@@ -29,7 +26,6 @@ export default function AirportDialog({
   onChange: (airport: Airport) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
   const { map: countryMap } = useCountryMap();
   const isAdd = DialogType === 'add';
@@ -48,7 +44,6 @@ export default function AirportDialog({
 
     // Operational Information (matching schema)
     isHub: airport?.isHub || false,
-    internalNotes: airport?.internalNotes || '',
   });
 
   // Update formData when airport prop changes
@@ -61,7 +56,6 @@ export default function AirportDialog({
       state: airport?.state || '',
       country: airport?.country || '',
       isHub: airport?.isHub || false,
-      internalNotes: airport?.internalNotes || '',
     });
   }, [airport]);
 
@@ -132,7 +126,6 @@ export default function AirportDialog({
         state: '',
         country: '',
         isHub: false,
-        internalNotes: '',
       });
     }
   };
@@ -146,7 +139,6 @@ export default function AirportDialog({
       state: '',
       country: '',
       isHub: false,
-      internalNotes: '',
     });
   };
 
@@ -154,18 +146,7 @@ export default function AirportDialog({
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger
-          ? trigger || (
-              <Button
-                intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
-                text={isAdd ? 'Add Airport' : isEdit ? 'Edit' : 'View'}
-                icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
-                size="md"
-              />
-            )
-          : null
-      }
+      trigger={trigger ? trigger : null}
       headerGradient="from-blue-500 to-blue-500"
       title={dialogTitle}
       onSave={handleSave}
@@ -221,14 +202,6 @@ export default function AirportDialog({
                 onChange={(value) => handleFieldChange('isHub', value)}
                 name="isHub"
                 value={formData.isHub}
-              />
-              <KeyValuePair
-                label="Internal Notes"
-                value={formData.internalNotes}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('internalNotes', value)}
-                name="internalNotes"
               />
             </div>
           </MainCard>

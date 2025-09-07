@@ -5,17 +5,12 @@ import { getProcessStatusDisplay, ProcessStatusEnum } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
-import { client as fuelTenderClient } from '@/modules/fuel-mgmt/tenders';
-import {
-  FuelTenderCreateInput,
-  FuelTenderUpdateInput,
-} from '@/modules/fuel-mgmt/tenders/tenders.types';
-import { Button } from '@/stories/Button/Button';
+import { client as fuelTenderClient } from '@/modules/fuel/tenders';
+import { FuelTenderCreateInput, FuelTenderUpdateInput } from '@/modules/fuel/tenders/tenders.types';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { serializeDatesForAPI } from '@/utils/date-helpers';
-import { Eye, Pencil, Plus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -27,7 +22,6 @@ export default function TenderDialog({
   DialogType = 'view',
   open,
   onOpenChange,
-  withTrigger = true,
 }: {
   trigger?: React.ReactNode;
   tender: FuelTender | null;
@@ -36,7 +30,6 @@ export default function TenderDialog({
   DialogType: 'add' | 'edit' | 'view';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
   const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
@@ -182,18 +175,7 @@ export default function TenderDialog({
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger
-          ? trigger || (
-              <Button
-                intent={isAdd ? 'add' : isEdit ? 'secondary' : 'primary'}
-                text={isAdd ? 'Add Tender' : isEdit ? 'Edit' : 'View'}
-                icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
-                size="md"
-              />
-            )
-          : null
-      }
+      trigger={trigger ? trigger : null}
       headerGradient="from-orange-500 to-orange-500"
       title={dialogTitle}
       DialogType={DialogType}

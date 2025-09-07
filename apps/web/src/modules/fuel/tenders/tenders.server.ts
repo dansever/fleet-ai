@@ -2,7 +2,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { fuelTendersTable } from '@/drizzle/schema/schema';
+import { fuelTendersTable } from '@/drizzle/schema/schema.fuel';
 import type { FuelTender, NewFuelTender, UpdateFuelTender } from '@/drizzle/types';
 import { desc, eq } from 'drizzle-orm';
 

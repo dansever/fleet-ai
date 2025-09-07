@@ -5,35 +5,29 @@ import { decisionDisplayMap } from '@/drizzle/enums';
 import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
-import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
-import { Button } from '@/stories/Button/Button';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
-import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function FuelBidDialog({
   bid,
   tenderId,
+  trigger,
   onChange,
   DialogType = 'view',
-  triggerClassName,
-  buttonSize = 'md',
   open,
   onOpenChange,
-  withTrigger = true,
 }: {
   bid: FuelBid | null;
   tenderId?: string; // Required when DialogType is 'add'
   onChange: (bid: FuelBid) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerClassName?: string;
-  buttonSize?: 'sm' | 'md' | 'lg';
+  trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
   const [formData, setFormData] = useState({
     // Bid Information & Timeline (matching schema)
@@ -238,22 +232,11 @@ export default function FuelBidDialog({
     });
   };
 
-  const triggerText = isAdd ? 'Add Bid' : isEdit ? 'Edit' : 'View';
   const dialogTitle = isAdd ? 'Add New Fuel Bid' : bid?.title || 'Fuel Bid Details';
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger ? (
-          <Button
-            intent={isAdd ? 'add' : 'secondary'}
-            text={triggerText}
-            icon={isAdd ? Plus : DialogType === 'edit' ? Pencil : Eye}
-            size={buttonSize}
-            className={triggerClassName}
-          />
-        ) : null
-      }
+      trigger={trigger ? trigger : null}
       headerGradient="from-pink-500 to-pink-500"
       title={dialogTitle}
       onSave={handleSave}

@@ -1,5 +1,5 @@
 import { FuelBid } from '@/drizzle/types';
-import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 

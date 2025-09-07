@@ -7,7 +7,7 @@ import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
-import { client as fuelTenderClient } from '@/modules/fuel-mgmt/tenders';
+import { client as fuelTenderClient } from '@/modules/fuel/tenders';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';

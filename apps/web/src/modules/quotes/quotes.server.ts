@@ -3,9 +3,9 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { quotesTable } from '@/drizzle/schema/schema';
+import { quotesTable } from '@/drizzle/schema/schema.technical';
 import type { NewQuote, Organization, Quote, Rfq, UpdateQuote } from '@/drizzle/types';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 
 /**
  * Get a Quote by its ID
@@ -20,24 +20,15 @@ export const getQuote = getQuoteById;
 /**
  * List quotes for a given RFQ within an organization.
  */
-export async function listQuotesByOrgIdAndRfqId(
-  orgId: Organization['id'],
-  rfqId: Rfq['id'],
-): Promise<Quote[]> {
-  return db.query.quotesTable.findMany({
-    where: (q, { eq }) => eq(q.orgId, orgId) && eq(q.rfqId, rfqId),
-    orderBy: (q, { desc }) => [desc(q.createdAt)],
-  });
-}
-
-/**
- * Find quotes by RFQ within an organization
- */
 export async function listQuotesByRfqId(
   orgId: Organization['id'],
   rfqId: Rfq['id'],
 ): Promise<Quote[]> {
-  return listQuotesByOrgIdAndRfqId(orgId, rfqId);
+  return db
+    .select()
+    .from(quotesTable)
+    .where(and(eq(quotesTable.orgId, orgId), eq(quotesTable.rfqId, rfqId)))
+    .orderBy(desc(quotesTable.createdAt));
 }
 
 /**

@@ -3,8 +3,8 @@ import { decisionEnum } from '@/drizzle/enums';
 import type { FuelBid, FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
-import { client as fuelBidClient } from '@/modules/fuel-mgmt/bids';
-import { FuelBidCreateInput } from '@/modules/fuel-mgmt/bids/bids.types';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
+import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 
 function getRandomInt(min: number, max: number): number {
   const ceilMin = Math.ceil(min);

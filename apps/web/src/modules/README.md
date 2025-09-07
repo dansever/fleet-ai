@@ -57,7 +57,7 @@ Rules:
 
 - Always `import "server-only"` in `*.server.ts`.
 - Never import `*.server.ts` into `"use client"` files.
-- Don’t call `db.query` directly in routes – always go through `*.server.ts`.
+- Don’t call `db.select` directly in routes – always go through `*.server.ts`.
 - Don’t export Drizzle tables from modules.
 - Keep `index.ts` exports limited to:
   ```ts

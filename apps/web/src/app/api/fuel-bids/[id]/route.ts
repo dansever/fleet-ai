@@ -1,6 +1,6 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as fuelBidServer } from '@/modules/fuel-mgmt/bids';
+import { server as fuelBidServer } from '@/modules/fuel/bids';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: { id: string } };

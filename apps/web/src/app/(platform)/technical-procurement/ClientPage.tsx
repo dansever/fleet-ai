@@ -15,7 +15,7 @@ import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { ChartBar, FileText, TrashIcon } from 'lucide-react';
+import { ChartBar, Eye, FileText, Pencil, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import RfqList from '../_components/RfqSidebar';
@@ -115,7 +115,7 @@ export default function TechnicalProcurementClientPage() {
       isRefreshing={isRefreshing}
       InsertAddRfqButton={true}
       rfqsDirection={'sent'}
-      onCreatedRfq={refreshRfqs}
+      onCreatedRfq={addRfq}
     />
   );
 
@@ -141,8 +141,7 @@ export default function TechnicalProcurementClientPage() {
           key={selectedRfq?.id}
           rfq={selectedRfq}
           onChange={updateRfq}
-          triggerText="View Details"
-          triggerIntent="secondary"
+          trigger={<Button intent="secondary" icon={Eye} text="view" />}
           DialogType="view"
         />
       </div>
@@ -183,9 +182,8 @@ export default function TechnicalProcurementClientPage() {
                   key={selectedRfq.id}
                   rfq={selectedRfq}
                   onChange={updateRfq}
-                  triggerText="Edit"
                   DialogType="edit"
-                  triggerIntent="secondaryInverted"
+                  trigger={<Button intent="secondaryInverted" icon={Pencil} />}
                 />
 
                 <ConfirmationPopover

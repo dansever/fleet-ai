@@ -117,7 +117,7 @@ interface RfqListProps {
   isLoading: boolean;
   isRefreshing?: boolean;
   InsertAddRfqButton?: boolean;
-  onCreatedRfq?: () => void;
+  onCreatedRfq?: (rfq: Rfq) => void;
   rfqsDirection?: OrderDirection;
 }
 
@@ -148,7 +148,7 @@ export default function RfqList({
       const result = await rfqClient.extractRfqFromFile(file);
       const convertedRfq = convertPydanticToRfq(result as PydanticRFQ);
       const newRfq = await rfqClient.createRfq({ ...convertedRfq, direction: rfqsDirection });
-      onCreatedRfq?.();
+      onCreatedRfq?.(newRfq);
       toast.success('RFQ extracted successfully');
     } catch (error) {
       toast.error('Error extracting RFQ');
@@ -236,8 +236,8 @@ export default function RfqList({
                       size="sm"
                       className="text-gray-500"
                       onClick={async () => {
-                        const rfq = await createRandomRfq(rfqsDirection);
-                        onCreatedRfq?.();
+                        const newRfq = await createRandomRfq(rfqsDirection);
+                        onCreatedRfq?.(newRfq);
                         console.log('Time to close the popover');
                         setUploadRfqPopoverOpen(false);
                       }}
@@ -360,14 +360,11 @@ export default function RfqList({
         rfq={null}
         DialogType="add"
         onChange={(rfq) => {
-          onCreatedRfq?.();
+          onCreatedRfq?.(rfq);
           setShowAddRfqDialog(false);
         }}
-        buttonSize="sm"
-        triggerText="Add RFQ"
         open={showAddRfqDialog}
         onOpenChange={setShowAddRfqDialog}
-        withTrigger={false}
       />
     </div>
   );

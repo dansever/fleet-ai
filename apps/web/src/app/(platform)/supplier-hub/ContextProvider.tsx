@@ -162,7 +162,7 @@ export function TechnicalProcurementContextProvider({
     }
 
     try {
-      const freshRfqs = await rfqClient.listRfqsByDirection('received');
+      const freshRfqs = await rfqClient.listRfqsByDirection({ direction: 'received' });
       setRfqs(freshRfqs);
 
       // If selected RFQ no longer exists, select an adjacent one

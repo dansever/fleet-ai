@@ -14,12 +14,10 @@ import {
 import type { Rfq } from '@/drizzle/types';
 import { client as rfqClient } from '@/modules/rfqs';
 import { RfqCreateInput, RfqUpdateInput } from '@/modules/rfqs/rfqs.types';
-import { Button, ButtonProps } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { serializeDatesForAPI } from '@/utils/date-helpers';
-import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -27,24 +25,18 @@ export default function RfqDialog({
   rfq,
   onChange,
   DialogType = 'view',
-  triggerClassName,
-  buttonSize = 'md',
   triggerText,
+  trigger,
   open,
   onOpenChange,
-  withTrigger = true,
-  triggerIntent,
 }: {
   rfq: Rfq | null;
   onChange: (rfq: Rfq) => void;
   DialogType: 'add' | 'edit' | 'view';
   triggerText?: string;
-  triggerClassName?: string;
-  buttonSize?: ButtonProps['size'];
-  triggerIntent?: ButtonProps['intent'];
+  trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  withTrigger?: boolean;
 }) {
   // Initial form data state - use memoized initialization
   const [formData, setFormData] = useState(() => {
@@ -253,25 +245,7 @@ export default function RfqDialog({
 
   return (
     <DetailDialog
-      trigger={
-        withTrigger ? (
-          <Button
-            intent={triggerIntent || (isAdd ? 'add' : isEdit ? 'secondary' : 'primary')}
-            text={triggerText}
-            icon={
-              isAdd
-                ? Plus
-                : DialogType === 'edit'
-                  ? Pencil
-                  : DialogType === 'view'
-                    ? Eye
-                    : undefined
-            }
-            size={buttonSize}
-            className={triggerClassName}
-          />
-        ) : null
-      }
+      trigger={trigger ? trigger : null}
       headerGradient="from-purple-500 to-purple-500"
       title={dialogTitle}
       onSave={handleSave}

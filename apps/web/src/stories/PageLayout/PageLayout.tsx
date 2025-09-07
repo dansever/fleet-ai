@@ -54,7 +54,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
         )}
 
         {/* Scrollable Main Content */}
-        <main className="px-4 flex-1 overflow-y-scroll">{mainContent}</main>
+        <main className="px-4 py-4 flex-1 overflow-y-scroll">{mainContent}</main>
       </div>
 
       {/* Render sidebar on right if position is 'right' */}
