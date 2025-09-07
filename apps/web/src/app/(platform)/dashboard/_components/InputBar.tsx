@@ -5,7 +5,7 @@ import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
 import { LLMResponse } from '@/types/llm';
-import { Bot, RefreshCcw } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { useState } from 'react';
 
 export default function InputBar() {
@@ -57,14 +57,6 @@ export default function InputBar() {
         icon={<Bot />}
         palette={GradientPalette.SkyIndigoViolet}
         className="flex-1 min-h-10"
-        actions={
-          <Button
-            intent="secondaryInverted"
-            icon={RefreshCcw}
-            onClick={() => setResponse(null)}
-            className={`${isLoading && 'animate-spin'}`}
-          />
-        }
         children={<span className="text-white/80">{response?.content}</span>}
       />
     </div>
