@@ -14,13 +14,13 @@ export default function LandingPageClient() {
       <LandingPageNavBar />
       <main className="flex-1 px-8 space-y-32">
         {/* Hero */}
-        <section id="hero" className="relative space-y-6 pt-8 overflow-hidden">
+        <section id="hero" className="relative space-y-6 overflow-hidden p-8 ">
           {/* <SoundWaveAnimation className="top-1/2 -translate-y-1/2" /> */}
-          <div className="flex max-w-[64rem] flex-col items-center gap-4 text-center relative z-10">
+          <div className="flex flex-col items-center gap-4 text-center relative z-10">
             <div className="rounded-full bg-primary/10 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-primary border border-primary/20">
               Introducing FleetAI
             </div>
-            <h1 className="font-semibold text-3xl sm:text-5xl md:text-6xl lg:text-7xl gradient-text p-4">
+            <h1 className="font-semibold text-5xl lg:text-7xl gradient-text p-4">
               AI-Powered Airline Procurement
             </h1>
             <p className="m-2 glass-effect p-4 rounded-lg text-xl font-semibold text-primary">
@@ -32,7 +32,7 @@ export default function LandingPageClient() {
         {/* Features */}
         <section id="features" className="relative space-y-6 overflow-hidden">
           <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-            <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl gradient-text p-4">
+            <h2 className="font-normal text-4xl lg:text-6xl leading-[1.1] gradient-text p-4">
               Intelligent Features
             </h2>
             <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
