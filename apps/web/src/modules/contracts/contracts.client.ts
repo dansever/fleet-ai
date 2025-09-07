@@ -1,5 +1,5 @@
 import type { Airport, Contract, Organization } from '@/drizzle/types';
-import { api } from '@/services/api-client';
+import { api, backendApi } from '@/services/api-client';
 import { ContractCreateInput, ContractUpdateInput } from './contracts.types';
 
 /**
@@ -60,4 +60,18 @@ export async function updateContract(id: string, data: ContractUpdateInput): Pro
  */
 export async function deleteContract(id: string): Promise<void> {
   await api.delete(`/api/contracts/${id}`);
+}
+
+/**
+ * Process a contract
+ * @param file - The file to process
+ * @returns The processed contract
+ */
+export async function processContract(file: File): Promise<unknown> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await backendApi.post('/api/v1/process/contracts', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data;
 }

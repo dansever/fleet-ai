@@ -31,7 +31,7 @@ def process_document_extraction(
         temp_path = save_temp_file(file)
         logger.info(f"🔍 {log_label} file saved to temp location.")
 
-        client = get_llama_extractor_client()
+        client = get_llama_extractor_client(update_extractor_schema=True)
         agent = client.get_or_create_agent(
             agent_name=agent_name,
             system_prompt=system_prompt,

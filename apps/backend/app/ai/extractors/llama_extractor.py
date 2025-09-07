@@ -134,6 +134,7 @@ class LlamaExtractorClient:
 
     def _create_agent(self, *, agent_name: str, data_schema: Type[BaseModel] | Type[Any], config: ExtractConfig) -> Any:
         try:
+            logger.info(f"Creating new LlamaExtract agent: {agent_name}")
             agent = self.client.create_agent(
                 name=agent_name,
                 data_schema=data_schema,
@@ -166,5 +167,9 @@ class LlamaExtractorClient:
 
 
 # Convenience initializer to mirror your OpenAI get_openai_client()
-def get_llama_extractor_client() -> LlamaExtractorClient:
-    return LlamaExtractorClient()
+def get_llama_extractor_client(
+    update_extractor_schema: Optional[bool] = None,
+) -> LlamaExtractorClient:
+    return LlamaExtractorClient(
+        update_extractor_schema=update_extractor_schema,
+    )

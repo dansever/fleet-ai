@@ -1,7 +1,7 @@
 'use client';
 
 import { Airport, Contact, Contract, User } from '@/drizzle/types';
-import { server as contractServer } from '@/modules/contracts/contracts';
+import { server as contractServer } from '@/modules/contracts';
 import { server as airportServer } from '@/modules/core/airports';
 import { server as contactServer } from '@/modules/vendors/contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';

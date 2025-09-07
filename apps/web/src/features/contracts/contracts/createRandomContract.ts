@@ -1,8 +1,8 @@
 // Updated by CursorAI on Sep 2 2025
 import { ContractTypeEnum } from '@/drizzle/enums';
 import type { Airport, Contract } from '@/drizzle/types';
-import { client as contractClient } from '@/modules/contracts/contracts';
-import { type ContractCreateInput } from '@/modules/contracts/contracts/contracts.types';
+import { client as contractClient } from '@/modules/contracts';
+import { type ContractCreateInput } from '@/modules/contracts/contracts.types';
 
 export async function createRandomContract(airportId: Airport['id']): Promise<Contract> {
   const randomNumber = Math.floor(Math.random() * 1000000);

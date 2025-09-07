@@ -1,7 +1,8 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
-import { deleteContract } from '@/modules/contracts/contracts/contracts.server';
+import { deleteContract } from '@/modules/contracts/contracts.server';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
@@ -17,6 +18,7 @@ export default function ContractsPage() {
     contracts,
     refreshContracts,
     loading,
+    errors,
     selectedContract,
     setSelectedContract,
   } = useAirportHub();
@@ -65,6 +67,24 @@ export default function ContractsPage() {
     return { total, active, expiringSoon, contractsByType };
   }, [contracts, groupedContracts, contractTypes]);
 
+  // Show loading state when initially loading contracts or when refreshing
+  if (loading.contracts && contracts.length === 0 && !loading.isRefreshing) {
+    return <LoadingComponent size="md" text="Loading contracts..." />;
+  }
+
+  // Show error state if there's an error loading contracts
+  if (errors.contracts && contracts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2 text-red-600">Error Loading Contracts</h3>
+          <p className="text-sm mb-4">{errors.contracts}</p>
+          <Button intent="primary" text="Retry" onClick={refreshContracts} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-row gap-4">
       <div
@@ -95,7 +115,13 @@ export default function ContractsPage() {
         actions={
           <div className="flex flex-row gap-2">
             <Button intent="secondaryInverted" icon={Eye} onClick={() => {}} />
-            <Button intent="secondaryInverted" icon={RefreshCw} onClick={refreshContracts} />
+            <Button
+              intent="secondaryInverted"
+              icon={RefreshCw}
+              onClick={refreshContracts}
+              isLoading={loading.contracts && loading.isRefreshing}
+              className={loading.contracts && loading.isRefreshing ? 'animate-spin' : ''}
+            />
             <ConfirmationPopover
               onConfirm={() => {
                 deleteContract(selectedContract?.id || '').then(() => {

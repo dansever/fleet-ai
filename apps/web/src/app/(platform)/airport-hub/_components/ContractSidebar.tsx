@@ -1,17 +1,19 @@
 'use client';
 
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { cn } from '@/lib/utils';
-import { client as storageClient } from '@/modules/storage';
+import { client as contractClient } from '@/modules/contracts';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAirportHub } from '../ContextProvider';
 
 interface ContractListProps {
   contracts: Contract[];
@@ -27,13 +29,14 @@ export default function ContractList({
   selectedContract,
   onContractAdd,
 }: ContractListProps) {
+  const { loading } = useAirportHub();
   // Upload Contract File
-  const handleUploadContractFile = async (file: File) => {
+  const handleProcessContract = async (file: File) => {
     try {
-      await storageClient.uploadFile(file, 'contracts');
-      toast.success('Contract file uploaded successfully');
+      await contractClient.processContract(file);
+      toast.success('Contract file processed successfully');
     } catch (error) {
-      toast.error('Failed to upload contract file');
+      toast.error('Failed to process contract file');
       console.error(error);
     }
   };
@@ -58,7 +61,7 @@ export default function ContractList({
           {contracts.length} of {contracts.length} contracts
         </div>
         <FileUploadPopover
-          onSend={handleUploadContractFile}
+          onSend={handleProcessContract}
           trigger={<Button intent="add" icon={Plus} />}
         >
           <div className="flex flex-col gap-1 w-full">
@@ -86,44 +89,50 @@ export default function ContractList({
           <div
             className={cn('p-3 space-y-3 transition-[padding,opacity] duration-200 ease-in-out')}
           >
-            {contracts.map((contract) => {
-              const isSelected = selectedContract?.id === contract.id;
-              return (
-                <ListItemCard
-                  key={contract.id}
-                  isSelected={isSelected}
-                  onClick={() => onContractSelect(contract)}
-                  className={cn(
-                    isSelected
-                      ? 'border-sky-100 from-sky-200/20 via-sky-200 to-sky-200/40 opacity-100'
-                      : 'bg-gradient-to-br from-sky-50/80 via-sky-50 to-sky-50/60 opacity-80 hover:bg-gradient-to-br hover:from-sky-100 hover:via-sky-100 hover:to-sky-100',
-                  )}
-                >
-                  <div className="flex flex-col gap-1 items-start">
-                    <div className="flex flex-row justify-between gap-2">
-                      <StatusBadge
-                        status={'default'}
-                        text={getContractTypeDisplay(contract.contractType || '')}
-                      />
-                      <StatusBadge
-                        status={
-                          getIsContractActive(contract) === 'active'
-                            ? 'operational'
-                            : getIsContractActive(contract) === 'pending'
-                              ? 'pending'
-                              : 'error'
-                        }
-                        text={getProcessStatusDisplay(
-                          getIsContractActive(contract) as ProcessStatus,
-                        )}
-                      />
+            {loading.contracts && loading.isRefreshing && contracts.length === 0 ? (
+              <div className="py-8">
+                <LoadingComponent size="sm" text="Loading contracts..." />
+              </div>
+            ) : (
+              contracts.map((contract) => {
+                const isSelected = selectedContract?.id === contract.id;
+                return (
+                  <ListItemCard
+                    key={contract.id}
+                    isSelected={isSelected}
+                    onClick={() => onContractSelect(contract)}
+                    className={cn(
+                      isSelected
+                        ? 'border-sky-100 from-sky-200/20 via-sky-200 to-sky-200/40 opacity-100'
+                        : 'bg-gradient-to-br from-sky-50/80 via-sky-50 to-sky-50/60 opacity-80 hover:bg-gradient-to-br hover:from-sky-100 hover:via-sky-100 hover:to-sky-100',
+                    )}
+                  >
+                    <div className="flex flex-col gap-1 items-start">
+                      <div className="flex flex-row justify-between gap-2">
+                        <StatusBadge
+                          status={'default'}
+                          text={getContractTypeDisplay(contract.contractType || '')}
+                        />
+                        <StatusBadge
+                          status={
+                            getIsContractActive(contract) === 'active'
+                              ? 'operational'
+                              : getIsContractActive(contract) === 'pending'
+                                ? 'pending'
+                                : 'error'
+                          }
+                          text={getProcessStatusDisplay(
+                            getIsContractActive(contract) as ProcessStatus,
+                          )}
+                        />
+                      </div>
+                      <span className="text-sm font-bold">{contract.title}</span>
+                      <span className="text-xs">{contract.vendorName}</span>
                     </div>
-                    <span className="text-sm font-bold">{contract.title}</span>
-                    <span className="text-xs">{contract.vendorName}</span>
-                  </div>
-                </ListItemCard>
-              );
-            })}
+                  </ListItemCard>
+                );
+              })
+            )}
           </div>
         </ScrollArea>
       </div>
