@@ -47,7 +47,9 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
     try {
       toast.info('Analyzing quotes with AI...');
 
-      const result = (await quoteClient.compareQuotes(selectedRfq.id)) as unknown as AnalysisResult;
+      const result = (await quoteClient.compareQuotesByRfqId(
+        selectedRfq.id,
+      )) as unknown as AnalysisResult;
 
       // Extract data from the ResponseEnvelope structure
       const comparisonData = result;
