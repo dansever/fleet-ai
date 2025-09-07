@@ -5,6 +5,7 @@ import { server as contractServer } from '@/modules/contracts/contracts';
 import { server as airportServer } from '@/modules/core/airports';
 import { server as contactServer } from '@/modules/vendors/contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export type LoadingState = {
   airports: boolean;
@@ -32,7 +33,7 @@ export type AirportHubContextType = {
   refreshAirports: () => Promise<void>;
   updateAirport: (updatedAirport: Airport) => void;
   addAirport: (newAirport: Airport) => void;
-  removeAirport: (airportId: Airport['id']) => void;
+  deleteAirport: (airportId: Airport['id']) => Promise<void>;
 
   // Contracts
   contracts: Contract[];
@@ -364,20 +365,32 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Remove airport
+   * Delete airport
    */
-  const removeAirport = useCallback(
-    (airportId: string) => {
-      setAirports((prevAirports) => {
-        const filteredAirports = prevAirports.filter((airport) => airport.id !== airportId);
+  const deleteAirport = useCallback(
+    async (airportId: string) => {
+      try {
+        // Delete from the server
+        await airportServer.deleteAirport(airportId);
 
-        // If we're removing the currently selected airport, select the first available one
-        if (selectedAirport?.id === airportId) {
-          setSelectedAirport(filteredAirports.length > 0 ? filteredAirports[0] : null);
-        }
+        // Remove from local state
+        setAirports((prevAirports) => {
+          const filteredAirports = prevAirports.filter((airport) => airport.id !== airportId);
 
-        return filteredAirports;
-      });
+          // If we're deleting the currently selected airport, select the first available one
+          if (selectedAirport?.id === airportId) {
+            setSelectedAirport(filteredAirports.length > 0 ? filteredAirports[0] : null);
+          }
+
+          return filteredAirports;
+        });
+
+        toast.success('Airport deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete airport:', error);
+        toast.error('Failed to delete airport');
+        throw error; // Re-throw so the UI can handle the error
+      }
     },
     [selectedAirport],
   );
@@ -588,7 +601,7 @@ export default function AirportHubProvider({
     refreshAirports,
     updateAirport,
     addAirport,
-    removeAirport,
+    deleteAirport,
     selectedAirport,
     setSelectedAirport,
     contracts,

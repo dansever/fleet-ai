@@ -8,7 +8,7 @@ import { Building2, Plane, Star, Trash } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
 export default function AirportPage() {
-  const { selectedAirport, updateAirport, contracts, removeAirport, setSelectedAirport } =
+  const { selectedAirport, updateAirport, contracts, deleteAirport, setSelectedAirport } =
     useAirportHub();
 
   if (!selectedAirport) {
@@ -44,9 +44,15 @@ export default function AirportPage() {
             trigger={<Button intent="danger" text="Delete" icon={Trash} />}
             popoverIntent="danger"
             title="Delete Airport"
-            onConfirm={() => {
-              removeAirport(selectedAirport.id);
-              setSelectedAirport(null);
+            onConfirm={async () => {
+              try {
+                await deleteAirport(selectedAirport.id);
+                // Note: deleteAirport already handles selecting the next airport,
+                // so we don't need to manually call setSelectedAirport(null)
+              } catch (error) {
+                console.error('Error deleting airport:', error);
+                // The deleteAirport function already shows error toast
+              }
             }}
           />
         }
