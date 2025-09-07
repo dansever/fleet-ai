@@ -36,7 +36,6 @@ export default function ContractDialog({
     title: contract?.title || '',
     contractType: contract?.contractType || null,
     summary: contract?.summary || null,
-    terms: contract?.terms || null,
     docUrl: contract?.docUrl || null,
 
     // Vendor Information (matching schema)
@@ -71,7 +70,6 @@ export default function ContractDialog({
       title: contract?.title || '',
       contractType: contract?.contractType || null,
       summary: contract?.summary || null,
-      terms: contract?.terms || null,
       docUrl: contract?.docUrl || null,
       vendorName: contract?.vendorName || null,
       vendorAddress: contract?.vendorAddress || null,
@@ -124,7 +122,6 @@ export default function ContractDialog({
           title: serializedFormData.title as string,
           contractType: serializedFormData.contractType!,
           summary: serializedFormData.summary,
-          terms: serializedFormData.terms,
           docUrl: serializedFormData.docUrl,
           vendorName: serializedFormData.vendorName,
           vendorAddress: serializedFormData.vendorAddress,
@@ -148,7 +145,6 @@ export default function ContractDialog({
           title: serializedFormData.title,
           contractType: serializedFormData.contractType || undefined,
           summary: serializedFormData.summary,
-          terms: serializedFormData.terms,
           docUrl: serializedFormData.docUrl,
           vendorName: serializedFormData.vendorName,
           vendorAddress: serializedFormData.vendorAddress,
@@ -183,7 +179,6 @@ export default function ContractDialog({
         title: '',
         contractType: null,
         summary: null,
-        terms: null,
         docUrl: null,
         vendorName: null,
         vendorAddress: null,
@@ -203,7 +198,6 @@ export default function ContractDialog({
       title: '',
       contractType: null,
       summary: null,
-      terms: null,
       docUrl: null,
       vendorName: null,
       vendorAddress: null,
@@ -264,14 +258,6 @@ export default function ContractDialog({
                 name="summary"
               />
 
-              <KeyValuePair
-                label="Terms"
-                value={formData.terms}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('terms', value)}
-                name="terms"
-              />
               <KeyValuePair
                 label="Document URL"
                 value={formData.docUrl}

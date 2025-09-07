@@ -9,7 +9,7 @@ import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { Building2, Mail, Phone, RefreshCw, User, UserPlus } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
-export default function VendorsPage() {
+export default function ContactsAndProviders() {
   const { selectedAirport, contacts, loading, errors, refreshContacts, addContact } =
     useAirportHub();
 

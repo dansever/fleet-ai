@@ -14,9 +14,7 @@ export async function createRandomContract(airportId: Airport['id']): Promise<Co
     vendorId: null, // Will be handled by backend if needed
     title: `${randomType.replace(/_/g, ' ').toUpperCase()} Contract ${randomNumber}`,
     contractType: randomType,
-    internalNotes: `Internal notes for Contract ${randomNumber}`,
     summary: `Summary for ${randomType} contract with Vendor ${randomNumber}`,
-    terms: `Standard terms and conditions for ${randomType} services`,
     docUrl: null,
     vendorName: `Vendor ${randomNumber}`,
     vendorAddress: `${Math.floor(Math.random() * 9999) + 1} Business Park, Suite ${Math.floor(Math.random() * 999) + 1}, Anytown, USA`,
