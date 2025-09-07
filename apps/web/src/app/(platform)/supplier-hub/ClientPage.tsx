@@ -154,7 +154,7 @@ export default function TechnicalProcurementClientPage() {
           key={selectedRfq?.id}
           rfq={selectedRfq}
           onChange={updateRfq}
-          trigger={<Button intent="secondary" icon={Eye} />}
+          trigger={<Button intent="secondary" text="View RFQ" icon={Eye} />}
           DialogType="view"
         />
       </div>

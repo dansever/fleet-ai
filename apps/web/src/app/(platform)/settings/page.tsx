@@ -1,30 +1,28 @@
-'use client';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { server as orgServer } from '@/modules/core/organizations';
+import { server as userServer } from '@/modules/core/users';
+import SettingsClientPage from './ClientPage';
+import { SettingsProvider } from './ContextProvider';
 
-import { PageLayout } from '@/stories/PageLayout/PageLayout';
-import { Tabs } from '@/stories/Tabs/TabsNew';
+export default async function SettingsPage() {
+  const { dbUser, orgId, error } = await getAuthContext();
+  if (error || !dbUser || !orgId) {
+    return <div>Error: {error}</div>;
+  }
 
-export default function SettingsPage() {
+  const user = await userServer.getUserById(dbUser.id);
+  if (!user) {
+    return <div>Error: User not found</div>;
+  }
+
+  const org = await orgServer.getOrgById(orgId);
+  if (!org) {
+    return <div>Error: Organization not found</div>;
+  }
+
   return (
-    <PageLayout
-      sidebarContent={null}
-      headerContent={'Settings'}
-      mainContent={
-        <div className="p-4">
-          <Tabs
-            tabs={[
-              { label: 'Account', value: 'account' },
-              { label: 'Security', value: 'security' },
-              { label: 'Billing', value: 'billing' },
-              { label: 'Notifications', value: 'notifications' },
-              { label: 'Integrations', value: 'integrations' },
-            ]}
-            selectedTab={'account '}
-            onTabChange={() => {
-              console.log('tab changed');
-            }}
-          />
-        </div>
-      }
-    />
+    <SettingsProvider initialUser={user} initialOrg={org}>
+      <SettingsClientPage />
+    </SettingsProvider>
   );
 }

@@ -5,9 +5,9 @@ export interface PageLayoutProps {
   /** Content for the left sidebar panel - if null/undefined, sidebar won't be rendered */
   sidebarContent?: ReactNode;
   /** Header content for the main panel */
-  headerContent: ReactNode;
+  headerContent?: ReactNode;
   /** Main scrollable content */
-  mainContent: ReactNode;
+  mainContent?: ReactNode;
   /** Custom className for the root container */
   className?: string;
   /** Width of the sidebar (default: 20rem) */

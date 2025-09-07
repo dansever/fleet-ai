@@ -29,7 +29,11 @@ export const Tabs = ({
   };
 
   return (
-    <TabsUI defaultValue={defaultTab} onValueChange={handleTabChange} className={className}>
+    <TabsUI
+      defaultValue={defaultTab}
+      onValueChange={handleTabChange}
+      className={cn('flex flex-col gap-4', className)}
+    >
       <TabsList className="px-4 w-fit rounded-2xl flex bg-white/80 backdrop-blur-sm gap-4 h-auto py-1 border border-white/20">
         {tabs.map((tab, index) => (
           <motion.div
