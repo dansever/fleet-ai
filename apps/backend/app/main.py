@@ -1,12 +1,31 @@
+# app/main.py
+
+import dotenv
+import os
+
+dotenv.load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.utils import get_logger
 import os
 from app.config import ai_config
+from contextlib import asynccontextmanager
+from app.services.clerk_service import _get_jwks
 
 # Initialize logger
 logger = get_logger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- startup ---
+    await _get_jwks()
+    logger.info("JWKS warm-up OK")
+    yield
+    # --- shutdown ---
+    # nothing to close if you use per-call httpx clients
+    # (if you add a shared http client, close it here)
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application"""
@@ -15,19 +34,18 @@ def create_app() -> FastAPI:
     app_title = os.getenv("APP_TITLE", "Fleet AI Backend API")
     app_description = os.getenv("APP_DESCRIPTION", "Backend API for Fleet AI document extraction and procurement management")
     app_version = os.getenv("APP_VERSION", "1.0.0")
-    
-    # CORS configuration
-    allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
-    
+        
     app = FastAPI(
         title=app_title,
         description=app_description,
         version=app_version,
         docs_url="/docs",
-        redoc_url="/redoc"
-    )
+        redoc_url="/redoc",
+        lifespan=lifespan
+        )
     
     # Add CORS middleware
+    allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
@@ -36,9 +54,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Validate configuration before routers are included
+    # Validate configuration before routers are included (fails fast if misconfigured)
     ai_config.validate()
-    app.state.ai_config = ai_config  # make available to routes and deps
+    app.state.ai_config = ai_config
     
     # Include API routes
     app.include_router(api_router, prefix="/api/v1")

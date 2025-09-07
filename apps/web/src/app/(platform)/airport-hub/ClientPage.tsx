@@ -34,15 +34,37 @@ export default function AirportHubClientPage() {
   const isCollapsed = state === 'collapsed';
 
   if (loading.airports) {
-    return <div>Loading...</div>;
+    return <LoadingComponent size="lg" text="Loading airports..." />;
   }
 
   if (errors.airports) {
-    return <div>Error: {errors.airports}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2 text-red-600">Error Loading Airports</h3>
+          <p className="text-sm mb-4">{errors.airports}</p>
+          <Button
+            intent="primary"
+            text="Retry"
+            onClick={() => {
+              clearError('airports');
+              window.location.reload();
+            }}
+          />
+        </div>
+      </div>
+    );
   }
 
-  if (!airports) {
-    return <div>No airports found</div>;
+  if (!airports || airports.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">No Airports Found</h3>
+          <p className="text-sm">No airports have been added to your organization yet.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -127,11 +149,24 @@ function MainContentSection() {
   const [selectedTab, setSelectedTab] = useState<TabValue>('manage-contracts');
   const { selectedAirport, loading, airports } = useAirportHub();
 
-  // Show loading state if we're still loading airports or if we have no airports but are loading
-  if (loading.airports || (airports.length === 0 && !selectedAirport)) {
+  // Show loading state if we're still loading airports
+  if (loading.airports) {
     return <LoadingComponent size="md" text="Loading airports..." />;
   }
 
+  // Show empty state if no airports exist
+  if (airports.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">No Airports Found</h3>
+          <p className="text-sm">No airports have been added to your organization yet.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no airport is selected
   if (!selectedAirport) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-gray-500">

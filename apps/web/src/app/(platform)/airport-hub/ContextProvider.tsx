@@ -76,7 +76,7 @@ export default function AirportHubProvider({
   children: React.ReactNode;
 }) {
   const [airports, setAirports] = useState<Airport[]>(initialAirports);
-  const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
+  const [selectedAirport, setSelectedAirportState] = useState<Airport | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -90,7 +90,7 @@ export default function AirportHubProvider({
 
   // Loading states
   const [loading, setLoading] = useState<LoadingState>({
-    airports: false,
+    airports: !hasServerData, // Start with true if no server data provided
     contracts: false,
     contacts: false,
     isRefreshing: false,
@@ -124,9 +124,14 @@ export default function AirportHubProvider({
 
     // Always set first airport as selected on initial load
     if (sortedAirports.length > 0) {
-      setSelectedAirport(sortedAirports[0]);
+      setSelectedAirportState(sortedAirports[0]);
     }
-  }, [initialAirports, sortAirports]);
+
+    // Set airports loading to false after initial processing
+    if (hasServerData) {
+      setLoading((prev) => ({ ...prev, airports: false }));
+    }
+  }, [initialAirports, sortAirports, hasServerData]);
 
   /**
    * Load service contracts for the selected airport (only when airport changes)
@@ -254,10 +259,10 @@ export default function AirportHubProvider({
       if (selectedAirport) {
         const updatedSelectedAirport = sortedAirports.find((a) => a.id === selectedAirport.id);
         if (updatedSelectedAirport) {
-          setSelectedAirport(updatedSelectedAirport);
+          setSelectedAirportState(updatedSelectedAirport);
         } else {
           // Selected airport was deleted, select first available
-          setSelectedAirport(sortedAirports[0] || null);
+          setSelectedAirportState(sortedAirports[0] || null);
         }
       }
     } catch (error) {
@@ -345,7 +350,7 @@ export default function AirportHubProvider({
       });
 
       if (selectedAirport?.id === updatedAirport.id) {
-        setSelectedAirport(updatedAirport);
+        setSelectedAirportState(updatedAirport);
       }
     },
     [selectedAirport, sortAirports],
@@ -379,7 +384,7 @@ export default function AirportHubProvider({
 
           // If we're deleting the currently selected airport, select the first available one
           if (selectedAirport?.id === airportId) {
-            setSelectedAirport(filteredAirports.length > 0 ? filteredAirports[0] : null);
+            setSelectedAirportState(filteredAirports.length > 0 ? filteredAirports[0] : null);
           }
 
           return filteredAirports;
@@ -590,6 +595,27 @@ export default function AirportHubProvider({
       general: null,
     });
   }, []);
+
+  /**
+   * Custom setSelectedAirport that provides instant UI updates
+   */
+  const setSelectedAirport = useCallback(
+    (airport: Airport | null) => {
+      // Immediately update the selected airport for instant UI feedback
+      setSelectedAirportState(airport);
+
+      if (airport) {
+        // Set loading states for content that will need to be fetched
+        setLoading((prev) => ({
+          ...prev,
+          contracts: !contractsCache[airport.id], // Only set loading if not cached
+          contacts: !contactsCache[airport.id], // Only set loading if not cached
+          isRefreshing: false,
+        }));
+      }
+    },
+    [contractsCache, contactsCache],
+  );
 
   /**
    * Context value

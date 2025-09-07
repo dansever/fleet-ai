@@ -18,7 +18,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    remotePatterns: [{ hostname: 'img.clerk.com' }],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'img.clerk.com' },
+      { protocol: 'https', hostname: '*.clerk.accounts.dev' },
+    ],
   },
   env: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,

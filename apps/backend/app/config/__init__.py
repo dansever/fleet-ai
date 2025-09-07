@@ -3,6 +3,10 @@ Configuration module for FleetAI backend.
 Provides typed enums, settings classes, and a top-level AIConfig instance.
 """
 
+import dotenv
+
+dotenv.load_dotenv()
+
 from .ai_config import (
     AIConfig,
     AIPlatform,

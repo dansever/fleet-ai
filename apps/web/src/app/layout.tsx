@@ -7,8 +7,8 @@ import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
 import React from 'react';
 import BackendApiAuth from './BackendApiAuth';
+import ClerkOrgSetter from './ClerkOrgSetter';
 import './globals.css';
-
 export const metadata: Metadata = {
   title: 'Fleet AI',
   description: 'Fleet AI is an AI-powered OS for airline procurement teams',
@@ -31,6 +31,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ClerkProvider>
           {/* Attach the JWT token to the backend API requests */}
           <BackendApiAuth />
+          {/* Set the organization */}
+          <ClerkOrgSetter />
           {/* Runtime DB Check */}
           <RuntimeDbCheck />
           {/* Children - Main App */}

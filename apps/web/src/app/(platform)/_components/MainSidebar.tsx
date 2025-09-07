@@ -19,7 +19,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { useOrganization, UserButton, useUser } from '@clerk/nextjs';
 import {
   BarChart,
   Fuel,
@@ -223,6 +223,7 @@ export function MainSidebar({
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const { organization } = useOrganization();
   const isCollapsed = state === 'collapsed';
   const { user } = useUser();
 
