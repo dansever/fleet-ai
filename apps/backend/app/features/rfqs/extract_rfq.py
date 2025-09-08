@@ -5,7 +5,7 @@ from fastapi import File, UploadFile
 from datetime import datetime
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
-from app.services import process_document_extraction
+from app.services import extract_document
 from .rfqs_config import LLAMA_RFQ_EXTRACTOR_AGENT_NAME, RFQ_EXTRACTOR_SYSTEM_PROMPT
 from app.schemas.rfq import RFQ
 
@@ -21,7 +21,7 @@ def extract_rfq(file: UploadFile = File(...)) -> ResponseEnvelope:
     logger.info(f"📄 Received RFQ extraction request for: {file.filename}")
     
     # run extraction once
-    result = process_document_extraction(
+    result = extract_document(
         file=file, 
         agent_name=LLAMA_RFQ_EXTRACTOR_AGENT_NAME,
         system_prompt=RFQ_EXTRACTOR_SYSTEM_PROMPT,

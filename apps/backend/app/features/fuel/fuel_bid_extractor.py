@@ -3,7 +3,7 @@
 from fastapi import File, UploadFile
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
-from app.services import process_document_extraction
+from app.services import extract_document
 from .fuel_config import FUEL_BID_EXTRACTOR_CONFIG
 import os
 import json
@@ -20,7 +20,7 @@ def extract_fuel_bid(file: UploadFile = File(...)) -> ResponseEnvelope:
 
     logger.info(f"📄 Received fuel bid extraction request for: {file.filename}")
 
-    result = process_document_extraction(file=file, **FUEL_BID_EXTRACTOR_CONFIG)
+    result = extract_document(file=file, **FUEL_BID_EXTRACTOR_CONFIG)
 
     logger.info("✅ Fuel bid extraction completed successfully")
 

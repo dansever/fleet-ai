@@ -23,15 +23,16 @@ router = APIRouter(
 @router.post("/contracts", response_model=ResponseEnvelope)
 async def process_contract_from_file(
     file: UploadFile = File(...),
-    auth = Depends(require_auth),
+    auth: dict = Depends(require_auth),
 ) -> ResponseEnvelope:
     """
     Process contracts from a file.
     """
-    # print("org_id", auth["org_id"])
-    # return process_contract(file, org_id=auth["org_id"])
+    result = await process_contract(file, org_id=auth["org_id"])
+    
+    # Ensure it's wrapped as ResponseEnvelope
     return ResponseEnvelope(
-        data=None,
+        data=result,
         success=True,
-        message="Test"
+        message="Contract processing completed successfully"
     )

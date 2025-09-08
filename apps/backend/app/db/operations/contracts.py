@@ -13,7 +13,7 @@ __all__ = [
 Get a contract by ID from the database of the current organization.
 - Returns: A single contract or None if not found.
 """
-async def get_contract(contract_id: str, organization_id: str):
+async def get_contract(organization_id: str, contract_id: str):
     contracts = await get_table("contracts")
     async for session in get_db():
         query = select(contracts).where(

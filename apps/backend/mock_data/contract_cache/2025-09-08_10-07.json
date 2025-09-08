@@ -1,0 +1,22 @@
+{
+  "vendor": {
+    "vendor_name": "Mediterranean Aviation Fuels Ltd.",
+    "vendor_address": null,
+    "vendor_contact_name": null,
+    "vendor_contact_email": null,
+    "vendor_contact_phone": null
+  },
+  "vendor_comments": null,
+  "title": "Fuel Supply Agreement - Israel Air at Ben Gurion Airport",
+  "contract_type": "fuel",
+  "effective_from": "2024-11-01",
+  "effective_to": "2025-10-31",
+  "summary": "Mediterranean Aviation Fuels Ltd. supplies Jet A-1 and into-plane services to Israel Air at Ben Gurion Airport, TLV, for one year. Services include 24/7 hydrant truck fueling, quality assurance, and daily reporting. Pricing is based on Platts FOB MED index plus fixed differentials and tiered monthly volume service fees. Minimum call-out, SLAs on truck response (max 12 minutes), and $75/turn credits for delay apply. Vendor keeps $10M CGL and pollution insurance. Termination allowed with 90 days\u2019 notice (convenience) or 30-day cure (cause). Billing net 30 days, late fee 1.5% per month. Israeli law governs.",
+  "commercial_terms": "Pricing model: Platts FOB MED Jet A-1 monthly average (M-1) + $0.041/USG differential + $0.006/USG throughput + $0.004/USG hydrant fee + taxes/levies. Tiered service fee by monthly uplift: 0-250,000 USG: +$0.010/USG; 250,001-600,000: +$0.007/USG; >600,000: +$0.005/USG, retroactive by month. Minimum uplift: 600 USG per call-out, surcharge $90 for less (exceptions for safety). Additives: FSII/SDA +$0.008/USG plus material at cost+3%. Defuel: $0.025/USG. Billing: net 30 days. Late fee: 1.5%/month.",
+  "slas": "Truck dispatch max 12 minutes from call, two hydrant trucks at peak; hydrant flow \u2265800 USG/min, bowser \u2265300 USG/min. Delays >15 min per turn: $75 credit/turn. Minimum uplift 600 USG, lower incurs surcharge. Sample, logs, data reporting daily. Statement reconciliation in 10 business days. Out-of-spec batch replaced in 6 hours.",
+  "edge_cases": "Bowser mode if hydrant outage, no extra fee unless outage >6 hours, then service fee -25%. SAT below -30\u00b0C: flow limits, clock paused on mitigation. Defuels billed and reviewed. Airline no-show (cancel <30 min ETA): $120 call-out. Additive requests and FSII/SDA billed extra.",
+  "risk_liability": "Vendor maintains min USD 10M each for CGL and pollution liability. Vendor responsible for contamination and related costs. Meter disputes >0.5% trigger joint test. Out-of-spec batch quarantined, replaced at Vendor's cost. Indemnities implied by insurance. No explicit liability cap beyond insurance limits stated.",
+  "termination_law": "Termination for convenience: 90 days\u2019 notice. For cause: 30-day cure period. Israeli law governs.",
+  "operational_baselines": "Service at TLV, 24/7 operations, two hydrant trucks per stand at peak. Dispatch by radio/call. Meter tickets (paper/electronic), EDI files by 03:00 daily. Min uplift 600 USG per call, cross-checked weekly. Meters certified every 6 months. Fuel sampling, quality logs, retention samples as per JIG/IATA/EI1530. Discrepancy settlement in 10 days.",
+  "tags": {}
+}

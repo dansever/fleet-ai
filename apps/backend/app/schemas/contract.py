@@ -9,7 +9,7 @@ class Contract(BaseModel):
     """Contract information extracted from procurement documents"""
     
     vendor: Vendor = Field(..., description="Information about the supplier submitting this contract.")
-    vendorComments: str | None = Field(
+    vendor_comments: str | None = Field(
         None,
         description=(
             "Free-text remarks provided by the vendor that accompany the contract, cover letter, or bid. "
@@ -25,14 +25,14 @@ class Contract(BaseModel):
         ),
     )
 
-    contractType: ContractTypes | None = Field(
+    contract_type: ContractTypes | None = Field(
         None,
         description=(
             "Enum describing the agreement type. Choose the most specific type present in the text."
         ),
     )
 
-    effectiveFrom: date | None = Field(
+    effective_from: date | None = Field(
         None,
         description=(
             "Date the agreement becomes effective. Prefer the effective date over the signature date. "
@@ -41,7 +41,7 @@ class Contract(BaseModel):
         ),
     )
 
-    effectiveTo: date | None = Field(
+    effective_to: date | None = Field(
         None,
         description=(
             "End date or renewal boundary. If the contract is evergreen or auto-renewing, leave null and "
@@ -60,7 +60,7 @@ class Contract(BaseModel):
         ),
     )
 
-    commercialTerms: str | None = Field(
+    commercial_terms: str | None = Field(
         None,
         description=(
             "Commercial details in a compact, structured narrative. Include: pricing model "
@@ -83,7 +83,7 @@ class Contract(BaseModel):
         ),
     )
 
-    edgeCases: str | None = Field(
+    edge_cases: str | None = Field(
         None,
         description=(
             "Unusual conditions, exceptions, or site-specific constraints that affect scope or price. "
@@ -92,7 +92,7 @@ class Contract(BaseModel):
         ),
     )
 
-    riskLiability: str | None = Field(
+    risk_liability: str | None = Field(
         None,
         description=(
             "Risk allocation and liability terms. Include limitation of liability amounts "
@@ -102,7 +102,7 @@ class Contract(BaseModel):
         ),
     )
 
-    terminationLaw: str | None = Field(
+    termination_law: str | None = Field(
         None,
         description=(
             "Termination mechanics and governing law. Include termination for convenience and cause, "
@@ -111,7 +111,7 @@ class Contract(BaseModel):
         ),
     )
 
-    operationalBaselines: str | None = Field(
+    operational_baselines: str | None = Field(
         None,
         description=(
             "Operational setup and runbook. Include service locations, delivery or service schedules, "
@@ -120,7 +120,7 @@ class Contract(BaseModel):
         ),
     )
 
-    tags: Dict | None = Field(
+    tags: dict | None = Field(
         None,
         description=(
             "Machine-readable key:value pairs for filtering and analytics. Use snake_case keys and normalized values. "
@@ -138,9 +138,9 @@ class ContractDocument(BaseModel):
     """Contract document information extracted from procurement documents"""
     title: str | None = Field(None, description="The title of the document.")
     version: int | None = Field(None, description="The version of the document.")
-    sourceType: str | None = Field(None, description="The source type of the document.")
-    storageUrl: str | None = Field(None, description="The storage URL of the document.")
-    rawText: str | None = Field(None, description="The raw text of the document.")
+    source_type: str | None = Field(None, description="The source type of the document.")
+    storage_url: str | None = Field(None, description="The storage URL of the document.")
+    raw_text: str | None = Field(None, description="The raw text of the document.")
 
 class ContractChunk(BaseModel):
     """Contract chunk information extracted from procurement documents"""

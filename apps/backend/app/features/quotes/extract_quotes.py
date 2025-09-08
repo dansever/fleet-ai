@@ -6,7 +6,7 @@ from datetime import datetime
 from fastapi import File, UploadFile
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
-from app.services import process_document_extraction
+from app.services import extract_document
 from .quotes_config import QUOTE_EXTRACTOR_SYSTEM_PROMPT, LLAMA_QUOTE_EXTRACTOR_AGENT_NAME
 from app.schemas.quote import Quote
 from app.config import ai_config
@@ -20,7 +20,7 @@ def extract_quotes(file: UploadFile = File(...)) -> ResponseEnvelope:
 
     logger.info(f"📄 Received quote extraction request for: {file.filename}")
     
-    result = process_document_extraction(
+    result = extract_document(
         file=file, 
         agent_name=LLAMA_QUOTE_EXTRACTOR_AGENT_NAME,
         system_prompt=QUOTE_EXTRACTOR_SYSTEM_PROMPT,

@@ -1,0 +1,22 @@
+{
+  "vendor": {
+    "vendor_name": "AeroNet TLV Communications Ltd.",
+    "vendor_address": null,
+    "vendor_contact_name": null,
+    "vendor_contact_email": null,
+    "vendor_contact_phone": null
+  },
+  "vendor_comments": null,
+  "title": "IT and Data Communications Agreement - Israel Air at Ben Gurion Airport",
+  "contract_type": "it_data_comms",
+  "effective_from": "2025-02-01",
+  "effective_to": "2025-12-31",
+  "summary": "Agreement between Israel Air and AeroNet TLV Communications Ltd. for CUPPS/CUTE desks, connectivity, and support services at Ben Gurion Airport (TLV) from 01-Feb-2025 to 31-Dec-2025. Scope includes wired/wireless connectivity, VLANs, print and DCS/messaging support. Service levels include 99.90% uptime and strict response times. Security compliance aligns with ISO 27001 and includes annual pen tests. Pricing is per active desk/managed port with monthly fixed fees and Net 30 payment terms. Termination allowed with 60 days' notice for convenience or 15-day cure for repeated SLA breach. Governed by the State of Israel.",
+  "commercial_terms": "Pricing: Monthly fixed fees per active desk/managed port. One-time setup fee for new gates. Payment terms: Net 30 days. No explicit rates or totals disclosed. Invoicing likely monthly per industry standard, not directly stated. No mentioned spend caps. SLA credits apply for service shortfalls (see SLAs).",
+  "slas": "Monthly uptime SLA: 99.90% per site segment. For each 0.1% shortfall in monthly uptime, provider credits 5% of the monthly fee (capped at 30% per month). Performance: Latency \u2264 80 ms, jitter \u2264 20 ms, packet loss \u2264 0.2% (95th percentile). Incident response: P1 engage in 30 min and restore in 2 hrs; P2 engage 1 hr, restore 8 hrs. DR: RTO 30 min. Security breach P1: notify airline within 2 hrs.",
+  "edge_cases": "REST API endpoint rate limit (300 requests/min); excess is queued. Type B fallback allowed during messaging outage at no extra fee. Custom Sunday change window (2:00-4:00) with 72-hour notice. Dedicated VLAN per airline. Quarterly DR failover testing. Secondary fiber path handled for disaster recovery.",
+  "risk_liability": "Security: Data encryption in transit (TLS 1.2+) and at rest for logs; SOC with IDS/IPS and log retention. Critical vulnerabilities remediated within 7 days, high within 14 days. Annual 3rd-party penetration test. Data breach notification within 2 hours for P1 event. No explicit monetary limitation of liability or indemnity terms detailed.",
+  "termination_law": "Termination by convenience with 60 days' notice. Termination for cause: 15-day cure following repeated SLA breach. Governing law: State of Israel. No specifics on survival clauses or detailed dispute resolution method.",
+  "operational_baselines": "Service location: Ben Gurion Airport (TLV). Service delivery: 12 CUTE desks at T3 check-in, 6 at gates. Asset management by vendor. Bandwidth: 200 Mbps symmetrical, bursting to 350 Mbps. Change windows set Sundays 02:00-04:00 local with 72-hour advance notice. SOC monitoring, VLAN per airline, central queue management for printers. On-premises support for DCS and messaging services. Capacity and DR measures implemented (secondary fiber, quarterly tests).",
+  "tags": {}
+}
