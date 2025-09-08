@@ -2,13 +2,17 @@ import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
+import ContractDialog from '@/features/contracts/contracts/ContractDialog';
+import { client as contractClient } from '@/modules/contracts';
 import { deleteContract } from '@/modules/contracts/contracts.server';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
-import { ConfirmationPopover } from '@/stories/Popover/Popover';
-import { Eye, RefreshCw, Trash } from 'lucide-react';
+import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { Eye, RefreshCw, Trash, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import ContractList from '../_components/ContractSidebar';
 
 export default function ContractsPage() {
@@ -36,6 +40,16 @@ export default function ContractsPage() {
     },
     {} as Record<string, Contract[]>,
   );
+
+  const handleUploadContractFile = async (file: File) => {
+    try {
+      await contractClient.processContract(file);
+      toast.success('Contract file processed successfully');
+    } catch (error) {
+      toast.error('Failed to process contract file');
+      console.error(error);
+    }
+  };
 
   // Get all contract types to ensure consistent ordering
   const contractTypes = ContractTypeEnum.enumValues;
@@ -114,13 +128,19 @@ export default function ContractsPage() {
         headerGradient="from-blue-500 via-blue-400 to-blue-600 opacity-80"
         actions={
           <div className="flex flex-row gap-2">
-            <Button intent="secondaryInverted" icon={Eye} onClick={() => {}} />
+            <ContractDialog
+              contract={selectedContract}
+              airportId={selectedContract?.airportId || ''}
+              DialogType="view"
+              trigger={<Button intent="secondaryInverted" icon={Eye} />}
+              onChange={() => {}}
+            />
+
             <Button
               intent="secondaryInverted"
               icon={RefreshCw}
               onClick={refreshContracts}
               isLoading={loading.contracts && loading.isRefreshing}
-              className={loading.contracts && loading.isRefreshing ? 'animate-spin' : ''}
             />
             <ConfirmationPopover
               onConfirm={() => {
@@ -145,6 +165,44 @@ export default function ContractsPage() {
               <h3 className="text-lg font-medium mb-2">No Contract Selected</h3>
               <p className="text-sm">Please select a contract to manage its information.</p>
             </div>
+          </div>
+        )}
+        {selectedContract && (
+          <div className="col-span-4 flex flex-col gap-2">
+            <div className="flex flex-row gap-2 justify-between">
+              <h3>Contract Information</h3>
+              <FileUploadPopover
+                onSend={handleUploadContractFile}
+                trigger={<Button intent="primary" text="Upload Contract" icon={Upload} />}
+              />
+            </div>
+            <KeyValuePair label="Summary" value={selectedContract.summary} valueType="string" />
+            <KeyValuePair
+              label="Commercial Terms"
+              value={selectedContract.commercialTerms}
+              valueType="string"
+            />
+            <KeyValuePair label="SLAs" value={selectedContract.slas} valueType="string" />
+            <KeyValuePair
+              label="Edge Cases"
+              value={selectedContract.edgeCases}
+              valueType="string"
+            />
+            <KeyValuePair
+              label="Risk & Liability"
+              value={selectedContract.riskLiability}
+              valueType="string"
+            />
+            <KeyValuePair
+              label="Termination Law"
+              value={selectedContract.terminationLaw}
+              valueType="string"
+            />
+            <KeyValuePair
+              label="Operational Baselines"
+              value={selectedContract.operationalBaselines}
+              valueType="string"
+            />
           </div>
         )}
       </MainCard>

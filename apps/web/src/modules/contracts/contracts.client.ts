@@ -1,6 +1,6 @@
-import type { Airport, Contract, Organization } from '@/drizzle/types';
+import type { Airport, Contract, NewContract, Organization } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
-import { ContractCreateInput, ContractUpdateInput } from './contracts.types';
+import { ContractUpdateInput } from './contracts.types';
 
 /**
  * Get a contract by ID
@@ -30,12 +30,9 @@ export async function listContractsByAirport(airportId: Airport['id']): Promise<
 /**
  * Create a new contract
  */
-export async function createContract(data: ContractCreateInput): Promise<Contract> {
+export async function createContract(data: Partial<NewContract>): Promise<Contract> {
   const payload = {
     ...data,
-    // Convert string dates to Date objects
-    effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
-    effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
   };
   const res = await api.post('/api/contracts', payload);
   return res.data;
@@ -47,9 +44,6 @@ export async function createContract(data: ContractCreateInput): Promise<Contrac
 export async function updateContract(id: string, data: ContractUpdateInput): Promise<Contract> {
   const payload = {
     ...data,
-    // Convert string dates to Date objects if provided
-    effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
-    effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
   };
   const res = await api.put(`/api/contracts/${id}`, payload);
   return res.data;

@@ -3,15 +3,17 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '@/drizzle/enums';
-import { Contract } from '@/drizzle/types';
-import ContractDialog from '@/features/contracts/contracts/ContractDialog';
+import { Airport, Contract } from '@/drizzle/types';
+import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
+import { createRandomContract } from '@/features/contracts/contracts/createRandomContract';
 import { cn } from '@/lib/utils';
 import { client as contractClient } from '@/modules/contracts';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
-import { FileUploadPopover } from '@/stories/Popover/Popover';
+import { BasePopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Plus } from 'lucide-react';
+import { Plus, PlusIcon, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
 
@@ -29,7 +31,8 @@ export default function ContractList({
   selectedContract,
   onContractAdd,
 }: ContractListProps) {
-  const { loading } = useAirportHub();
+  const { selectedAirport, loading, refreshContracts } = useAirportHub();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // Upload Contract File
   const handleProcessContract = async (file: File) => {
     try {
@@ -53,6 +56,18 @@ export default function ContractList({
         : 'inactive';
   }
 
+  const handleGenerateRandomContract = async () => {
+    try {
+      setIsPopoverOpen(false); // Close popover
+      const newContract = await createRandomContract(selectedAirport?.id as Airport['id']);
+      onContractAdd?.(newContract);
+      toast.success('Random contract generated successfully');
+    } catch (error) {
+      toast.error('Failed to generate random contract');
+      console.error(error);
+    }
+  };
+
   return (
     <div className="h-fit flex flex-col rounded-2xl bg-card">
       {/* Header */}
@@ -60,13 +75,50 @@ export default function ContractList({
         <div className="text-sm text-muted-foreground">
           {contracts.length} of {contracts.length} contracts
         </div>
-        <FileUploadPopover
+        <Button intent="ghost" icon={RefreshCw} size="sm" onClick={refreshContracts} />
+        <BasePopover
+          trigger={<Button intent="add" icon={Plus} />}
+          title="Add Contract"
+          description="Add a new service agreement to the airport hub"
+          open={isPopoverOpen}
+          onOpenChange={setIsPopoverOpen}
+        >
+          <div className="flex flex-col gap-1 w-full">
+            <SimpleContractDialog
+              airport={selectedAirport!}
+              trigger={<Button intent="secondary" icon={PlusIcon} text="Add Contract" />}
+              onOpenChange={(open) => {
+                if (!open) {
+                  // Close popover when dialog closes
+                  setIsPopoverOpen(false);
+                }
+              }}
+              onChange={(newContract) => {
+                if (onContractAdd) {
+                  onContractAdd(newContract);
+                  // Automatically select the newly created contract
+                  onContractSelect(newContract);
+                }
+              }}
+            />
+            <Button
+              intent="ghost"
+              text="Or generate random (dev mode)"
+              size="sm"
+              className="text-gray-500"
+              onClick={handleGenerateRandomContract}
+            />
+          </div>
+        </BasePopover>
+
+        {/* <FileUploadPopover
           onSend={handleProcessContract}
           trigger={<Button intent="add" icon={Plus} />}
         >
           <div className="flex flex-col gap-1 w-full">
             <ContractDialog
               contract={null}
+              airportId={selectedAirport?.id as Airport['id']}
               DialogType="add"
               trigger={<Button intent="secondary" text="Manually Add Contract" size="sm" />}
               onChange={(newContract) => {
@@ -77,9 +129,16 @@ export default function ContractList({
                 }
               }}
             />
-            <Button intent="ghost" text="Or generate a random contract" size="sm" />
+            <Button
+              intent="ghost"
+              text="Or generate a random contract"
+              size="sm"
+              onClick={() => {
+                handleGenerateRandomContract();
+              }}
+            />
           </div>
-        </FileUploadPopover>
+        </FileUploadPopover> */}
       </div>
 
       {/* Contract List */}
@@ -108,26 +167,24 @@ export default function ContractList({
                     )}
                   >
                     <div className="flex flex-col gap-1 items-start">
-                      <div className="flex flex-row justify-between gap-2">
-                        <StatusBadge
-                          status={'default'}
-                          text={getContractTypeDisplay(contract.contractType || '')}
-                        />
-                        <StatusBadge
-                          status={
-                            getIsContractActive(contract) === 'active'
-                              ? 'operational'
-                              : getIsContractActive(contract) === 'pending'
-                                ? 'pending'
-                                : 'error'
-                          }
-                          text={getProcessStatusDisplay(
-                            getIsContractActive(contract) as ProcessStatus,
-                          )}
-                        />
-                      </div>
+                      <StatusBadge
+                        status={'default'}
+                        text={getContractTypeDisplay(contract.contractType || '')}
+                      />
                       <span className="text-sm font-bold">{contract.title}</span>
                       <span className="text-xs">{contract.vendorName}</span>
+                      <StatusBadge
+                        status={
+                          getIsContractActive(contract) === 'active'
+                            ? 'operational'
+                            : getIsContractActive(contract) === 'pending'
+                              ? 'pending'
+                              : 'error'
+                        }
+                        text={getProcessStatusDisplay(
+                          getIsContractActive(contract) as ProcessStatus,
+                        )}
+                      />
                     </div>
                   </ListItemCard>
                 );

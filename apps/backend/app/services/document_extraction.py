@@ -1,15 +1,14 @@
 # app/services/document_extraction.py
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile, HTTPException, File
 from typing import Type
 from app.utils import get_logger, save_temp_file, cleanup_temp_file, validate_file_type
 from app.ai.extractors import get_llama_extractor_client
 from app.config import ai_config
-from app.shared.schemas import ResponseEnvelope
 from pydantic import BaseModel
 
 logger = get_logger(__name__)
 
-def extract_document(
+async def extract_document(
     file: UploadFile,
     agent_name: str,
     system_prompt: str,
@@ -17,7 +16,7 @@ def extract_document(
     log_label: str = "Document",
     allowed_extensions: tuple[str, ...] | None = None,
     allowed_mime_types: tuple[str, ...] | None = None
-) -> ResponseEnvelope:
+) -> dict:
     """
     Generic document extraction handler.
     """
@@ -47,11 +46,7 @@ def extract_document(
         logger.info(f"📄 {log_label} extraction completed.")
 
         # Return response
-        return ResponseEnvelope(
-            data=result.data,
-            success=True,
-            message=f"Extraction completed successfully for {log_label}"
-        )
+        return result.data
 
     # Handle errors
     except HTTPException:

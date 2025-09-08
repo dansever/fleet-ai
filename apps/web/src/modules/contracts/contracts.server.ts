@@ -14,8 +14,6 @@ export async function getContractById(id: Contract['id']): Promise<Contract | nu
   const result = await db.select().from(contractsTable).where(eq(contractsTable.id, id)).limit(1);
   return result[0] ?? null;
 }
-// Backward compatible alias
-export const getContract = getContractById;
 
 /**
  * Get all contracts for an organization

@@ -155,9 +155,10 @@ export default function AirportDialog({
       DialogType={DialogType}
       open={open}
       onOpenChange={onOpenChange}
+      className="min-w-[35vw] sm:min-w-[40vw] md:min-w-[45vw] lg:min-w-[50vw]"
     >
       {(isEditing) => (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           <MainCard title="Airport Information" neutralHeader={true}>
             <div className="flex flex-col justify-between ">
               {isEditing && isAdd ? (

@@ -5,7 +5,7 @@ import { AirportCreateInput, AirportUpdateInput } from './airports.types';
 /**
  * Get an airport by ID
  */
-export async function getAirport(id: Airport['id']): Promise<Airport> {
+export async function getAirportById(id: Airport['id']): Promise<Airport> {
   const res = await api.get(`/api/airports/${id}`);
   return res.data;
 }

@@ -417,7 +417,7 @@ export const ListItemCard = ({
             </div>
           )}
 
-          <div className={cn('flex-1 min-w-0', !icon && 'pl-1')}>
+          <div className={cn('flex-1 min-w-0')}>
             <div className="flex items-start justify-between gap-2 w-full max-w-full">
               <div className="min-w-0 flex-1">
                 {title && <h4 className="font-medium truncate">{title}</h4>}

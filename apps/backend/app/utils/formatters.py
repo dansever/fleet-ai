@@ -29,29 +29,27 @@ def format_dict(d: dict) -> str:
 
 def flatten_dict(d: dict) -> dict:
     """
-    Flatten a nested dictionary.
-    - Vendor dictionary is flattened to vendor_{subkey}
-    - All other keys are kept as is.
-    - Example:
+    Flatten a dictionary by one level.
+    If a value is another dict, merge its keys into the top level.
+    Later keys override earlier ones if there's a conflict.
+    Example:
         {
+            "title": "Contract Title",
             "vendor": {
-                "name": "John Doe",
-                "address": "123 Main St, Anytown, USA"
+                "vendor_name": "John Doe",
+                "vendor_address": "123 Main St, Anytown, USA"
             }
-            "title": "Contract Title"
         }
         -> {
-            "vendor_name": "John Doe", 
-            "vendor_address": "123 Main St, Anytown, USA", 
-            "title": "Contract Title"
-            }
+            "title": "Contract Title",
+            "vendor_name": "John Doe",
+            "vendor_address": "123 Main St, Anytown, USA"
+        }
     """
     flat = {}
     for key, value in d.items():
-        if key == "vendor" and isinstance(value, dict):
-            # promote vendor children directly
-            for subkey, subval in value.items():
-                flat[subkey] = subval
+        if isinstance(value, dict):
+            flat.update(value)  # merge subkeys
         else:
             flat[key] = value
     return flat

@@ -13,8 +13,6 @@ export async function getAirportById(id: Airport['id']): Promise<Airport | null>
   const result = await db.select().from(airportsTable).where(eq(airportsTable.id, id)).limit(1);
   return result[0] ?? null;
 }
-// Backward compatible alias
-export const getAirport = getAirportById;
 
 /**
  * Get all airports by organization ID

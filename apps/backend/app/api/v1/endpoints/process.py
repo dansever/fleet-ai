@@ -28,11 +28,5 @@ async def process_contract_from_file(
     """
     Process contracts from a file.
     """
-    result = await process_contract(file, org_id=auth["org_id"])
+    return await process_contract(file, clerk_org_id=auth["org_id"])
     
-    # Ensure it's wrapped as ResponseEnvelope
-    return ResponseEnvelope(
-        data=result,
-        success=True,
-        message="Contract processing completed successfully"
-    )

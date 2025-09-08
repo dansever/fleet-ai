@@ -1,7 +1,7 @@
 import { ContractType } from '@/drizzle/enums';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as contractServer } from '@/modules/contracts/contracts';
+import { server as contractServer } from '@/modules/contracts';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
     if (error || !dbUser) return jsonError('Unauthorized', 401);
 
     const body = await request.json();
+    console.log('body', body);
     const newContract = await contractServer.createContract({
       ...body,
       orgId: dbUser.orgId,

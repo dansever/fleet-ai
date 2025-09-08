@@ -1,20 +1,24 @@
 // src/modules/contracts/contracts/contracts.types.ts
+
 /**
  * Contract types for form handling and API requests
  */
-
-import type { NewContract } from '@/drizzle/types';
+import { ContractType } from '@/drizzle/enums';
+import type { Airport, Contract } from '@/drizzle/types';
 
 /**
- * For creating contracts from forms - excludes server-managed fields
+ * For creating contracts - Only need title, contractType, airportId
  */
-export type ContractCreateInput = Omit<NewContract, 'id' | 'orgId' | 'createdAt' | 'updatedAt'> & {
-  // Allow date fields as strings (from forms) or Date objects
-  effectiveFrom?: string | Date | null;
-  effectiveTo?: string | Date | null;
+export type ContractCreateInput = {
+  title: string;
+  contractType: ContractType;
+  airportId: Airport['id'];
 };
 
 /**
- * For updating contracts from forms - all fields optional
+ * For updating contracts - all fields optional.
+ * Off limits: id, orgId, createdAt, updatedAt
  */
-export type ContractUpdateInput = Partial<ContractCreateInput>;
+export type ContractUpdateInput = Partial<
+  Omit<Contract, 'id' | 'orgId' | 'createdAt' | 'updatedAt'>
+>;

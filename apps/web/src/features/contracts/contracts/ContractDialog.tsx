@@ -2,11 +2,12 @@
 'use client';
 
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
-import type { Contract } from '@/drizzle/types';
+import type { Airport, Contract } from '@/drizzle/types';
 import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
 import { formatDate } from '@/lib/core/formatters';
 import { client as contractClient } from '@/modules/contracts';
 import { type ContractCreateInput } from '@/modules/contracts/contracts.types';
+import { client as airportClient } from '@/modules/core/airports';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
@@ -24,19 +25,33 @@ export default function ContractDialog({
   onOpenChange,
 }: {
   contract: Contract | null;
-  airportId?: string; // Required when DialogType is 'add'
+  airportId: Airport['id']; // Required when DialogType is 'add'
   onChange: (contract: Contract) => void;
   DialogType: 'add' | 'edit' | 'view';
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
+  const [airport, setAirport] = useState<Airport | null>(null);
+  // Get airport object --> For name display
+  useEffect(() => {
+    if (!airportId) {
+      setAirport(null);
+      return;
+    }
+    const fetchAirport = async () => {
+      const fullAirport = await airportClient.getAirportById(airportId);
+      if (fullAirport) {
+        setAirport(fullAirport);
+      }
+    };
+    fetchAirport();
+  }, [airportId]);
+
   const [formData, setFormData] = useState({
     // Contract Information (matching schema)
     title: contract?.title || '',
     contractType: contract?.contractType || null,
-    summary: contract?.summary || null,
-    docUrl: contract?.docUrl || null,
 
     // Vendor Information (matching schema)
     vendorName: contract?.vendorName || null,
@@ -69,8 +84,6 @@ export default function ContractDialog({
     setFormData({
       title: contract?.title || '',
       contractType: contract?.contractType || null,
-      summary: contract?.summary || null,
-      docUrl: contract?.docUrl || null,
       vendorName: contract?.vendorName || null,
       vendorAddress: contract?.vendorAddress || null,
       vendorContactName: contract?.vendorContactName || null,
@@ -121,8 +134,6 @@ export default function ContractDialog({
           vendorId: null, // Will be handled by backend if needed
           title: serializedFormData.title as string,
           contractType: serializedFormData.contractType!,
-          summary: serializedFormData.summary,
-          docUrl: serializedFormData.docUrl,
           vendorName: serializedFormData.vendorName,
           vendorAddress: serializedFormData.vendorAddress,
           vendorContactName: serializedFormData.vendorContactName,
@@ -144,8 +155,6 @@ export default function ContractDialog({
         const updateData = {
           title: serializedFormData.title,
           contractType: serializedFormData.contractType || undefined,
-          summary: serializedFormData.summary,
-          docUrl: serializedFormData.docUrl,
           vendorName: serializedFormData.vendorName,
           vendorAddress: serializedFormData.vendorAddress,
           vendorContactName: serializedFormData.vendorContactName,
@@ -178,8 +187,6 @@ export default function ContractDialog({
       setFormData({
         title: '',
         contractType: null,
-        summary: null,
-        docUrl: null,
         vendorName: null,
         vendorAddress: null,
         vendorContactName: null,
@@ -197,8 +204,6 @@ export default function ContractDialog({
     setFormData({
       title: '',
       contractType: null,
-      summary: null,
-      docUrl: null,
       vendorName: null,
       vendorAddress: null,
       vendorContactName: null,
@@ -250,21 +255,12 @@ export default function ContractDialog({
                 }))}
               />
               <KeyValuePair
-                label="Summary"
-                value={formData.summary}
+                label="Airport"
+                value={airport?.name}
                 valueType="string"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('summary', value)}
-                name="summary"
-              />
-
-              <KeyValuePair
-                label="Document URL"
-                value={formData.docUrl}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('docUrl', value)}
-                name="docUrl"
+                onChange={(value) => handleFieldChange('airport', value)}
+                name="airport"
               />
             </div>
           </MainCard>

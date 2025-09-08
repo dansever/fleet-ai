@@ -38,8 +38,8 @@ export const contractsTable = pgTable(
     vendorComments: text('vendor_comments'),
 
     // Period
-    effectiveFrom: date('effective_from').notNull(),
-    effectiveTo: date('effective_to').notNull(),
+    effectiveFrom: date('effective_from'),
+    effectiveTo: date('effective_to'),
     processStatus: ProcessStatusEnum('process_status').default('pending'),
 
     // Source
