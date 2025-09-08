@@ -8,15 +8,18 @@ from app.config import ai_config
 import os
 import json
 from datetime import datetime
-from app.db.operations import create_contract, get_org_by_clerk_org_id
+from app.db.operations import update_contract, get_org_by_clerk_org_id
 from app.utils.io import load_latest_extraction_result
 
 DEBUG_MODE = ai_config.features.debug_mode
-USE_MOCK_DATA = True
+USE_MOCK_DATA = False
 
 logger = get_logger(__name__)
 
-async def process_contract(file: UploadFile = File(...), clerk_org_id: str = None) -> ResponseEnvelope:
+async def process_contract(
+    file: UploadFile = File(...), 
+    contract_id: str = None, 
+    clerk_org_id: str = None) -> ResponseEnvelope:
     """Process contracts from a file"""
     try:
         logger.info(f"📄 Received contract processing request for: {file.filename}")
@@ -35,8 +38,8 @@ async def process_contract(file: UploadFile = File(...), clerk_org_id: str = Non
             
         # ============== 2 - Flatten data ==============
         extraction_result = flatten_dict(extraction_result) 
-        
-        # ============== 3 - DEBUG: Write to mock data ==============
+
+        # ============== DEBUG: Write to mock data ==============
         if DEBUG_MODE:
             if not USE_MOCK_DATA:
                 # write result.data to file
@@ -48,9 +51,15 @@ async def process_contract(file: UploadFile = File(...), clerk_org_id: str = Non
         
         # ============== 4 - Write to Database ==============
         # Get DB Org ID from Clerk Org ID
-        # org = await get_org_by_clerk_org_id(clerk_org_id)
-        # await create_contract(org_id=org.id, contract=extraction_result)
+        org = await get_org_by_clerk_org_id(clerk_org_id)
         
+        # Upadte a copy so to not mutate the original extraction_result
+        contract_data = {k: v for k, v in extraction_result.items() if k not in ("title", "contract_type")}
+        await update_contract(
+            contract_id=contract_id,
+            org_id=org.id,
+            contract=contract_data
+        )        
 
         # ============== 4 - Return Response ==============
         return ResponseEnvelope(

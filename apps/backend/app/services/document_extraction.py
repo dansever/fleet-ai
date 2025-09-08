@@ -19,44 +19,48 @@ async def extract_document(
 ) -> dict:
     """
     Generic document extraction handler.
+    Returns a dict with Python-native types (e.g., datetime.date for DATE fields).
     """
     temp_path = None
 
     try:
-        # Validate file type
+        # ============== Validate file type ==============
         exts = allowed_extensions or ai_config.allowed_extensions
         mimes = allowed_mime_types or ai_config.allowed_mime_types
         validate_file_type(file, exts, mimes)
+        logger.info(f"📁 File type validated.")
 
-        # Save file to a temporary location
+        # ============== Save file to a temporary location ==============
         temp_path = save_temp_file(file)
-        logger.info(f"🔍 {log_label} file saved to temp location.")
+        logger.info(f"📁 File saved to temp location.")
 
-        # Get and initialize LlamaExtractor client
+        # ============== Initialize extractor ==============
         client = get_llama_extractor_client(update_extractor_schema=True)
         agent = client.get_or_create_agent(
             agent_name=agent_name,
             system_prompt=system_prompt,
             data_schema=schema_class,
         )
+        logger.info(f"🤖 Extraction agent initialized.")
 
-        # Start extraction
-        logger.info(f"🤖 {log_label} agent initialized - Starting extraction...")
+        # ============== Run extraction ==============
         result = agent.extract(temp_path)
-        logger.info(f"📄 {log_label} extraction completed.")
+        logger.info(f"✅ Extraction completed.")
 
-        # Return response
-        return result.data
+        # ============== Normalize with Pydantic (v2) ==============
+        parsed = schema_class.model_validate(result.data)
+        return parsed.model_dump(mode="python")
+        
 
-    # Handle errors
+    # ============== Handle errors ==============
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"❌ Error in {log_label} extraction: {str(e)}")
+        logger.exception(f"❌ Error in extraction: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to extract {log_label} data from document")
     
-    # Cleanup temporary file if it exists
+    # ============== Cleanup temporary file if it exists ==============
     finally:
         if temp_path:
             cleanup_temp_file(temp_path)
-            logger.info(f"🧹 Temporary file cleaned up")
+            logger.info(f"🧹 Temporary file cleaned up.")

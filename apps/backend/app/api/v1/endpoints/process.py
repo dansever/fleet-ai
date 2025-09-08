@@ -1,7 +1,7 @@
 # backend/app/api/v1/endpoints/process.py
 
 import os
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Form
 from app.core import require_auth
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
@@ -23,10 +23,10 @@ router = APIRouter(
 @router.post("/contracts", response_model=ResponseEnvelope)
 async def process_contract_from_file(
     file: UploadFile = File(...),
+    contractId: str = Form(...),
     auth: dict = Depends(require_auth),
 ) -> ResponseEnvelope:
     """
     Process contracts from a file.
     """
-    return await process_contract(file, clerk_org_id=auth["org_id"])
-    
+    return await process_contract(file, contract_id=contractId, clerk_org_id=auth["org_id"])

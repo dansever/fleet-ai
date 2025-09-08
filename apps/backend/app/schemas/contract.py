@@ -6,133 +6,78 @@ from app.schemas.vendor import Vendor
 from datetime import date
 
 class Contract(BaseModel):
-    """Contract information extracted from procurement documents"""
-    
-    vendor: Vendor = Field(..., description="Information about the supplier submitting this contract.")
+    """Structured contract information extracted from procurement documents."""
+
+    vendor: Vendor = Field(
+        ...,
+        description="Supplier information (name, address, and contacts if available)."
+    )
+
     vendor_comments: str | None = Field(
         None,
-        description=(
-            "Free-text remarks provided by the vendor that accompany the contract, cover letter, or bid. "
-            "Capture the text verbatim when possible. If not present, leave null."
-        ),
+        description="Any free-text remarks from the vendor. Verbatim if present, otherwise null."
     )
+
     title: str | None = Field(
         None,
-        description=(
-            "Official contract title or caption as shown in the document. "
-            "If no explicit title exists, synthesize a concise identifier such as "
-            "\"Fuel Supply Agreement - Ben Gurion Airport - 2025\". Avoid file name artifacts."
-        ),
+        description="Official contract title. If absent, synthesize a clear identifier (e.g., 'Fuel Supply Agreement - TLV - 2025')."
     )
 
     contract_type: ContractTypes | None = Field(
         None,
-        description=(
-            "Enum describing the agreement type. Choose the most specific type present in the text."
-        ),
+        description="Most specific contract type from the enum."
     )
 
     effective_from: date | None = Field(
         None,
-        description=(
-            "Date the agreement becomes effective. Prefer the effective date over the signature date. "
-            "If only a signature date appears and it is clearly used as the start, use that date. "
-            "If pending or unspecified, leave null."
-        ),
+        description="Start date of contract (prefer effective over signature date)."
     )
 
     effective_to: date | None = Field(
         None,
-        description=(
-            "End date or renewal boundary. If the contract is evergreen or auto-renewing, leave null and "
-            "note the renewal mechanics in summary or tags. If the term is defined by a number of months, "
-            "convert to a date when possible, otherwise capture the term length in summary."
-        ),
+        description="End or renewal boundary. Leave null if evergreen/auto-renewing."
     )
 
     summary: str | None = Field(
         None,
-        description=(
-            "Executive synopsis for humans and LLMs. Write 3 to 6 short lines covering: parties, "
-            "purpose and services, scope boundaries, term and renewal, total commercial value if stated, "
-            "pricing model, payment terms, notable SLAs, and key termination or risk items. "
-            "Include concrete numbers with currency and units."
-        ),
+        description="2-3 sentence executive synopsis covering parties, purpose, scope, term, renewal, value if given, pricing model, payment terms, and major SLAs/liabilities."
     )
 
     commercial_terms: str | None = Field(
         None,
-        description=(
-            "Commercial details in a compact, structured narrative. Include: pricing model "
-            "(fixed, per-unit, tiered, indexed), unit definitions, unit rates, quantities or minimum commitments, "
-            "discounts, price adjustment or indexation formula, currency, taxes, deposits, performance bonds if any, "
-            "payment terms expressed as Net X days, invoicing frequency, late fees or interest, "
-            "and any spend caps or not-to-exceed amounts. Example lines:\n"
-            "- Pricing model: per liter, index = Platts Med Jet; formula: index + 0.02 USD/l\n"
-            "- Unit rate: 1.32 USD/liter; Min commit: 2,000,000 liters/year\n"
-            "- Payment terms: Net 30; Invoicing: monthly; Late fee: 1.5% per month"
-        ),
+        description="Key commercial and pricing terms in 1–2 sentences: pricing model, rates/formulas, unit, minimums, surcharges, discounts, payment terms, invoicing, caps."
     )
 
     slas: str | None = Field(
         None,
-        description=(
-            "Service levels and remedies. Name each metric with its threshold and measurement period. "
-            "Examples: uptime target, response and resolution times, delivery windows, quality specs, "
-            "service credit schedule including calculation method and caps, and any exclusions or planned maintenance windows."
-        ),
+        description="1-3 sentence summary of major SLAs: uptime/availability, dispatch times, throughput, penalties/credits, and quality standards."
     )
 
     edge_cases: str | None = Field(
         None,
-        description=(
-            "Unusual conditions, exceptions, or site-specific constraints that affect scope or price. "
-            "Examples: force majeure refinements, airport or security restrictions, hazardous handling rules, "
-            "minimum call-out quantities, black-out periods, or acceptance test edge cases."
-        ),
+        description="1-3 sentences on unusual conditions affecting scope, pricing, or service (e.g., outages, surcharges, restrictions, exceptions)."
     )
 
     risk_liability: str | None = Field(
         None,
-        description=(
-            "Risk allocation and liability terms. Include limitation of liability amounts "
-            "(absolute caps and multiples such as 12x monthly fees), carve-outs, indemnities, "
-            "IP ownership and license scope, warranty period and scope, confidentiality, "
-            "insurance requirements with limits and endorsements. Provide numeric caps where present."
-        ),
+        description="1-3 sentences on liability and risk allocation: caps, insurance, indemnities, warranties, IP, confidentiality, compliance standards."
     )
 
     termination_law: str | None = Field(
         None,
-        description=(
-            "Termination mechanics and governing law. Include termination for convenience and cause, "
-            "notice and cure periods, auto-renewal and non-renewal notice, survival clauses, "
-            "governing law, jurisdiction or venue, and dispute resolution method such as court or arbitration."
-        ),
+        description="1-3 sentences on termination and legal terms: notice/cure, auto-renewal, governing law, jurisdiction, and dispute resolution."
     )
 
     operational_baselines: str | None = Field(
         None,
-        description=(
-            "Operational setup and runbook. Include service locations, delivery or service schedules, "
-            "hours of operation, staffing or response coverage, onboarding or training, acceptance criteria, "
-            "change management, incident severity matrix and escalation contacts, and any required tooling or data feeds."
-        ),
+        description="1-3 sentences on operational setup: locations, coverage, schedules, reporting, onboarding, acceptance, and incident protocols."
     )
 
     tags: dict | None = Field(
         None,
-        description=(
-            "Machine-readable key:value pairs for filtering and analytics. Use snake_case keys and normalized values. "
-            "Recommended keys include: currency, pricing_model, unit, unit_rate, quantity, min_commit, "
-            "total_contract_value, payment_terms_days, invoicing_frequency, index, price_formula, "
-            "service_category, governing_law, auto_renew, notice_days, liability_cap_multiple, "
-            "sla_uptime_target, service_credits_cap. Example: "
-            "{'currency':'USD','pricing_model':'per_unit','unit':'liter','unit_rate':'1.32',"
-            "'index':'Platts Med Jet','price_formula':'index+0.02 USD/l','payment_terms_days':'30',"
-            "'governing_law':'IL','auto_renew':'true'}"
-        ),
+        description="Machine-readable key:value pairs for analytics (e.g., currency, pricing_model, unit, unit_rate, min_commit, payment_terms_days, governing_law, auto_renew). Use snake_case and normalized values."
     )
+
 
 class ContractDocument(BaseModel):
     """Contract document information extracted from procurement documents"""

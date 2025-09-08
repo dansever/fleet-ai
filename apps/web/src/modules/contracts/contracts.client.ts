@@ -61,9 +61,10 @@ export async function deleteContract(id: string): Promise<void> {
  * @param file - The file to process
  * @returns The processed contract
  */
-export async function processContract(file: File): Promise<unknown> {
+export async function processContract(file: File, contractId: Contract['id']): Promise<unknown> {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('contractId', contractId);
   const res = await backendApi.post('/api/v1/process/contracts', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

@@ -7,10 +7,8 @@ import { client as contractClient } from '@/modules/contracts';
 import { deleteContract } from '@/modules/contracts/contracts.server';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
-import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { Eye, RefreshCw, Trash, Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import ContractList from '../_components/ContractSidebar';
@@ -26,8 +24,8 @@ export default function ContractsPage() {
     selectedContract,
     setSelectedContract,
   } = useAirportHub();
-  const router = useRouter();
   const [selectedContractTypes, setSelectedContractTypes] = useState<string[]>([]);
+
   // Group contracts by type
   const groupedContracts = contracts.reduce(
     (acc: Record<string, Contract[]>, contract: Contract) => {
@@ -40,16 +38,6 @@ export default function ContractsPage() {
     },
     {} as Record<string, Contract[]>,
   );
-
-  const handleUploadContractFile = async (file: File) => {
-    try {
-      await contractClient.processContract(file);
-      toast.success('Contract file processed successfully');
-    } catch (error) {
-      toast.error('Failed to process contract file');
-      console.error(error);
-    }
-  };
 
   // Get all contract types to ensure consistent ordering
   const contractTypes = ContractTypeEnum.enumValues;
@@ -98,6 +86,21 @@ export default function ContractsPage() {
       </div>
     );
   }
+
+  if (!selectedContract) {
+    return <LoadingComponent size="md" text="Loading contract..." />;
+  }
+
+  const handleUploadContractFile = async (file: File) => {
+    try {
+      await contractClient.processContract(file, selectedContract.id);
+      toast.success('Contract file processed successfully');
+      refreshContracts();
+    } catch (error) {
+      toast.error('Failed to process contract file');
+      console.error(error);
+    }
+  };
 
   return (
     <div className="flex flex-row gap-4">
@@ -176,33 +179,32 @@ export default function ContractsPage() {
                 trigger={<Button intent="primary" text="Upload Contract" icon={Upload} />}
               />
             </div>
-            <KeyValuePair label="Summary" value={selectedContract.summary} valueType="string" />
-            <KeyValuePair
-              label="Commercial Terms"
-              value={selectedContract.commercialTerms}
-              valueType="string"
-            />
-            <KeyValuePair label="SLAs" value={selectedContract.slas} valueType="string" />
-            <KeyValuePair
-              label="Edge Cases"
-              value={selectedContract.edgeCases}
-              valueType="string"
-            />
-            <KeyValuePair
-              label="Risk & Liability"
-              value={selectedContract.riskLiability}
-              valueType="string"
-            />
-            <KeyValuePair
-              label="Termination Law"
-              value={selectedContract.terminationLaw}
-              valueType="string"
-            />
-            <KeyValuePair
-              label="Operational Baselines"
-              value={selectedContract.operationalBaselines}
-              valueType="string"
-            />
+            <div className="flex flex-col gap-2">
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <h3>Summary</h3>
+                <p>{selectedContract.summary}</p>
+              </div>
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <h3>Commercial Terms</h3>
+                <p>{selectedContract.commercialTerms}</p>
+              </div>
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <h3>SLAs</h3>
+                <p>{selectedContract.slas}</p>
+              </div>
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <h3>Edge Cases</h3>
+                <p>{selectedContract.edgeCases}</p>
+              </div>
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <h3>Risk & Liability</h3>
+                <p>{selectedContract.riskLiability}</p>
+              </div>
+              <div className="rounded-2xl bg-sky-50 p-4">
+                <h3>Termination Law</h3>
+                <p>{selectedContract.terminationLaw}</p>
+              </div>
+            </div>
           </div>
         )}
       </MainCard>
