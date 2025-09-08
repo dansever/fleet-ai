@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     # --- startup ---
     await _get_jwks()
-    logger.info("JWKS warm-up OK")
+    logger.info("Clerk JWKS warm-up successful")
     yield
     # --- shutdown ---
     # nothing to close if you use per-call httpx clients
