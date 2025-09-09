@@ -233,7 +233,7 @@ export const AllCardVariants: StoryObj = {
         <div className="space-y-3 max-w-md">
           <ListItemCard
             icon={<Mail className="w-5 h-5" />}
-            iconBackground="from-blue-100 to-blue-200"
+            iconBackgroundClassName="from-blue-100 to-blue-200"
             isSelected={true}
           >
             <div>
@@ -244,7 +244,7 @@ export const AllCardVariants: StoryObj = {
           </ListItemCard>
           <ListItemCard
             icon={<Phone className="w-5 h-5" />}
-            iconBackground="from-green-100 to-green-200"
+            iconBackgroundClassName="from-green-100 to-green-200"
           >
             <div>
               <h4 className="font-medium">Crew Communication</h4>
@@ -254,7 +254,7 @@ export const AllCardVariants: StoryObj = {
           </ListItemCard>
           <ListItemCard
             icon={<MapPin className="w-5 h-5" />}
-            iconBackground="from-orange-100 to-orange-200"
+            iconBackgroundClassName="from-orange-100 to-orange-200"
           >
             <div>
               <h4 className="font-medium">Route Optimization</h4>

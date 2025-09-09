@@ -270,21 +270,21 @@ const userColumns = [
     header: 'Created At',
     sortable: true,
     filterable: true,
-    render: (value: string) => new Date(value).toLocaleDateString(),
+    accessor: (item: any) => new Date(item.createdAt as string).toLocaleDateString(),
   },
   {
     key: 'role' as const,
     header: 'Role',
     sortable: true,
     filterable: true,
-    render: (value: string) => <StatusBadge text={value} status={'operational'} />,
+    accessor: (item: any) => <StatusBadge text={item.role as string} status={'operational'} />,
   },
   {
     key: 'status' as const,
     header: 'Status',
     sortable: true,
     filterable: true,
-    render: (value: string) => <StatusBadge text={value} status={'operational'} />,
+    accessor: (item: any) => <StatusBadge text={item.status as string} status={'operational'} />,
   },
   {
     key: 'department' as const,
@@ -296,7 +296,7 @@ const userColumns = [
     key: 'lastLogin' as const,
     header: 'Last Login',
     sortable: true,
-    render: (value: string) => new Date(value).toLocaleDateString(),
+    accessor: (item: any) => new Date(item.lastLogin as string).toLocaleDateString(),
   },
 ];
 
@@ -323,15 +323,17 @@ const productColumns = [
     key: 'price' as const,
     header: 'Price',
     sortable: true,
-    render: (value: number) => `$${value.toFixed(2)}`,
+    accessor: (item: any) => `$${(item.price as number).toFixed(2)}`,
     className: 'text-right',
   },
   {
     key: 'stock' as const,
     header: 'Stock',
     sortable: true,
-    render: (value: number) => (
-      <span className={value < 50 ? 'text-orange-600 font-medium' : ''}>{value}</span>
+    accessor: (item: any) => (
+      <span className={(item.stock as number) < 50 ? 'text-orange-600 font-medium' : ''}>
+        {item.stock}
+      </span>
     ),
     className: 'text-center',
   },
@@ -339,10 +341,10 @@ const productColumns = [
     key: 'rating' as const,
     header: 'Rating',
     sortable: true,
-    render: (value: number) => (
+    accessor: (item: any) => (
       <div className="flex items-center gap-1">
         <span className="text-yellow-500">★</span>
-        <span>{value}</span>
+        <span>{item.rating}</span>
       </div>
     ),
     className: 'text-center',
@@ -396,9 +398,6 @@ export const FullFeatured: Story = {
     csvDownload: true,
     csvFilename: 'users-export',
     onRowClick: (row) => toast.info(`Clicked on ${row.name}`),
-    onView: (row) => toast.success(`Viewing ${row.name}`),
-    onEdit: (row) => toast.info(`Editing ${row.name}`),
-    onDelete: (row) => toast.error(`Deleting ${row.name}`),
   },
 };
 
@@ -415,9 +414,6 @@ export const ProductTable: Story = {
     csvDownload: true,
     csvFilename: 'products-inventory',
     onRowClick: (row) => toast.info(`Selected ${row.name}`),
-    onView: (row) => toast.success(`Viewing ${row.name} details`),
-    onEdit: (row) => toast.info(`Editing ${row.name}`),
-    onDelete: (row) => toast.error(`Removing ${row.name} from inventory`),
   },
 };
 
@@ -442,7 +438,7 @@ export const ViewOnly: Story = {
     title: 'User Directory (View Only)',
     description: 'Table with only view actions, no edit/delete',
     searchable: true,
-    onView: (row) => toast.success(`Viewing profile: ${row.name}`),
+    onRowClick: (row) => toast.success(`Viewing profile: ${row.name}`),
   },
 };
 
@@ -453,7 +449,6 @@ export const CustomEmptyState: Story = {
     columns: userColumns.slice(0, 4),
     title: 'Empty Table Example',
     description: 'Demonstrates custom empty state message',
-    emptyMessage: 'No users found in the system',
     searchable: true,
   },
 };
@@ -505,7 +500,7 @@ export const MinimalColumns: Story = {
         key: 'role' as const,
         header: 'Role',
         sortable: true,
-        render: (value: string) => <StatusBadge text={value} status={'operational'} />,
+        accessor: (item: any) => <StatusBadge text={item.role as string} status={'operational'} />,
       },
     ],
     title: 'Minimal User Table',
@@ -549,7 +544,7 @@ export const FilterableOnly: Story = {
         key: 'role' as const,
         header: 'Role',
         filterable: true,
-        render: (value: string) => <StatusBadge text={value} status={'operational'} />,
+        accessor: (item: any) => <StatusBadge text={item.role as string} status={'operational'} />,
       },
     ],
     title: 'Filterable Columns Only',
@@ -581,7 +576,6 @@ export const CustomSearchPlaceholder: Story = {
     title: 'Custom Search Placeholder',
     description: 'Table with custom search placeholder text',
     searchable: true,
-    searchPlaceholder: 'Search users by name, email, or role...',
     pagination: true,
     pageSize: 4,
     onRowClick: (row) => toast.info(`Selected: ${row.name}`),

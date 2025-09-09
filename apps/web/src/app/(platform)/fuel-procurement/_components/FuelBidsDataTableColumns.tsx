@@ -10,7 +10,7 @@ import { Button } from '@/stories/Button/Button';
 import type { Column } from '@/stories/DataTable/DataTable';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { CheckCircle, Clock, Fuel, Star, Trash, XCircle, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Eye, Fuel, Star, Trash, XCircle, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../contexts';
@@ -232,7 +232,12 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         header: <span className="whitespace-nowrap">Actions</span>,
         accessor: (bid: FuelBid) => (
           <div className="flex flex-col gap-1.5 min-w-[120px]">
-            <FuelBidDialog bid={bid} onChange={() => {}} DialogType="view" buttonSize="sm" />
+            <FuelBidDialog
+              bid={bid}
+              onChange={() => {}}
+              DialogType="view"
+              trigger={<Button intent="secondary" text="View" icon={Eye} size="sm" />}
+            />
             <Button intent="secondary" text="Shortlist" icon={Star} size="sm" onClick={() => {}} />
             <ConfirmationPopover
               trigger={

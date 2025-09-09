@@ -4,6 +4,7 @@ import type { FuelBid, FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
+import { CreateFuelBidData } from '@/modules/fuel/bids/bids.client';
 import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 
 function getRandomInt(min: number, max: number): number {
@@ -210,7 +211,7 @@ export async function createRandomFuelBid(
 
   const differential = useIndexPricing ? getRandomFloat(-0.35, 0.35, 4) : null;
 
-  const data: FuelBidCreateInput = {
+  const data: Partial<Omit<FuelBidCreateInput, 'id' | 'createdAt' | 'updatedAt'>> = {
     // Required linkage
     tenderId,
     vendorId: null, // Will be handled by backend if needed
@@ -280,7 +281,7 @@ export async function createRandomFuelBid(
     decisionNotes: Math.random() < 0.2 ? pickOne(DECISION_NOTES_OPTIONS) : null,
   };
 
-  const result = await fuelBidClient.createFuelBid(tenderId, data);
+  const result = await fuelBidClient.createFuelBid(tenderId, data as CreateFuelBidData);
   return result;
 }
 

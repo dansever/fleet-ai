@@ -2,12 +2,16 @@ import { Invoice } from '@/drizzle/types';
 import { DataTable } from '@/stories/DataTable/DataTable';
 import { useFuelInvoicesColumns } from './FuelInvoicesDataTableColumns';
 
-export default function FuelInvoicesDataTable(Invoices: Invoice[]) {
-  const fuelBidColumns = useFuelInvoicesColumns();
+type FuelInvoicesDataTableProps = {
+  invoices: Invoice[];
+};
+
+export default function FuelInvoicesDataTable({ invoices }: FuelInvoicesDataTableProps) {
+  const columns = useFuelInvoicesColumns();
 
   return (
     <div>
-      <DataTable data={[]} columns={fuelBidColumns} />
+      <DataTable data={invoices} columns={columns} />
     </div>
   );
 }

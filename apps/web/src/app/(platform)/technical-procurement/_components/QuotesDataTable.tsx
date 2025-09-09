@@ -101,10 +101,7 @@ const QuoteDataTableColumns = (
           quote={quote}
           onChange={onUpdateQuote}
           DialogType="view"
-          triggerButtonText="View"
-          triggerButtonIntent="secondary"
-          triggerButtonIcon={Eye}
-          TriggerButtonSize="sm"
+          trigger={<Button intent="secondary" text="View" icon={Eye} size="sm" />}
         />
         <ConfirmationPopover
           trigger={

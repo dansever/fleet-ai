@@ -1,5 +1,5 @@
 import { Invoice, UpdateInvoice } from '@/drizzle/types';
-import { client as invoiceClient } from '@/modules/invoices/invoices';
+import { client as invoiceClient } from '@/modules/invoices';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 

@@ -3,7 +3,6 @@
 
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import type { Airport, Contract } from '@/drizzle/types';
-import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
 import { formatDate } from '@/lib/core/formatters';
 import { client as contractClient } from '@/modules/contracts';
 import { type ContractCreateInput } from '@/modules/contracts/contracts.types';
@@ -17,7 +16,6 @@ import { toast } from 'sonner';
 
 export default function ContractDialog({
   contract,
-  airportId,
   onChange,
   DialogType = 'view',
   trigger,
@@ -25,9 +23,8 @@ export default function ContractDialog({
   onOpenChange,
 }: {
   contract: Contract | null;
-  airportId: Airport['id']; // Required when DialogType is 'add'
   onChange: (contract: Contract) => void;
-  DialogType: 'add' | 'edit' | 'view';
+  DialogType: 'edit' | 'view';
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -35,18 +32,18 @@ export default function ContractDialog({
   const [airport, setAirport] = useState<Airport | null>(null);
   // Get airport object --> For name display
   useEffect(() => {
-    if (!airportId) {
+    if (!contract?.airportId) {
       setAirport(null);
       return;
     }
     const fetchAirport = async () => {
-      const fullAirport = await airportClient.getAirportById(airportId);
+      const fullAirport = await airportClient.getAirportById(contract.airportId!);
       if (fullAirport) {
         setAirport(fullAirport);
       }
     };
     fetchAirport();
-  }, [airportId]);
+  }, [contract?.airportId]);
 
   const [formData, setFormData] = useState({
     // Contract Information (matching schema)
@@ -65,18 +62,10 @@ export default function ContractDialog({
     effectiveFrom: contract?.effectiveFrom ? new Date(contract.effectiveFrom) : null,
     effectiveTo: contract?.effectiveTo ? new Date(contract.effectiveTo) : null,
 
-    // Airport ID for new contracts
-    airportId: contract?.airportId || airportId || null,
+    // Airport ID
+    airportId: contract?.airportId || null,
   });
 
-  const [airportQuery, setAirportQuery] = useState('');
-  const { suggestions: airportSuggestions, isLoading: isLoadingAirports } = useAirportAutocomplete({
-    query: airportQuery,
-    enabled: true,
-    limit: 10,
-  });
-
-  const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
   // Update formData when contract prop changes
@@ -92,9 +81,9 @@ export default function ContractDialog({
       vendorComments: contract?.vendorComments || null,
       effectiveFrom: contract?.effectiveFrom ? new Date(contract.effectiveFrom) : null,
       effectiveTo: contract?.effectiveTo ? new Date(contract.effectiveTo) : null,
-      airportId: contract?.airportId || airportId || null,
+      airportId: contract?.airportId || null,
     });
-  }, [contract, airportId]);
+  }, [contract]);
 
   const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -123,100 +112,78 @@ export default function ContractDialog({
         effectiveTo: formData.effectiveTo ? formData.effectiveTo.toISOString().split('T')[0] : null,
       };
 
-      if (isAdd) {
-        // Create new contract
-        if (!formData.airportId) {
-          throw new Error('Airport is required for new contracts');
-        }
-
-        const createData: ContractCreateInput = {
-          airportId: serializedFormData.airportId,
-          vendorId: null,
-          title: serializedFormData.title as string,
-          contractType: serializedFormData.contractType!,
-          vendorName: serializedFormData.vendorName,
-          vendorAddress: serializedFormData.vendorAddress,
-          vendorContactName: serializedFormData.vendorContactName,
-          vendorContactEmail: serializedFormData.vendorContactEmail,
-          vendorContactPhone: serializedFormData.vendorContactPhone,
-          vendorComments: serializedFormData.vendorComments,
-          effectiveFrom: serializedFormData.effectiveFrom as string,
-          effectiveTo: serializedFormData.effectiveTo as string,
-        };
-
-        savedContract = await contractClient.createContract(createData);
-        toast.success('Contract created successfully');
-      } else {
-        // Update existing contract
-        if (!contract?.id) {
-          throw new Error('Contract ID is required for updates');
-        }
-
-        const updateData = {
-          title: serializedFormData.title,
-          contractType: serializedFormData.contractType || undefined,
-          vendorName: serializedFormData.vendorName,
-          vendorAddress: serializedFormData.vendorAddress,
-          vendorContactName: serializedFormData.vendorContactName,
-          vendorContactEmail: serializedFormData.vendorContactEmail,
-          vendorContactPhone: serializedFormData.vendorContactPhone,
-          vendorComments: serializedFormData.vendorComments,
-          effectiveFrom: serializedFormData.effectiveFrom,
-          effectiveTo: serializedFormData.effectiveTo,
-        };
-
-        savedContract = await contractClient.updateContract(
-          contract.id,
-          updateData as Partial<ContractCreateInput>,
-        );
-        toast.success('Contract updated successfully');
+      // Update existing contract
+      if (!contract?.id) {
+        throw new Error('Contract ID is required for updates');
       }
+
+      const updateData = {
+        title: serializedFormData.title,
+        contractType: serializedFormData.contractType || undefined,
+        vendorName: serializedFormData.vendorName,
+        vendorAddress: serializedFormData.vendorAddress,
+        vendorContactName: serializedFormData.vendorContactName,
+        vendorContactEmail: serializedFormData.vendorContactEmail,
+        vendorContactPhone: serializedFormData.vendorContactPhone,
+        vendorComments: serializedFormData.vendorComments,
+        effectiveFrom: serializedFormData.effectiveFrom,
+        effectiveTo: serializedFormData.effectiveTo,
+      };
+
+      savedContract = await contractClient.updateContract(
+        contract.id,
+        updateData as Partial<ContractCreateInput>,
+      );
+      toast.success('Contract updated successfully');
 
       // Call onChange to update parent with new data
       onChange(savedContract);
     } catch (error) {
-      const action = isAdd ? 'create' : 'update';
-      toast.error(`Failed to ${action} contract`);
-      console.error(`Error ${action}ing contract:`, error);
+      toast.error('Failed to update contract');
+      console.error('Error updating contract:', error);
       throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
   const handleCancel = () => {
-    if (isAdd) {
+    // Reset form to original contract data
+    if (contract) {
       setFormData({
-        title: '',
-        contractType: null,
-        vendorName: null,
-        vendorAddress: null,
-        vendorContactName: null,
-        vendorContactEmail: null,
-        vendorContactPhone: null,
-        vendorComments: null,
-        effectiveFrom: null,
-        effectiveTo: null,
-        airportId: airportId || null,
+        title: contract.title || '',
+        contractType: contract.contractType || null,
+        vendorName: contract.vendorName || null,
+        vendorAddress: contract.vendorAddress || null,
+        vendorContactName: contract.vendorContactName || null,
+        vendorContactEmail: contract.vendorContactEmail || null,
+        vendorContactPhone: contract.vendorContactPhone || null,
+        vendorComments: contract.vendorComments || null,
+        effectiveFrom: contract.effectiveFrom ? new Date(contract.effectiveFrom) : null,
+        effectiveTo: contract.effectiveTo ? new Date(contract.effectiveTo) : null,
+        airportId: contract.airportId || null,
       });
     }
   };
 
   const handleReset = () => {
-    setFormData({
-      title: '',
-      contractType: null,
-      vendorName: null,
-      vendorAddress: null,
-      vendorContactName: null,
-      vendorContactEmail: null,
-      vendorContactPhone: null,
-      vendorComments: null,
-      effectiveFrom: null,
-      effectiveTo: null,
-      airportId: airportId || null,
-    });
+    // Reset form to original contract data
+    if (contract) {
+      setFormData({
+        title: contract.title || '',
+        contractType: contract.contractType || null,
+        vendorName: contract.vendorName || null,
+        vendorAddress: contract.vendorAddress || null,
+        vendorContactName: contract.vendorContactName || null,
+        vendorContactEmail: contract.vendorContactEmail || null,
+        vendorContactPhone: contract.vendorContactPhone || null,
+        vendorComments: contract.vendorComments || null,
+        effectiveFrom: contract.effectiveFrom ? new Date(contract.effectiveFrom) : null,
+        effectiveTo: contract.effectiveTo ? new Date(contract.effectiveTo) : null,
+        airportId: contract.airportId || null,
+      });
+    }
   };
 
-  const dialogTitle = isAdd ? 'Add New Contract' : contract?.title || 'Contract Details';
+  const dialogTitle = contract?.title || 'Contract Details';
 
   return (
     <DetailDialog

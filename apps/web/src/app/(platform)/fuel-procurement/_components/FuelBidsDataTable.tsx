@@ -9,7 +9,7 @@ import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { DataTable } from '@/stories/DataTable/DataTable';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
-import { FileText, RefreshCw } from 'lucide-react';
+import { FileText, RefreshCw, Upload } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../contexts';
@@ -72,9 +72,7 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
           <FileUploadPopover
             open={uploadFuelBidPopoverOpen}
             onOpenChange={setUploadFuelBidPopoverOpen}
-            triggerIntent="secondary"
-            triggerText="Upload Bid"
-            triggerSize="md"
+            trigger={<Button intent="secondary" text="Upload Bid" icon={Upload} size="md" />}
             onSend={handleSendFuelBidFile}
           >
             <Button

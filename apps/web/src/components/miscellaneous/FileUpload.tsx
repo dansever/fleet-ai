@@ -1,10 +1,9 @@
 'use client';
 
-import type React from 'react';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, File as FileIcon, UploadCloud, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, type Variants } from 'motion/react';
+import type React from 'react';
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react';
 
 type UploadStatus = 'idle' | 'dragging' | 'uploading' | 'success' | 'error';
@@ -24,7 +23,7 @@ const cardVariants = {
   exit: { opacity: 0, y: -20 },
 };
 
-const dropzoneVariants = {
+const dropzoneVariants: Variants = {
   idle: {
     scale: 1,
     borderColor: 'var(--border-color)',
@@ -35,14 +34,14 @@ const dropzoneVariants = {
     borderColor: 'var(--primary-color)',
     backgroundColor: 'var(--primary-bg)',
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 400,
       damping: 25,
     },
   },
 };
 
-const iconVariants = {
+const iconVariants: Variants = {
   idle: { y: 0, scale: 1 },
   dragging: {
     y: -5,
@@ -51,27 +50,27 @@ const iconVariants = {
       repeat: Number.POSITIVE_INFINITY,
       repeatType: 'reverse' as const,
       duration: 1,
-      ease: 'easeInOut',
+      ease: 'easeInOut' as const,
     },
   },
 };
 
-const progressVariants = {
+const progressVariants: Variants = {
   initial: { pathLength: 0, opacity: 0 },
   animate: (progress: number) => ({
     pathLength: progress / 100,
     opacity: 1,
-    transition: { duration: 0.5, ease: 'easeOut' },
+    transition: { duration: 0.5, ease: 'easeOut' as const },
   }),
 };
 
-const successIconVariants = {
+const successIconVariants: Variants = {
   initial: { scale: 0, rotate: -180 },
   animate: {
     scale: 1,
     rotate: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 200,
       damping: 20,
     },

@@ -6,6 +6,7 @@ import type { FuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
+import { CreateFuelBidData } from '@/modules/fuel/bids/bids.client';
 import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -134,12 +135,12 @@ export default function FuelBidDialog({
         if (!tenderId) {
           throw new Error('Tender ID is required when creating a new bid');
         }
-        const createData: FuelBidCreateInput = {
+        const createData: Partial<Omit<FuelBidCreateInput, 'id' | 'createdAt' | 'updatedAt'>> = {
           tenderId,
           vendorId: null, // Will be handled by backend if needed
           ...formData,
         };
-        savedBid = await fuelBidClient.createFuelBid(tenderId, createData);
+        savedBid = await fuelBidClient.createFuelBid(tenderId, createData as CreateFuelBidData);
         toast.success('Fuel bid created successfully');
       } else {
         // Update existing bid

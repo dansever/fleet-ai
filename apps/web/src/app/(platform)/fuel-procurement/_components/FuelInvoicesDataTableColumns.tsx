@@ -1,5 +1,4 @@
 import { Invoice } from '@/drizzle/types';
-import { formatCurrency } from '@/lib/core/formatters';
 import { Column } from '@/stories/DataTable/DataTable';
 import { useMemo } from 'react';
 
@@ -44,7 +43,7 @@ export const useFuelInvoicesColumns = (): Column<Invoice>[] => {
         header: <span className="whitespace-nowrap">Total Amount</span>,
         accessor: (invoice: Invoice) => (
           <div className="space-y-1">
-            <h3>{formatCurrency(invoice.totalAmount, invoice.currency)}</h3>
+            {/* <h3>{formatCurrency(invoice.totalAmount, invoice.currency)}</h3> */}
           </div>
         ),
         sortable: true,

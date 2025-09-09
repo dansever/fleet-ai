@@ -1,6 +1,6 @@
 import { Contract, Invoice, NewInvoice } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
-import { createInvoice } from '@/services/contracts/invoice-client';
+import { client as invoiceClient } from '@/modules/invoices';
 
 function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -156,12 +156,6 @@ export default async function createRandomInvoice(contractId: Contract['id']): P
     // Invoice Information
     invoiceNumber,
     invoiceDate: Math.random() > 0.1 ? randomDateString(invoiceDateDays) : null,
-    totalAmount: Math.random() > 0.05 ? totalAmount.toString() : null,
-    currency: Math.random() > 0.1 ? currencyKey : null,
-
-    // Document Management
-    summary: Math.random() > 0.2 ? pickOne(INVOICE_SUMMARIES) : null,
-    docUrl: Math.random() > 0.4 ? pickOne(DOC_URLS) : null,
 
     // Vendor Information
     vendorName: Math.random() > 0.1 ? vendorName : null,
@@ -171,11 +165,14 @@ export default async function createRandomInvoice(contractId: Contract['id']): P
     vendorContactPhone: Math.random() > 0.5 ? randomPhone() : null,
     vendorComments: Math.random() > 0.5 ? pickOne(VENDOR_COMMENTS) : null,
 
+    // Document Management
+    summary: Math.random() > 0.2 ? pickOne(INVOICE_SUMMARIES) : null,
+
     // Timeline
     periodStart: Math.random() > 0.2 ? randomDateString(periodStartDays) : null,
     periodEnd: Math.random() > 0.2 ? randomDateString(periodEndDays) : null,
   };
 
-  const result = await createInvoice(contractId, invoiceData);
+  const result = await invoiceClient.createInvoice(invoiceData);
   return result;
 }

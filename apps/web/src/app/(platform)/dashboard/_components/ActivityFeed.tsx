@@ -79,7 +79,7 @@ export function ActivityFeed() {
   };
 
   return (
-    <BaseCard title="Activity Feed" description="Activity Feed" className="col-span-4">
+    <BaseCard className="col-span-4">
       <CardHeader>
         <CardTitle className="text-lg">Activity Feed</CardTitle>
       </CardHeader>

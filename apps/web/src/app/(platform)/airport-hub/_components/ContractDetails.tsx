@@ -42,7 +42,6 @@ export function ContractDetails() {
     <div className="flex flex-row gap-2">
       <ContractDialog
         contract={selectedContract}
-        airportId={selectedContract?.airportId || ''}
         DialogType="view"
         trigger={<Button intent="secondaryInverted" icon={Eye} />}
         onChange={refreshContracts}

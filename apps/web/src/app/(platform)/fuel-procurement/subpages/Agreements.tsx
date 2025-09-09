@@ -156,12 +156,12 @@ export default function AgreementsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <FuelInvoicesDataTable invoices={[] as Invoice[]} />
+          <FuelInvoicesDataTable invoices={invoices.invoices} />
         </CardContent>
       </BaseCard>
 
       {/* Dispute Generation */}
-      {invoices.length > 0 && (
+      {invoices.invoices.length > 0 && (
         <MainCard
           title="Generate Dispute"
           subtitle="Review variance details before creating dispute"
@@ -171,7 +171,7 @@ export default function AgreementsPage() {
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 <span className="font-medium text-yellow-800">
-                  {invoices.length} invoice(s) selected for dispute
+                  {invoices.invoices.length} invoice(s) selected for dispute
                 </span>
               </div>
               <div className="text-sm text-yellow-700">
