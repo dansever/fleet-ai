@@ -100,13 +100,7 @@ export default function ContractsPage() {
           willChange: 'width',
         }}
       >
-        <ContractList
-          contracts={contracts}
-          onContractSelect={setSelectedContract}
-          selectedContract={selectedContract}
-          InsertAddContractButton={true}
-          onContractAdd={addContract}
-        />
+        <ContractList />
       </div>
       <Tabs
         tabs={[

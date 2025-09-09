@@ -131,7 +131,7 @@ export default function ContractDialog({
 
         const createData: ContractCreateInput = {
           airportId: serializedFormData.airportId,
-          vendorId: null, // Will be handled by backend if needed
+          vendorId: null,
           title: serializedFormData.title as string,
           contractType: serializedFormData.contractType!,
           vendorName: serializedFormData.vendorName,
@@ -321,6 +321,7 @@ export default function ContractDialog({
           <MainCard title="Contract Period" neutralHeader={true}>
             {!isEditing && (
               <ModernTimeline
+                orientation="horizontal"
                 items={[
                   {
                     id: '1',

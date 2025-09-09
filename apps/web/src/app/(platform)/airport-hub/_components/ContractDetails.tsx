@@ -45,9 +45,8 @@ export function ContractDetails() {
         airportId={selectedContract?.airportId || ''}
         DialogType="view"
         trigger={<Button intent="secondaryInverted" icon={Eye} />}
-        onChange={() => {}}
+        onChange={refreshContracts}
       />
-
       <Button
         intent="secondaryInverted"
         icon={RefreshCw}
