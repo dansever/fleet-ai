@@ -1,66 +1,79 @@
 'use client';
 
-import { MainCard } from '@/stories/Card/Card';
-import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { MainCard, MetricCard } from '@/stories/Card/Card';
+import { useOrganization, useUser } from '@clerk/nextjs';
+import { Package, Users } from 'lucide-react';
+import Image from 'next/image';
 import { useSettings } from '../ContextProvider';
 
-export default function AccountPage() {
-  const { user, org } = useSettings();
+export default function ProfilePage() {
+  const { user: dbUser, org: dbOrg } = useSettings();
+  const { user: clerkUser } = useUser();
+  const { organization: clerkOrg } = useOrganization();
+
   return (
-    <div className="grid grid-cols-5 gap-4">
-      <MainCard className="col-span-3" title="Personal Settings">
-        <div className="flex flex-col gap-2">
-          <h3>Details</h3>
-          <KeyValuePair
-            label="Name"
-            value={user.firstName + ' ' + user.lastName}
-            valueType="string"
-          />
-          <KeyValuePair label="Email" value={user.email} valueType="email" />
-          <KeyValuePair label="Position" value={user.position} valueType="string" />
-          <h3>AI Details</h3>
-          <KeyValuePair label="AI Tokens Used" value={user.aiTokensUsed} valueType="number" />
-          <KeyValuePair
-            label="Total Quotes Processed"
-            value={user.totalQuotesProcessed}
-            valueType="number"
-          />
-          <KeyValuePair
-            label="Total RFQs Processed"
-            value={user.totalRfqsProcessed}
-            valueType="number"
-          />
-          <KeyValuePair
-            label="Last Seen At"
-            value={user.lastSeenAt ? user.lastSeenAt.toISOString() : null}
-            valueType="date"
-          />
-          <KeyValuePair
-            label="Created At"
-            value={user.createdAt ? user.createdAt.toISOString() : null}
-            valueType="date"
-          />
-          <KeyValuePair
-            label="Updated At"
-            value={user.updatedAt ? user.updatedAt.toISOString() : null}
-            valueType="date"
-          />
+    <div className="min-h-screen flex flex-col bg-background min-w-3xl">
+      <main className="flex-1 container max-w-7xl mx-auto px-4 py-12">
+        <div className="grid gap-8 md:grid-cols-[250px_1fr]">
+          {/* Profile Sidebar */}
+          <div className="space-y-6">
+            <div className="flex flex-col items-center md:items-start">
+              <Avatar className="h-20 w-20">
+                <AvatarImage
+                  src={clerkUser?.imageUrl ?? ''}
+                  alt={dbUser.firstName + dbUser.lastName}
+                />
+                <AvatarFallback>{dbUser?.firstName?.[0] + dbUser?.lastName?.[0]}</AvatarFallback>
+              </Avatar>
+
+              <h1 className="mt-4 tracking-tight">
+                {dbUser.firstName} {dbUser.lastName}
+              </h1>
+              <p>{dbUser.email}</p>
+              <p>{dbUser.position}</p>
+            </div>
+            <Separator />
+            <div className="flex flex-col items-center md:items-start">
+              <div
+                className="items-left justify-start"
+                style={{ position: 'relative', width: '100%', height: '40px' }}
+              >
+                <Image
+                  src={clerkOrg?.imageUrl ?? ''}
+                  alt="Organization logo"
+                  fill
+                  sizes="200px"
+                  className="object-contain object-left"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <MainCard
+            className="bg-transparent"
+            headerGradient="from-orange-500 to-violet-500 opacity-80"
+            title="Account Settings"
+          >
+            <CardContent className="grid grid-cols-3 gap-4 px-0">
+              <MetricCard title="Tokens Used" value={dbUser.aiTokensUsed ?? 0} icon={<Package />} />
+              <MetricCard
+                title="Quotes Processed"
+                value={dbUser.totalQuotesProcessed ?? 0}
+                icon={<Users />}
+              />
+              <MetricCard
+                title="RFQs Processed"
+                value={dbUser.totalRfqsProcessed ?? 0}
+                icon={<Users />}
+              />
+            </CardContent>
+          </MainCard>
         </div>
-      </MainCard>
-      <MainCard className="col-span-2" title="Organizational Settings">
-        <div className="flex flex-col gap-2">
-          <h3>Details</h3>
-          <KeyValuePair label="Organization Name" value={org.name} valueType="string" />
-          <h3>AI Usage</h3>
-          <KeyValuePair label="AI Tokens Used" value={org.aiTokensUsed} valueType="number" />
-          <KeyValuePair
-            label="Quotes Processed"
-            value={org.totalQuotesProcessed}
-            valueType="number"
-          />
-          <KeyValuePair label="RFQs Processed" value={org.totalRfqsProcessed} valueType="number" />
-        </div>
-      </MainCard>
+      </main>
     </div>
   );
 }

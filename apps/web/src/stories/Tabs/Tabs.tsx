@@ -4,7 +4,7 @@ import { TabsList, TabsTrigger, Tabs as TabsUI } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import type React from 'react';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 
 export interface TabsProps {
   tabs: { label: string; icon: ReactNode; value: string }[];
@@ -22,6 +22,7 @@ export const Tabs = ({
   className,
 }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const uniqueId = useId();
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -84,7 +85,7 @@ export const Tabs = ({
               <AnimatePresence>
                 {activeTab === tab.value && (
                   <motion.div
-                    layoutId="activeTab"
+                    layoutId={`activeTab-${uniqueId}`}
                     className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border-0"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}

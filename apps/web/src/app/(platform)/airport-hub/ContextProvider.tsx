@@ -60,6 +60,9 @@ export type AirportHubContextType = {
   errors: ErrorState;
   clearError: (errorType: keyof ErrorState) => void;
   clearAllErrors: () => void;
+
+  // Cache management
+  clearAllCaches: () => void;
 };
 
 const AirportHubContext = createContext<AirportHubContextType | undefined>(undefined);
@@ -87,6 +90,10 @@ export default function AirportHubProvider({
 
   // Cache to avoid refetching contacts for the same airport
   const [contactsCache, setContactsCache] = useState<Record<string, Contact[]>>({});
+
+  // Cache cleanup configuration
+  const MAX_CACHE_SIZE = 20; // Maximum number of airports to cache
+  const CACHE_CLEANUP_THRESHOLD = 40; // Start cleanup when we reach this many cached items
 
   // Loading states
   const [loading, setLoading] = useState<LoadingState>({
@@ -116,6 +123,58 @@ export default function AirportHubProvider({
   }, []);
 
   /**
+   * Clean up cache when it gets too large to prevent memory issues during long sessions
+   */
+  const cleanupCache = useCallback(
+    <T,>(cache: Record<string, T>, currentAirportId?: string): Record<string, T> => {
+      const cacheKeys = Object.keys(cache);
+
+      if (cacheKeys.length <= CACHE_CLEANUP_THRESHOLD) {
+        return cache;
+      }
+
+      // Always keep the current airport's cache
+      const keysToKeep = currentAirportId ? [currentAirportId] : [];
+
+      // Keep the most recently accessed airports (approximate by keeping current selection)
+      const remainingSlots = MAX_CACHE_SIZE - keysToKeep.length;
+      const keysToRemove = cacheKeys.filter((key) => !keysToKeep.includes(key));
+
+      // Remove oldest entries (simple approach - remove from beginning of keys array)
+      const keysToDelete = keysToRemove.slice(0, Math.max(0, keysToRemove.length - remainingSlots));
+
+      const cleanedCache = { ...cache };
+      keysToDelete.forEach((key) => {
+        delete cleanedCache[key];
+      });
+
+      console.log(
+        `Cache cleanup: Removed ${keysToDelete.length} entries, ${Object.keys(cleanedCache).length} remaining`,
+      );
+      return cleanedCache;
+    },
+    [MAX_CACHE_SIZE, CACHE_CLEANUP_THRESHOLD],
+  );
+
+  /**
+   * Cleanup both caches periodically
+   */
+  const performCacheCleanup = useCallback(() => {
+    setContractsCache((prev) => cleanupCache(prev, selectedAirport?.id));
+    setContactsCache((prev) => cleanupCache(prev, selectedAirport?.id));
+  }, [cleanupCache, selectedAirport?.id]);
+
+  /**
+   * Manually clear all caches (useful for troubleshooting or memory management)
+   */
+  const clearAllCaches = useCallback(() => {
+    setContractsCache({});
+    setContactsCache({});
+    console.log('All caches cleared manually');
+    toast.success('Cache cleared successfully');
+  }, []);
+
+  /**
    * Sort airports on initial load and set first as selected
    */
   useEffect(() => {
@@ -132,6 +191,38 @@ export default function AirportHubProvider({
       setLoading((prev) => ({ ...prev, airports: false }));
     }
   }, [initialAirports, sortAirports, hasServerData]);
+
+  /**
+   * Periodic cache cleanup to prevent memory issues during long sessions
+   */
+  useEffect(() => {
+    const cleanupInterval = setInterval(
+      () => {
+        performCacheCleanup();
+      },
+      5 * 60 * 1000,
+    ); // Cleanup every 5 minutes
+
+    // Optional: Log cache statistics for monitoring
+    const statsInterval = setInterval(
+      () => {
+        const contractsCacheSize = Object.keys(contractsCache).length;
+        const contactsCacheSize = Object.keys(contactsCache).length;
+
+        if (contractsCacheSize > 20 || contactsCacheSize > 20) {
+          console.log(
+            `Cache stats - Contracts: ${contractsCacheSize}, Contacts: ${contactsCacheSize}`,
+          );
+        }
+      },
+      2 * 60 * 1000,
+    ); // Log every 2 minutes if caches are getting large
+
+    return () => {
+      clearInterval(cleanupInterval);
+      clearInterval(statsInterval);
+    };
+  }, [performCacheCleanup, contractsCache, contactsCache]);
 
   /**
    * Load service contracts for the selected airport (only when airport changes)
@@ -164,21 +255,29 @@ export default function AirportHubProvider({
         setContracts(contracts);
 
         // Cache the service contracts for this airport
-        setContractsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]: contracts,
-        }));
+        setContractsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedAirport.id]: contracts,
+          };
+          return cleanupCache(updated, selectedAirport.id);
+        });
 
         // Always set first contract as selected when loading contracts for a new airport
         setSelectedContract(contracts.length > 0 ? contracts[0] : null);
       } catch (error) {
         console.error('Error loading service contracts:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to load service contracts';
         setErrors((prev) => ({
           ...prev,
-          contracts: error instanceof Error ? error.message : 'Failed to load service contracts',
+          contracts: errorMessage,
         }));
         setContracts([]);
         setSelectedContract(null);
+
+        // Show user-friendly toast notification
+        toast.error(`Failed to load contracts: ${errorMessage}`);
       } finally {
         setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
       }
@@ -218,21 +317,28 @@ export default function AirportHubProvider({
         setContacts(contacts);
 
         // Cache the contacts for this airport
-        setContactsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]: contacts,
-        }));
+        setContactsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedAirport.id]: contacts,
+          };
+          return cleanupCache(updated, selectedAirport.id);
+        });
 
         // Always set first contact as selected when loading contacts for a new airport
         setSelectedContact(contacts.length > 0 ? contacts[0] : null);
       } catch (error) {
         console.error('Error loading contacts:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load contacts';
         setErrors((prev) => ({
           ...prev,
-          contacts: error instanceof Error ? error.message : 'Failed to load contacts',
+          contacts: errorMessage,
         }));
         setContacts([]);
         setSelectedContact(null);
+
+        // Show user-friendly toast notification
+        toast.error(`Failed to load contacts: ${errorMessage}`);
       } finally {
         setLoading((prev) => ({ ...prev, contacts: false, isRefreshing: false }));
       }
@@ -297,10 +403,13 @@ export default function AirportHubProvider({
       setContracts(contracts);
 
       // Update cache with fresh data
-      setContractsCache((prev) => ({
-        ...prev,
-        [selectedAirport.id]: contracts,
-      }));
+      setContractsCache((prev) => {
+        const updated = {
+          ...prev,
+          [selectedAirport.id]: contracts,
+        };
+        return cleanupCache(updated, selectedAirport.id);
+      });
 
       // Preserve the currently selected contract if it still exists, otherwise select first
       if (selectedContract) {
@@ -315,10 +424,15 @@ export default function AirportHubProvider({
       }
     } catch (error) {
       console.error('Error refreshing service contracts:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to refresh service contracts';
       setErrors((prev) => ({
         ...prev,
-        contracts: error instanceof Error ? error.message : 'Failed to refresh service contracts',
+        contracts: errorMessage,
       }));
+
+      // Show user-friendly toast notification
+      toast.error(`Failed to refresh contracts: ${errorMessage}`);
     } finally {
       setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
     }
@@ -327,7 +441,7 @@ export default function AirportHubProvider({
   /**
    * Select service contract by ID without refetching (instant selection)
    */
-  const selectcontractById = useCallback(
+  const selectContractById = useCallback(
     (contractId: string) => {
       const contract = contracts.find((c) => c.id === contractId);
       if (contract) {
@@ -401,29 +515,25 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Update service contract
-   */
-  const updatecontract = useCallback(
-    (updatedContract: Contract) => {
-      setContracts((prevContracts) =>
-        prevContracts.map((contract) =>
-          contract.id === updatedContract.id ? updatedContract : contract,
-        ),
-      );
-
-      if (selectedContract?.id === updatedContract.id) {
-        setSelectedContract(updatedContract);
-      }
-    },
-    [selectedContract],
-  );
-
-  /**
    * Add service contract
    */
-  const addContract = useCallback((newContract: Contract) => {
-    setContracts((prevContracts) => [newContract, ...prevContracts]);
-  }, []);
+  const addContract = useCallback(
+    (newContract: Contract) => {
+      setContracts((prevContracts) => [newContract, ...prevContracts]);
+
+      // Update cache as well
+      if (selectedAirport && selectedAirport.id === newContract.airportId) {
+        setContractsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedAirport.id]: [newContract, ...(prev[selectedAirport.id] || [])],
+          };
+          return cleanupCache(updated, selectedAirport.id);
+        });
+      }
+    },
+    [selectedAirport, cleanupCache],
+  );
 
   /**
    * Remove service contract
@@ -440,8 +550,17 @@ export default function AirportHubProvider({
 
         return filteredContracts;
       });
+
+      // Update cache as well
+      if (selectedAirport) {
+        setContractsCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]:
+            prev[selectedAirport.id]?.filter((contract) => contract.id !== contractId) || [],
+        }));
+      }
     },
-    [selectedContract],
+    [selectedContract, selectedAirport],
   );
 
   /**
@@ -454,8 +573,23 @@ export default function AirportHubProvider({
           contract.id === updatedContract.id ? updatedContract : contract,
         ),
       );
+
+      if (selectedContract?.id === updatedContract.id) {
+        setSelectedContract(updatedContract);
+      }
+
+      // Update cache as well
+      if (selectedAirport) {
+        setContractsCache((prev) => ({
+          ...prev,
+          [selectedAirport.id]:
+            prev[selectedAirport.id]?.map((contract) =>
+              contract.id === updatedContract.id ? updatedContract : contract,
+            ) || [],
+        }));
+      }
     },
-    [selectedContract],
+    [selectedContract, selectedAirport],
   );
 
   /**
@@ -479,10 +613,13 @@ export default function AirportHubProvider({
       setContacts(contacts);
 
       // Update cache with fresh data
-      setContactsCache((prev) => ({
-        ...prev,
-        [selectedAirport.id]: contacts,
-      }));
+      setContactsCache((prev) => {
+        const updated = {
+          ...prev,
+          [selectedAirport.id]: contacts,
+        };
+        return cleanupCache(updated, selectedAirport.id);
+      });
 
       // Preserve the currently selected contact if it still exists, otherwise select first
       if (selectedContact) {
@@ -493,10 +630,14 @@ export default function AirportHubProvider({
       }
     } catch (error) {
       console.error('Error refreshing contacts:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh contacts';
       setErrors((prev) => ({
         ...prev,
-        contacts: error instanceof Error ? error.message : 'Failed to refresh contacts',
+        contacts: errorMessage,
       }));
+
+      // Show user-friendly toast notification
+      toast.error(`Failed to refresh contacts: ${errorMessage}`);
     } finally {
       setLoading((prev) => ({ ...prev, contacts: false, isRefreshing: false }));
     }
@@ -540,13 +681,16 @@ export default function AirportHubProvider({
 
       // Update cache as well
       if (selectedAirport) {
-        setContactsCache((prev) => ({
-          ...prev,
-          [selectedAirport.id]: [newContact, ...(prev[selectedAirport.id] || [])],
-        }));
+        setContactsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedAirport.id]: [newContact, ...(prev[selectedAirport.id] || [])],
+          };
+          return cleanupCache(updated, selectedAirport.id);
+        });
       }
     },
-    [selectedAirport],
+    [selectedAirport, cleanupCache],
   );
 
   /**
@@ -650,6 +794,7 @@ export default function AirportHubProvider({
     errors,
     clearError,
     clearAllErrors,
+    clearAllCaches,
   };
 
   return <AirportHubContext.Provider value={value}>{children}</AirportHubContext.Provider>;

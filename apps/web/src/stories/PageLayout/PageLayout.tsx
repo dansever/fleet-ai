@@ -1,3 +1,4 @@
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type { FC, ReactNode } from 'react';
 
@@ -42,20 +43,26 @@ export const PageLayout: FC<PageLayoutProps> = ({
   );
 
   return (
-    <div className={cn('flex flex-row h-screen', className)}>
+    <div className={cn('flex flex-row h-screen gap-2', className)}>
       {/* Left Sidebar Panel */}
       {sidebarPosition === 'left' && sidebarElement}
 
       {/* Right Main Panel */}
-      <div className="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
+      {/* <div className="flex-1 min-w-0 flex flex-col gap-2 overflow-y-scroll"> */}
+      <ScrollArea className="p-2 flex-1 min-w-0 flex flex-col gap-2">
         {/* Fixed Header */}
         {headerContent && (
-          <header className="px-4 py-2 flex items-center flex-shrink-0">{headerContent}</header>
+          <header className="p-2 sticky top-0 z-50 w-full">
+            <div className="px-2 py-1 rounded-xl backdrop-blur supports-[backdrop-filter]:bg-white/40">
+              {headerContent}
+            </div>
+          </header>
         )}
 
         {/* Scrollable Main Content */}
-        <main className="px-4 py-4 flex-1 overflow-y-scroll">{mainContent}</main>
-      </div>
+        <main className="px-4 py-2 flex-1">{mainContent}</main>
+        <ScrollBar orientation="vertical" className="" />
+      </ScrollArea>
 
       {/* Render sidebar on right if position is 'right' */}
       {sidebarPosition === 'right' && sidebarElement}

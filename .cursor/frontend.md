@@ -44,6 +44,21 @@ Platform feature folders follow: `page.tsx` (server), `ClientPage.tsx` (client),
 - Server components: `page.tsx → modules/<domain>.server.ts` directly (never from client components).
 - Python backend: use `backendApi` only for backend services (e.g., `/api/v1/...`).
 
+### Platform Feature Folders
+
+- Location: `app/(platform)/<feature>/`
+- Files and responsibilities:
+  - `page.tsx` (server): `getAuthContext()`, fetch initial data in parallel via `modules/<domain>.server.ts`, render `<ContextProvider hasServerData initial*>` wrapping `<ClientPage />`.
+  - `ContextProvider.tsx` (client): owns state, caches, and actions; exposes typed context. May call server actions from `modules/<domain>.server.ts` for reads/writes, or use `modules/<domain>.client.ts` when going through API routes.
+  - `ClientPage.tsx` (client): consumes context, composes `PageLayout` (sidebar/header/main), orchestrates tabs and routes events to context.
+  - `_components/`: feature-local UI (e.g., sidebars, lists, dialogs) that consume context.
+  - `subpages/`: tab bodies split by concern; each is a client component using context.
+- Patterns:
+  - Always pass `hasServerData` when server preloads; set initial lists and selection in an effect.
+  - Keep selected entity local to context and reset on parent selection changes.
+  - Maintain small in-memory caches keyed by parent id to avoid re-fetching.
+  - Provide `refresh*`, `add*`, `update*`, `remove*` actions that update cache and selection predictably.
+
 ### API Routes
 
 - Location: `app/api/<domain>/route.ts` (collection) and `app/api/<domain>/[id]/route.ts` (item).

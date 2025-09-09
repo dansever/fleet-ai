@@ -36,7 +36,7 @@ export default function ContractList({
   // Upload Contract File
   const handleProcessContract = async (file: File) => {
     try {
-      await contractClient.processContract(file);
+      await contractClient.processContract(file, selectedContract?.id as Contract['id']);
       toast.success('Contract file processed successfully');
     } catch (error) {
       toast.error('Failed to process contract file');
@@ -69,7 +69,7 @@ export default function ContractList({
   };
 
   return (
-    <div className="h-fit flex flex-col rounded-2xl bg-card">
+    <div className="h-fit flex flex-col rounded-3xl bg-card">
       {/* Header */}
       <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2">
         <div className="text-sm text-muted-foreground">
