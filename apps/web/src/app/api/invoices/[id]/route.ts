@@ -12,9 +12,11 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const invoice = await invoicesServer.getInvoiceById(params.id);
+    // Get invoice by id
+    const { id } = await params;
+    const invoice = await invoicesServer.getInvoiceById(id);
     if (!invoice) return jsonError('Invoice not found', 404);
-    if (invoice.orgId !== orgId) return jsonError('Forbidden', 403);
+    if (invoice.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     return NextResponse.json(invoice);
   } catch (error) {
@@ -28,9 +30,11 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const existing = await invoicesServer.getInvoiceById(params.id);
+    // Get invoice by id
+    const { id } = await params;
+    const existing = await invoicesServer.getInvoiceById(id);
     if (!existing) return jsonError('Invoice not found', 404);
-    if (existing.orgId !== orgId) return jsonError('Forbidden', 403);
+    if (existing.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     const body = await request.json();
     const payload = {
@@ -40,7 +44,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
       periodEnd: body.periodEnd ? new Date(body.periodEnd) : undefined,
     };
 
-    const updated = await invoicesServer.updateInvoice(params.id, payload);
+    const updated = await invoicesServer.updateInvoice(id, payload);
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating invoice:', error);
@@ -53,11 +57,14 @@ export async function DELETE(_request: NextRequest, { params }: RouteContext) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const existing = await invoicesServer.getInvoiceById(params.id);
+    // Get invoice by id
+    const { id } = await params;
+    const existing = await invoicesServer.getInvoiceById(id);
     if (!existing) return jsonError('Invoice not found', 404);
-    if (existing.orgId !== orgId) return jsonError('Forbidden', 403);
+    if (existing.orgId !== orgId) return jsonError('Unauthorized', 401);
 
-    await invoicesServer.deleteInvoice(params.id);
+    // Delete invoice
+    await invoicesServer.deleteInvoice(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting invoice:', error);

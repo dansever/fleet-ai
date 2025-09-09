@@ -4,15 +4,12 @@ import { server as contactServer } from '@/modules/vendors/contacts';
 import { ContactCreateInput } from '@/modules/vendors/contacts/contacts.types';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { params: Promise<{ vendorId: string }> };
-
 /**
  * GET /api/contacts - Get all contacts by vendor id or organization id
  * @param request - The request object
- * @param param1
  * @returns
  */
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest) {
   try {
     // Autherize user
     const { dbUser, orgId, error } = await getAuthContext();
