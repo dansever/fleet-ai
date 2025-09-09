@@ -47,7 +47,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
       {sidebarPosition === 'left' && sidebarElement}
 
       {/* Right Main Panel */}
-      <div className="flex-1 flex flex-col gap-2 overflow-hidden min-w-4xl">
+      <div className="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
         {/* Fixed Header */}
         {headerContent && (
           <header className="px-4 py-2 flex items-center flex-shrink-0">{headerContent}</header>

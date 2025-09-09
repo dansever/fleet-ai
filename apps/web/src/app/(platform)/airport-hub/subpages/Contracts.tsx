@@ -1,5 +1,6 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { TabsContent } from '@/components/ui/tabs';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
@@ -8,7 +9,8 @@ import { deleteContract } from '@/modules/contracts/contracts.server';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
-import { Eye, RefreshCw, Trash, Upload } from 'lucide-react';
+import { Tabs } from '@/stories/Tabs/Tabs';
+import { Banknote, Eye, FileText, RefreshCw, Trash, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import ContractList from '../_components/ContractSidebar';
@@ -87,11 +89,26 @@ export default function ContractsPage() {
     );
   }
 
-  if (!selectedContract) {
-    return <LoadingComponent size="md" text="Loading contract..." />;
+  // Show "no contracts" state when contracts are loaded but empty (not loading)
+  if (!loading.contracts && contracts.length === 0 && !errors.contracts) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">No Contracts Available</h3>
+          <p className="text-sm mb-4">
+            This airport doesn't have any contracts yet. Add a contract to get started.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const handleUploadContractFile = async (file: File) => {
+    if (!selectedContract) {
+      toast.error('No contract selected');
+      return;
+    }
+
     try {
       await contractClient.processContract(file, selectedContract.id);
       toast.success('Contract file processed successfully');
@@ -124,6 +141,21 @@ export default function ContractsPage() {
           onContractAdd={addContract}
         />
       </div>
+      <Tabs
+        tabs={[
+          { label: 'Details', value: 'details', icon: <FileText /> },
+          { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
+        ]}
+        defaultTab="details"
+        onTabChange={() => {}}
+      >
+        <TabsContent value="details">
+          <div>Details</div>
+        </TabsContent>
+        <TabsContent value="invoices">
+          <div>Invoices</div>
+        </TabsContent>
+      </Tabs>
       <MainCard
         className="flex-1"
         title={selectedContract?.title}
@@ -162,7 +194,7 @@ export default function ContractsPage() {
           </div>
         }
       >
-        {!selectedContract && (
+        {!selectedContract && contracts.length > 0 && (
           <div className="text-center py-12 text-gray-500">
             <div className="text-center">
               <h3 className="text-lg font-medium mb-2">No Contract Selected</h3>

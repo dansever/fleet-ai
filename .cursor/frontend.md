@@ -12,24 +12,43 @@ This is the short, high-signal guide. For examples/recipes, see `frontend-exampl
 apps/web/src/
 
 - `app/` App Router: `(auth)`, `(platform)`, `api/`, `landing-page/`, `layout.tsx`
+- `modules/` vertical slices by domain: `*.server.ts`, `*.client.ts`, `*.types.ts`, optional `*.queries.ts`, `index.ts`
 - `components/` UI primitives (`ui/`) and utilities
 - `stories/` Storybook library
-- `services/` API client services (client-only)
-- `db/` server-only db actions
 - `lib/`, `hooks/`, `middleware.ts`
 
 Platform feature folders follow: `page.tsx` (server), `ClientPage.tsx` (client), `ContextProvider.tsx`, `_components/`, `subpages/`.
 
+### Modules Pattern
+
+- `*.server.ts` server-only DB ops. Must contain `use server` and `import "server-only"`.
+- `*.client.ts` client-safe API callers to Next API routes. No DB imports.
+- `*.types.ts` transport DTOs and schemas. Keep small; derive from Drizzle types where useful.
+- `*.queries.ts` optional read-optimized aggregations.
+- `index.ts` exports:
+  ```ts
+  export * as server from './<domain>.server';
+  export * as client from './<domain>.client';
+  export * from './<domain>.types';
+  ```
+
 ### Core Principles
 
 - Server vs Client: server components fetch/authorize; client components render/interact.
-- Multi-tenancy: every query must be scoped by `orgId`.
-- Access rules: client components use `services/*-client.ts`; server components can call `db/*-actions.ts`. Never call db actions from client.
+- Multi-tenancy: every query is scoped by `orgId` (enforce in server code and routes).
+- Naming: reads use `get*`/`list*`; writes use `create*`/`update*`/`delete*` (avoid domain verbs like approve/reject; use `update*`).
 
 ### Data Flow
 
-- Client: `Component → services/*-client.ts → /api/*`
-- Server: `page.tsx → db/*-actions.ts`
+- Client components: `Component → modules/<domain>.client.ts → /app/api/<domain> → modules/<domain>.server.ts → DB`.
+- Server components: `page.tsx → modules/<domain>.server.ts` directly (never from client components).
+- Python backend: use `backendApi` only for backend services (e.g., `/api/v1/...`).
+
+### API Routes
+
+- Location: `app/api/<domain>/route.ts` (collection) and `app/api/<domain>/[id]/route.ts` (item).
+- Responsibilities: auth + validation (Zod) + call server fn. No business logic in routes.
+- Validate inputs at the edge; convert ISO strings to `Date` before server calls.
 
 ### Context Pattern
 
@@ -37,22 +56,27 @@ Platform feature folders follow: `page.tsx` (server), `ClientPage.tsx` (client),
   - isLoading: initial fetch when no data yet.
   - isRefreshing: update while keeping current data visible.
 - Preserve cache during refresh; replace only when fresh results arrive.
+- When server provides initial data, set `hasServerData` to prevent duplicate client fetches.
 
 ### Auth
 
 - `middleware.ts` protects routes (Clerk).
-- `getAuthContext()` in server components; redirect if unauthenticated or missing `orgId`.
+- Use a server helper (e.g., `getAuthContext()`) in server components; redirect if unauthenticated or missing `orgId`.
 
-### UI/UX
+### Types & Schema
 
-- Use `PageLayout` for consistent page composition.
-- Prefer Storybook components for complex UI; `shadcn/ui` for primitives.
+- Drizzle tables live in `src/drizzle/schema/*`. Domain types exported from `src/drizzle/types`.
+- Keep 3 layers distinct:
+  - Row: DB rows (Drizzle)
+  - DTO: transport types for API (`*.types.ts`)
+  - Domain: safe types used in UI (dates as `Date`)
+- Never export Drizzle tables to UI; do not import `*.server.ts` into `"use client"` files.
 
 ### Dates
 
-- TIMESTAMP: store Date objects; submit ISO with time; display date+time.
-- DATE: store Date objects; submit `YYYY-MM-DD`; display date only.
-- Use helpers like `formatDate`, `formatDateForAPI`.
+- TIMESTAMP: store `Date`; submit ISO with time; display date+time.
+- DATE: store `Date`; submit `YYYY-MM-DD`; display date only.
+- Prefer shared helpers like `formatDate` and `formatDateForAPI`.
 
 ### Performance
 
@@ -62,40 +86,31 @@ Platform feature folders follow: `page.tsx` (server), `ClientPage.tsx` (client),
 ### Quality
 
 - TypeScript strict; ESLint + Prettier; clear names; robust error handling.
-- Follow existing patterns and naming; keep functions pure and reusable where possible.
-
-See `frontend-examples.md` for concrete snippets and patterns.
+- Favor pure functions and reusable utilities; follow module/file naming conventions.
 
 ### API Boundaries
 
-- Client components talk to Next.js API routes via `services/*-client.ts`.
-- Use `backendApi` only when calling the Python backend; keep a clear boundary.
-- Prefer server-side data fetch in `page.tsx` when SEO/first paint matters.
-
-### Routing & Conventions
-
-- App Router with feature folders under `(platform)`; colocate `ContextProvider` and subpages.
-- Keep URLs stable; derive state from params/search when possible.
-- Avoid client navigation side-effects during initial load; rely on server auth redirect.
+- Client components call Next API via `modules/<domain>.client.ts`.
+- Use `backendApi` only for Python backend calls; do not mix concerns.
+- Prefer server-side fetch in `page.tsx` when SEO/first paint matters.
 
 ### Error & Empty States
 
-- Handle three states distinctly: loading, empty, data.
-- Show full-screen loader only on the very first load; otherwise prefer inline refresh indicators.
-- When server provides initial data, use a `hasServerData` flag to prevent duplicate client fetches.
+- Handle loading, empty, data distinctly.
+- Full-screen loader only on first load; otherwise prefer inline refresh indicators.
 
 ### Security
 
-- Never expose secrets to the client; read from server env only.
-- Enforce org scoping on every query; gate UI with role checks but enforce on server.
-- Sanitize and validate all inputs in API routes.
+- Never expose secrets to the client; use server env only.
+- Enforce org scoping in every server query; gate UI by role but enforce on server.
+- Sanitize and validate all inputs in API routes with Zod.
 
 ### Testing & Tooling
 
-- Storybook for component behavior; Vitest for units and simple integration.
-- ESLint + Prettier as default quality gates; keep logs minimal and actionable.
+- Storybook for components; Vitest for units/integration.
+- Keep logs minimal and actionable.
 
 ### Observability
 
-- Centralize error reporting; prefer consistent toast/snackbar patterns in clients.
+- Centralize error reporting; use consistent toast/snackbar patterns.
 - Add lightweight timings around expensive client actions where useful.
