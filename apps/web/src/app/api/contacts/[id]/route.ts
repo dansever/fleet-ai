@@ -7,6 +7,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: { id: string } };
 
+/**
+ * GET /api/contacts/[id] - Get a contact by ID
+ * @param _request
+ * @param param1
+ * @returns
+ */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, error } = await getAuthContext();
@@ -23,6 +29,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * PUT /api/contacts/[id] - Update a contact
+ * @param request
+ * @param params
+ * @returns
+ */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, error } = await getAuthContext();
@@ -41,6 +53,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * DELETE /api/contacts/[id] - Delete a contact
+ * @param _request
+ * @param params
+ * @returns
+ */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, error } = await getAuthContext();

@@ -1,11 +1,10 @@
 export interface LLMUsage {
-  input_tokens: number;
-  output_tokens: number;
-  total_tokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
 }
 
-export interface LLMResponse<T = string> {
+export interface LLMResult<T = string> {
   content: T | string;
-  usage?: LLMUsage;
-  model?: string;
+  usage: LLMUsage;
 }

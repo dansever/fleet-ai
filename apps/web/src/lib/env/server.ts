@@ -22,6 +22,9 @@ export const serverEnv = createEnv({
     CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:8000'),
 
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+
+    // OpenAI API Key
+    OPENAI_API_KEY: z.string().min(1),
   },
   experimental__runtimeEnv: process.env,
 });
