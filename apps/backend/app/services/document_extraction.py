@@ -1,15 +1,14 @@
 # app/services/document_extraction.py
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile, HTTPException, File
 from typing import Type
 from app.utils import get_logger, save_temp_file, cleanup_temp_file, validate_file_type
 from app.ai.extractors import get_llama_extractor_client
 from app.config import ai_config
-from app.shared.schemas import ResponseEnvelope
 from pydantic import BaseModel
 
 logger = get_logger(__name__)
 
-def process_document_extraction(
+async def extract_document(
     file: UploadFile,
     agent_name: str,
     system_prompt: str,
@@ -17,43 +16,51 @@ def process_document_extraction(
     log_label: str = "Document",
     allowed_extensions: tuple[str, ...] | None = None,
     allowed_mime_types: tuple[str, ...] | None = None
-) -> ResponseEnvelope:
+) -> dict:
     """
     Generic document extraction handler.
+    Returns a dict with Python-native types (e.g., datetime.date for DATE fields).
     """
     temp_path = None
 
     try:
+        # ============== Validate file type ==============
         exts = allowed_extensions or ai_config.allowed_extensions
         mimes = allowed_mime_types or ai_config.allowed_mime_types
         validate_file_type(file, exts, mimes)
+        logger.info(f"📁 File type validated.")
 
+        # ============== Save file to a temporary location ==============
         temp_path = save_temp_file(file)
-        logger.info(f"🔍 {log_label} file saved to temp location.")
+        logger.info(f"📁 File saved to temp location.")
 
-        client = get_llama_extractor_client()
+        # ============== Initialize extractor ==============
+        client = get_llama_extractor_client(update_extractor_schema=True)
         agent = client.get_or_create_agent(
             agent_name=agent_name,
             system_prompt=system_prompt,
             data_schema=schema_class,
         )
+        logger.info(f"🤖 Extraction agent initialized.")
 
-        logger.info(f"🤖 {log_label} agent initialized. Starting extraction...")
+        # ============== Run extraction ==============
         result = agent.extract(temp_path)
-        logger.info(f"📄 {log_label} extraction completed.")
+        logger.info(f"✅ Extraction completed.")
 
-        return ResponseEnvelope(
-            data=result.data, 
-            success=True, 
-            message=f"Extraction completed successfully for {log_label}"
-            )
+        # ============== Normalize with Pydantic (v2) ==============
+        parsed = schema_class.model_validate(result.data)
+        return parsed.model_dump(mode="python")
+        
 
+    # ============== Handle errors ==============
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"❌ Error in {log_label} extraction: {str(e)}")
+        logger.exception(f"❌ Error in extraction: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to extract {log_label} data from document")
+    
+    # ============== Cleanup temporary file if it exists ==============
     finally:
         if temp_path:
             cleanup_temp_file(temp_path)
-            logger.info(f"🧹 Temporary file cleaned up")
+            logger.info(f"🧹 Temporary file cleaned up.")

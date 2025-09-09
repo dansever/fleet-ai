@@ -3,6 +3,8 @@ import shutil
 import os
 from fastapi import HTTPException, UploadFile
 from app.utils import get_logger
+import json
+from pathlib import Path
 
 logger = get_logger(__name__)
 
@@ -32,6 +34,24 @@ def cleanup_temp_file(path: str) -> None:
 def validate_file_type(file: UploadFile, allowed_extensions: tuple[str, ...], allowed_mime_types: tuple[str, ...]):
     ext_valid = file.filename.lower().endswith(allowed_extensions)
     mime_valid = file.content_type in allowed_mime_types
-
-    if not (ext_valid and mime_valid):
+    
+    if not (ext_valid and mime_valid):  # Requires BOTH to be valid
         raise HTTPException(status_code=400, detail="Unsupported file type")
+
+
+def load_latest_extraction_result(cache_dir: str = "mock_data/contract_cache"):
+    """Load the most recent JSON file from the contract_cache folder."""
+    cache_path = Path(cache_dir)
+    if not cache_path.exists() or not cache_path.is_dir():
+        raise FileNotFoundError(f"Cache directory not found: {cache_dir}")
+
+    files = list(cache_path.glob("*.json"))
+    if not files:
+        raise FileNotFoundError(f"No JSON files found in {cache_dir}")
+
+    latest_file = max(files, key=os.path.getmtime)
+
+    with open(latest_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    return data

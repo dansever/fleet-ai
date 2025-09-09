@@ -1,24 +1,24 @@
 'use client';
 
-import { simpleLLM } from '@/modules/ai/ai.client';
+import { client as aiClient } from '@/modules/ai';
 import { Button } from '@/stories/Button/Button';
 import { FeatureCard, GradientPalette } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
-import { LLMResponse } from '@/types/llm';
+import { LLMResult } from '@/types/llm';
 import { Bot, RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
 
 export default function InputBar() {
   const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState<LLMResponse<string> | null>(null);
+  const [response, setResponse] = useState<LLMResult['content']>('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAskAI = async () => {
     try {
       setIsLoading(true);
-      const result = await simpleLLM(prompt);
-      console.log(result.data);
-      setResponse(result.data);
+      const result = await aiClient.callLLM(prompt);
+      console.log('RESULT: ', result);
+      setResponse(result.content);
     } catch (error) {
       console.error(error);
     } finally {
@@ -52,20 +52,23 @@ export default function InputBar() {
         />
       </div>
       <FeatureCard
-        title="AI Response"
-        subtitle={response?.content || 'No response yet'}
+        title={`${response ? 'AI Response' : 'Ask AI'}`}
         icon={<Bot />}
+        actions={
+          response ? (
+            <Button
+              intent="secondaryInverted"
+              icon={RefreshCcw}
+              text="Reset"
+              onClick={() => setResponse('')}
+              disabled={isLoading}
+              className="flex-shrink-0"
+            />
+          ) : undefined
+        }
         palette={GradientPalette.SkyIndigoViolet}
         className="flex-1 min-h-10"
-        actions={
-          <Button
-            intent="secondaryInverted"
-            icon={RefreshCcw}
-            onClick={() => setResponse(null)}
-            className={`${isLoading && 'animate-spin'}`}
-          />
-        }
-        children={<span className="text-white/80">{response?.content}</span>}
+        children={<span className="text-white/80">{response}</span>}
       />
     </div>
   );

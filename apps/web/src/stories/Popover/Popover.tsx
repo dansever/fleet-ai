@@ -9,6 +9,52 @@ import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '../Button/Button';
 import { MainCard } from '../Card/Card';
 
+interface BasePopoverProps {
+  trigger: ReactNode;
+  headerGradient?: string;
+  title: string;
+  description?: string;
+  popoverContentAlign?: 'start' | 'center' | 'end';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children?: ReactNode;
+  className?: string;
+}
+
+export const BasePopover = ({
+  trigger,
+  headerGradient = 'from-sky-500 via-blue-600 to-indigo-500',
+  title,
+  description,
+  popoverContentAlign = 'end',
+  open,
+  onOpenChange,
+  children,
+  className,
+}: BasePopoverProps) => {
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent
+        align={popoverContentAlign}
+        className={cn('w-80 p-0 rounded-2xl overflow-hidden border-0 backdrop-blur-sm', className)}
+      >
+        <div className={cn(`bg-gradient-to-r ${headerGradient} opacity-80 text-white p-4`)}>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-1">
+              <h4 className="font-semibold">{title}</h4>
+              <p>{description}</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-2 bg-card">
+          <div className="flex gap-2 justify-start">{children}</div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 // Confirmation Popover Component for direct actions
 interface ConfirmationPopoverProps {
   trigger: ReactNode;
@@ -87,14 +133,14 @@ export const ConfirmationPopover = ({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         align={popoverContentAlign}
-        className="w-80 p-0 rounded-2xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm"
+        className="w-80 p-0 rounded-2xl overflow-hidden border-0 backdrop-blur-sm"
       >
         <div className={cn('bg-gradient-to-r text-white p-4', styles.gradient)}>
           <div className="flex items-center gap-3">
             <span className="text-2xl">{styles.icon}</span>
-            <div>
-              <h4 className="font-semibold text-sm">{title}</h4>
-              <p className="text-white/90 text-xs mt-1">{description}</p>
+            <div className="flex flex-col gap-1">
+              <h4 className="font-semibold">{title}</h4>
+              <p>{description}</p>
             </div>
           </div>
         </div>

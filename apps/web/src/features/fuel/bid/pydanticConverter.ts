@@ -1,4 +1,4 @@
-import { CreateFuelBidData } from '@/services/fuel/fuel-bid-client';
+import { CreateFuelBidData } from '@/modules/fuel/bids/bids.client';
 
 // Type definition for the Pydantic FuelBid object from backend
 interface PydanticFuelBid {
@@ -51,9 +51,10 @@ export function convertPydanticToFuelBid(
   tenderId: string,
   round?: number,
 ): CreateFuelBidData {
-  const createFuelBidData: CreateFuelBidData = {
+  const createFuelBidData: Partial<Omit<CreateFuelBidData, 'id' | 'createdAt' | 'updatedAt'>> = {
     // Required system fields
     tenderId,
+    orgId: '',
 
     // Bid Information
     title: pydanticBid.title,
@@ -108,5 +109,5 @@ export function convertPydanticToFuelBid(
 
   console.log('✅Converted Pydantic Bid --> CreateFuelBidData');
 
-  return createFuelBidData;
+  return createFuelBidData as CreateFuelBidData;
 }

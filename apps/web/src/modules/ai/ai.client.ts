@@ -1,10 +1,14 @@
-import { api } from '@/services/api-client';
-import { ResponseEnvelope } from '@/types/backend-response';
-import { LLMResponse } from '@/types/llm';
+// src/modules/ai/ai.client.ts
 
-export async function simpleLLM(prompt: string): Promise<ResponseEnvelope<LLMResponse<string>>> {
-  const res = await api.post<ResponseEnvelope<LLMResponse<string>>>('/api/v1/llm/basic', {
-    prompt,
-  });
-  return res.data;
+import { api } from '@/services/api-client';
+import { LLMResult } from '@/types/llm';
+
+/**
+ * Call the AI client with a prompt
+ * @param prompt
+ * @returns
+ */
+export async function callLLM(prompt: string): Promise<LLMResult<string>> {
+  const res = await api.post('/api/ai', { prompt });
+  return res.data.output as LLMResult<string>;
 }

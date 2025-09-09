@@ -2,11 +2,11 @@
 'use client';
 
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
-import type { Contract } from '@/drizzle/types';
-import { useAirportAutocomplete } from '@/hooks/use-airport-autocomplete';
+import type { Airport, Contract } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
-import { client as contractClient } from '@/modules/contracts/contracts';
-import { type ContractCreateInput } from '@/modules/contracts/contracts/contracts.types';
+import { client as contractClient } from '@/modules/contracts';
+import { type ContractCreateInput } from '@/modules/contracts/contracts.types';
+import { client as airportClient } from '@/modules/core/airports';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
@@ -16,7 +16,6 @@ import { toast } from 'sonner';
 
 export default function ContractDialog({
   contract,
-  airportId,
   onChange,
   DialogType = 'view',
   trigger,
@@ -24,20 +23,32 @@ export default function ContractDialog({
   onOpenChange,
 }: {
   contract: Contract | null;
-  airportId?: string; // Required when DialogType is 'add'
   onChange: (contract: Contract) => void;
-  DialogType: 'add' | 'edit' | 'view';
+  DialogType: 'edit' | 'view';
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
+  const [airport, setAirport] = useState<Airport | null>(null);
+  // Get airport object --> For name display
+  useEffect(() => {
+    if (!contract?.airportId) {
+      setAirport(null);
+      return;
+    }
+    const fetchAirport = async () => {
+      const fullAirport = await airportClient.getAirportById(contract.airportId!);
+      if (fullAirport) {
+        setAirport(fullAirport);
+      }
+    };
+    fetchAirport();
+  }, [contract?.airportId]);
+
   const [formData, setFormData] = useState({
     // Contract Information (matching schema)
     title: contract?.title || '',
     contractType: contract?.contractType || null,
-    summary: contract?.summary || null,
-    terms: contract?.terms || null,
-    docUrl: contract?.docUrl || null,
 
     // Vendor Information (matching schema)
     vendorName: contract?.vendorName || null,
@@ -51,18 +62,10 @@ export default function ContractDialog({
     effectiveFrom: contract?.effectiveFrom ? new Date(contract.effectiveFrom) : null,
     effectiveTo: contract?.effectiveTo ? new Date(contract.effectiveTo) : null,
 
-    // Airport ID for new contracts
-    airportId: contract?.airportId || airportId || null,
+    // Airport ID
+    airportId: contract?.airportId || null,
   });
 
-  const [airportQuery, setAirportQuery] = useState('');
-  const { suggestions: airportSuggestions, isLoading: isLoadingAirports } = useAirportAutocomplete({
-    query: airportQuery,
-    enabled: true,
-    limit: 10,
-  });
-
-  const isAdd = DialogType === 'add';
   const isEdit = DialogType === 'edit';
 
   // Update formData when contract prop changes
@@ -70,9 +73,6 @@ export default function ContractDialog({
     setFormData({
       title: contract?.title || '',
       contractType: contract?.contractType || null,
-      summary: contract?.summary || null,
-      terms: contract?.terms || null,
-      docUrl: contract?.docUrl || null,
       vendorName: contract?.vendorName || null,
       vendorAddress: contract?.vendorAddress || null,
       vendorContactName: contract?.vendorContactName || null,
@@ -81,9 +81,9 @@ export default function ContractDialog({
       vendorComments: contract?.vendorComments || null,
       effectiveFrom: contract?.effectiveFrom ? new Date(contract.effectiveFrom) : null,
       effectiveTo: contract?.effectiveTo ? new Date(contract.effectiveTo) : null,
-      airportId: contract?.airportId || airportId || null,
+      airportId: contract?.airportId || null,
     });
-  }, [contract, airportId]);
+  }, [contract]);
 
   const handleFieldChange = (field: string, value: string | boolean | number | Date | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -112,112 +112,78 @@ export default function ContractDialog({
         effectiveTo: formData.effectiveTo ? formData.effectiveTo.toISOString().split('T')[0] : null,
       };
 
-      if (isAdd) {
-        // Create new contract
-        if (!formData.airportId) {
-          throw new Error('Airport is required for new contracts');
-        }
-
-        const createData: ContractCreateInput = {
-          airportId: serializedFormData.airportId,
-          vendorId: null, // Will be handled by backend if needed
-          title: serializedFormData.title as string,
-          contractType: serializedFormData.contractType!,
-          summary: serializedFormData.summary,
-          terms: serializedFormData.terms,
-          docUrl: serializedFormData.docUrl,
-          vendorName: serializedFormData.vendorName,
-          vendorAddress: serializedFormData.vendorAddress,
-          vendorContactName: serializedFormData.vendorContactName,
-          vendorContactEmail: serializedFormData.vendorContactEmail,
-          vendorContactPhone: serializedFormData.vendorContactPhone,
-          vendorComments: serializedFormData.vendorComments,
-          effectiveFrom: serializedFormData.effectiveFrom as string,
-          effectiveTo: serializedFormData.effectiveTo as string,
-        };
-
-        savedContract = await contractClient.createContract(createData);
-        toast.success('Contract created successfully');
-      } else {
-        // Update existing contract
-        if (!contract?.id) {
-          throw new Error('Contract ID is required for updates');
-        }
-
-        const updateData = {
-          title: serializedFormData.title,
-          contractType: serializedFormData.contractType || undefined,
-          summary: serializedFormData.summary,
-          terms: serializedFormData.terms,
-          docUrl: serializedFormData.docUrl,
-          vendorName: serializedFormData.vendorName,
-          vendorAddress: serializedFormData.vendorAddress,
-          vendorContactName: serializedFormData.vendorContactName,
-          vendorContactEmail: serializedFormData.vendorContactEmail,
-          vendorContactPhone: serializedFormData.vendorContactPhone,
-          vendorComments: serializedFormData.vendorComments,
-          effectiveFrom: serializedFormData.effectiveFrom,
-          effectiveTo: serializedFormData.effectiveTo,
-        };
-
-        savedContract = await contractClient.updateContract(
-          contract.id,
-          updateData as Partial<ContractCreateInput>,
-        );
-        toast.success('Contract updated successfully');
+      // Update existing contract
+      if (!contract?.id) {
+        throw new Error('Contract ID is required for updates');
       }
+
+      const updateData = {
+        title: serializedFormData.title,
+        contractType: serializedFormData.contractType || undefined,
+        vendorName: serializedFormData.vendorName,
+        vendorAddress: serializedFormData.vendorAddress,
+        vendorContactName: serializedFormData.vendorContactName,
+        vendorContactEmail: serializedFormData.vendorContactEmail,
+        vendorContactPhone: serializedFormData.vendorContactPhone,
+        vendorComments: serializedFormData.vendorComments,
+        effectiveFrom: serializedFormData.effectiveFrom,
+        effectiveTo: serializedFormData.effectiveTo,
+      };
+
+      savedContract = await contractClient.updateContract(
+        contract.id,
+        updateData as Partial<ContractCreateInput>,
+      );
+      toast.success('Contract updated successfully');
 
       // Call onChange to update parent with new data
       onChange(savedContract);
     } catch (error) {
-      const action = isAdd ? 'create' : 'update';
-      toast.error(`Failed to ${action} contract`);
-      console.error(`Error ${action}ing contract:`, error);
+      toast.error('Failed to update contract');
+      console.error('Error updating contract:', error);
       throw error; // Re-throw to let Dialog component handle loading state
     }
   };
 
   const handleCancel = () => {
-    if (isAdd) {
+    // Reset form to original contract data
+    if (contract) {
       setFormData({
-        title: '',
-        contractType: null,
-        summary: null,
-        terms: null,
-        docUrl: null,
-        vendorName: null,
-        vendorAddress: null,
-        vendorContactName: null,
-        vendorContactEmail: null,
-        vendorContactPhone: null,
-        vendorComments: null,
-        effectiveFrom: null,
-        effectiveTo: null,
-        airportId: airportId || null,
+        title: contract.title || '',
+        contractType: contract.contractType || null,
+        vendorName: contract.vendorName || null,
+        vendorAddress: contract.vendorAddress || null,
+        vendorContactName: contract.vendorContactName || null,
+        vendorContactEmail: contract.vendorContactEmail || null,
+        vendorContactPhone: contract.vendorContactPhone || null,
+        vendorComments: contract.vendorComments || null,
+        effectiveFrom: contract.effectiveFrom ? new Date(contract.effectiveFrom) : null,
+        effectiveTo: contract.effectiveTo ? new Date(contract.effectiveTo) : null,
+        airportId: contract.airportId || null,
       });
     }
   };
 
   const handleReset = () => {
-    setFormData({
-      title: '',
-      contractType: null,
-      summary: null,
-      terms: null,
-      docUrl: null,
-      vendorName: null,
-      vendorAddress: null,
-      vendorContactName: null,
-      vendorContactEmail: null,
-      vendorContactPhone: null,
-      vendorComments: null,
-      effectiveFrom: null,
-      effectiveTo: null,
-      airportId: airportId || null,
-    });
+    // Reset form to original contract data
+    if (contract) {
+      setFormData({
+        title: contract.title || '',
+        contractType: contract.contractType || null,
+        vendorName: contract.vendorName || null,
+        vendorAddress: contract.vendorAddress || null,
+        vendorContactName: contract.vendorContactName || null,
+        vendorContactEmail: contract.vendorContactEmail || null,
+        vendorContactPhone: contract.vendorContactPhone || null,
+        vendorComments: contract.vendorComments || null,
+        effectiveFrom: contract.effectiveFrom ? new Date(contract.effectiveFrom) : null,
+        effectiveTo: contract.effectiveTo ? new Date(contract.effectiveTo) : null,
+        airportId: contract.airportId || null,
+      });
+    }
   };
 
-  const dialogTitle = isAdd ? 'Add New Contract' : contract?.title || 'Contract Details';
+  const dialogTitle = contract?.title || 'Contract Details';
 
   return (
     <DetailDialog
@@ -256,29 +222,12 @@ export default function ContractDialog({
                 }))}
               />
               <KeyValuePair
-                label="Summary"
-                value={formData.summary}
+                label="Airport"
+                value={airport?.name}
                 valueType="string"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('summary', value)}
-                name="summary"
-              />
-
-              <KeyValuePair
-                label="Terms"
-                value={formData.terms}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('terms', value)}
-                name="terms"
-              />
-              <KeyValuePair
-                label="Document URL"
-                value={formData.docUrl}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('docUrl', value)}
-                name="docUrl"
+                onChange={(value) => handleFieldChange('airport', value)}
+                name="airport"
               />
             </div>
           </MainCard>
@@ -339,6 +288,7 @@ export default function ContractDialog({
           <MainCard title="Contract Period" neutralHeader={true}>
             {!isEditing && (
               <ModernTimeline
+                orientation="horizontal"
                 items={[
                   {
                     id: '1',

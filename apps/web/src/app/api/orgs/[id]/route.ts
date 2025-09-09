@@ -3,16 +3,19 @@ import { jsonError } from '@/lib/core/errors';
 import { server as orgServer } from '@/modules/core/organizations';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    if (params.id !== orgId) return jsonError('Unauthorized', 401);
+    // Get org id
+    const { id } = await params;
+    if (id !== orgId) return jsonError('Unauthorized', 401);
 
-    const org = await orgServer.getOrgById(params.id);
+    // Get org by id
+    const org = await orgServer.getOrgById(id);
     if (!org) return jsonError('Organization not found', 404);
     return NextResponse.json(org);
   } catch (error) {
@@ -25,13 +28,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    if (params.id !== orgId) return jsonError('Unauthorized', 401);
-
-    const existing = await orgServer.getOrgById(params.id);
+    // Get org by id
+    const { id } = await params;
+    const existing = await orgServer.getOrgById(id);
     if (!existing) return jsonError('Organization not found', 404);
+    if (existing.id !== orgId) return jsonError('Unauthorized', 401);
 
     const body = await request.json();
-    const updated = await orgServer.updateOrg(params.id, body);
+    const updated = await orgServer.updateOrg(id, body);
     return NextResponse.json(updated);
   } catch (error) {
     return jsonError('Failed to update organization', 500);
@@ -43,12 +47,14 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    if (params.id !== orgId) return jsonError('Unauthorized', 401);
-
-    const existing = await orgServer.getOrgById(params.id);
+    // Get org by id
+    const { id } = await params;
+    const existing = await orgServer.getOrgById(id);
     if (!existing) return jsonError('Organization not found', 404);
+    if (existing.id !== orgId) return jsonError('Unauthorized', 401);
 
-    await orgServer.deleteOrg(params.id);
+    // Delete org
+    await orgServer.deleteOrg(id);
     return NextResponse.json({ message: 'Organization deleted successfully' });
   } catch (error) {
     return jsonError('Failed to delete organization', 500);

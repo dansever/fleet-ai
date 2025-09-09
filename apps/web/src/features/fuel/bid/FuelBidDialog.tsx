@@ -2,10 +2,12 @@
 'use client';
 
 import { decisionDisplayMap } from '@/drizzle/enums';
-import type { FuelBid, NewFuelBid, UpdateFuelBid } from '@/drizzle/types';
+import type { FuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
+import { CreateFuelBidData } from '@/modules/fuel/bids/bids.client';
+import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 import { MainCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
@@ -45,8 +47,8 @@ export default function FuelBidDialog({
 
     // Pricing Structure & Terms (matching schema)
     priceType: bid?.priceType || null, // fixed, index_formula
-    currency: bid?.currency || 'USD',
-    uom: bid?.uom || 'USG',
+    currency: bid?.currency || null,
+    uom: bid?.uom || null,
     paymentTerms: bid?.paymentTerms || null,
 
     // Fixed Pricing (matching schema)
@@ -133,12 +135,12 @@ export default function FuelBidDialog({
         if (!tenderId) {
           throw new Error('Tender ID is required when creating a new bid');
         }
-        const createData: NewFuelBid = {
+        const createData: Partial<Omit<FuelBidCreateInput, 'id' | 'createdAt' | 'updatedAt'>> = {
           tenderId,
           vendorId: null, // Will be handled by backend if needed
           ...formData,
         };
-        savedBid = await fuelBidClient.createFuelBid(tenderId, createData);
+        savedBid = await fuelBidClient.createFuelBid(tenderId, createData as CreateFuelBidData);
         toast.success('Fuel bid created successfully');
       } else {
         // Update existing bid

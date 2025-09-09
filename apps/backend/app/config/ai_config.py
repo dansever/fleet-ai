@@ -50,7 +50,7 @@ class TavilySettings(BaseModel):
 # ---------- Feature flags ----------
 class FeatureFlags(BaseModel):
     update_extraction_schema: bool = False
-    debug_mode: bool = False
+    debug_mode: bool = True
 
 # ---------- Active model routing ----------
 class ActiveModels(BaseModel):

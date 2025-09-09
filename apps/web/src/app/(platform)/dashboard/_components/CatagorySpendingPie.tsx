@@ -12,7 +12,7 @@ export function CatagorySpendingPie({
   categoryColors: string[];
 }) {
   return (
-    <BaseCard title="Spend by Category" description="Spend by Category" className="col-span-4">
+    <BaseCard className="col-span-4">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <PieChartIcon className="h-5 w-5" />

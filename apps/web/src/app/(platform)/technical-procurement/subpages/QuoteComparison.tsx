@@ -5,7 +5,7 @@ import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
-import { Package, Plus, RefreshCw } from 'lucide-react';
+import { Package, Plus, RefreshCw, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useTechnicalProcurement } from '../ContextProvider';
@@ -88,8 +88,7 @@ export default function QuoteComparison() {
           <FileUploadPopover
             open={uploadQuotePopoverOpen}
             onOpenChange={setUploadQuotePopoverOpen}
-            triggerIntent="secondary"
-            triggerText="Upload Quote"
+            trigger={<Button intent="secondary" text="Upload Quote" icon={Upload} size="md" />}
             onSend={() => {}}
           >
             <div className="flex flex-col gap-2 text-sm">
@@ -97,10 +96,7 @@ export default function QuoteComparison() {
                 quote={null}
                 onChange={() => {}}
                 DialogType="add"
-                triggerButtonText="Add Quote"
-                triggerButtonIntent="secondary"
-                triggerButtonIcon={Plus}
-                TriggerButtonSize="sm"
+                trigger={<Button intent="secondary" text="Add Quote" icon={Plus} size="sm" />}
               />
               <Button
                 intent="ghost"

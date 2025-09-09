@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 export function RiskAndCompliance() {
   return (
-    <BaseCard title="Risk and Compliance" description="Risk and Compliance" className="col-span-4">
+    <BaseCard className="col-span-4">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5" />

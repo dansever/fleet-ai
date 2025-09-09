@@ -1,0 +1,19 @@
+{
+  "vendor_name": "Atlas Freight Israel Ltd.",
+  "vendor_address": null,
+  "vendor_contact_name": null,
+  "vendor_contact_email": null,
+  "vendor_contact_phone": null,
+  "vendor_comments": null,
+  "title": "Logistics and Freight Forwarding Agreement - Israel Air at Ben Gurion Airport",
+  "contract_type": "logistics_freight",
+  "effective_from": "2024-12-01",
+  "effective_to": "2025-10-31",
+  "summary": "Agreement between Israel Air and Atlas Freight Israel Ltd. for domestic and international freight forwarding, customs brokerage, DG and AOG logistics at Ben Gurion Airport. \nScope includes bonded storage, last-mile, and over-dimensional over-weight freight handling.\nEffective from December 1, 2024, until October 31, 2025, with weekly consolidated invoicing and Net 30 payment.\nSurcharges: AOG, fuel indexed to IATA Fuel Price Monitor, after-hours (18%), and security per airport tariff.\nLiability per Montreal/Warsaw Convention; declared value option available at a premium.",
+  "commercial_terms": "Airport-to-door tariff rates by weight break: 0\u201345 kg, 46\u2013100 kg, 101\u2013300 kg, 301\u2013500 kg, >500 kg. AOG surcharge as per attached matrix. Fuel surcharge indexed monthly to IATA Fuel Price Monitor; published monthly. After-hours/weekend surcharge: +18%. Security screening fee per piece per airport tariff. Weekly consolidated invoices with airwaybill detail. Payment terms: Net 30. Demurrage: first 24 hours free at vendor facility, then per kg/day tariff.",
+  "slas": "24\u00d77 AOG hotline; pickup within 120 minutes in Tel Aviv metro. Proof of delivery within 24 hours, with name, timestamp, photo if available. EDI milestone tracking at major events. Customs brokerage and DG handling per IATA DGR.",
+  "edge_cases": "First 24 hours storage free; after, tariff per kg/day. Over-dimension/over-weight freight subject to feasibility and extra handling fees; crating recommended for fragile items. Airport storage as per IAA rates.",
+  "risk_liability": "Liability as per Montreal/Warsaw Convention. Declared value option available at a premium. DG staff certified; records kept 24 months. Customs bond management included.",
+  "termination_law": "Termination for convenience: 60 days' notice. For cause: 15-day cure period. Governing law: State of Israel.",
+  "operational_baselines": "Services at Ben Gurion Airport (TLV); 24\u00d77 AOG desk; export cutoff coordination with operations. POD and EDI milestone tracking. Customs, DG, and compliance procedures as per international standards. Weekly consolidated invoicing."
+}

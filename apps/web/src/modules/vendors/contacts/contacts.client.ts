@@ -1,4 +1,4 @@
-import type { Airport, Contact, Organization, Vendor } from '@/drizzle/types';
+import type { Contact, Organization, Vendor } from '@/drizzle/types';
 import { api } from '@/services/api-client';
 import { ContactCreateInput, ContactUpdateInput } from './contacts.types';
 
@@ -16,14 +16,6 @@ export async function getContact(id: Contact['id']): Promise<Contact> {
 export async function listContactsByOrg(orgId?: Organization['id']): Promise<Contact[]> {
   const url = orgId ? `/api/contacts?orgId=${orgId}` : '/api/contacts';
   const res = await api.get(url);
-  return res.data;
-}
-
-/**
- * Get all contacts for an airport
- */
-export async function listContactsByAirport(airportId: Airport['id']): Promise<Contact[]> {
-  const res = await api.get(`/api/contacts?airportId=${airportId}`);
   return res.data;
 }
 

@@ -1,5 +1,5 @@
 import { Contract, UpdateContract } from '@/drizzle/types';
-import { client as contractClient } from '@/modules/contracts/contracts';
+import { client as contractClient } from '@/modules/contracts';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheManager, createCacheKey } from '../utils/cacheManager';
 

@@ -12,6 +12,7 @@ import {
   Send,
   Share,
   Trash2,
+  Upload,
   Users,
   X,
 } from 'lucide-react';
@@ -203,8 +204,7 @@ export const AllPopoverVariants: Story = {
             <div className="space-y-4">
               <h4 className="font-medium text-sm text-muted-foreground">DOCUMENT UPLOAD</h4>
               <FileUploadPopover
-                triggerText="Upload Documents"
-                triggerIntent="primary"
+                trigger={<Button intent="primary" text="Upload Documents" icon={Upload} />}
                 accept=".pdf,.doc,.docx,.txt"
                 maxSize={10}
                 onSend={handleFileUpload}
@@ -217,9 +217,7 @@ export const AllPopoverVariants: Story = {
             <div className="space-y-4">
               <h4 className="font-medium text-sm text-muted-foreground">IMAGE UPLOAD</h4>
               <FileUploadPopover
-                triggerText="Upload Images"
-                triggerIntent="secondary"
-                triggerSize="sm"
+                trigger={<Button intent="secondary" text="Upload Images" icon={Upload} size="sm" />}
                 accept="image/*"
                 maxSize={5}
                 onSend={handleFileUpload}
@@ -232,9 +230,7 @@ export const AllPopoverVariants: Story = {
             <div className="space-y-4">
               <h4 className="font-medium text-sm text-muted-foreground">ANY FILE TYPE</h4>
               <FileUploadPopover
-                triggerText="Upload Any File"
-                triggerIntent="success"
-                triggerSize="lg"
+                trigger={<Button intent="success" text="Upload Any File" icon={Upload} />}
                 accept="*/*"
                 maxSize={25}
                 onSend={handleFileUpload}
@@ -247,8 +243,7 @@ export const AllPopoverVariants: Story = {
             <div className="space-y-4">
               <h4 className="font-medium text-sm text-muted-foreground">SPREADSHEET UPLOAD</h4>
               <FileUploadPopover
-                triggerText="Import Data"
-                triggerIntent="primary"
+                trigger={<Button intent="primary" text="Import Data" icon={Upload} />}
                 accept=".xlsx,.xls,.csv"
                 maxSize={15}
                 onSend={handleFileUpload}
@@ -261,8 +256,7 @@ export const AllPopoverVariants: Story = {
             <div className="space-y-4">
               <h4 className="font-medium text-sm text-muted-foreground">COMPRESSED FILES</h4>
               <FileUploadPopover
-                triggerText="Upload Archive"
-                triggerIntent="secondary"
+                trigger={<Button intent="secondary" text="Upload Archive" icon={Upload} />}
                 accept=".zip,.rar,.7z"
                 maxSize={50}
                 onSend={handleFileUpload}
@@ -323,9 +317,9 @@ export const AllPopoverVariants: Story = {
                       />
 
                       <FileUploadPopover
-                        triggerText="Upload Docs"
-                        triggerIntent="secondary"
-                        triggerSize="sm"
+                        trigger={
+                          <Button intent="secondary" text="Upload Docs" icon={Upload} size="sm" />
+                        }
                         accept=".pdf,.doc,.docx"
                         maxSize={10}
                         onSend={(file) => console.log('Aircraft document uploaded:', file.name)}
@@ -371,8 +365,7 @@ export const AllPopoverVariants: Story = {
 
                   <div className="flex flex-wrap gap-3">
                     <FileUploadPopover
-                      triggerText="Import Schedule"
-                      triggerIntent="primary"
+                      trigger={<Button intent="primary" text="Import Schedule" icon={Upload} />}
                       accept=".xlsx,.csv"
                       maxSize={5}
                       onSend={(file) => console.log('Schedule imported:', file.name)}
@@ -427,9 +420,9 @@ export const AllPopoverVariants: Story = {
                     </h5>
                     <div className="flex flex-wrap gap-2">
                       <FileUploadPopover
-                        triggerText="Upload Report"
-                        triggerIntent="primary"
-                        triggerSize="sm"
+                        trigger={
+                          <Button intent="primary" text="Upload Report" icon={Upload} size="sm" />
+                        }
                         accept=".pdf,.doc,.jpg,.png"
                         maxSize={15}
                         onSend={(file) => console.log('Maintenance report uploaded:', file.name)}
@@ -496,9 +489,9 @@ export const AllPopoverVariants: Story = {
 
                   <div className="flex flex-wrap gap-2">
                     <FileUploadPopover
-                      triggerText="Upload Certs"
-                      triggerIntent="secondary"
-                      triggerSize="sm"
+                      trigger={
+                        <Button intent="secondary" text="Upload Certs" icon={Upload} size="sm" />
+                      }
                       accept=".pdf,.jpg,.png"
                       maxSize={5}
                       onSend={(file) => console.log('Certification uploaded:', file.name)}
@@ -556,9 +549,9 @@ export const AllPopoverVariants: Story = {
                 />
 
                 <FileUploadPopover
-                  triggerText="Upload (Start)"
-                  triggerIntent="secondary"
-                  triggerSize="sm"
+                  trigger={
+                    <Button intent="secondary" text="Upload (Start)" icon={Upload} size="sm" />
+                  }
                   popoverContentAlign="start"
                   accept="*/*"
                   maxSize={5}
@@ -581,9 +574,9 @@ export const AllPopoverVariants: Story = {
                 />
 
                 <FileUploadPopover
-                  triggerText="Upload (Center)"
-                  triggerIntent="secondary"
-                  triggerSize="sm"
+                  trigger={
+                    <Button intent="secondary" text="Upload (Center)" icon={Upload} size="sm" />
+                  }
                   popoverContentAlign="center"
                   accept="*/*"
                   maxSize={5}
@@ -606,9 +599,9 @@ export const AllPopoverVariants: Story = {
                 />
 
                 <FileUploadPopover
-                  triggerText="Upload (End)"
-                  triggerIntent="secondary"
-                  triggerSize="sm"
+                  trigger={
+                    <Button intent="secondary" text="Upload (End)" icon={Upload} size="sm" />
+                  }
                   popoverContentAlign="end"
                   accept="*/*"
                   maxSize={5}
@@ -644,9 +637,7 @@ export const AllPopoverVariants: Story = {
                   <Button intent="primary" text="Edit" icon={Edit} size="sm" />
 
                   <FileUploadPopover
-                    triggerText="Docs"
-                    triggerIntent="secondary"
-                    triggerSize="sm"
+                    trigger={<Button intent="secondary" text="Docs" icon={Upload} size="sm" />}
                     accept=".pdf,.doc,.jpg"
                     maxSize={10}
                     onSend={(file) => console.log('Aircraft doc:', file.name)}
@@ -690,9 +681,7 @@ export const AllPopoverVariants: Story = {
                   <Button intent="primary" text="Edit" icon={Edit} size="sm" />
 
                   <FileUploadPopover
-                    triggerText="Plan"
-                    triggerIntent="secondary"
-                    triggerSize="sm"
+                    trigger={<Button intent="secondary" text="Plan" icon={Upload} size="sm" />}
                     accept=".pdf,.doc"
                     maxSize={5}
                     onSend={(file) => console.log('Flight plan:', file.name)}

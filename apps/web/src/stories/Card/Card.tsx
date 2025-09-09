@@ -91,7 +91,7 @@ export const MainCard = ({
               <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
             )}
 
-            <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="relative z-10 flex items-start justify-between gap-2">
               <div className="flex flex-col gap-1">
                 <div className="flex flex-row items-center gap-3">
                   {icon && icon}
@@ -417,7 +417,7 @@ export const ListItemCard = ({
             </div>
           )}
 
-          <div className={cn('flex-1 min-w-0', !icon && 'pl-1')}>
+          <div className={cn('flex-1 min-w-0')}>
             <div className="flex items-start justify-between gap-2 w-full max-w-full">
               <div className="min-w-0 flex-1">
                 {title && <h4 className="font-medium truncate">{title}</h4>}

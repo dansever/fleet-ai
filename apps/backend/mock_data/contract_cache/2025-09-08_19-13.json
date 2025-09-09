@@ -1,0 +1,19 @@
+{
+  "vendor_name": "Shalom Sky Catering Ltd.",
+  "vendor_address": null,
+  "vendor_contact_name": null,
+  "vendor_contact_email": null,
+  "vendor_contact_phone": null,
+  "vendor_comments": null,
+  "title": "Inflight Catering Agreement - Israel Air at Ben Gurion Airport",
+  "contract_type": "catering",
+  "effective_from": "2024-12-15",
+  "effective_to": "2025-12-14",
+  "summary": "This agreement is between Israel Air and Shalom Sky Catering Ltd. for inflight catering services at Ben Gurion Airport (TLV) from December 15, 2024 to December 14, 2025. The Vendor will provide meal production, galley handling, equipment cleaning, and waste removal, with compliance to HACCP and ISO 22000 standards and allergen labeling. Kosher certification is mandated, and operational and legal guidelines are clearly defined.",
+  "commercial_terms": "Meals are priced per route and cabin class; beverage and bar sets are itemized, and dry stores are cost plus 8 percent. Equipment loss rates are charged above threshold. Payment is net 30 days. Forecasting variance within \u00b110% is without surcharge; overage or underage outside this range triggers surcharges or credits. Late delivery credits apply, capped at 25% of catering value.",
+  "slas": "Late gate delivery target is T-45 minutes for short-haul and T-60 for long-haul, with $40 credits per 10-minute Vendor-caused delay (capped). Temperature and hygiene standards enforced with regular QA, and corrective actions documented. Monthly micro testing, labeled packaging, and quick response on allergy alerts are specified.",
+  "edge_cases": "Allergy alerts at gate are addressed with contingency kits within 30 minutes, billed with a 20% surcharge. Aircraft swaps incur a $65 reconfiguration fee. Waste handling requires recyclables separation and allows restocking of unused items if safe.",
+  "risk_liability": "Equipment loss/damage is billed above a breakage threshold. Hygiene standards and batch reviews on test failures manage food safety risk. Legal compliance includes HACCP, ISO 22000, allergen labeling, and kosher certification.",
+  "termination_law": "Agreement may be terminated for convenience with 60 days' notice, or for cause with a 30-day cure period. The governing law is the State of Israel.",
+  "operational_baselines": "Services provided at TLV include meal production, equipment wash, galley handling, and waste removal, with defined lead times and order processes. Cold chain, QA, and packaging protocols are outlined. Special meals and cancellations have specific procedures and surcharges."
+}

@@ -2,7 +2,7 @@
 RAG creation base in one file.
 
 Receives a PDF file path, then:
-1. Loads it with an async PyPDFLoader
+1. Loads it with an async DirectoryLoader
 2. Chunks pages with RecursiveCharacterTextSplitter
 3. Indexes chunks in a vector store (in-memory by default)
 4. Returns a retriever so you can ask questions immediately
@@ -35,100 +35,28 @@ Notes:
 """
 from __future__ import annotations
 
-import asyncio
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, List, Tuple
 
 from app.config import ai_config
+from app.ai.rag.chunker import chunk_documents, ChunkingConfig
+from app.ai.rag.embedder import build_embedder, EmbeddingConfig
 
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.retrievers import BaseRetriever
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_openai import OpenAIEmbeddings
+from app.ai.rag.loader import load_file
+from app.ai.rag.embedder import build_embedder, EmbeddingConfig
 
 try:
     from langchain_core.documents import Document
-    from langchain_core.embeddings import Embeddings
 except Exception:  # pragma: no cover
     Document = Any  # type: ignore
     Embeddings = Any  # type: ignore
 
-# -----------------------------
-# 1) Loader
-# -----------------------------
-async def load_pdf(file_path: str) -> List[Document]:
-    """
-    Loader for PDF files.
-
-    - Uses langchain_community.document_loaders.PyPDFLoader
-    - Uses async iteration for loading
-    - Returns a list of Document objects with `metadata` and `page_content`
-    """
-    loader = PyPDFLoader(file_path)
-    pages: List[Document] = []
-    async for page in loader.alazy_load():
-        pages.append(page)
-    return pages
-
 
 # -----------------------------
-# 2) Chunker
+# Orchestrator – build retriever
 # -----------------------------
-@dataclass
-class ChunkingConfig:
-    chunk_size: int = 1000
-    chunk_overlap: int = 150
-    add_start_index: bool = True  # adds `metadata["start_index"]`
-
-
-def chunk_documents(
-    docs: Sequence[Document], config: ChunkingConfig
-) -> List[Document]:
-    """Split documents into overlapping chunks suitable for embedding.
-
-    Uses RecursiveCharacterTextSplitter which prefers paragraph, newline, space,
-    then character boundaries.
-    """
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=config.chunk_size,
-        chunk_overlap=config.chunk_overlap,
-        add_start_index=config.add_start_index,
-    )
-    return splitter.split_documents(list(docs))
-
-
-# -----------------------------
-# 3) Embedder
-# -----------------------------
-@dataclass
-class EmbeddingConfig:
-    provider: str = "openai"  # for defaults only
-    model: Optional[str] = None  # e.g., "text-embedding-3-large"
-
-
-def build_embedder(cfg: EmbeddingConfig) -> Embeddings:
-    """Create a LangChain Embeddings instance based on config.
-
-    Defaults to OpenAIEmbeddings if available. Replace as needed.
-    """
-    if cfg.provider.lower() == "openai":
-        if OpenAIEmbeddings is None:
-            raise RuntimeError(
-                "langchain-openai is not installed. `pip install -U langchain-openai`"
-            )
-        kwargs: Dict[str, Any] = {}
-        if cfg.model:
-            kwargs["model"] = cfg.model
-        return OpenAIEmbeddings(**kwargs)
-
-    raise ValueError(f"Unsupported embeddings provider: {cfg.provider}")
-
-
-# -----------------------------
-# 4) Orchestrator – build retriever
-# -----------------------------
-async def rag_pipeline(
+def rag_pipeline(
     file_path: str,
     chunk_size: int = 1000,
     chunk_overlap: int = 150,
@@ -146,18 +74,23 @@ async def rag_pipeline(
         retriever: ready-to-use retriever for QA
         chunks: the chunked Document list
     """
-    # Load
-    pages = await load_pdf(file_path)
+    # =============== Load ===============
+    pages = load_file(file_path)
 
-    # Chunk
+    # =============== Chunk ===============
     chunks = chunk_documents(
-        pages, ChunkingConfig(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        pages, 
+        ChunkingConfig(
+            chunk_size=chunk_size, 
+            chunk_overlap=chunk_overlap,
+            add_start_index=True
+        )
     )
 
-    # Get embedding model from ai_config or use override
+    # =============== Embed ===============
     embedding_model = embedding_model or ai_config.active_embedding_model_id
 
-    # Build embeddings and in-memory vector store
+    # =============== Vector Store ===============
     embedder = build_embedder(EmbeddingConfig(provider="openai", model=embedding_model))
     vector_store = InMemoryVectorStore(embedding=embedder)
     vector_store.add_documents(chunks)
@@ -166,9 +99,7 @@ async def rag_pipeline(
     return retriever, chunks
 
 
-# -----------------------------
-# 5) Simple QA layer
-# -----------------------------
+# =============== QA layer ===============
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnablePassthrough

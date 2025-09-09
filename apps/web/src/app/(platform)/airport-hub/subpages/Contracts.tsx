@@ -1,13 +1,13 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
+import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { TabsContent } from '@/components/ui/tabs';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
-import { deleteContract } from '@/modules/contracts/contracts/contracts.server';
 import { Button } from '@/stories/Button/Button';
-import { MainCard } from '@/stories/Card/Card';
-import { ConfirmationPopover } from '@/stories/Popover/Popover';
-import { Eye, RefreshCw, Trash } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Tabs } from '@/stories/Tabs/Tabs';
+import { Banknote, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { ContractDetails } from '../_components/ContractDetails';
 import ContractList from '../_components/ContractSidebar';
 
 export default function ContractsPage() {
@@ -17,11 +17,12 @@ export default function ContractsPage() {
     contracts,
     refreshContracts,
     loading,
+    errors,
     selectedContract,
     setSelectedContract,
   } = useAirportHub();
-  const router = useRouter();
   const [selectedContractTypes, setSelectedContractTypes] = useState<string[]>([]);
+
   // Group contracts by type
   const groupedContracts = contracts.reduce(
     (acc: Record<string, Contract[]>, contract: Contract) => {
@@ -65,6 +66,26 @@ export default function ContractsPage() {
     return { total, active, expiringSoon, contractsByType };
   }, [contracts, groupedContracts, contractTypes]);
 
+  // Show loading state when initially loading contracts or when refreshing
+  if (loading.contracts && contracts.length === 0 && !loading.isRefreshing) {
+    return <LoadingComponent size="md" text="Loading contracts..." />;
+  }
+
+  // Show error state if there's an error loading contracts
+  if (errors.contracts && contracts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2 text-red-600">Error Loading Contracts</h3>
+          <p className="text-sm mb-4">{errors.contracts}</p>
+          <Button intent="primary" text="Retry" onClick={refreshContracts} />
+        </div>
+      </div>
+    );
+  }
+
+  // Keep layout even when there are no contracts; empty state handled in ContractDetails
+
   return (
     <div className="flex flex-row gap-4">
       <div
@@ -79,49 +100,30 @@ export default function ContractsPage() {
           willChange: 'width',
         }}
       >
-        <ContractList
-          contracts={contracts}
-          onContractSelect={setSelectedContract}
-          selectedContract={selectedContract}
-          InsertAddContractButton={true}
-          onContractAdd={addContract}
-        />
+        <ContractList />
       </div>
-      <MainCard
+      <Tabs
+        tabs={[
+          { label: 'Files', value: 'files', icon: <FileText /> },
+          { label: 'Ask AI', value: 'ask-ai', icon: <Brain /> },
+          { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
+          { label: 'Financials', value: 'financials', icon: <ChartBar /> },
+        ]}
+        defaultTab="files"
+        onTabChange={() => {}}
         className="flex-1"
-        title={selectedContract?.title}
-        subtitle={selectedContract?.vendorName || ''}
-        headerGradient="from-blue-500 via-blue-400 to-blue-600 opacity-80"
-        actions={
-          <div className="flex flex-row gap-2">
-            <Button intent="secondaryInverted" icon={Eye} onClick={() => {}} />
-            <Button intent="secondaryInverted" icon={RefreshCw} onClick={refreshContracts} />
-            <ConfirmationPopover
-              onConfirm={() => {
-                deleteContract(selectedContract?.id || '').then(() => {
-                  refreshContracts();
-                  setSelectedContract(null);
-                });
-              }}
-              trigger={
-                <Button intent="secondaryInverted" icon={Trash} className="hover:bg-red-500" />
-              }
-              popoverIntent="danger"
-              title="Delete Contract"
-              description="Are you sure you want to delete this contract?"
-            />
-          </div>
-        }
       >
-        {!selectedContract && (
-          <div className="text-center py-12 text-gray-500">
-            <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">No Contract Selected</h3>
-              <p className="text-sm">Please select a contract to manage its information.</p>
-            </div>
-          </div>
-        )}
-      </MainCard>
+        <TabsContent value="files">
+          <ContractDetails />
+        </TabsContent>
+        <TabsContent value="invoices">
+          <div>Invoices</div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+
+const ContractInvoices = () => {
+  return <div>Contract Invoices</div>;
+};

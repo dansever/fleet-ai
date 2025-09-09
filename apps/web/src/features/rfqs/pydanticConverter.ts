@@ -1,4 +1,4 @@
-import { RfqCreateInput } from '@/modules/rfqs/rfqs.client';
+import { RfqCreateInput } from '@/modules/rfqs/rfqs.types';
 import { PydanticPart, PydanticVendor } from '../pydantic-models/shared-pydantic-models';
 
 export interface PydanticRFQ {
@@ -57,7 +57,7 @@ export function convertPydanticToRfq(pydanticRfq: PydanticRFQ): RfqCreateInput {
     buyerComments: pydanticRfq.buyer_comments,
 
     // Workflow Management
-    status: 'pending',
+    processStatus: 'pending',
     selectedQuoteId: null,
 
     // Timestamps - will be set by the database (ISO string for API transport)

@@ -1,0 +1,19 @@
+{
+  "vendor_name": "TLV Ground Solutions Ltd.",
+  "vendor_address": null,
+  "vendor_contact_name": null,
+  "vendor_contact_email": null,
+  "vendor_contact_phone": null,
+  "vendor_comments": null,
+  "title": "Ground Handling Agreement - Israel Air at Ben Gurion Airport",
+  "contract_type": "ground_handling",
+  "effective_from": "2025-01-01",
+  "effective_to": "2025-11-30",
+  "summary": "Agreement between Israel Air and TLV Ground Solutions Ltd. for ground handling services at Ben Gurion Airport from 1 Jan 2025 to 30 Nov 2025. Services include passenger handling, gates, baggage, ramp, load control, turnaround coordination, potable water and lavatory services. De-icing not included. Pricing is per aircraft turn by class, with clearly defined baseline consumables and excess charges. Weekly invoicing with Net 30 payment.\nKPIs and SLAs include on-time pushback, baggage mishandling rate, and safety standards. Early/late arrivals, tail swaps, consumable overage, and equipment failure credit scenarios addressed. Termination for convenience requires 90 days\u2019 notice; for cause, 30-day cure. Governed by State of Israel law.",
+  "commercial_terms": "Pricing model: per turn, by aircraft class. NB (A320/B737): $690; WB (B787/A330): $1,190; ULR WB (A350-1000/777): $1,450. Remote stand add-on: $120/turn.\nBaseline per turn includes: GPU electricity NB 25kWh, WB 50kWh (excess $0.28/kWh); PCA NB 0.8 ton-hours, WB 1.6 ton-hours (excess $18/ton-hour); engine oil NB 2 quarts, WB 4 quarts (excess $14/quart); potable water NB 200L, WB 400L (excess $0.006/L); 1 lavatory service per turn (extra $45/event); ASU 10min/start included (extra $4/min).\nPer-turn invoicing weekly. Payment: Net 30. No late fee set.",
+  "slas": "On-time pushback \u2265 90% within STD \u00b115min when Airline resources are on time. Loadsheet by T-15min pre-off-block. Mishandled baggage \u2264 1.8 per 1,000 pax monthly. Zero towbar misconnection incidents. Equipment failure: $60 credit per 10min delay caused by GPU/PCA failure, cap at 30% of per-turn fee. Corrective actions for incidents within 5 business days.",
+  "edge_cases": "Late arrivals > 60min (not Vendor-caused): $95/started 30min after 30min grace. Early arrivals < -20min: Vendor attempts to meet, else remote parking at cost. Tail swap/equipment change within 60min: $75 load control, $2.50/bag >80. Oil above baseline: logs sent to Airline Engineering if >6 quarts. De-icing expressly excluded. Equipment failure credits capped at 30% per turn.",
+  "risk_liability": "Quarterly ramp audits and safety training per ISAGO; vendor provides specified towbar heads. Incidents graded A/B/C; corrective action required in 5 business days. No explicit liability cap or insurance requirements stated.",
+  "termination_law": "Termination for convenience: 90 days\u2019 notice. Termination for cause: 30-day cure. Governing law: State of Israel. Dispute resolution process not specified.",
+  "operational_baselines": "Services at Ben Gurion Airport (TLV). Coverage of passenger, baggage, load control, turnaround, potable water, and lavatory at TLV. De-icing service only if separately contracted. Ramp audits quarterly, FOD walks each shift. Vendor provides towbar heads per Airline fleet list."
+}

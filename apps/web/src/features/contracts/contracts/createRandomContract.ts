@@ -1,24 +1,20 @@
 // Updated by CursorAI on Sep 2 2025
 import { ContractTypeEnum } from '@/drizzle/enums';
-import type { Airport, Contract } from '@/drizzle/types';
-import { client as contractClient } from '@/modules/contracts/contracts';
-import { type ContractCreateInput } from '@/modules/contracts/contracts/contracts.types';
+import type { Airport, Contract, NewContract } from '@/drizzle/types';
+import { client as contractClient } from '@/modules/contracts';
 
 export async function createRandomContract(airportId: Airport['id']): Promise<Contract> {
   const randomNumber = Math.floor(Math.random() * 1000000);
   const randomType =
     ContractTypeEnum.enumValues[Math.floor(Math.random() * ContractTypeEnum.enumValues.length)];
 
-  const generatedContract: ContractCreateInput = {
+  const generatedContract: Partial<Omit<NewContract, 'id' | 'createdAt' | 'updatedAt'>> = {
     airportId,
-    vendorId: null, // Will be handled by backend if needed
+    vendorName: `Vendor ${randomNumber}`,
     title: `${randomType.replace(/_/g, ' ').toUpperCase()} Contract ${randomNumber}`,
     contractType: randomType,
-    internalNotes: `Internal notes for Contract ${randomNumber}`,
     summary: `Summary for ${randomType} contract with Vendor ${randomNumber}`,
-    terms: `Standard terms and conditions for ${randomType} services`,
-    docUrl: null,
-    vendorName: `Vendor ${randomNumber}`,
+    docUrl: `https://www.google.com`,
     vendorAddress: `${Math.floor(Math.random() * 9999) + 1} Business Park, Suite ${Math.floor(Math.random() * 999) + 1}, Anytown, USA`,
     vendorContactName: `Contact Person ${randomNumber}`,
     vendorContactEmail: `contact${randomNumber}@vendor${randomNumber}.com`,

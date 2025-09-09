@@ -56,3 +56,5 @@ strands-agents
 strands-agents-tools
 
 pypdf
+
+chromadb

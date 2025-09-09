@@ -1,155 +1,76 @@
-# fleet-ai/backend/services/clerk_service.py
-import dotenv
-dotenv.load_dotenv()
-
-import os
-import requests
-from typing import Optional
-import logging
+# backend/services/clerk_service.py
+import os, time, json, logging
+from typing import Optional, Dict, Any
+import httpx
 import jwt
-from jwt.exceptions import InvalidTokenError
-import json
+from jwt import InvalidTokenError
 
 logger = logging.getLogger(__name__)
 
-# Initialize Clerk configuration
-CLERK_SECRET_KEY = os.getenv('CLERK_SECRET_KEY')
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY')
-CLERK_JWKS_URL = os.getenv('CLERK_JWKS_URL')
-
-if not CLERK_SECRET_KEY:
-    raise ValueError("CLERK_SECRET_KEY environment variable not set. Please add it to your .env file.")
-
-if not NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
-    raise ValueError("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable not set. Please add it to your .env file.")
-
-async def get_clerk_session(session_token: str) -> Optional[dict]:
-    """
-    Verifies a Clerk session token (JWT) and returns the decoded payload.
-    Returns None if the session token is invalid or expired.
-    """
-    if not session_token:
-        logger.error("Session token is required")
-        return None
+def _get_clerk_config():
+    """Get Clerk configuration at runtime, loading environment variables if needed."""
     
+    CLERK_ISSUER = os.getenv("CLERK_ISSUER")
+    CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL")
+    BACKEND_AUD = os.getenv("CLERK_BACKEND_AUD")
+    # Validate environment variables - Fails fast if missing
+    for k, v in {"CLERK_ISSUER": CLERK_ISSUER, "CLERK_JWKS_URL": CLERK_JWKS_URL, "CLERK_BACKEND_AUD": BACKEND_AUD}.items():
+        if not v:
+            raise RuntimeError(f"Missing required env: {k}")
+    
+    return CLERK_ISSUER, CLERK_JWKS_URL, BACKEND_AUD
+
+_jwks_cache: Dict[str, Any] = {"keys": [], "fetched_at": 0}
+
+async def _get_jwks() -> Dict[str, Any]:
+    _, CLERK_JWKS_URL, _ = _get_clerk_config()
+    now = int(time.time())
+    if now - _jwks_cache["fetched_at"] > 600 or not _jwks_cache["keys"]:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get(CLERK_JWKS_URL)
+            resp.raise_for_status()
+            data = resp.json()
+        _jwks_cache["keys"] = data.get("keys", [])
+        _jwks_cache["fetched_at"] = now
+    return _jwks_cache
+
+async def verify_clerk_jwt(session_token: str) -> Optional[Dict[str, Any]]:
+    if not session_token:
+        return None
     try:
-        # Get JWKS (JSON Web Key Set) from Clerk to verify the JWT
-        jwks_response = requests.get(CLERK_JWKS_URL)
-        if jwks_response.status_code != 200:
-            logger.error(f"Failed to fetch JWKS: {jwks_response.status_code}")
-            return None
-            
-        jwks = jwks_response.json()
+        CLERK_ISSUER, _, BACKEND_AUD = _get_clerk_config()
         
-        # Decode the JWT header to get the key ID (kid)
-        unverified_header = jwt.get_unverified_header(session_token)
-        kid = unverified_header.get('kid')
-        
+        jwks = await _get_jwks()
+        header = jwt.get_unverified_header(session_token)
+        kid = header.get("kid")
         if not kid:
-            logger.error("No 'kid' found in JWT header")
             return None
-            
-        # Find the appropriate key from JWKS
-        public_key = None
-        for key in jwks.get('keys', []):
-            if key.get('kid') == kid:
-                public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
-                break
-                
-        if not public_key:
-            logger.error(f"No matching key found for kid: {kid}")
+        key = next((k for k in jwks["keys"] if k.get("kid") == kid), None)
+        if not key:
             return None
-            
-        # Verify and decode the JWT with clock skew tolerance
-        decoded_token = jwt.decode(
+
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
+        claims = jwt.decode(
             session_token,
-            public_key,
-            algorithms=['RS256'],
-            options={"verify_exp": True, "verify_nbf": True},
-            leeway=60  # Allow 60 seconds of clock skew tolerance
+            key=public_key,
+            algorithms=[key.get("alg", "RS256")],
+            issuer=CLERK_ISSUER,
+            audience=BACKEND_AUD,
+            options={
+                "verify_signature": True,
+                "verify_exp": True,
+                "verify_nbf": True,
+                "verify_iss": True,
+                "verify_aud": True,
+            },
+            leeway=60,
         )
-        
-        # Return session data for compatibility
-        return {
-            'user_id': decoded_token.get('sub'),
-            'session_id': decoded_token.get('sid'),
-            'payload': decoded_token
-        }
-        
+
+        return {"sub": claims.get("sub"), "sid": claims.get("sid"), "orgId": claims.get("orgId"), "claims": claims}
+
     except InvalidTokenError as e:
-        logger.error(f"Invalid JWT token: {e}")
+        logger.warning(f"JWT invalid: {e}")
         return None
     except Exception as e:
-        logger.error(f"Error verifying Clerk session token: {e}")
-        return None
-
-
-async def get_clerk_google_access_token(user_id: str) -> Optional[str]:
-    """
-    Retrieves the Google OAuth access token for a given Clerk user.
-    Returns None if the Google account is not connected or token not found.
-    """
-    try:
-        headers = {
-            'Authorization': f'Bearer {CLERK_SECRET_KEY}',
-            'Content-Type': 'application/json'
-        }
-        
-        url = f"https://api.clerk.com/v1/users/{user_id}/oauth_access_tokens/oauth_google"
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            # Handle both list and dict responses from Clerk API
-            if isinstance(data, list) and len(data) > 0:
-                return data[0].get('token') if isinstance(data[0], dict) else None
-            elif isinstance(data, dict):
-                return data.get('token')
-            else:
-                logger.error(f"Unexpected response format from Clerk API: {type(data)}")
-                return None
-        elif response.status_code == 404:
-            logger.warning(f"No Google OAuth token found for user {user_id}")
-            return None
-        else:
-            logger.error(f"Failed to get Google token: {response.status_code} - {response.text}")
-            return None
-            
-    except Exception as e:
-        logger.error(f"Error fetching Google access token from Clerk for user {user_id}: {e}")
-        return None
-
-
-async def get_clerk_microsoft_access_token(user_id: str) -> Optional[str]:
-    """
-    Retrieves the Microsoft OAuth access token for a given Clerk user.
-    Returns None if the Microsoft account is not connected or token not found.
-    """
-    try:
-        headers = {
-            'Authorization': f'Bearer {CLERK_SECRET_KEY}',
-            'Content-Type': 'application/json'
-        }
-
-        url = f"https://api.clerk.com/v1/users/{user_id}/oauth_access_tokens/oauth_microsoft"
-        response = requests.get(url, headers=headers)
-
-        if response.status_code == 200:
-            data = response.json()
-            # Handle both list and dict responses from Clerk API
-            if isinstance(data, list) and len(data) > 0:    
-                return data[0].get('token') if isinstance(data[0], dict) else None
-            elif isinstance(data, dict):
-                return data.get('token')
-            else:
-                logger.error(f"Unexpected response format from Clerk API: {type(data)}")
-                return None
-        elif response.status_code == 404:
-            logger.warning(f"No Microsoft OAuth token found for user {user_id}")
-            return None
-        else:
-            logger.error(f"Failed to get Microsoft token: {response.status_code} - {response.text}")
-            return None
-    except Exception as e:
-        logger.error(f"Error fetching Microsoft access token from Clerk for user {user_id}: {e}")
+        logger.error(f"JWT verify error: {e}")
         return None

@@ -4,7 +4,7 @@ import { TabsList, TabsTrigger, Tabs as TabsUI } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import type React from 'react';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 
 export interface TabsProps {
   tabs: { label: string; icon: ReactNode; value: string }[];
@@ -22,6 +22,7 @@ export const Tabs = ({
   className,
 }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const uniqueId = useId();
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -29,7 +30,11 @@ export const Tabs = ({
   };
 
   return (
-    <TabsUI defaultValue={defaultTab} onValueChange={handleTabChange} className={className}>
+    <TabsUI
+      defaultValue={defaultTab}
+      onValueChange={handleTabChange}
+      className={cn('flex flex-col gap-4', className)}
+    >
       <TabsList className="px-4 w-fit rounded-2xl flex bg-white/80 backdrop-blur-sm gap-4 h-auto py-1 border border-white/20">
         {tabs.map((tab, index) => (
           <motion.div
@@ -80,7 +85,7 @@ export const Tabs = ({
               <AnimatePresence>
                 {activeTab === tab.value && (
                   <motion.div
-                    layoutId="activeTab"
+                    layoutId={`activeTab-${uniqueId}`}
                     className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border-0"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}

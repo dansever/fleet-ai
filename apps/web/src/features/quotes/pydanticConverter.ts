@@ -79,7 +79,7 @@ export function convertPydanticToQuote(
     throw new Error('No quotes found in the extracted data');
   }
 
-  const CreateQuoteData: QuoteCreateInput = {
+  const CreateQuoteData: Partial<Omit<QuoteCreateInput, 'id' | 'createdAt' | 'updatedAt'>> = {
     // System fields
     rfqId,
 
@@ -129,7 +129,7 @@ export function convertPydanticToQuote(
     vendorComments: pydanticQuote.supplier_comments,
 
     // Workflow Management
-    status: 'pending',
+    processStatus: 'pending',
 
     // Timestamps - will be set by the database
     sentAt: null,
@@ -137,5 +137,5 @@ export function convertPydanticToQuote(
 
   console.log('✅ Converted Pydantic Quote --> New Quote');
 
-  return CreateQuoteData;
+  return CreateQuoteData as QuoteCreateInput;
 }
