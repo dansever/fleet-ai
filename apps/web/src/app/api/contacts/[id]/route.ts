@@ -5,7 +5,7 @@ import { server as contactServer } from '@/modules/vendors/contacts';
 import { ContactUpdateInput } from '@/modules/vendors/contacts/contacts.types';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/contacts/[id] - Get a contact by ID
@@ -15,12 +15,13 @@ type RouteParams = { params: { id: string } };
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await getAuthContext();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const { id } = await params;
     const contact = await contactServer.getContactById(id);
     if (!contact) return jsonError('Contact not found', 404);
+    if (contact.orgId !== orgId) return jsonError('Unauthorized', 401);
     if (!authorizeResource(contact, dbUser)) return jsonError('Unauthorized', 401);
 
     return NextResponse.json(contact);
@@ -45,6 +46,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const existing = await contactServer.getContactById(id);
     if (!existing) return jsonError('Contact not found', 404);
+    if (existing.orgId !== orgId) return jsonError('Unauthorized', 401);
     if (!authorizeResource(existing, dbUser)) return jsonError('Unauthorized', 401);
 
     // Update contact

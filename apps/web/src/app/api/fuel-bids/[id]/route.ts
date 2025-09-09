@@ -3,7 +3,7 @@ import { jsonError } from '@/lib/core/errors';
 import { server as fuelBidServer } from '@/modules/fuel/bids';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/fuel-bids/[id] - Get an existing fuel bid

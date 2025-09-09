@@ -4,7 +4,7 @@ import { jsonError } from '@/lib/core/errors';
 import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {

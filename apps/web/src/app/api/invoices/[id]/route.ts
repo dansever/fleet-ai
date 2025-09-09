@@ -4,7 +4,7 @@ import { server as invoicesServer } from '@/modules/invoices/invoices';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(_request: NextRequest, { params }: RouteContext) {

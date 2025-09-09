@@ -3,7 +3,7 @@ import { jsonError } from '@/lib/core/errors';
 import { server as userServer } from '@/modules/core/users';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/users/[id]
