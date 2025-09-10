@@ -1,4 +1,8 @@
 import { createSimpleFleetAIChain, handleChainError } from '@/lib/ai/langchain-integration';
+import { LangChainStreamHandler, extractUserInput } from '@/lib/ai/streaming-utils';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { jsonError } from '@/lib/core/errors';
+import { recordAiTokenUsageAsync } from '@/services/record-usage';
 import { UIMessage } from 'ai';
 import { NextRequest } from 'next/server';
 
@@ -7,51 +11,43 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
+    // Get auth context once at the start
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) {
+      return jsonError('Unauthorized', 401);
+    }
+
     const { messages }: { messages: UIMessage[] } = await req.json();
 
-    // Use LangChain for enhanced processing
+    // Extract user input and create LangChain chain
+    const userInput = extractUserInput(messages);
     const chain = createSimpleFleetAIChain();
-
-    // Get the latest user message
-    const latestMessage = messages[messages.length - 1];
-    const userInput =
-      latestMessage.parts
-        ?.filter((part) => part.type === 'text')
-        .map((part) => part.text)
-        .join('') || '';
 
     // Stream the response
     const stream = await chain.stream({
       input: userInput,
     });
 
-    // Create a readable stream for the response
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of stream) {
-            // Format the chunk as expected by the AI SDK
-            const data = JSON.stringify({
-              type: 'text-delta',
-              textDelta: chunk,
-            });
-            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-          }
-
-          // Send the final message
-          const finalData = JSON.stringify({
-            type: 'finish',
-            finishReason: 'stop',
-          });
-          controller.enqueue(encoder.encode(`data: ${finalData}\n\n`));
-          controller.close();
-        } catch (error) {
-          console.error('Streaming error:', error);
-          controller.error(error);
-        }
+    // Create stream handler with usage tracking
+    const streamHandler = new LangChainStreamHandler(
+      // On usage detected
+      (usage) => {
+        recordAiTokenUsageAsync({
+          userId: dbUser.id,
+          orgId: orgId,
+          totalTokens: usage.total_tokens,
+        }).catch((error) => {
+          console.error('Failed to record AI token usage:', error);
+          // Don't throw - we don't want to break the response for usage tracking issues
+        });
       },
-    });
+      // On error
+      (error) => {
+        console.error('Stream processing error:', error);
+      },
+    );
+
+    const readable = streamHandler.createReadableStream(stream);
 
     return new Response(readable, {
       headers: {
@@ -62,9 +58,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('LangChain API error:', error);
     const errorMessage = handleChainError(error);
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError(errorMessage, 500);
   }
 }

@@ -17,6 +17,7 @@ export default function ChatWindow() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +37,7 @@ export default function ChatWindow() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isStreaming) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -80,8 +81,7 @@ export default function ChatWindow() {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
-
+      let assistantMessageAdded = false;
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -98,6 +98,14 @@ export default function ChatWindow() {
             try {
               const data = JSON.parse(line.slice(6));
               if (data.type === 'text-delta' && data.textDelta) {
+                // Add the assistant message only when first text delta arrives
+                if (!assistantMessageAdded) {
+                  setMessages((prev) => [...prev, assistantMessage]);
+                  setIsLoading(false);
+                  setIsStreaming(true);
+                  assistantMessageAdded = true;
+                }
+
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === assistantMessage.id
@@ -119,6 +127,7 @@ export default function ChatWindow() {
       setMessages((prev) => prev.filter((msg) => msg.role === 'user' || msg.content.length > 0));
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
     }
   };
 
@@ -174,13 +183,13 @@ export default function ChatWindow() {
                 <div
                   className={cn(
                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                    message.role === 'user' ? 'bg-primary' : 'bg-secondary',
+                    message.role === 'user' ? 'bg-primary' : 'bg-white',
                   )}
                 >
                   {message.role === 'user' ? (
                     <User className="h-4 w-4 text-primary-foreground" />
                   ) : (
-                    <Bot className="h-4 w-4 text-secondary-foreground" />
+                    <Bot className="h-4 w-4 text-primary" />
                   )}
                 </div>
 
@@ -189,10 +198,10 @@ export default function ChatWindow() {
                     'flex-1 space-y-2 rounded-2xl px-4 py-3 max-w-[80%]',
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground ml-12'
-                      : 'bg-muted text-foreground mr-12',
+                      : 'bg-white  border-1 border-green-400 text-foreground mr-12',
                   )}
                 >
-                  <div className="text-sm font-medium">
+                  <div className="text-sm font-bold">
                     {message.role === 'user' ? 'You' : 'FleetAI Assistant'}
                   </div>
                   <div className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -203,8 +212,8 @@ export default function ChatWindow() {
               </div>
             ))}
 
-            {/* Loading indicator */}
-            {isLoading && (
+            {/* Loading indicator - only show when thinking, not when streaming */}
+            {isLoading && !isStreaming && (
               <div className="flex gap-4 max-w-4xl mx-auto">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border">
                   <Bot className="h-4 w-4 text-muted-foreground" />
@@ -232,14 +241,14 @@ export default function ChatWindow() {
                 value={input}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                disabled={isLoading}
+                disabled={isLoading || isStreaming}
                 placeholder="Message FleetAI Assistant... (Press Enter to send, Shift+Enter for new line)"
               />
             </div>
             <Button
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || isStreaming || !input.trim()}
               intent="primary"
-              text={isLoading ? 'Sending...' : 'Send'}
+              text={isLoading || isStreaming ? 'Sending...' : 'Send'}
               onClick={handleSubmit}
               className="shrink-0"
             />

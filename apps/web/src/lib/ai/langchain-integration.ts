@@ -7,12 +7,12 @@ import { ChatOpenAI } from '@langchain/openai';
 // Initialize the LangChain OpenAI model with optimal settings
 export const createLangChainModel = () => {
   return new ChatOpenAI({
-    model: 'gpt-4o',
-    temperature: 0.7,
-    maxTokens: 2000, // Increased for more detailed responses
-    streaming: true,
-    // Add retry logic for robustness
-    maxRetries: 3,
+    model: 'gpt-4o', // Use the GPT-4o model
+    temperature: 0.7, // Adjust temperature for desired creativity
+    maxTokens: 500, // Increased for more detailed responses
+    streaming: true, // Enable streaming mode
+    streamUsage: true, // Enable token usage tracking in streaming mode
+    maxRetries: 3, // Add retry logic for robustness
   });
 };
 
@@ -76,9 +76,10 @@ export const createSimpleFleetAIChain = () => {
     ['system', FLEET_AI_SYSTEM_PROMPT],
     ['human', '{input}'],
   ]);
-  const outputParser = new StringOutputParser();
 
-  return RunnableSequence.from([prompt, model, outputParser]);
+  // Return the chain without StringOutputParser to preserve usage metadata
+  // The StringOutputParser strips away the AIMessageChunk metadata including usage_metadata
+  return RunnableSequence.from([prompt, model]);
 };
 
 // Convert UI messages to LangChain format with better handling

@@ -4,11 +4,11 @@ import ChatWindow from './_components/ChatWindow';
 
 export default function AIAssistantClientPage() {
   return (
-    <PageLayout sidebarContent={null} headerContent={<ChatHeader />} mainContent={<ChatWindow />} />
+    <PageLayout sidebarContent={null} headerContent={<Header />} mainContent={<ChatWindow />} />
   );
 }
 
-const ChatHeader = () => {
+const Header = () => {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">

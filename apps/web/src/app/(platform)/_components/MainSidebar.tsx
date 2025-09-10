@@ -16,10 +16,9 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { useOrganization, UserButton, useUser } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import {
   BarChart,
   Fuel,
@@ -34,6 +33,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 interface SidebarTab {
   title: string;
@@ -231,9 +231,15 @@ export function MainSidebar({
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
-  const { organization } = useOrganization();
   const isCollapsed = state === 'collapsed';
   const { user } = useUser();
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.organizationMemberships?.[0]?.organization?.imageUrl) {
+      setImageUrl(user.organizationMemberships[0].organization.imageUrl);
+    }
+  }, [user?.organizationMemberships?.[0]?.organization?.imageUrl]);
 
   return (
     <Sidebar collapsible="icon" variant={variant} className="border-transparen">
@@ -341,9 +347,9 @@ export function MainSidebar({
       </SidebarContent>
       <SidebarFooter>
         <div style={{ position: 'relative', width: '100%', height: '40px' }}>
-          {user?.organizationMemberships[0].organization.imageUrl && !isCollapsed && (
+          {!isCollapsed && (
             <Image
-              src={user.organizationMemberships[0].organization.imageUrl}
+              src={imageUrl ?? '/placeholder.png'}
               alt="Organization logo"
               fill
               sizes="200px"
@@ -360,26 +366,21 @@ export function MainSidebar({
 }
 
 function ClientUserButton({ showName }: { showName: boolean }) {
-  const { isSignedIn, isLoaded } = useUser();
-
-  if (!isLoaded || !isSignedIn) {
-    return (
-      <div className="h-8 w-8 flex items-center justify-center">
-        <Skeleton className="h-8 w-8 rounded-full" />
-      </div>
-    );
-  }
+  // Memoize appearance to prevent unnecessary re-renders
+  const appearance = useMemo(
+    () => ({
+      elements: {
+        userButtonBox: {
+          flexDirection: 'row-reverse' as const,
+        },
+      },
+    }),
+    [],
+  );
 
   return (
-    <UserButton
-      showName={showName}
-      appearance={{
-        elements: {
-          userButtonBox: {
-            flexDirection: 'row-reverse',
-          },
-        },
-      }}
-    />
+    <div suppressHydrationWarning>
+      <UserButton showName={showName} appearance={appearance} />
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/stories/Button/Button';
 import { CheckCircle, File as FileIcon, UploadCloud, X } from 'lucide-react';
 import { AnimatePresence, motion, type Variants } from 'motion/react';
 import type React from 'react';
@@ -9,6 +10,7 @@ import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 type UploadStatus = 'idle' | 'dragging' | 'uploading' | 'success' | 'error';
 
 interface FileUploadProps {
+  onUpload?: (file: File, onProgress?: (progress: number) => void) => Promise<void>;
   onUploadSuccess?: (file: File) => void;
   onUploadError?: (error: string) => void;
   acceptedFileTypes?: string[]; // e.g., ["image/png", "image/jpeg"]
@@ -78,12 +80,13 @@ const successIconVariants: Variants = {
 };
 
 export default function FileUpload({
+  onUpload,
   onUploadSuccess,
   onUploadError,
   acceptedFileTypes,
   maxFileSize = 5 * 1024 * 1024, // Default 5MB
   currentFile: initialFile = null,
-  onFileRemove,
+  onFileRemove = () => {},
 }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(initialFile);
   const [status, setStatus] = useState<UploadStatus>('idle');
@@ -127,22 +130,22 @@ export default function FileUpload({
     return true;
   };
 
-  const handleFileSelect = (selectedFile: File | null) => {
-    if (!selectedFile) return;
+  const handleFileSelect = useCallback(
+    (selectedFile: File | null) => {
+      if (!selectedFile) return;
 
-    if (!handleFileValidation(selectedFile)) {
-      setFile(null); // Clear invalid file
-      // Keep the error state active
-      return;
-    }
+      if (!handleFileValidation(selectedFile)) {
+        setFile(null); // Clear invalid file
+        // Keep the error state active
+        return;
+      }
 
-    setFile(selectedFile);
-    setError(null);
-    setStatus('uploading');
-    setProgress(0);
-    // Simulate upload
-    simulateUpload(selectedFile);
-  };
+      setFile(selectedFile);
+      setError(null);
+      setStatus('idle'); // Set to idle, upload happens when user clicks "Upload" button
+    },
+    [acceptedFileTypes, maxFileSize, onUploadError],
+  );
 
   const handleDragOver = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
@@ -193,35 +196,36 @@ export default function FileUpload({
     fileInputRef.current?.click();
   };
 
-  const simulateUpload = (uploadingFile: File) => {
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += Math.random() * 10 + 10; // Simulate progress increments
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-        setProgress(100);
-        setStatus('success');
-        if (onUploadSuccess) {
-          onUploadSuccess(uploadingFile);
-        }
-        // Optional: Reset after a delay
-        //  setTimeout(() => {
-        //     resetState();
-        // }, 3000);
-      } else {
-        // Check if still in uploading state before updating progress
-        setStatus((prevStatus) => {
-          if (prevStatus === 'uploading') {
-            setProgress(currentProgress);
-            return 'uploading';
-          }
-          // If status changed (e.g., user clicked reset), stop the simulation
-          clearInterval(interval);
-          return prevStatus;
-        });
+  const handleUpload = useCallback(async () => {
+    if (!file || !onUpload) return;
+    try {
+      setStatus('uploading');
+      setProgress(0);
+      setError(null);
+
+      // Progress callback for upload function
+      const onProgress = (progressValue: number) => {
+        setProgress(Math.min(100, Math.max(0, progressValue)));
+      };
+
+      // Call the provided upload function with progress callback
+      await onUpload(file, onProgress);
+
+      // If we reach here, upload was successful
+      setProgress(100);
+      setStatus('success');
+      if (onUploadSuccess) {
+        onUploadSuccess(file);
       }
-    }, 200); // Adjust interval for simulation speed
-  };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+      setError(errorMessage);
+      setStatus('error');
+      if (onUploadError) {
+        onUploadError(errorMessage);
+      }
+    }
+  }, [file, onUpload, onUploadSuccess, onUploadError]);
 
   const resetState = () => {
     setFile(null);
@@ -272,12 +276,11 @@ export default function FileUpload({
         } as React.CSSProperties
       }
     >
-      <Card className="w-full max-w-md mx-auto overflow-hidden min-h-[250px] flex flex-col bg-white dark:bg-zinc-900 border-zinc-200/50 dark:border-zinc-800/50 shadow-lg shadow-zinc-200/50 dark:shadow-zinc-900/50">
-        <CardContent className="p-6 flex-1 flex flex-col items-center justify-center text-center relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-50/20 via-transparent to-sky-50/20 dark:from-violet-500/5 dark:via-transparent dark:to-sky-500/5" />
+      <Card className="p-0 w-full max-w-md mx-auto overflow-hidden flex flex-col bg-white border-zinc-200/50 rounded-3xl shadow-lg">
+        <CardContent className="py-8 flex-1 flex flex-col items-center justify-center text-center relative bg-gradient-to-br from-violet-50 to-orange-50 transparent">
           <div className="relative z-10 w-full">
             <AnimatePresence mode="wait" initial={false}>
-              {file && (status === 'success' || status !== 'uploading') ? (
+              {file && (status === 'idle' || status === 'error') ? (
                 <motion.div
                   key="preview"
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -315,9 +318,7 @@ export default function FileUpload({
                   {!previewUrl && (
                     <FileIcon className="w-16 h-16 mb-4 text-violet-500" aria-hidden="true" />
                   )}
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                    Current File
-                  </h3>
+                  <h3 className="text-lg font-semibold text-zinc-900 ">Current File</h3>
                   <div className="w-full max-w-xs bg-zinc-50/50 dark:bg-zinc-800/50 rounded-lg p-3 mb-4 backdrop-blur-sm">
                     <p
                       className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2 truncate"
@@ -353,22 +354,18 @@ export default function FileUpload({
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => triggerFileInput()}
-                      type="button"
-                      className="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
-                      aria-label="Replace file"
-                    >
-                      Replace File
-                    </button>
-                    <button
+                    <Button
+                      intent="primary"
+                      onClick={handleUpload}
+                      text="Upload"
+                      aria-label="Upload file"
+                    />
+                    <Button
                       onClick={handleRemoveFile}
-                      type="button"
-                      className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-200 hover:border-red-300 dark:border-red-800 dark:hover:border-red-700 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
+                      intent="danger"
+                      text="Remove"
                       aria-label="Remove file"
-                    >
-                      Remove
-                    </button>
+                    />
                   </div>
                 </motion.div>
               ) : status === 'idle' || status === 'dragging' ? (

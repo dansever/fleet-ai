@@ -23,7 +23,6 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ActivityFeed } from './_components/ActivityFeed';
 import { CatagorySpendingPie } from './_components/CatagorySpendingPie';
-import InputBar from './_components/InputBar';
 import { RiskAndCompliance } from './_components/RiskAndCompliance';
 
 export default function DashboardClientPage({
@@ -105,9 +104,6 @@ export default function DashboardClientPage({
 
   return (
     <div className="grid grid-cols-6 gap-4">
-      {/* Search and AI Button */}
-      <InputBar />
-
       {/* Executive KPI Metrics */}
       <div className="col-span-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {executiveMetrics.map((metric) => (

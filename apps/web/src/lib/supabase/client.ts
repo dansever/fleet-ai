@@ -1,3 +1,6 @@
+// lib/supabase/client.ts
+// Browser-side Supabase client (uses anon key, no auth headers)
+
 import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
