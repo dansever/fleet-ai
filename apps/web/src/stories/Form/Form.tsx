@@ -333,7 +333,6 @@ export const ModernTextarea = ({
       rows={rows}
       className={cn(
         formStyles.input,
-        'min-h-[40px] max-h-[200px] resize-y rounded-br-sm',
         error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
         className,
       )}

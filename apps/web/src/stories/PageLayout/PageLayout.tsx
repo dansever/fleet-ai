@@ -48,8 +48,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
       {sidebarPosition === 'left' && sidebarElement}
 
       {/* Right Main Panel */}
-      {/* <div className="flex-1 min-w-0 flex flex-col gap-2 overflow-y-scroll"> */}
-      <ScrollArea className="p-2 flex-1 min-w-0 flex flex-col gap-2">
+      <ScrollArea className="px-2 pb-2 flex-1 min-w-0 flex flex-col gap-2">
         {/* Fixed Header */}
         {headerContent && (
           <header className="p-2 sticky top-0 z-50 w-full">

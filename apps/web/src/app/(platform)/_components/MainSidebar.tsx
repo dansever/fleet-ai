@@ -29,6 +29,7 @@ import {
   Settings,
   Settings2,
   ShoppingCart,
+  Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -49,6 +50,13 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       description: 'Overview & Analytics',
       url: '/dashboard',
       icon: LayoutDashboard,
+      isReady: true,
+    },
+    {
+      title: 'AI Assistant',
+      description: 'AI Assistant',
+      url: '/ai-assistant',
+      icon: Sparkles,
       isReady: true,
     },
     {
