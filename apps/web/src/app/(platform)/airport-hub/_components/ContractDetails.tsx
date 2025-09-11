@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { client as contractClient } from '@/modules/contracts';
@@ -88,87 +94,116 @@ export function ContractDetails() {
   );
 
   return (
-    <MainCard
-      className="flex-1"
-      title={selectedContract?.title || 'Service Agreements'}
-      subtitle={
-        selectedContract?.vendorName ||
-        `All service agreements for ${selectedAirport?.name || 'this airport'}`
-      }
-      headerGradient={
-        selectedContract ? 'from-blue-500 via-blue-400 to-blue-600 opacity-80' : undefined
-      }
-      neutralHeader={!selectedContract}
-      actions={selectedContract ? actionsWhenSelected : actionsWhenNotSelected}
-    >
-      {!hasContracts && (
-        <div className="text-center py-12 text-gray-500">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <FileText className="w-8 h-8 text-gray-400" />
+    <div className="flex flex-col gap-4">
+      <MainCard
+        className="flex-1"
+        title={selectedContract?.title || 'Service Agreements'}
+        subtitle={
+          selectedContract?.vendorName ||
+          `All service agreements for ${selectedAirport?.name || 'this airport'}`
+        }
+        headerGradient={
+          selectedContract ? 'from-blue-500 via-blue-400 to-blue-600 opacity-80' : undefined
+        }
+        neutralHeader={!selectedContract}
+        actions={selectedContract ? actionsWhenSelected : actionsWhenNotSelected}
+      >
+        {!hasContracts && (
+          <div className="text-center py-12 text-gray-500">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <FileText className="w-8 h-8 text-gray-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">No contracts found</h4>
+            <p className="text-sm mb-4">
+              No contracts have been added for {selectedAirport?.name || 'this airport'} yet.
+            </p>
+            {selectedAirport && (
+              <SimpleContractDialog
+                airport={selectedAirport}
+                trigger={<Button intent="primary" text="Add First Contract" icon={PlusIcon} />}
+                onChange={(newContract) => {
+                  addContract(newContract);
+                  setSelectedContract(newContract);
+                }}
+              />
+            )}
           </div>
-          <h4 className="text-lg font-semibold text-gray-900 mb-2">No contracts found</h4>
-          <p className="text-sm mb-4">
-            No contracts have been added for {selectedAirport?.name || 'this airport'} yet.
-          </p>
-          {selectedAirport && (
-            <SimpleContractDialog
-              airport={selectedAirport}
-              trigger={<Button intent="primary" text="Add First Contract" icon={PlusIcon} />}
-              onChange={(newContract) => {
-                addContract(newContract);
-                setSelectedContract(newContract);
-              }}
-            />
-          )}
-        </div>
-      )}
+        )}
 
-      {!selectedContract && hasContracts && (
-        <div className="text-center py-12 text-gray-500">
-          <div className="text-center">
-            <h3 className="text-lg font-medium mb-2">No Contract Selected</h3>
-            <p className="text-sm">Please select a contract to manage its information.</p>
+        {!selectedContract && hasContracts && (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-center">
+              <h3 className="text-lg font-medium mb-2">No Contract Selected</h3>
+              <p className="text-sm">Please select a contract to manage its information.</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {selectedContract && (
-        <div className="col-span-4 flex flex-col gap-2">
-          <div className="flex flex-row gap-2 justify-between">
-            <h3>Contract Information</h3>
-            <FileUploadPopover
-              onSend={handleUploadContractFile}
-              trigger={<Button intent="primary" text="Upload Contract" icon={Upload} />}
-            />
+        {selectedContract && (
+          <div className="col-span-4 flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
+              <Accordion type="multiple" className="w-full" defaultValue={['item-1']}>
+                <AccordionItem value="item-1">
+                  <AccordionTrigger className="cursor-pointer font-bold">
+                    Contract Information
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    {selectedContract.summary}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                  <AccordionTrigger className="cursor-pointer font-bold">
+                    Commercial Terms
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    {selectedContract.commercialTerms}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-3">
+                  <AccordionTrigger className="cursor-pointer font-bold">SLAs</AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    {selectedContract.slas}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-4">
+                  <AccordionTrigger className="cursor-pointer font-bold">
+                    Edge Cases
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    {selectedContract.edgeCases}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-5">
+                  <AccordionTrigger className="cursor-pointer font-bold">
+                    Risk & Liability
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    {selectedContract.riskLiability}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-6">
+                  <AccordionTrigger className="cursor-pointer font-bold">
+                    Termination Law
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col gap-4">
+                    {selectedContract.terminationLaw}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <h3>Summary</h3>
-              <p>{selectedContract.summary}</p>
-            </div>
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <h3>Commercial Terms</h3>
-              <p>{selectedContract.commercialTerms}</p>
-            </div>
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <h3>SLAs</h3>
-              <p>{selectedContract.slas}</p>
-            </div>
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <h3>Edge Cases</h3>
-              <p>{selectedContract.edgeCases}</p>
-            </div>
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <h3>Risk & Liability</h3>
-              <p>{selectedContract.riskLiability}</p>
-            </div>
-            <div className="rounded-2xl bg-sky-50 p-4">
-              <h3>Termination Law</h3>
-              <p>{selectedContract.terminationLaw}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </MainCard>
+        )}
+      </MainCard>
+      <MainCard
+        neutralHeader
+        title="Documents & Files"
+        actions={
+          <FileUploadPopover
+            onSend={handleUploadContractFile}
+            trigger={<Button intent="primary" text="Upload Contract" icon={Upload} />}
+          />
+        }
+      ></MainCard>
+    </div>
   );
 }

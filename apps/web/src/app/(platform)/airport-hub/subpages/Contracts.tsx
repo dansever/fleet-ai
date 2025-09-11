@@ -104,20 +104,26 @@ export default function ContractsPage() {
       </div>
       <Tabs
         tabs={[
-          { label: 'Files', value: 'files', icon: <FileText /> },
+          { label: 'Contract Details', value: 'contract-details', icon: <FileText /> },
           { label: 'Ask AI', value: 'ask-ai', icon: <Brain /> },
           { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
           { label: 'Financials', value: 'financials', icon: <ChartBar /> },
         ]}
-        defaultTab="files"
+        defaultTab="contract-details"
         onTabChange={() => {}}
         className="flex-1"
       >
-        <TabsContent value="files">
+        <TabsContent value="contract-details">
           <ContractDetails />
+        </TabsContent>
+        <TabsContent value="ask-ai">
+          <div>Ask AI</div>
         </TabsContent>
         <TabsContent value="invoices">
           <div>Invoices</div>
+        </TabsContent>
+        <TabsContent value="financials">
+          <div>Financials</div>
         </TabsContent>
       </Tabs>
     </div>
