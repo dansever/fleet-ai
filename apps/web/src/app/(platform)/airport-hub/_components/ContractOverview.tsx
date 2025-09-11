@@ -6,15 +6,13 @@ import {
 } from '@/components/ui/accordion';
 import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
-import { client as contractClient } from '@/modules/contracts';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
-import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
-import { Eye, FileText, PlusIcon, RefreshCw, Trash, Upload } from 'lucide-react';
-import { toast } from 'sonner';
+import { ConfirmationPopover } from '@/stories/Popover/Popover';
+import { Eye, FileText, PlusIcon, RefreshCw, Trash } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
-export function ContractDetails() {
+export function ContractOverview() {
   const {
     selectedAirport,
     loading,
@@ -25,22 +23,6 @@ export function ContractDetails() {
     removeContract,
     addContract,
   } = useAirportHub();
-
-  const handleUploadContractFile = async (file: File) => {
-    if (!selectedContract) {
-      toast.error('No contract selected');
-      return;
-    }
-
-    try {
-      await contractClient.processContract(file, selectedContract.id);
-      toast.success('Contract file processed successfully');
-      refreshContracts();
-    } catch (error) {
-      toast.error('Failed to process contract file');
-      console.error(error);
-    }
-  };
 
   const hasContracts = contracts.length > 0;
 
@@ -194,16 +176,6 @@ export function ContractDetails() {
           </div>
         )}
       </MainCard>
-      <MainCard
-        neutralHeader
-        title="Documents & Files"
-        actions={
-          <FileUploadPopover
-            onSend={handleUploadContractFile}
-            trigger={<Button intent="primary" text="Upload Contract" icon={Upload} />}
-          />
-        }
-      ></MainCard>
     </div>
   );
 }

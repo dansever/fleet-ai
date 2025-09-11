@@ -5,10 +5,11 @@ import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import { Button } from '@/stories/Button/Button';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { Banknote, Brain, ChartBar, FileText } from 'lucide-react';
+import { Banknote, BarChart, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AskAI from '../_components/AskAI';
-import { ContractDetails } from '../_components/ContractDetails';
+import { ContractFiles } from '../_components/ContractFiles';
+import { ContractOverview } from '../_components/ContractOverview';
 import ContractList from '../_components/ContractSidebar';
 
 export default function ContractsPage() {
@@ -105,19 +106,23 @@ export default function ContractsPage() {
       </div>
       <Tabs
         tabs={[
-          { label: 'Contract Details', value: 'contract-details', icon: <FileText /> },
-          { label: 'Ask AI', value: 'ask-ai', icon: <Brain /> },
+          { label: 'Overview', value: 'overview', icon: <BarChart /> },
+          { label: 'Files', value: 'files', icon: <FileText /> },
+          { label: 'ChatBot', value: 'chatbot', icon: <Brain /> },
           { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
           { label: 'Financials', value: 'financials', icon: <ChartBar /> },
         ]}
-        defaultTab="contract-details"
+        defaultTab="overview"
         onTabChange={() => {}}
         className="flex-1"
       >
-        <TabsContent value="contract-details">
-          <ContractDetails />
+        <TabsContent value="overview">
+          <ContractOverview />
         </TabsContent>
-        <TabsContent value="ask-ai">
+        <TabsContent value="files">
+          <ContractFiles />
+        </TabsContent>
+        <TabsContent value="chatbot">
           <AskAI />
         </TabsContent>
         <TabsContent value="invoices">

@@ -109,7 +109,7 @@ export default function AirportHubClientPage() {
                     <StatusBadge status="secondary" text={selectedAirport.iata} />
                   )}
                   {selectedAirport.isHub && (
-                    <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400 bg-yellow-50">
+                    <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400 bg-gradient-to-br from-yellow-100 to-yellow-200 opacity-80">
                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                       Hub
                     </div>

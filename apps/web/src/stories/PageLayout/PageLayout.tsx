@@ -52,7 +52,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
         {/* Fixed Header */}
         {headerContent && (
           <header className="p-2 sticky top-0 z-50 w-full">
-            <div className="px-2 py-1 rounded-xl backdrop-blur supports-[backdrop-filter]:bg-white/20">
+            <div className="px-2 py-1 rounded-xl backdrop-blur-sm supports-[backdrop-filter]:bg-white/20">
               {headerContent}
             </div>
           </header>

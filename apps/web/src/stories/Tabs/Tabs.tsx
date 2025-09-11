@@ -35,7 +35,7 @@ export const Tabs = ({
       onValueChange={handleTabChange}
       className={cn('flex flex-col gap-4', className)}
     >
-      <TabsList className="px-4 w-fit rounded-2xl flex bg-white/80 backdrop-blur-sm gap-4 h-auto py-1 border border-white/20">
+      <TabsList className="px-2 w-fit rounded-2xl flex bg-white/80 backdrop-blur-sm gap-2 h-auto py-1 border border-white/20">
         {tabs.map((tab, index) => (
           <motion.div
             key={tab.value}
