@@ -2,62 +2,76 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { contactsTable } from '@/drizzle/schema/schema.core';
-import { Contact, NewContact, Organization, UpdateContact, Vendor } from '@/drizzle/types';
+import { vendorContactsTable } from '@/drizzle/schema/schema.vendors';
+import {
+  NewVendorContact,
+  Organization,
+  UpdateVendorContact,
+  Vendor,
+  VendorContact,
+} from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 
 /**
- * Get a contact by ID
+ * Get a vendor contact by ID
  */
-export async function getContactById(id: Contact['id']): Promise<Contact | null> {
-  const result = await db.select().from(contactsTable).where(eq(contactsTable.id, id)).limit(1);
+export async function getVendorContactById(id: VendorContact['id']): Promise<VendorContact | null> {
+  const result = await db
+    .select()
+    .from(vendorContactsTable)
+    .where(eq(vendorContactsTable.id, id))
+    .limit(1);
   return result[0] ?? null;
 }
-// Backward compatible alias
-export const getContact = getContactById;
 
 /**
- * Get all contacts for an organization
+ * Get all vendor contacts for an organization
  */
-export async function listContactsByOrg(orgId: Organization['id']): Promise<Contact[]> {
-  const contacts = await db.select().from(contactsTable).where(eq(contactsTable.orgId, orgId));
-  return contacts;
-}
-
-/**
- * Get all contacts for a vendor
- */
-export async function listContactsByVendor(vendorId: Vendor['id']): Promise<Contact[]> {
+export async function listVendorContactsByOrg(orgId: Organization['id']): Promise<VendorContact[]> {
   const contacts = await db
     .select()
-    .from(contactsTable)
-    .where(eq(contactsTable.vendorId, vendorId));
+    .from(vendorContactsTable)
+    .where(eq(vendorContactsTable.orgId, orgId));
   return contacts;
 }
 
 /**
- * Create a new contact
+ * Get all vendor contacts for a vendor
  */
-export async function createContact(data: NewContact): Promise<Contact> {
-  const result = await db.insert(contactsTable).values(data).returning();
+export async function listVendorContactsByVendor(vendorId: Vendor['id']): Promise<VendorContact[]> {
+  const contacts = await db
+    .select()
+    .from(vendorContactsTable)
+    .where(eq(vendorContactsTable.vendorId, vendorId));
+  return contacts;
+}
+
+/**
+ * Create a new vendor contact
+ */
+export async function createVendorContact(data: NewVendorContact): Promise<VendorContact> {
+  const result = await db.insert(vendorContactsTable).values(data).returning();
   return result[0];
 }
 
 /**
- * Update a contact
+ * Update a vendor contact
  */
-export async function updateContact(id: Contact['id'], data: UpdateContact): Promise<Contact> {
+export async function updateVendorContact(
+  id: VendorContact['id'],
+  data: UpdateVendorContact,
+): Promise<VendorContact> {
   const result = await db
-    .update(contactsTable)
+    .update(vendorContactsTable)
     .set({ ...data, updatedAt: new Date() })
-    .where(eq(contactsTable.id, id))
+    .where(eq(vendorContactsTable.id, id))
     .returning();
   return result[0];
 }
 
 /**
- * Delete a contact
+ * Delete a vendor contact
  */
-export async function deleteContact(id: Contact['id']): Promise<void> {
-  await db.delete(contactsTable).where(eq(contactsTable.id, id));
+export async function deleteVendorContact(id: VendorContact['id']): Promise<void> {
+  await db.delete(vendorContactsTable).where(eq(vendorContactsTable.id, id));
 }

@@ -3,52 +3,54 @@ import { api } from '@/services/api-client';
 import { VendorContactCreateInput, VendorContactUpdateInput } from './vendor-contacts.types';
 
 /**
- * Get a contact by ID
+ * Get a vendor contact by ID
  */
-export async function getContact(id: VendorContact['id']): Promise<VendorContact> {
-  const res = await api.get(`/api/contacts/${id}`);
+export async function getVendorContactById(id: VendorContact['id']): Promise<VendorContact> {
+  const res = await api.get(`/api/vendor-contacts/${id}`);
   return res.data;
 }
 
 /**
- * Get all contacts for an organization
+ * Get all vendor contacts for an organization
  */
-export async function listContactsByOrg(orgId?: Organization['id']): Promise<VendorContact[]> {
-  const url = orgId ? `/api/contacts?orgId=${orgId}` : '/api/contacts';
+export async function listVendorContactsByOrg(
+  orgId?: Organization['id'],
+): Promise<VendorContact[]> {
+  const url = orgId ? `/api/vendor-contacts?orgId=${orgId}` : '/api/vendor-contacts';
   const res = await api.get(url);
   return res.data;
 }
 
 /**
- * Get all contacts for a vendor
+ * Get all vendor contacts for a vendor
  */
-export async function listContactsByVendor(vendorId: Vendor['id']): Promise<VendorContact[]> {
-  const res = await api.get(`/api/contacts?vendorId=${vendorId}`);
+export async function listVendorContactsByVendor(vendorId: Vendor['id']): Promise<VendorContact[]> {
+  const res = await api.get(`/api/vendor-contacts?vendorId=${vendorId}`);
   return res.data;
 }
 
 /**
- * Create a new contact
+ * Create a new vendor contact
  */
-export async function createContact(data: VendorContactCreateInput): Promise<VendorContact> {
-  const res = await api.post('/api/contacts', data);
+export async function createVendorContact(data: VendorContactCreateInput): Promise<VendorContact> {
+  const res = await api.post('/api/vendor-contacts', data);
   return res.data;
 }
 
 /**
- * Update an existing contact
+ * Update an existing vendor contact
  */
-export async function updateContact(
+export async function updateVendorContact(
   id: string,
   data: VendorContactUpdateInput,
 ): Promise<VendorContact> {
-  const res = await api.put(`/api/contacts/${id}`, data);
+  const res = await api.put(`/api/vendor-contacts/${id}`, data);
   return res.data;
 }
 
 /**
- * Delete a contact
+ * Delete a vendor contact
  */
-export async function deleteContact(id: string): Promise<void> {
-  await api.delete(`/api/contacts/${id}`);
+export async function deleteVendorContact(id: string): Promise<void> {
+  await api.delete(`/api/vendor-contacts/${id}`);
 }

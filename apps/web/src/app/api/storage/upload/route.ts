@@ -1,9 +1,10 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { uploadFileToStorage } from '@/lib/supabase/storage';
+import { createClient } from '@/lib/supabase/client';
 import { server as orgServer } from '@/modules/core/organizations';
 import { NextRequest, NextResponse } from 'next/server';
 import slugify from 'slugify';
+const supabase = createClient();
 
 /**
  * POST /api/storage/upload - Upload a file to the storage
@@ -11,8 +12,8 @@ import slugify from 'slugify';
  */
 export async function POST(request: NextRequest) {
   try {
-    const { dbUser, orgId, error } = await getAuthContext();
-    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error: authError } = await getAuthContext();
+    if (authError || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // get the organization for the bucket
     const org = await orgServer.getOrgById(orgId);
@@ -28,28 +29,42 @@ export async function POST(request: NextRequest) {
     const documentType = formData.get('documentType') as string;
     if (!documentType) return jsonError('No document type uploaded', 400);
 
-    // get the file extension and name
+    // get the file extension and name: "fileName.pdf" -> "pdf"
     const ext = (() => {
       const e = file.name.split('.').pop();
       return e ? e.toLowerCase() : 'bin';
     })();
 
+    // get the file name without extension for slug: "fileName.pdf" -> "fileName"
+    const fileNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    const fileNameSlug = slugify(fileNameWithoutExt, { lower: true });
+
     // add a UUID to avoid collisions
     const unique = crypto.randomUUID();
 
-    // get the file name slug and path
-    const fileNameSlug = slugify(file.name);
+    // "contracts/fileName-1234.pdf"
     const path = `${documentType}/${fileNameSlug}-${unique.slice(0, 4)}.${ext}`;
 
-    console.log('++++ INSIDE API ROUTE ++++');
-    console.log('Path:', path);
-    console.log('Bucket:', bucket);
-
     // upload the file to the storage
-    const uploadedFile = await uploadFileToStorage({ bucket, path, file });
+    const { data, error: supabaseError } = await supabase.storage.from(bucket).upload(path, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type,
+    });
 
-    // return the uploaded file
-    return NextResponse.json(uploadedFile);
+    if (supabaseError) {
+      console.error('Supabase storage error:', supabaseError);
+      return jsonError(`Failed to upload file: ${supabaseError.message}`, 500);
+    }
+
+    // return the uploaded file data with additional metadata
+    return NextResponse.json({
+      ...data,
+      bucket,
+      originalName: file.name,
+      size: file.size,
+      contentType: file.type,
+    });
   } catch (error) {
     console.error('Failed to upload file', error);
     return jsonError('Failed to upload file', 500);

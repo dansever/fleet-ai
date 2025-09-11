@@ -1,12 +1,11 @@
-// src/modules/vendors/contacts/contacts.types.ts
 /**
- * Contact types for form handling and API requests
+ * Vendor contact types for form handling and API requests
  */
 
 import type { NewVendorContact } from '@/drizzle/types';
 
 /**
- * For creating contacts from forms - excludes server-managed fields
+ * For creating vendor contacts from forms - excludes server-managed fields
  */
 export type VendorContactCreateInput = Omit<
   NewVendorContact,
@@ -14,6 +13,6 @@ export type VendorContactCreateInput = Omit<
 >;
 
 /**
- * For updating contacts from forms - all fields optional
+ * For updating vendor contacts from forms - all fields optional
  */
 export type VendorContactUpdateInput = Partial<VendorContactCreateInput>;

@@ -1,11 +1,11 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as contactServer } from '@/modules/vendors/vendor-contacts';
-import { ContactCreateInput } from '@/modules/vendors/vendor-contacts/vendor-contacts.types';
+import { VendorContactCreateInput } from '@/modules/vendors/vendor-contacts/vendor-contacts.types';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * GET /api/contacts - Get all contacts by vendor id or organization id
+ * GET /api/vendor-contacts - Get all vendor contacts by vendor id or organization id
  * @param request - The request object
  * @returns
  */
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get contacts by vendor id
-    const contacts = await contactServer.listContactsByVendor(vendorId);
+    const contacts = await contactServer.listVendorContactsByVendor(vendorId);
     return NextResponse.json(contacts);
   } catch (error) {
     console.error('Error fetching contacts:', error);
@@ -47,10 +47,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get contact data from request body
-    const contact: ContactCreateInput = await request.json();
+    const contact: VendorContactCreateInput = await request.json();
 
     // Create contact
-    const newContact = await contactServer.createContact({ ...contact, orgId });
+    const newContact = await contactServer.createVendorContact({ ...contact, orgId });
     return NextResponse.json(newContact);
   } catch (error) {
     console.error('Error creating contact:', error);
