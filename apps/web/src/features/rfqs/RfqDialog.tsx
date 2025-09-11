@@ -25,7 +25,6 @@ export default function RfqDialog({
   rfq,
   onChange,
   DialogType = 'view',
-  triggerText,
   trigger,
   open,
   onOpenChange,
@@ -33,14 +32,12 @@ export default function RfqDialog({
   rfq: Rfq | null;
   onChange: (rfq: Rfq) => void;
   DialogType: 'add' | 'edit' | 'view';
-  triggerText?: string;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
   // Initial form data state - use memoized initialization
   const [formData, setFormData] = useState(() => {
-    console.log('Initial formData state for RFQ:', rfq?.id || 'null');
     return {
       // RFQ Identification (matching schema)
       direction: rfq?.direction || null,
@@ -125,12 +122,6 @@ export default function RfqDialog({
 
     // Only update if the RFQ ID has actually changed
     if (currentRfqId !== previousRfqIdRef.current) {
-      console.log(
-        'RfqDialog: RFQ actually changed from',
-        previousRfqIdRef.current,
-        'to',
-        currentRfqId,
-      );
       setFormData(createFormDataFromRfq(rfq));
       previousRfqIdRef.current = currentRfqId;
     }
@@ -141,7 +132,6 @@ export default function RfqDialog({
     if (open === true) {
       const currentRfqId = rfq?.id || null;
       if (currentRfqId !== previousRfqIdRef.current) {
-        console.log('RfqDialog: Dialog opened with new RFQ ID:', currentRfqId);
         setFormData(createFormDataFromRfq(rfq));
         previousRfqIdRef.current = currentRfqId;
       } else {

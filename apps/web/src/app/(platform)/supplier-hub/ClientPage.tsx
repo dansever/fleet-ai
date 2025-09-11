@@ -208,7 +208,7 @@ export default function TechnicalProcurementClientPage() {
               </div>
             }
           >
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
               {/* Tender Information */}
               <MainCard neutralHeader={true} title="Details">
                 <KeyValuePair
@@ -266,25 +266,21 @@ export default function TechnicalProcurementClientPage() {
               {/* Quick Stats */}
               <MainCard title="General" neutralHeader={true}>
                 <KeyValuePair
-                  keyClassName="max-w-1/2"
                   label="Status"
                   value={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}
                   valueType="string"
                 />
                 <KeyValuePair
-                  keyClassName="max-w-1/2"
                   label="Urgency"
                   value={getUrgencyLevelDisplay(selectedRfq.urgencyLevel)}
                   valueType="string"
                 />
                 <KeyValuePair
-                  keyClassName="max-w-1/2"
                   label="Deliver To"
                   value={selectedRfq.deliverTo || ''}
                   valueType="string"
                 />
                 <KeyValuePair
-                  keyClassName="max-w-1/2"
                   label="Buyer Comments"
                   value={selectedRfq.buyerComments || ''}
                   valueType="string"
@@ -340,9 +336,7 @@ export default function TechnicalProcurementClientPage() {
                 <FileUploadPopover
                   open={uploadQuotePopoverOpen}
                   onOpenChange={setUploadQuotePopoverOpen}
-                  trigger={
-                    <Button intent="secondary" icon={Upload} text="Upload Quote" size="sm" />
-                  }
+                  trigger={<Button intent="secondary" icon={Upload} text="Upload Quote" />}
                   onSend={() => {}}
                 >
                   <div className="flex flex-col gap-2 text-sm">

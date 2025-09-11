@@ -99,10 +99,10 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       isReady: true,
     },
   ],
-  dev: [
+  admin: [
     {
-      title: 'Dev Page',
-      url: '/dev-page',
+      title: 'Admin',
+      url: '/admin',
       icon: Settings2,
       isReady: true,
     },
@@ -314,10 +314,10 @@ export function MainSidebar({
           </SidebarGroup>
 
           <SidebarGroup>
-            <SidebarGroupLabel>Dev</SidebarGroupLabel>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {sidebarTabs.dev.map((item) => (
+                {sidebarTabs.admin.map((item) => (
                   <SidebarNavItem
                     key={item.title}
                     item={item}

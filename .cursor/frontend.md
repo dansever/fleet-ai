@@ -21,7 +21,8 @@ Platform feature folders follow: `page.tsx` (server), `ClientPage.tsx` (client),
 
 ### Modules Pattern
 
-- `*.server.ts` server-only DB ops. Must contain `use server` and `import "server-only"`.
+- `*.server.ts` server-only DB ops. **Must contain `'use server'` and `import 'server-only'`** at the top.
+  - Without these directives, Next.js will try to bundle server code for the client, causing `Module not found: Can't resolve 'fs'` errors from database drivers.
 - `*.client.ts` client-safe API callers to Next API routes. No DB imports.
 - `*.types.ts` transport DTOs and schemas. Keep small; derive from Drizzle types where useful.
 - `*.queries.ts` optional read-optimized aggregations.

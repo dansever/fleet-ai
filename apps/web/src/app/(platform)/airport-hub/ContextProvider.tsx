@@ -1,15 +1,17 @@
 'use client';
 
-import { Airport, Contact, Contract, User } from '@/drizzle/types';
-import { server as contractServer } from '@/modules/contracts';
-import { server as airportServer } from '@/modules/core/airports';
-import { server as contactServer } from '@/modules/vendors/contacts';
+import { Airport, Contact, Contract, Document, User } from '@/drizzle/types';
+import { client as contractClient } from '@/modules/contracts';
+import { client as airportClient } from '@/modules/core/airports';
+import { client as documentClient } from '@/modules/documents';
+import { client as contactClient } from '@/modules/vendors/contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export type LoadingState = {
   airports: boolean;
   contracts: boolean;
+  documents: boolean;
   contacts: boolean;
   isRefreshing: boolean; // Indicates if current loading is from a refresh action
 };
@@ -17,6 +19,7 @@ export type LoadingState = {
 export type ErrorState = {
   airports: string | null;
   contracts: string | null;
+  documents: string | null;
   contacts: string | null;
   general: string | null;
 };
@@ -44,6 +47,16 @@ export type AirportHubContextType = {
   updateContract: (updatedContract: Contract) => void;
   addContract: (newContract: Contract) => void;
   removeContract: (contractId: Contract['id']) => void;
+
+  // Documents
+  documents: Document[];
+  setDocuments: (documents: Document[]) => void;
+  selectedDocument: Document | null;
+  setSelectedDocument: (document: Document | null) => void;
+  refreshDocuments: () => Promise<void>;
+  updateDocument: (updatedDocument: Document) => void;
+  addDocument: (newDocument: Document) => void;
+  removeDocument: (documentId: Document['id']) => void;
 
   // Contacts
   contacts: Contact[];
@@ -78,17 +91,23 @@ export default function AirportHubProvider({
   hasServerData: boolean;
   children: React.ReactNode;
 }) {
+  // Airports
   const [airports, setAirports] = useState<Airport[]>(initialAirports);
   const [selectedAirport, setSelectedAirportState] = useState<Airport | null>(null);
+
+  // Contracts
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-
-  // Cache to avoid refetching contracts for the same airport
   const [contractsCache, setContractsCache] = useState<Record<string, Contract[]>>({});
 
-  // Cache to avoid refetching contacts for the same airport
+  // Documents
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [documentsCache, setDocumentsCache] = useState<Record<string, Document[]>>({});
+
+  // Contacts
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [contactsCache, setContactsCache] = useState<Record<string, Contact[]>>({});
 
   // Cache cleanup configuration
@@ -99,6 +118,7 @@ export default function AirportHubProvider({
   const [loading, setLoading] = useState<LoadingState>({
     airports: !hasServerData, // Start with true if no server data provided
     contracts: false,
+    documents: false,
     contacts: false,
     isRefreshing: false,
   });
@@ -107,6 +127,7 @@ export default function AirportHubProvider({
   const [errors, setErrors] = useState<ErrorState>({
     airports: null,
     contracts: null,
+    documents: null,
     contacts: null,
     general: null,
   });
@@ -251,7 +272,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contracts: null }));
 
       try {
-        const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
+        const contracts = await contractClient.listContractsByAirport(selectedAirport.id);
         setContracts(contracts);
 
         // Cache the service contracts for this airport
@@ -313,7 +334,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contacts: null }));
 
       try {
-        const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
+        const contacts = await contactClient.listContactsByVendor(selectedAirport.id);
         setContacts(contacts);
 
         // Cache the contacts for this airport
@@ -357,7 +378,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, airports: null }));
 
     try {
-      const freshAirports = await airportServer.listAirportsByOrgId(dbUser.orgId);
+      const freshAirports = await airportClient.listAirports();
       const sortedAirports = sortAirports(freshAirports);
       setAirports(sortedAirports);
 
@@ -399,7 +420,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contracts: null }));
 
     try {
-      const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
+      const contracts = await contractClient.listContractsByAirport(selectedAirport.id);
       setContracts(contracts);
 
       // Update cache with fresh data
@@ -490,7 +511,7 @@ export default function AirportHubProvider({
     async (airportId: string) => {
       try {
         // Delete from the server
-        await airportServer.deleteAirport(airportId);
+        await airportClient.deleteAirport(airportId);
 
         // Remove from local state
         setAirports((prevAirports) => {
@@ -609,7 +630,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contacts: null }));
 
     try {
-      const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
+      const contacts = await contactClient.listContactsByVendor(selectedAirport.id);
       setContacts(contacts);
 
       // Update cache with fresh data
@@ -722,6 +743,55 @@ export default function AirportHubProvider({
   );
 
   /**
+   * Refresh documents for the currently selected contract (clears cache)
+   */
+  const refreshDocuments = useCallback(async () => {
+    if (!selectedContract) return;
+
+    // Clear cache for this contract to force fresh data
+    setDocumentsCache((prev) => {
+      const updated = { ...prev };
+      delete updated[selectedContract.id];
+      return updated;
+    });
+
+    setLoading((prev) => ({ ...prev, documents: true, isRefreshing: true }));
+    setErrors((prev) => ({ ...prev, documents: null }));
+
+    try {
+      const documents = await documentClient.listDocumentsByContract(selectedContract.id);
+      // setDocuments(documents);
+    } catch (error) {
+      console.error('Error refreshing documents:', error);
+    }
+  }, [selectedContract]);
+
+  /**
+   * Update document
+   */
+  const updateDocument = useCallback((updatedDocument: Document) => {
+    setDocuments((prevDocuments) =>
+      prevDocuments.map((document) =>
+        document.id === updatedDocument.id ? updatedDocument : document,
+      ),
+    );
+  }, []);
+
+  /**
+   * Add document
+   */
+  const addDocument = useCallback((newDocument: Document) => {
+    setDocuments((prevDocuments) => [newDocument, ...prevDocuments]);
+  }, []);
+
+  /**
+   * Remove document
+   */
+  const removeDocument = useCallback((documentId: string) => {
+    setDocuments((prevDocuments) => prevDocuments.filter((document) => document.id !== documentId));
+  }, []);
+
+  /**
    * Clear specific error
    */
   const clearError = useCallback((errorType: keyof ErrorState) => {
@@ -735,6 +805,7 @@ export default function AirportHubProvider({
     setErrors({
       airports: null,
       contracts: null,
+      documents: null,
       contacts: null,
       general: null,
     });
@@ -782,6 +853,14 @@ export default function AirportHubProvider({
     updateContract,
     addContract,
     removeContract,
+    documents,
+    setDocuments,
+    selectedDocument,
+    setSelectedDocument,
+    refreshDocuments,
+    updateDocument,
+    addDocument,
+    removeDocument,
     contacts,
     setContacts,
     selectedContact,

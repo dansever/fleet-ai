@@ -43,7 +43,6 @@ export const documentsTable = pgTable(
     title: text('title').notNull(),
     version: integer('version').default(1),
     fileType: text('file_type'), // 'pdf' | 'docx' | 'scan'
-    documentType: text('document_type'), // 'contract' | 'invoice' | 'other'
     storageUrl: text('storage_url'), // S3, GCS, etc.
     storagePath: text('storage_path'), // path in the storage
     rawText: text('raw_text'), // full extracted text
