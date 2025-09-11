@@ -3,14 +3,17 @@
  * Contact types for form handling and API requests
  */
 
-import type { NewContact } from '@/drizzle/types';
+import type { NewVendorContact } from '@/drizzle/types';
 
 /**
  * For creating contacts from forms - excludes server-managed fields
  */
-export type ContactCreateInput = Omit<NewContact, 'id' | 'orgId' | 'createdAt' | 'updatedAt'>;
+export type VendorContactCreateInput = Omit<
+  NewVendorContact,
+  'id' | 'orgId' | 'createdAt' | 'updatedAt'
+>;
 
 /**
  * For updating contacts from forms - all fields optional
  */
-export type ContactUpdateInput = Partial<ContactCreateInput>;
+export type VendorContactUpdateInput = Partial<VendorContactCreateInput>;

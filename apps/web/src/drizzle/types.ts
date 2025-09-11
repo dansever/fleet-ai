@@ -1,16 +1,12 @@
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import {
-  airportsTable,
-  contactsTable,
-  organizationsTable,
-  usersTable,
-  vendorsTable,
-} from './schema/schema';
 import { contractsTable } from './schema/schema.contracts';
-import { documentsChunksTable, documentsTable } from './schema/schema.documents';
+import { airportsTable, organizationsTable, usersTable } from './schema/schema.core';
+import { documentsTable } from './schema/schema.documents';
+import { embeddingsTable } from './schema/schema.embeddings';
 import { fuelBidsTable, fuelTendersTable } from './schema/schema.fuel';
 import { invoicesTable } from './schema/schema.invoices';
 import { quotesTable, rfqsTable } from './schema/schema.technical';
+import { vendorContactsTable, vendorsTable } from './schema/schema.vendors';
 
 // ==================== ORGANIZATIONS ====================
 export type Organization = InferSelectModel<typeof organizationsTable>;
@@ -33,9 +29,9 @@ export type NewVendor = InferInsertModel<typeof vendorsTable>;
 export type UpdateVendor = Partial<NewVendor>;
 
 // ==================== CONTACTS ====================
-export type Contact = InferSelectModel<typeof contactsTable>;
-export type NewContact = InferInsertModel<typeof contactsTable>;
-export type UpdateContact = Partial<NewContact>;
+export type VendorContact = InferSelectModel<typeof vendorContactsTable>;
+export type NewVendorContact = InferInsertModel<typeof vendorContactsTable>;
+export type UpdateVendorContact = Partial<NewVendorContact>;
 
 // ==================== RFQS ====================
 export type Rfq = InferSelectModel<typeof rfqsTable>;
@@ -73,6 +69,6 @@ export type NewDocument = InferInsertModel<typeof documentsTable>;
 export type UpdateDocument = Partial<NewDocument>;
 
 // ==================== DOCUMENTS CHUNKS ====================
-export type DocumentChunk = InferSelectModel<typeof documentsChunksTable>;
-export type NewDocumentChunk = InferInsertModel<typeof documentsChunksTable>;
-export type UpdateDocumentChunk = Partial<NewDocumentChunk>;
+export type Embedding = InferSelectModel<typeof embeddingsTable>;
+export type NewEmbedding = InferInsertModel<typeof embeddingsTable>;
+export type UpdateEmbedding = Partial<NewEmbedding>;

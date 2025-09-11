@@ -11,9 +11,10 @@ import {
 } from 'drizzle-orm/pg-core';
 import { InvoiceStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { organizationsTable, vendorsTable } from './schema';
 import { contractsTable } from './schema.contracts';
+import { organizationsTable } from './schema.core';
 import { documentsTable } from './schema.documents';
+import { vendorsTable } from './schema.vendors';
 
 // -------------------- Invoices --------------------
 export const invoicesTable = pgTable(

@@ -253,7 +253,7 @@ export default function ChatWindow() {
       </div>
 
       {/* Input Area - Fixed at Bottom with Proper Centering */}
-      <div className="absolute bottom-8 left-0 right-0 backdrop-blur-sm p-0=">
+      <div className="absolute bottom-8 left-0 right-0">
         <div className="max-w-4xl mx-auto">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <div className="flex-1">
@@ -270,7 +270,6 @@ export default function ChatWindow() {
               intent="primary"
               text={isLoading || isStreaming ? 'Sending...' : 'Send'}
               onClick={handleSubmit}
-              className="shrink-0"
             />
           </form>
         </div>

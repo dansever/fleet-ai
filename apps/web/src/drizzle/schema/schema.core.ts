@@ -1,3 +1,10 @@
+/**
+ * Includes:
+ * - Organizations
+ * - Users
+ * - Airports
+ */
+
 import { relations } from 'drizzle-orm';
 import {
   boolean,
@@ -15,6 +22,7 @@ import { documentsTable } from './schema.documents';
 import { fuelBidsTable, fuelTendersTable } from './schema.fuel';
 import { invoicesTable } from './schema.invoices';
 import { quotesTable, rfqsTable } from './schema.technical';
+import { vendorContactsTable, vendorsTable } from './schema.vendors';
 
 /* -------------------- Organizations -------------------- */
 export const organizationsTable = pgTable('organizations', {
@@ -23,10 +31,15 @@ export const organizationsTable = pgTable('organizations', {
   clerkOrgId: text('clerk_org_id').notNull().unique(),
   name: text('name'),
 
-  // Organization-level usage tracking
-  aiTokensUsed: integer('ai_tokens_used').default(0),
-  totalQuotesProcessed: integer('total_quotes_processed').default(0),
-  totalRfqsProcessed: integer('total_rfqs_processed').default(0),
+  // Organization-level AI tokens used
+  tokensUsed: integer('tokens_used').default(0),
+
+  // Organization-level business metrics
+  quotesProcessed: integer('quotes_processed').default(0),
+  rfqsProcessed: integer('rfqs_processed').default(0),
+  fuelTendersProcessed: integer('fuel_tenders_processed').default(0),
+  fuelBidsProcessed: integer('fuel_bids_processed').default(0),
+  filesUploaded: integer('files_uploaded').default(0),
 
   // Timestamps
   createdAt,
@@ -61,10 +74,15 @@ export const usersTable = pgTable(
     email: text('email').notNull(),
     position: text('position'),
 
-    // User-level usage tracking
-    aiTokensUsed: integer('ai_tokens_used').default(0),
-    totalQuotesProcessed: integer('total_quotes_processed').default(0),
-    totalRfqsProcessed: integer('total_rfqs_processed').default(0),
+    // User-level AI tokens used
+    tokensUsed: integer('tokens_used').default(0),
+
+    // User-level business metrics
+    quotesProcessed: integer('quotes_processed').default(0),
+    rfqsProcessed: integer('rfqs_processed').default(0),
+    fuelTendersProcessed: integer('fuel_tenders_processed').default(0),
+    fuelBidsProcessed: integer('fuel_bids_processed').default(0),
+    filesUploaded: integer('files_uploaded').default(0),
 
     // Timestamps
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
@@ -129,95 +147,6 @@ export const airportsRelations = relations(airportsTable, ({ one, many }) => ({
   }),
   contracts: many(contractsTable),
   invoices: many(invoicesTable),
-  contacts: many(contactsTable),
+  vendorContacts: many(vendorContactsTable),
   fuelTenders: many(fuelTendersTable),
-}));
-
-/* -------------------- Vendors -------------------- */
-export const vendorsTable = pgTable(
-  'vendors',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(), //fk to orgs table
-
-    // Vendor Information
-    name: text('name').notNull(),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_vendors_org_id',
-    }).onDelete('cascade'),
-    // Unique index on orgId and name
-    uniqueIndex('vendors_org_name_uniq').on(table.orgId, table.name),
-  ],
-);
-/* -------------------- Vendors Relations -------------------- */
-export const vendorsRelations = relations(vendorsTable, ({ one, many }) => ({
-  // Each vendor can have one organization
-  organization: one(organizationsTable, {
-    fields: [vendorsTable.orgId],
-    references: [organizationsTable.id],
-  }),
-  // Each vendor can have many contracts
-  contracts: many(contractsTable),
-  // Each vendor can have many invoices
-  invoices: many(invoicesTable),
-  // Each vendor can have many contacts
-  contacts: many(contactsTable),
-  // Each vendor can have many fuel bids
-  fuelBids: many(fuelBidsTable),
-}));
-
-/* -------------------- Contacts -------------------- */
-export const contactsTable = pgTable(
-  'contacts',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(), //fk to orgs table
-    vendorId: uuid('vendor_id'), //fk to vendors table
-
-    // Contact Information
-    name: text('name'),
-    email: text('email'),
-    phone: text('phone'),
-    department: text('department'),
-    role: text('role'),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_contacts_org_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.vendorId],
-      foreignColumns: [vendorsTable.id],
-      name: 'fk_contacts_vendor_id',
-    }).onDelete('cascade'),
-  ],
-);
-/* -------------------- Contacts Relations -------------------- */
-export const contactsRelations = relations(contactsTable, ({ one }) => ({
-  // Each contact can have one organization
-  organization: one(organizationsTable, {
-    fields: [contactsTable.orgId],
-    references: [organizationsTable.id],
-  }),
-  // Each contact can have one vendor
-  vendor: one(vendorsTable, {
-    fields: [contactsTable.vendorId],
-    references: [vendorsTable.id],
-  }),
 }));

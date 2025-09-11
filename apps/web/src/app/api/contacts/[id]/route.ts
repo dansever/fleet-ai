@@ -1,8 +1,8 @@
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as contactServer } from '@/modules/core/contacts';
-import { ContactUpdateInput } from '@/modules/core/contacts/contacts.types';
+import { server as contactServer } from '@/modules/vendors/vendor-contacts';
+import { ContactUpdateInput } from '@/modules/vendors/vendor-contacts/vendor-contacts.types';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: Promise<{ id: string }> };

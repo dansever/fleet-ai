@@ -19,8 +19,8 @@ export async function recordAiTokenUsage(opts: {
   if (tokens <= 0) return;
 
   await Promise.allSettled([
-    userServer.updateUserUsage(opts.userId, { aiTokensUsed: tokens }),
-    organizationServer.updateOrgUsage(opts.orgId, { aiTokenUsage: tokens }),
+    userServer.updateUserUsage(opts.userId, { tokensUsed: tokens }),
+    organizationServer.updateOrgUsage(opts.orgId, { tokenUsage: tokens }),
   ]);
 }
 
@@ -88,7 +88,7 @@ class UsageTracker {
 
     for (const [userId, tokens] of userUsage) {
       updatePromises.push(
-        userServer.updateUserUsage(userId, { aiTokensUsed: tokens }).catch((error) => {
+        userServer.updateUserUsage(userId, { tokensUsed: tokens }).catch((error) => {
           console.error(`Failed to update user usage for ${userId}:`, error);
         }),
       );
@@ -96,7 +96,7 @@ class UsageTracker {
 
     for (const [orgId, tokens] of orgUsage) {
       updatePromises.push(
-        organizationServer.updateOrgUsage(orgId, { aiTokenUsage: tokens }).catch((error) => {
+        organizationServer.updateOrgUsage(orgId, { tokenUsage: tokens }).catch((error) => {
           console.error(`Failed to update org usage for ${orgId}:`, error);
         }),
       );

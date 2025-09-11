@@ -1,7 +1,7 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as contactServer } from '@/modules/core/contacts';
-import { ContactCreateInput } from '@/modules/core/contacts/contacts.types';
+import { server as contactServer } from '@/modules/vendors/vendor-contacts';
+import { ContactCreateInput } from '@/modules/vendors/vendor-contacts/vendor-contacts.types';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**

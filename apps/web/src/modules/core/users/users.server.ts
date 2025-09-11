@@ -2,7 +2,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { usersTable } from '@/drizzle/schema/schema';
+import { usersTable } from '@/drizzle/schema/schema.core';
 import { NewUser, Organization, UpdateUser, User } from '@/drizzle/types';
 import { eq, sql } from 'drizzle-orm';
 
@@ -61,25 +61,40 @@ export async function updateUser(id: User['id'], data: UpdateUser): Promise<User
 export async function updateUserUsage(
   id: User['id'],
   usageData: {
-    aiTokensUsed?: number;
-    totalQuotesProcessed?: number;
-    totalRfqsProcessed?: number;
+    tokensUsed?: number;
+    quotesProcessed?: number;
+    rfqsProcessed?: number;
+    fuelTendersProcessed?: number;
+    fuelBidsProcessed?: number;
+    filesUploaded?: number;
   },
 ): Promise<User> {
   const updatePayload: Record<string, unknown> = {
     updatedAt: new Date(),
   };
 
-  if (usageData.aiTokensUsed !== undefined && usageData.aiTokensUsed > 0) {
-    updatePayload.aiTokensUsed = sql`${usersTable.aiTokensUsed} + ${usageData.aiTokensUsed}`;
+  if (usageData.tokensUsed !== undefined && usageData.tokensUsed > 0) {
+    updatePayload.tokensUsed = sql`${usersTable.tokensUsed} + ${usageData.tokensUsed}`;
   }
 
-  if (usageData.totalQuotesProcessed !== undefined && usageData.totalQuotesProcessed > 0) {
-    updatePayload.totalQuotesProcessed = sql`${usersTable.totalQuotesProcessed} + ${usageData.totalQuotesProcessed}`;
+  if (usageData.quotesProcessed !== undefined && usageData.quotesProcessed > 0) {
+    updatePayload.quotesProcessed = sql`${usersTable.quotesProcessed} + ${usageData.quotesProcessed}`;
   }
 
-  if (usageData.totalRfqsProcessed !== undefined && usageData.totalRfqsProcessed > 0) {
-    updatePayload.totalRfqsProcessed = sql`${usersTable.totalRfqsProcessed} + ${usageData.totalRfqsProcessed}`;
+  if (usageData.rfqsProcessed !== undefined && usageData.rfqsProcessed > 0) {
+    updatePayload.rfqsProcessed = sql`${usersTable.rfqsProcessed} + ${usageData.rfqsProcessed}`;
+  }
+
+  if (usageData.fuelTendersProcessed !== undefined && usageData.fuelTendersProcessed > 0) {
+    updatePayload.fuelTendersProcessed = sql`${usersTable.fuelTendersProcessed} + ${usageData.fuelTendersProcessed}`;
+  }
+
+  if (usageData.fuelBidsProcessed !== undefined && usageData.fuelBidsProcessed > 0) {
+    updatePayload.fuelBidsProcessed = sql`${usersTable.fuelBidsProcessed} + ${usageData.fuelBidsProcessed}`;
+  }
+
+  if (usageData.filesUploaded !== undefined && usageData.filesUploaded > 0) {
+    updatePayload.filesUploaded = sql`${usersTable.filesUploaded} + ${usageData.filesUploaded}`;
   }
   const result = await db
     .update(usersTable)

@@ -1,3 +1,9 @@
+/**
+ * Includes:
+ * - RFQs
+ * - Quotes
+ */
+
 import { relations } from 'drizzle-orm';
 import {
   foreignKey,
@@ -11,7 +17,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { OrderDirectionEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { organizationsTable, usersTable } from './schema';
+import { organizationsTable, usersTable } from './schema.core';
 import { documentsTable } from './schema.documents';
 
 /* -------------------- RFQs -------------------- */

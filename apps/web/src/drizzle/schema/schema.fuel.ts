@@ -1,3 +1,9 @@
+/**
+ * Includes:
+ * - Fuel Tenders
+ * - Fuel Bids
+ */
+
 import { relations } from 'drizzle-orm';
 import {
   boolean,
@@ -12,8 +18,9 @@ import {
 } from 'drizzle-orm/pg-core';
 import { decisionEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { airportsTable, organizationsTable, usersTable, vendorsTable } from './schema';
+import { airportsTable, organizationsTable, usersTable } from './schema.core';
 import { documentsTable } from './schema.documents';
+import { vendorsTable } from './schema.vendors';
 
 // -------------------- Fuel Tenders --------------------
 export const fuelTendersTable = pgTable(

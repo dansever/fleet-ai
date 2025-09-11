@@ -59,15 +59,30 @@ export default function ProfilePage() {
             title="Account Settings"
           >
             <CardContent className="grid grid-cols-3 gap-4 px-0">
-              <MetricCard title="Tokens Used" value={dbUser.aiTokensUsed ?? 0} icon={<Package />} />
+              <MetricCard title="Tokens Used" value={dbUser.tokensUsed ?? 0} icon={<Package />} />
               <MetricCard
                 title="Quotes Processed"
-                value={dbUser.totalQuotesProcessed ?? 0}
+                value={dbUser.quotesProcessed ?? 0}
                 icon={<Users />}
               />
               <MetricCard
                 title="RFQs Processed"
-                value={dbUser.totalRfqsProcessed ?? 0}
+                value={dbUser.rfqsProcessed ?? 0}
+                icon={<Users />}
+              />
+              <MetricCard
+                title="Fuel Tenders Processed"
+                value={dbUser.fuelTendersProcessed ?? 0}
+                icon={<Users />}
+              />
+              <MetricCard
+                title="Fuel Bids Processed"
+                value={dbUser.fuelBidsProcessed ?? 0}
+                icon={<Users />}
+              />
+              <MetricCard
+                title="Files Uploaded"
+                value={dbUser.filesUploaded ?? 0}
                 icon={<Users />}
               />
             </CardContent>

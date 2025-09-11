@@ -2,7 +2,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { contactsTable } from '@/drizzle/schema/schema';
+import { contactsTable } from '@/drizzle/schema/schema.core';
 import { Contact, NewContact, Organization, UpdateContact, Vendor } from '@/drizzle/types';
 import { eq } from 'drizzle-orm';
 

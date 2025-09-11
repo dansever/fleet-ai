@@ -1,17 +1,9 @@
 import { relations } from 'drizzle-orm';
-import {
-  foreignKey,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  uuid,
-  vector,
-} from 'drizzle-orm/pg-core';
+import { foreignKey, index, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { DocumentParentTypeEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { organizationsTable } from './schema';
+import { organizationsTable } from './schema.core';
+import { embeddingsTable } from './schema.embeddings';
 
 /* -------------------- Documents --------------------
  * Documents use a polymorphic relationship pattern with parentId/parentType
@@ -40,12 +32,10 @@ export const documentsTable = pgTable(
     parentType: DocumentParentTypeEnum('parent_type'), // contract | invoice | rfq | fuel_tender | fuel_bid | other
 
     // Identity
-    title: text('title').notNull(),
-    version: integer('version').default(1),
     fileType: text('file_type'), // 'pdf' | 'docx' | 'scan'
     storageUrl: text('storage_url'), // S3, GCS, etc.
     storagePath: text('storage_path'), // path in the storage
-    rawText: text('raw_text'), // full extracted text
+    content: text('content'), // full extracted text
 
     // Timestamps
     createdAt,
@@ -64,45 +54,6 @@ export const documentsTable = pgTable(
   ],
 );
 
-/* -------------------- Documents Chunks (vector-enabled) -------------------- */
-export const documentsChunksTable = pgTable(
-  'documents_chunks',
-  {
-    // System
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(),
-    documentId: uuid('document_id').notNull(),
-
-    // Identity
-    order: integer('order').notNull(), // sequence within doc
-    label: text('label'), // "Pricing", "SLA", "Edge Cases"
-    content: text('content').notNull(),
-
-    // Embedding managed by Drizzle pgvector
-    embedding: vector('embedding', { dimensions: 1536 }),
-
-    // Metadata
-    meta: jsonb('meta').default({}), // {page:3, span:[100,450], tokens:450}
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (t) => [
-    foreignKey({
-      columns: [t.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_documents_chunks_org_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [t.documentId],
-      foreignColumns: [documentsTable.id],
-      name: 'fk_documents_chunks_document_id',
-    }).onDelete('cascade'),
-  ],
-);
-
-// -------------------- Relations -------------------- */
 /* -------------------- Documents Relations -------------------- */
 export const documentsRelations = relations(documentsTable, ({ one, many }) => ({
   // Each document is tied to one organization
@@ -111,21 +62,7 @@ export const documentsRelations = relations(documentsTable, ({ one, many }) => (
     references: [organizationsTable.id],
   }),
   // Each document can have many chunks
-  chunks: many(documentsChunksTable),
+  chunks: many(embeddingsTable),
   // Note: Parent relationship (contract, invoice, etc.) is handled via parentId/parentType
   // and must be resolved programmatically since Drizzle relations don't support polymorphic FKs
-}));
-
-/* -------------------- Documents Chunks Relations -------------------- */
-export const documentsChunksRelations = relations(documentsChunksTable, ({ one }) => ({
-  // Each document is tied to one organization
-  organization: one(organizationsTable, {
-    fields: [documentsChunksTable.orgId],
-    references: [organizationsTable.id],
-  }),
-  // Each chunk is tied to one document
-  document: one(documentsTable, {
-    fields: [documentsChunksTable.documentId],
-    references: [documentsTable.id],
-  }),
 }));

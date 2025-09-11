@@ -2,8 +2,9 @@ import { relations } from 'drizzle-orm';
 import { date, foreignKey, index, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { ContractTypeEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { airportsTable, organizationsTable, vendorsTable } from './schema';
+import { airportsTable, organizationsTable } from './schema.core';
 import { documentsTable } from './schema.documents';
+import { vendorsTable } from './schema.vendors';
 
 /* -------------------- Contracts -------------------- */
 export const contractsTable = pgTable(

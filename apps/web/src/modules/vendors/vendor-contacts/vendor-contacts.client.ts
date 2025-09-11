@@ -1,11 +1,11 @@
-import type { Contact, Organization, Vendor } from '@/drizzle/types';
+import type { Organization, Vendor, VendorContact } from '@/drizzle/types';
 import { api } from '@/services/api-client';
-import { ContactCreateInput, ContactUpdateInput } from './contacts.types';
+import { VendorContactCreateInput, VendorContactUpdateInput } from './vendor-contacts.types';
 
 /**
  * Get a contact by ID
  */
-export async function getContact(id: Contact['id']): Promise<Contact> {
+export async function getContact(id: VendorContact['id']): Promise<VendorContact> {
   const res = await api.get(`/api/contacts/${id}`);
   return res.data;
 }
@@ -13,7 +13,7 @@ export async function getContact(id: Contact['id']): Promise<Contact> {
 /**
  * Get all contacts for an organization
  */
-export async function listContactsByOrg(orgId?: Organization['id']): Promise<Contact[]> {
+export async function listContactsByOrg(orgId?: Organization['id']): Promise<VendorContact[]> {
   const url = orgId ? `/api/contacts?orgId=${orgId}` : '/api/contacts';
   const res = await api.get(url);
   return res.data;
@@ -22,7 +22,7 @@ export async function listContactsByOrg(orgId?: Organization['id']): Promise<Con
 /**
  * Get all contacts for a vendor
  */
-export async function listContactsByVendor(vendorId: Vendor['id']): Promise<Contact[]> {
+export async function listContactsByVendor(vendorId: Vendor['id']): Promise<VendorContact[]> {
   const res = await api.get(`/api/contacts?vendorId=${vendorId}`);
   return res.data;
 }
@@ -30,7 +30,7 @@ export async function listContactsByVendor(vendorId: Vendor['id']): Promise<Cont
 /**
  * Create a new contact
  */
-export async function createContact(data: ContactCreateInput): Promise<Contact> {
+export async function createContact(data: VendorContactCreateInput): Promise<VendorContact> {
   const res = await api.post('/api/contacts', data);
   return res.data;
 }
@@ -38,7 +38,10 @@ export async function createContact(data: ContactCreateInput): Promise<Contact> 
 /**
  * Update an existing contact
  */
-export async function updateContact(id: string, data: ContactUpdateInput): Promise<Contact> {
+export async function updateContact(
+  id: string,
+  data: VendorContactUpdateInput,
+): Promise<VendorContact> {
   const res = await api.put(`/api/contacts/${id}`, data);
   return res.data;
 }
