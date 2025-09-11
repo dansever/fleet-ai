@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
+import { updateExtractors } from '@/modules/admin/admin.client';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Tabs } from '@/stories/Tabs/Tabs';
@@ -23,6 +24,7 @@ import {
   Settings,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ExtractionAgent {
   name: string;
@@ -79,52 +81,16 @@ export default function AdminClientPage() {
     }, 5000);
   };
 
-  // LlamaCloud Functions
-  const updateAgent = async (agentName: string) => {
-    setAgents((prev) =>
-      prev.map((agent) =>
-        agent.name === agentName ? { ...agent, status: 'updating' as const } : agent,
-      ),
-    );
-
+  const updateAllExtractors = async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-
-      setAgents((prev) =>
-        prev.map((agent) =>
-          agent.name === agentName
-            ? {
-                ...agent,
-                status: 'up-to-date' as const,
-                lastUpdated: new Date().toISOString(),
-                schemaVersion: '1.4.0', // Simulate version bump
-              }
-            : agent,
-        ),
-      );
-
-      addAlert('success', `Successfully updated ${agentName}`);
+      await updateExtractors();
+      toast.success('All agents updated successfully');
     } catch (error) {
-      setAgents((prev) =>
-        prev.map((agent) =>
-          agent.name === agentName ? { ...agent, status: 'needs-update' as const } : agent,
-        ),
-      );
-      addAlert('error', `Failed to update ${agentName}`);
+      toast.error('Failed to update all agents');
+      console.error('Error updating all agents:', error);
+    } finally {
+      setLoading((prev) => ({ ...prev, agents: false }));
     }
-  };
-
-  const updateAllAgents = async () => {
-    setLoading((prev) => ({ ...prev, agents: true }));
-
-    const agentsNeedingUpdate = agents.filter((agent) => agent.status === 'needs-update');
-
-    for (const agent of agentsNeedingUpdate) {
-      await updateAgent(agent.name);
-    }
-
-    setLoading((prev) => ({ ...prev, agents: false }));
   };
 
   // Storage Functions
@@ -293,7 +259,7 @@ export default function AdminClientPage() {
                   intent="primary"
                   text="Update All"
                   icon={RefreshCw}
-                  onClick={() => updateAllAgents()}
+                  onClick={() => updateAllExtractors()}
                   iconPosition="right"
                   disabled={loading.agents || !agents.some((a) => a.status === 'needs-update')}
                   className="gap-2"
@@ -301,37 +267,6 @@ export default function AdminClientPage() {
                 />
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {agents.map((agent) => (
-                <div
-                  key={agent.name}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon(agent.status)}
-                    <div>
-                      <h3 className="font-medium">{agent.name}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Schema v{agent.schemaVersion}</span>
-                        <span>•</span>
-                        <span>Updated {new Date(agent.lastUpdated).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(agent.status)}
-                    <Button
-                      intent="secondary"
-                      text="Update"
-                      icon={RefreshCw}
-                      onClick={() => updateAgent(agent.name)}
-                      disabled={agent.status === 'updating' || agent.status === 'up-to-date'}
-                      isLoading={loading.agents}
-                    />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="storage">

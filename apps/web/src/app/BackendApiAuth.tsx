@@ -11,7 +11,7 @@ export default function BackendApiAuth() {
   // Memoize the interceptor function to prevent unnecessary re-creations
   const createInterceptor = useCallback(
     async (config: any) => {
-      const token = await getToken({ template: 'fleet-ai-jwt-template' });
+      const token = await getToken({ template: 'fleet-ai-jwt' });
       if (token) {
         config.headers = config.headers ?? {};
         config.headers.Authorization = `Bearer ${token}`;
