@@ -7,6 +7,7 @@ import { Button } from '@/stories/Button/Button';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { Banknote, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import AskAI from '../_components/AskAI';
 import { ContractDetails } from '../_components/ContractDetails';
 import ContractList from '../_components/ContractSidebar';
 
@@ -117,7 +118,7 @@ export default function ContractsPage() {
           <ContractDetails />
         </TabsContent>
         <TabsContent value="ask-ai">
-          <div>Ask AI</div>
+          <AskAI />
         </TabsContent>
         <TabsContent value="invoices">
           <div>Invoices</div>

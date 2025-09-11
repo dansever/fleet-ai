@@ -1,7 +1,7 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { Contact } from '@/drizzle/types';
+import { VendorContact } from '@/drizzle/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
@@ -10,10 +10,16 @@ import { Building2, Mail, Phone, RefreshCw, User, UserPlus } from 'lucide-react'
 import { useAirportHub } from '../ContextProvider';
 
 export default function ContactsAndProviders() {
-  const { selectedAirport, contacts, loading, errors, refreshContacts, addContact } =
-    useAirportHub();
+  const {
+    selectedAirport,
+    vendorContacts,
+    loading,
+    errors,
+    refreshVendorContacts,
+    addVendorContact,
+  } = useAirportHub();
 
-  const contactColumns: Column<Contact>[] = [
+  const contactColumns: Column<VendorContact>[] = [
     {
       key: 'name',
       header: 'Name',
@@ -95,19 +101,24 @@ export default function ContactsAndProviders() {
   ];
 
   // Loading state - Only show when loading contacts for initial load or airport selection, not refresh
-  if (loading.contacts && !loading.isRefreshing && contacts.length === 0) {
+  if (loading.vendorContacts && !loading.isRefreshing && vendorContacts.length === 0) {
     return <LoadingComponent size="md" />;
   }
 
   // Error state
-  if (errors.contacts) {
+  if (errors.vendorContacts) {
     return (
       <div className="text-center py-12">
         <div className="text-red-500 mb-4">
           <p className="text-lg font-semibold">Error Loading Contacts</p>
-          <p className="text-sm">{errors.contacts}</p>
+          <p className="text-sm">{errors.vendorContacts}</p>
         </div>
-        <Button intent="secondary" text="Try Again" icon={RefreshCw} onClick={refreshContacts} />
+        <Button
+          intent="secondary"
+          text="Try Again"
+          icon={RefreshCw}
+          onClick={refreshVendorContacts}
+        />
       </div>
     );
   }
@@ -123,9 +134,9 @@ export default function ContactsAndProviders() {
             <Button
               intent="ghost"
               icon={RefreshCw}
-              className={cn(loading.contacts && loading.isRefreshing && 'animate-spin')}
-              disabled={loading.contacts && loading.isRefreshing}
-              onClick={refreshContacts}
+              className={cn(loading.vendorContacts && loading.isRefreshing && 'animate-spin')}
+              disabled={loading.vendorContacts && loading.isRefreshing}
+              onClick={refreshVendorContacts}
             />
 
             <Button
@@ -141,7 +152,7 @@ export default function ContactsAndProviders() {
       >
         <div>
           {/* Empty state when no contacts - Only show when not doing initial loading */}
-          {contacts.length === 0 && !(loading.contacts && !loading.isRefreshing) ? (
+          {vendorContacts.length === 0 && !(loading.vendorContacts && !loading.isRefreshing) ? (
             <div className="text-center py-12 text-gray-500">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                 <User className="w-8 h-8 text-gray-400" />
@@ -162,15 +173,15 @@ export default function ContactsAndProviders() {
             </div>
           ) : (
             <DataTable
-              data={contacts}
+              data={vendorContacts}
               columns={contactColumns}
               searchable={true}
               filterable={false}
               pagination={true}
               pageSize={10}
-              onRowClick={(contact) => {
+              onRowClick={(vendorContact) => {
                 // TODO: Implement contact details view
-                console.log('Contact clicked:', contact);
+                console.log('Contact clicked:', vendorContact);
               }}
               csvFilename={`${selectedAirport?.iata || 'airport'}-contacts`}
               showNormalizedRow={false}
