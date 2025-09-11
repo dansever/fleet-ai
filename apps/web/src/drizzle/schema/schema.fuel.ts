@@ -1,5 +1,3 @@
-import { createdAt, updatedAt } from './common';
-
 import { relations } from 'drizzle-orm';
 import {
   boolean,
@@ -13,7 +11,9 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { decisionEnum, ProcessStatusEnum } from '../enums';
+import { createdAt, updatedAt } from './common';
 import { airportsTable, organizationsTable, usersTable, vendorsTable } from './schema';
+import { documentsTable } from './schema.documents';
 
 // -------------------- Fuel Tenders --------------------
 export const fuelTendersTable = pgTable(
@@ -167,10 +167,12 @@ export const fuelTendersRelations = relations(fuelTendersTable, ({ one, many }) 
     fields: [fuelTendersTable.winningBidId],
     references: [fuelBidsTable.id],
   }),
+  // Each fuel tender can have many documents
+  documents: many(documentsTable),
 }));
 
 /* -------------------- Fuel Bids Relations -------------------- */
-export const fuelBidsRelations = relations(fuelBidsTable, ({ one }) => ({
+export const fuelBidsRelations = relations(fuelBidsTable, ({ one, many }) => ({
   organization: one(organizationsTable, {
     fields: [fuelBidsTable.orgId],
     references: [organizationsTable.id],
@@ -187,4 +189,6 @@ export const fuelBidsRelations = relations(fuelBidsTable, ({ one }) => ({
     fields: [fuelBidsTable.decisionByUserId],
     references: [usersTable.id],
   }),
+  // Each fuel bid can have many documents
+  documents: many(documentsTable),
 }));

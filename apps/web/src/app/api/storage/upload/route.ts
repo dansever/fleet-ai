@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // get the organization for the bucket
     const org = await orgServer.getOrgById(orgId);
     if (!org || !org.name) return jsonError('Organization not found', 404);
-    const bucket = org.name;
+    const bucket = slugify(org.name, { lower: true });
 
     // get the file from the request
     const formData = await request.formData();
@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
     // get the file name slug and path
     const fileNameSlug = slugify(file.name);
     const path = `${documentType}/${fileNameSlug}-${unique.slice(0, 4)}.${ext}`;
+
+    console.log('++++ INSIDE API ROUTE ++++');
+    console.log('Path:', path);
+    console.log('Bucket:', bucket);
 
     // upload the file to the storage
     const uploadedFile = await uploadFileToStorage({ bucket, path, file });

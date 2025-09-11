@@ -7,6 +7,7 @@ import {
   vendorsTable,
 } from './schema/schema';
 import { contractsTable } from './schema/schema.contracts';
+import { documentsChunksTable, documentsTable } from './schema/schema.documents';
 import { fuelBidsTable, fuelTendersTable } from './schema/schema.fuel';
 import { invoicesTable } from './schema/schema.invoices';
 import { quotesTable, rfqsTable } from './schema/schema.technical';
@@ -65,3 +66,13 @@ export type UpdateFuelTender = Partial<NewFuelTender>;
 export type FuelBid = InferSelectModel<typeof fuelBidsTable>;
 export type NewFuelBid = InferInsertModel<typeof fuelBidsTable>;
 export type UpdateFuelBid = Partial<NewFuelBid>;
+
+// ==================== DOCUMENTS ====================
+export type Document = InferSelectModel<typeof documentsTable>;
+export type NewDocument = InferInsertModel<typeof documentsTable>;
+export type UpdateDocument = Partial<NewDocument>;
+
+// ==================== DOCUMENTS CHUNKS ====================
+export type DocumentChunk = InferSelectModel<typeof documentsChunksTable>;
+export type NewDocumentChunk = InferInsertModel<typeof documentsChunksTable>;
+export type UpdateDocumentChunk = Partial<NewDocumentChunk>;

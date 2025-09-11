@@ -134,3 +134,31 @@ export function getUrgencyLevelDisplay(
     urgencyLevel.charAt(0).toUpperCase() + urgencyLevel.slice(1)
   );
 }
+
+// --------------------  Document Parent Type Enum --------------------
+export const DocumentParentTypeEnum = pgEnum('document_parent_type', [
+  'contract',
+  'invoice',
+  'rfq',
+  'fuel_tender',
+  'fuel_bid',
+  'other',
+]);
+export type DocumentParentType = (typeof DocumentParentTypeEnum.enumValues)[number];
+export const documentParentTypeDisplayMap: Record<DocumentParentType, string> = {
+  contract: 'Contract',
+  invoice: 'Invoice',
+  rfq: 'RFQ',
+  fuel_tender: 'Fuel Tender',
+  fuel_bid: 'Fuel Bid',
+  other: 'Other',
+};
+export function getDocumentParentTypeDisplay(
+  documentParentType: DocumentParentType | string | null | undefined,
+): string {
+  if (!documentParentType) return 'Unknown';
+  return (
+    documentParentTypeDisplayMap[documentParentType as DocumentParentType] ||
+    documentParentType.charAt(0).toUpperCase() + documentParentType.slice(1)
+  );
+}

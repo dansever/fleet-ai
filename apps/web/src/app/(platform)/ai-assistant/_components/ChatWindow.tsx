@@ -3,8 +3,9 @@
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ModernTextarea } from '@/stories/Form/Form';
-import { Bot, Loader2, User } from 'lucide-react';
+import { Bot, Copy, Loader2, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -195,19 +196,38 @@ export default function ChatWindow() {
 
                 <div
                   className={cn(
-                    'flex-1 space-y-2 rounded-2xl px-4 py-3 max-w-[80%]',
+                    'flex-1 space-y-2 rounded-3xl px-4 py-3',
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground ml-12'
+                      ? 'max-w-[60%] bg-primary text-primary-foreground ml-12'
                       : 'bg-white  border-1 border-green-400 text-foreground mr-12',
                   )}
                 >
-                  <div className="text-sm font-bold">
-                    {message.role === 'user' ? 'You' : 'FleetAI Assistant'}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold">
+                        {message.role === 'user' ? 'You' : 'FleetAI Assistant'}
+                      </span>
+                      <span className="text-xs opacity-70">
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <Copy
+                      className={cn(
+                        'h-5 w-5 hover:cursor-pointer hover:scale-105 transition-all',
+                        message.role === 'user'
+                          ? 'text-slate-400 hover:text-slate-300'
+                          : 'text-slate-400 hover:text-slate-600',
+                      )}
+                      onClick={() => {
+                        navigator.clipboard.writeText(message.content);
+                        toast.info('Copied to clipboard');
+                      }}
+                    />
                   </div>
                   <div className="text-sm leading-relaxed whitespace-pre-wrap">
                     {message.content}
                   </div>
-                  <div className="text-xs opacity-70">{message.timestamp.toLocaleTimeString()}</div>
+                  <div></div>
                 </div>
               </div>
             ))}

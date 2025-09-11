@@ -23,7 +23,7 @@ export async function uploadFileToStorage({
     throw new Error('File is required');
   }
 
-  const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+  const { data, error } = await supabase.storage.from('avion-systems').upload(path, file, {
     cacheControl: '3600',
     upsert,
     contentType: file.type,

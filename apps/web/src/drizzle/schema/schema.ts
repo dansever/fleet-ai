@@ -11,9 +11,10 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createdAt, updatedAt } from './common';
 import { contractsTable } from './schema.contracts';
+import { documentsTable } from './schema.documents';
 import { fuelBidsTable, fuelTendersTable } from './schema.fuel';
 import { invoicesTable } from './schema.invoices';
-import { rfqsTable } from './schema.technical';
+import { quotesTable, rfqsTable } from './schema.technical';
 
 /* -------------------- Organizations -------------------- */
 export const organizationsTable = pgTable('organizations', {
@@ -38,8 +39,11 @@ export const organizationsRelations = relations(organizationsTable, ({ many }) =
   vendors: many(vendorsTable),
   contracts: many(contractsTable),
   invoices: many(invoicesTable),
+  documents: many(documentsTable),
   fuelTenders: many(fuelTendersTable),
   fuelBids: many(fuelBidsTable),
+  rfqs: many(rfqsTable),
+  quotes: many(quotesTable),
 }));
 
 /* -------------------- Users -------------------- */
