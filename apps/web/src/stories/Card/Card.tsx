@@ -67,9 +67,11 @@ export const MainCard = ({
   children,
   footer,
   className,
+  cardContentClassName,
 }: StandardCardProps & {
   headerGradient?: string;
   neutralHeader?: boolean;
+  cardContentClassName?: string;
 }) => (
   <Card
     className={cn('rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden', className)}
@@ -113,7 +115,7 @@ export const MainCard = ({
     )}
 
     {/* Content area */}
-    <CardContent>{children}</CardContent>
+    <CardContent className={cardContentClassName}>{children}</CardContent>
     {footer && <CardContent>{footer}</CardContent>}
   </Card>
 );
@@ -393,10 +395,10 @@ export const ListItemCard = ({
 }) => (
   <Card
     className={cn(
-      'border-1 border-muted/80 shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
+      'border-1 border-muted/60 bg-gradient-to-br shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
       isSelected
-        ? 'border-purple-100 bg-gradient-to-br from-blue-200/80 via-purple-200/80 to-pink-200/80'
-        : 'hover:bg-gradient-to-br hover:from-blue-50/50 hover:via-pink-50/50 hover:to-purple-50/50',
+        ? 'border-purple-100 from-blue-200/40 via-purple-200/40 to-orange-100'
+        : 'hover:from-blue-50/50 hover:via-purple-50/50 hover:to-orange-50/50',
       className,
     )}
     onClick={onClick}
@@ -422,7 +424,7 @@ export const ListItemCard = ({
               <div className="min-w-0 flex-1">
                 {title && <h4 className="font-medium truncate">{title}</h4>}
                 {subtitle && <p className="text-sm text-muted-foreground truncate">{subtitle}</p>}
-                {children && <div className="mt-1">{children}</div>}
+                {children && <div>{children}</div>}
               </div>
               {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
             </div>

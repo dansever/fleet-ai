@@ -1,3 +1,9 @@
+/**
+ * Includes:
+ * - RFQs
+ * - Quotes
+ */
+
 import { relations } from 'drizzle-orm';
 import {
   foreignKey,
@@ -11,7 +17,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { OrderDirectionEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { organizationsTable, usersTable } from './schema';
+import { organizationsTable, usersTable } from './schema.core';
+import { documentsTable } from './schema.documents';
 
 /* -------------------- RFQs -------------------- */
 export const rfqsTable = pgTable(
@@ -85,6 +92,8 @@ export const rfqsRelations = relations(rfqsTable, ({ one, many }) => ({
     fields: [rfqsTable.selectedQuoteId],
     references: [quotesTable.id],
   }),
+  // Each RFQ can have many documents
+  documents: many(documentsTable),
 }));
 
 /* -------------------- Quotes -------------------- */
@@ -111,7 +120,7 @@ export const quotesTable = pgTable(
     partNumber: text('part_number'),
     serialNumber: text('serial_number'),
     partDescription: text('part_description'),
-    partCondition: text('condition_code'),
+    conditionCode: text('condition_code'),
     unitOfMeasure: text('unit_of_measure'),
     quantity: integer('quantity'),
 
@@ -163,7 +172,7 @@ export const quotesTable = pgTable(
   ],
 );
 /* -------------------- Quotes Relations -------------------- */
-export const quotesRelations = relations(quotesTable, ({ one }) => ({
+export const quotesRelations = relations(quotesTable, ({ one, many }) => ({
   organization: one(organizationsTable, {
     fields: [quotesTable.orgId],
     references: [organizationsTable.id],
@@ -172,4 +181,6 @@ export const quotesRelations = relations(quotesTable, ({ one }) => ({
     fields: [quotesTable.rfqId],
     references: [rfqsTable.id],
   }),
+  // Each quote can have many documents
+  documents: many(documentsTable),
 }));

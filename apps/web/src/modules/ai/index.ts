@@ -1,2 +1,4 @@
-export * as client from './ai.client';
-export * as server from './ai.server';
+// AI Module exports
+export * as chat from './chat';
+export * as extract from './extract';
+export * from './types';

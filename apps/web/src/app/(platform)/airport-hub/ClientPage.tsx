@@ -2,6 +2,7 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { useSidebar } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
 import AirportDialog from '@/features/airports/AirportDialog';
 import { Button } from '@/stories/Button/Button';
@@ -80,35 +81,18 @@ export default function AirportHubClientPage() {
       }
       headerContent={
         loading.airports ? (
-          <div className="flex flex-row items-center gap-4 justify-between w-full">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <div className="animate-pulse bg-gray-300 h-6 w-48 rounded"></div>
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="animate-pulse bg-gray-200 h-4 w-32 rounded"></div>
-              </div>
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
             </div>
           </div>
         ) : selectedAirport ? (
-          <div className="flex flex-row items-center gap-4 justify-between w-full">
+          <div className="flex flex-row items-start gap-4 justify-between w-full">
             <div className="flex flex-col">
               <div className="flex flex-row items-center gap-4">
                 <h1>{selectedAirport.name}</h1>
-                <div className="flex flex-row items-center gap-1">
-                  {selectedAirport.icao && (
-                    <StatusBadge status="secondary" text={selectedAirport.icao} />
-                  )}
-                  {selectedAirport.iata && (
-                    <StatusBadge status="secondary" text={selectedAirport.iata} />
-                  )}
-                  {selectedAirport.isHub && (
-                    <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      Hub
-                    </div>
-                  )}
-                </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600 text-sm">
                 <MapPin className="w-4 h-4" />
@@ -117,6 +101,20 @@ export default function AirportHubClientPage() {
                   {selectedAirport.state && ', ' + selectedAirport.state}
                   {selectedAirport.country && ', ' + selectedAirport.country}
                 </span>
+                <div className="flex flex-row items-center gap-1">
+                  {selectedAirport.icao && (
+                    <StatusBadge status="secondary" text={selectedAirport.icao} />
+                  )}
+                  {selectedAirport.iata && (
+                    <StatusBadge status="secondary" text={selectedAirport.iata} />
+                  )}
+                  {selectedAirport.isHub && (
+                    <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400 bg-gradient-to-br from-yellow-100 to-yellow-200 opacity-80">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      Hub
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex gap-2">

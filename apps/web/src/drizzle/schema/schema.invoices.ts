@@ -3,18 +3,18 @@ import {
   date,
   foreignKey,
   index,
-  integer,
   jsonb,
   pgTable,
   text,
   uniqueIndex,
   uuid,
-  vector,
 } from 'drizzle-orm/pg-core';
 import { InvoiceStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { airportsTable, organizationsTable, vendorsTable } from './schema';
 import { contractsTable } from './schema.contracts';
+import { organizationsTable } from './schema.core';
+import { documentsTable } from './schema.documents';
+import { vendorsTable } from './schema.vendors';
 
 // -------------------- Invoices --------------------
 export const invoicesTable = pgTable(
@@ -23,9 +23,8 @@ export const invoicesTable = pgTable(
     // System Fields
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(), //fk to orgs table
-    airportId: uuid('airport_id'), //fk to airports table
-    contractId: uuid('contract_id'), //fk to contracts table
     vendorId: uuid('vendor_id'), //fk to vendors table
+    contractId: uuid('contract_id'), //fk to contracts table
 
     // Identity
     invoiceNumber: text('invoice_number').notNull(), // number of the invoice
@@ -63,11 +62,6 @@ export const invoicesTable = pgTable(
       name: 'fk_invoices_org_id',
     }).onDelete('cascade'),
     foreignKey({
-      columns: [table.airportId],
-      foreignColumns: [airportsTable.id],
-      name: 'fk_invoices_airport_id',
-    }).onDelete('cascade'),
-    foreignKey({
       columns: [table.contractId],
       foreignColumns: [contractsTable.id],
       name: 'fk_invoices_contract_id',
@@ -96,11 +90,6 @@ export const invoicesRelations = relations(invoicesTable, ({ one, many }) => ({
     fields: [invoicesTable.orgId],
     references: [organizationsTable.id],
   }),
-  // Each invoice can have one airport
-  airport: one(airportsTable, {
-    fields: [invoicesTable.airportId],
-    references: [airportsTable.id],
-  }),
   // Each invoice can have one vendor
   vendor: one(vendorsTable, {
     fields: [invoicesTable.vendorId],
@@ -112,113 +101,5 @@ export const invoicesRelations = relations(invoicesTable, ({ one, many }) => ({
     references: [contractsTable.id],
   }),
   // if you want reverse navigation
-  documents: many(invoiceDocumentsTable),
-  chunks: many(invoiceChunksTable),
-}));
-
-/* -------------------- Invoice Documents -------------------- */
-export const invoiceDocumentsTable = pgTable(
-  'invoice_documents',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(), //fk to orgs table
-    invoiceId: uuid('invoice_id').notNull(), //fk to invoices table
-
-    // Identity
-    title: text('title').notNull(),
-    version: integer('version').default(1),
-    sourceType: text('source_type'), // pdf | docx | scan
-    storageUrl: text('storage_url'),
-    rawText: text('raw_text'),
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.invoiceId],
-      foreignColumns: [invoicesTable.id],
-      name: 'fk_invoice_documents_invoice_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_invoice_documents_org_id',
-    }).onDelete('cascade'),
-    uniqueIndex('invoice_documents_invoice_version_uniq').on(table.invoiceId, table.version),
-    index('invoice_documents_invoice_created_idx').on(table.invoiceId, table.createdAt),
-  ],
-);
-
-/* -------------------- Invoice Documents Relations -------------------- */
-export const invoiceDocumentsRelations = relations(invoiceDocumentsTable, ({ one, many }) => ({
-  // Each invoice document can have one invoice
-  invoice: one(invoicesTable, {
-    fields: [invoiceDocumentsTable.invoiceId],
-    references: [invoicesTable.id],
-  }),
-  // Each invoice document can have one organization
-  organization: one(organizationsTable, {
-    fields: [invoiceDocumentsTable.orgId],
-    references: [organizationsTable.id],
-  }),
-  // Each invoice document can have many chunks
-  chunks: many(invoiceChunksTable),
-}));
-
-/* -------------------- Invoice Chunks -------------------- */
-export const invoiceChunksTable = pgTable(
-  'invoice_chunks',
-  {
-    // System Fields
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    invoiceId: uuid('invoice_id').notNull(), //fk to invoices table
-    docId: uuid('doc_id').notNull(), //fk to invoice documents table
-
-    // Identity
-    order: integer('order').notNull(),
-    label: text('label'), // "Header", "Totals", "Taxes", "Fuel Lines", etc.
-    content: text('content').notNull(),
-    embedding: vector('embedding', { dimensions: 1536 }).notNull(),
-    meta: jsonb('meta').default({}), // {page:2, span:[120,420], tokens:480}
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.invoiceId],
-      foreignColumns: [invoicesTable.id],
-      name: 'fk_invoice_chunks_invoice_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [table.docId],
-      foreignColumns: [invoiceDocumentsTable.id],
-      name: 'fk_invoice_chunks_doc_id',
-    }).onDelete('cascade'),
-    // Index on embedding
-    index('invoice_chunks_embedding_hnsw').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    // Index on invoiceId and docId
-    index('invoice_chunks_invoice_id_idx').on(table.invoiceId),
-    index('invoice_chunks_doc_id_idx').on(table.docId),
-    // Unique index on docId and order
-    uniqueIndex('invoice_chunks_doc_order_unique').on(table.docId, table.order),
-  ],
-);
-
-/* -------------------- Invoice Chunks Relations -------------------- */
-export const invoiceChunksRelations = relations(invoiceChunksTable, ({ one }) => ({
-  // Each chunk can have one invoice
-  invoice: one(invoicesTable, {
-    fields: [invoiceChunksTable.invoiceId],
-    references: [invoicesTable.id],
-  }),
-  // Each chunk can have one document
-  document: one(invoiceDocumentsTable, {
-    fields: [invoiceChunksTable.docId],
-    references: [invoiceDocumentsTable.id],
-  }),
+  documents: many(documentsTable),
 }));

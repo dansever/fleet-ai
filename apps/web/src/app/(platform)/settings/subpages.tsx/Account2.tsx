@@ -19,15 +19,15 @@ export default function AccountPage() {
           <KeyValuePair label="Email" value={user.email} valueType="email" />
           <KeyValuePair label="Position" value={user.position} valueType="string" />
           <h3>AI Details</h3>
-          <KeyValuePair label="AI Tokens Used" value={user.aiTokensUsed} valueType="number" />
+          <KeyValuePair label="AI Tokens Used" value={user.tokensUsed} valueType="number" />
           <KeyValuePair
             label="Total Quotes Processed"
-            value={user.totalQuotesProcessed}
+            value={user.quotesProcessed}
             valueType="number"
           />
           <KeyValuePair
             label="Total RFQs Processed"
-            value={user.totalRfqsProcessed}
+            value={user.rfqsProcessed}
             valueType="number"
           />
           <KeyValuePair
@@ -52,13 +52,20 @@ export default function AccountPage() {
           <h3>Details</h3>
           <KeyValuePair label="Organization Name" value={org.name} valueType="string" />
           <h3>AI Usage</h3>
-          <KeyValuePair label="AI Tokens Used" value={org.aiTokensUsed} valueType="number" />
+          <KeyValuePair label="AI Tokens Used" value={org.tokensUsed} valueType="number" />
+          <KeyValuePair label="Quotes Processed" value={org.quotesProcessed} valueType="number" />
+          <KeyValuePair label="RFQs Processed" value={org.rfqsProcessed} valueType="number" />
           <KeyValuePair
-            label="Quotes Processed"
-            value={org.totalQuotesProcessed}
+            label="Fuel Tenders Processed"
+            value={org.fuelTendersProcessed}
             valueType="number"
           />
-          <KeyValuePair label="RFQs Processed" value={org.totalRfqsProcessed} valueType="number" />
+          <KeyValuePair
+            label="Fuel Bids Processed"
+            value={org.fuelBidsProcessed}
+            valueType="number"
+          />
+          <KeyValuePair label="Files Uploaded" value={org.filesUploaded} valueType="number" />
         </div>
       </MainCard>
     </div>

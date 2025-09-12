@@ -30,6 +30,7 @@ export const formStyles = {
     'focus:border-secondary focus:ring-offset-0 focus-visible:ring-0 focus-visible:border-secondary',
     'hover:border-secondary/50',
     'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
+    'w-full',
   ),
 
   // Label styling
@@ -333,7 +334,7 @@ export const ModernTextarea = ({
       rows={rows}
       className={cn(
         formStyles.input,
-        'min-h-[40px] max-h-[200px] resize-y rounded-br-sm',
+        'resize-none',
         error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
         className,
       )}

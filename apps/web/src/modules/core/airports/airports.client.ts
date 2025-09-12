@@ -29,7 +29,7 @@ export async function createAirport(data: AirportCreateInput): Promise<Airport> 
 /**
  * Update an existing airport
  */
-export async function updateAirport(id: string, data: AirportUpdateInput): Promise<Airport> {
+export async function updateAirport(id: Airport['id'], data: AirportUpdateInput): Promise<Airport> {
   const res = await api.put(`/api/airports/${id}`, data);
   return res.data;
 }
@@ -37,6 +37,6 @@ export async function updateAirport(id: string, data: AirportUpdateInput): Promi
 /**
  * Delete an airport
  */
-export async function deleteAirport(id: string): Promise<void> {
+export async function deleteAirport(id: Airport['id']): Promise<void> {
   await api.delete(`/api/airports/${id}`);
 }

@@ -1,19 +1,10 @@
 import { relations } from 'drizzle-orm';
-import {
-  date,
-  foreignKey,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  uniqueIndex,
-  uuid,
-  vector,
-} from 'drizzle-orm/pg-core';
+import { date, foreignKey, index, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { ContractTypeEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
-import { airportsTable, organizationsTable, vendorsTable } from './schema';
+import { airportsTable, organizationsTable } from './schema.core';
+import { documentsTable } from './schema.documents';
+import { vendorsTable } from './schema.vendors';
 
 /* -------------------- Contracts -------------------- */
 export const contractsTable = pgTable(
@@ -41,9 +32,6 @@ export const contractsTable = pgTable(
     effectiveFrom: date('effective_from'),
     effectiveTo: date('effective_to'),
     processStatus: ProcessStatusEnum('process_status').default('pending'),
-
-    // Source
-    docUrl: text('doc_url'),
 
     // LLM narratives
     summary: text('summary'),
@@ -86,92 +74,6 @@ export const contractsTable = pgTable(
   ],
 );
 
-/* -------------------- Contract Documents -------------------- */
-export const contractDocumentsTable = pgTable(
-  'contract_documents',
-  {
-    // System
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    orgId: uuid('org_id').notNull(),
-    contractId: uuid('contract_id').notNull(),
-
-    // Identity
-    title: text('title').notNull(),
-    version: integer('version').default(1),
-    sourceType: text('source_type'), // 'pdf' | 'docx' | 'scan'
-    storageUrl: text('storage_url'), // S3, GCS, etc.
-    rawText: text('raw_text'), // full extracted text
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (t) => [
-    foreignKey({
-      columns: [t.contractId],
-      foreignColumns: [contractsTable.id],
-      name: 'fk_contract_documents_contract_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [t.orgId],
-      foreignColumns: [organizationsTable.id],
-      name: 'fk_contract_documents_org_id',
-    }).onDelete('cascade'),
-
-    uniqueIndex('contract_documents_contract_version_uniq').on(t.contractId, t.version),
-    index('contract_documents_org_id_idx').on(t.orgId),
-  ],
-);
-
-/* -------------------- Contract Chunks (vector-enabled) -------------------- */
-export const contractChunksTable = pgTable(
-  'contract_chunks',
-  {
-    // System
-    id: uuid('id').primaryKey().notNull().defaultRandom(),
-    contractId: uuid('contract_id').notNull(),
-    docId: uuid('doc_id').notNull(),
-
-    // Identity
-    order: integer('order').notNull(), // sequence within doc
-    label: text('label'), // "Pricing", "SLA", "Edge Cases"
-    content: text('content').notNull(),
-
-    // Embedding managed by Drizzle pgvector
-    embedding: vector('embedding', { dimensions: 1536 }),
-
-    // Metadata
-    meta: jsonb('meta').default({}), // {page:3, span:[100,450], tokens:450}
-
-    // Timestamps
-    createdAt,
-    updatedAt,
-  },
-  (t) => [
-    foreignKey({
-      columns: [t.contractId],
-      foreignColumns: [contractsTable.id],
-      name: 'fk_contract_chunks_contract_id',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [t.docId],
-      foreignColumns: [contractDocumentsTable.id],
-      name: 'fk_contract_chunks_doc_id',
-    }).onDelete('cascade'),
-
-    // Unique index on docId and order
-    uniqueIndex('contract_chunks_doc_order_unique').on(t.docId, t.order),
-
-    // Vector index
-    index('contract_chunks_embedding_hnsw').using('hnsw', t.embedding.op('vector_cosine_ops')),
-
-    // Handy filters
-    index('contract_chunks_contract_id_idx').on(t.contractId),
-    index('contract_chunks_doc_id_idx').on(t.docId),
-    index('contract_chunks_doc_order_idx').on(t.docId, t.order),
-  ],
-);
-
 /* -------------------- Relations -------------------- */
 export const contractsRelations = relations(contractsTable, ({ one, many }) => ({
   // Each contract is tied to one organization
@@ -190,35 +92,5 @@ export const contractsRelations = relations(contractsTable, ({ one, many }) => (
     references: [vendorsTable.id],
   }),
   // Each contract can have many documents
-  documents: many(contractDocumentsTable),
-  // Each contract can have many chunks
-  chunks: many(contractChunksTable),
-}));
-
-export const contractDocumentsRelations = relations(contractDocumentsTable, ({ one, many }) => ({
-  // Each document is tied to one contract
-  contract: one(contractsTable, {
-    fields: [contractDocumentsTable.contractId],
-    references: [contractsTable.id],
-  }),
-  // Each document is tied to one organization
-  organization: one(organizationsTable, {
-    fields: [contractDocumentsTable.orgId],
-    references: [organizationsTable.id],
-  }),
-  // Each document can have many chunks
-  chunks: many(contractChunksTable),
-}));
-
-export const contractChunksRelations = relations(contractChunksTable, ({ one }) => ({
-  // Each chunk is tied to one contract
-  contract: one(contractsTable, {
-    fields: [contractChunksTable.contractId],
-    references: [contractsTable.id],
-  }),
-  // Each chunk is tied to one document
-  document: one(contractDocumentsTable, {
-    fields: [contractChunksTable.docId],
-    references: [contractDocumentsTable.id],
-  }),
+  documents: many(documentsTable),
 }));

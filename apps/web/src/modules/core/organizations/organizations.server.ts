@@ -2,7 +2,7 @@
 import 'server-only';
 
 import { db } from '@/drizzle';
-import { organizationsTable } from '@/drizzle/schema/schema';
+import { organizationsTable } from '@/drizzle/schema/schema.core';
 import { NewOrganization, Organization } from '@/drizzle/types';
 import { eq, sql } from 'drizzle-orm';
 
@@ -57,25 +57,40 @@ export async function updateOrg(
 export async function updateOrgUsage(
   orgId: Organization['id'],
   usageData: {
-    aiTokenUsage?: number;
-    totalQuotesProcessed?: number;
-    totalRfqsProcessed?: number;
+    tokenUsage?: number;
+    quotesProcessed?: number;
+    rfqsProcessed?: number;
+    fuelTendersProcessed?: number;
+    fuelBidsProcessed?: number;
+    filesUploaded?: number;
   },
 ): Promise<Organization> {
   const updatePayload: Record<string, unknown> = {
     updatedAt: new Date(),
   };
 
-  if (usageData.aiTokenUsage) {
-    updatePayload.aiTokensUsed = sql`${organizationsTable.aiTokensUsed} + ${usageData.aiTokenUsage}`;
+  if (usageData.tokenUsage) {
+    updatePayload.tokensUsed = sql`${organizationsTable.tokensUsed} + ${usageData.tokenUsage}`;
   }
 
-  if (usageData.totalQuotesProcessed) {
-    updatePayload.totalQuotesProcessed = sql`${organizationsTable.totalQuotesProcessed} + ${usageData.totalQuotesProcessed}`;
+  if (usageData.quotesProcessed) {
+    updatePayload.quotesProcessed = sql`${organizationsTable.quotesProcessed} + ${usageData.quotesProcessed}`;
   }
 
-  if (usageData.totalRfqsProcessed) {
-    updatePayload.totalRfqsProcessed = sql`${organizationsTable.totalRfqsProcessed} + ${usageData.totalRfqsProcessed}`;
+  if (usageData.rfqsProcessed) {
+    updatePayload.rfqsProcessed = sql`${organizationsTable.rfqsProcessed} + ${usageData.rfqsProcessed}`;
+  }
+
+  if (usageData.fuelTendersProcessed) {
+    updatePayload.fuelTendersProcessed = sql`${organizationsTable.fuelTendersProcessed} + ${usageData.fuelTendersProcessed}`;
+  }
+
+  if (usageData.fuelBidsProcessed) {
+    updatePayload.fuelBidsProcessed = sql`${organizationsTable.fuelBidsProcessed} + ${usageData.fuelBidsProcessed}`;
+  }
+
+  if (usageData.filesUploaded) {
+    updatePayload.filesUploaded = sql`${organizationsTable.filesUploaded} + ${usageData.filesUploaded}`;
   }
   const result = await db
     .update(organizationsTable)

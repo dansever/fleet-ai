@@ -25,6 +25,11 @@ export const serverEnv = createEnv({
 
     // OpenAI API Key
     OPENAI_API_KEY: z.string().min(1),
+
+    // Llama Cloud API Key
+    LLAMA_CLOUD_API_KEY: z.string().min(1),
+    LLAMA_EXTRACT_PROJECT_ID: z.string().min(1),
+    LLAMA_ORGANIZATION_ID: z.string().min(1),
   },
   experimental__runtimeEnv: process.env,
 });

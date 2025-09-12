@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import extract_router, quotes_router, llm_router, process_router
+from app.api.v1.endpoints import extract_router, quotes_router, llm_router, process_router, admin_router
 
 api_router = APIRouter()
 
@@ -31,4 +31,11 @@ api_router.include_router(
 api_router.include_router(
     llm_router,
     tags=["llm"]
+)
+
+# ======= Admin endpoints =======
+# POST /api/v1/admin/update_extractors/ - Update extractor agents
+api_router.include_router(
+    admin_router,
+    tags=["admin"]
 )

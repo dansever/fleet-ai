@@ -192,9 +192,9 @@ const QuoteDataTableColumns = (
           </div>
         </div>
         <div className="flex flex-wrap gap-1 ml-6">
-          {quote.partCondition && (
+          {quote.conditionCode && (
             <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-              {quote.partCondition}
+              {quote.conditionCode}
             </Badge>
           )}
           {quote.serialNumber && (

@@ -1,2 +1,3 @@
-export * as contacts from './contacts';
-export * as vendors from './vendors';
+export * as client from './vendors.client';
+export * as server from './vendors.server';
+export * as types from './vendors.types';

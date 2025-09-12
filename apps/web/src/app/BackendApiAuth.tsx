@@ -3,23 +3,30 @@
 
 import { backendApi } from '@/services/api-client';
 import { useAuth } from '@clerk/nextjs';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 export default function BackendApiAuth() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
 
-  useEffect(() => {
-    if (!isLoaded || !isSignedIn) return; // avoid SSR/client mismatch
-    const id = backendApi.interceptors.request.use(async (config) => {
-      const token = await getToken({ template: 'fleet-ai-jwt-template' });
+  // Memoize the interceptor function to prevent unnecessary re-creations
+  const createInterceptor = useCallback(
+    async (config: any) => {
+      const token = await getToken({ template: 'fleet-ai-jwt' });
       if (token) {
         config.headers = config.headers ?? {};
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
-    });
+    },
+    [getToken],
+  );
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return; // avoid SSR/client mismatch
+
+    const id = backendApi.interceptors.request.use(createInterceptor);
     return () => backendApi.interceptors.request.eject(id);
-  }, [getToken, isLoaded, isSignedIn]);
+  }, [createInterceptor, isLoaded, isSignedIn]);
 
   return null;
 }

@@ -1,23 +1,26 @@
 'use client';
 
-import { Airport, Contact, Contract, User } from '@/drizzle/types';
-import { server as contractServer } from '@/modules/contracts';
-import { server as airportServer } from '@/modules/core/airports';
-import { server as contactServer } from '@/modules/vendors/contacts';
+import { Airport, Contract, Document, User, VendorContact } from '@/drizzle/types';
+import { client as contractClient } from '@/modules/contracts';
+import { client as airportClient } from '@/modules/core/airports';
+import { client as documentClient } from '@/modules/documents';
+import { client as vendorContactClient } from '@/modules/vendors/vendor-contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export type LoadingState = {
   airports: boolean;
   contracts: boolean;
-  contacts: boolean;
+  documents: boolean;
+  vendorContacts: boolean;
   isRefreshing: boolean; // Indicates if current loading is from a refresh action
 };
 
 export type ErrorState = {
   airports: string | null;
   contracts: string | null;
-  contacts: string | null;
+  documents: string | null;
+  vendorContacts: string | null;
   general: string | null;
 };
 
@@ -45,15 +48,25 @@ export type AirportHubContextType = {
   addContract: (newContract: Contract) => void;
   removeContract: (contractId: Contract['id']) => void;
 
-  // Contacts
-  contacts: Contact[];
-  setContacts: (contacts: Contact[]) => void;
-  selectedContact: Contact | null;
-  setSelectedContact: (contact: Contact | null) => void;
-  refreshContacts: () => Promise<void>;
-  updateContact: (updatedContact: Contact) => void;
-  addContact: (newContact: Contact) => void;
-  removeContact: (contactId: Contact['id']) => void;
+  // Documents
+  documents: Document[];
+  setDocuments: (documents: Document[]) => void;
+  selectedDocument: Document | null;
+  setSelectedDocument: (document: Document | null) => void;
+  refreshDocuments: () => Promise<void>;
+  updateDocument: (updatedDocument: Document) => void;
+  addDocument: (newDocument: Document) => void;
+  removeDocument: (documentId: Document['id']) => void;
+
+  // Vendor Contacts
+  vendorContacts: VendorContact[];
+  setVendorContacts: (vendorContacts: VendorContact[]) => void;
+  selectedVendorContact: VendorContact | null;
+  setSelectedVendorContact: (vendorContact: VendorContact | null) => void;
+  refreshVendorContacts: () => Promise<void>;
+  updateVendorContact: (updatedVendorContact: VendorContact) => void;
+  addVendorContact: (newVendorContact: VendorContact) => void;
+  removeVendorContact: (vendorContactId: VendorContact['id']) => void;
 
   // Loading and error states
   loading: LoadingState;
@@ -78,18 +91,26 @@ export default function AirportHubProvider({
   hasServerData: boolean;
   children: React.ReactNode;
 }) {
+  // Airports
   const [airports, setAirports] = useState<Airport[]>(initialAirports);
   const [selectedAirport, setSelectedAirportState] = useState<Airport | null>(null);
+
+  // Contracts
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-
-  // Cache to avoid refetching contracts for the same airport
   const [contractsCache, setContractsCache] = useState<Record<string, Contract[]>>({});
 
-  // Cache to avoid refetching contacts for the same airport
-  const [contactsCache, setContactsCache] = useState<Record<string, Contact[]>>({});
+  // Documents
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [documentsCache, setDocumentsCache] = useState<Record<string, Document[]>>({});
+
+  // Vendor Contacts
+  const [vendorContacts, setVendorContacts] = useState<VendorContact[]>([]);
+  const [selectedVendorContact, setSelectedVendorContact] = useState<VendorContact | null>(null);
+  const [vendorContactsCache, setVendorContactsCache] = useState<Record<string, VendorContact[]>>(
+    {},
+  );
 
   // Cache cleanup configuration
   const MAX_CACHE_SIZE = 20; // Maximum number of airports to cache
@@ -99,7 +120,8 @@ export default function AirportHubProvider({
   const [loading, setLoading] = useState<LoadingState>({
     airports: !hasServerData, // Start with true if no server data provided
     contracts: false,
-    contacts: false,
+    documents: false,
+    vendorContacts: false,
     isRefreshing: false,
   });
 
@@ -107,7 +129,8 @@ export default function AirportHubProvider({
   const [errors, setErrors] = useState<ErrorState>({
     airports: null,
     contracts: null,
-    contacts: null,
+    documents: null,
+    vendorContacts: null,
     general: null,
   });
 
@@ -157,19 +180,21 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Cleanup both caches periodically
+   * Cleanup all caches periodically
    */
   const performCacheCleanup = useCallback(() => {
     setContractsCache((prev) => cleanupCache(prev, selectedAirport?.id));
-    setContactsCache((prev) => cleanupCache(prev, selectedAirport?.id));
-  }, [cleanupCache, selectedAirport?.id]);
+    setVendorContactsCache((prev) => cleanupCache(prev, selectedAirport?.id));
+    setDocumentsCache((prev) => cleanupCache(prev, selectedContract?.id));
+  }, [cleanupCache, selectedAirport?.id, selectedContract?.id]);
 
   /**
    * Manually clear all caches (useful for troubleshooting or memory management)
    */
   const clearAllCaches = useCallback(() => {
     setContractsCache({});
-    setContactsCache({});
+    setVendorContactsCache({});
+    setDocumentsCache({});
     console.log('All caches cleared manually');
     toast.success('Cache cleared successfully');
   }, []);
@@ -207,11 +232,12 @@ export default function AirportHubProvider({
     const statsInterval = setInterval(
       () => {
         const contractsCacheSize = Object.keys(contractsCache).length;
-        const contactsCacheSize = Object.keys(contactsCache).length;
+        const vendorContactsCacheSize = Object.keys(vendorContactsCache).length;
+        const documentsCacheSize = Object.keys(documentsCache).length;
 
-        if (contractsCacheSize > 20 || contactsCacheSize > 20) {
+        if (contractsCacheSize > 20 || vendorContactsCacheSize > 20 || documentsCacheSize > 20) {
           console.log(
-            `Cache stats - Contracts: ${contractsCacheSize}, Contacts: ${contactsCacheSize}`,
+            `Cache stats - Contracts: ${contractsCacheSize}, Vendor Contacts: ${vendorContactsCacheSize}, Documents: ${documentsCacheSize}`,
           );
         }
       },
@@ -222,7 +248,7 @@ export default function AirportHubProvider({
       clearInterval(cleanupInterval);
       clearInterval(statsInterval);
     };
-  }, [performCacheCleanup, contractsCache, contactsCache]);
+  }, [performCacheCleanup, contractsCache, vendorContactsCache]);
 
   /**
    * Load service contracts for the selected airport (only when airport changes)
@@ -251,7 +277,7 @@ export default function AirportHubProvider({
       setErrors((prev) => ({ ...prev, contracts: null }));
 
       try {
-        const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
+        const contracts = await contractClient.listContractsByAirport(selectedAirport.id);
         setContracts(contracts);
 
         // Cache the service contracts for this airport
@@ -291,33 +317,33 @@ export default function AirportHubProvider({
    */
   useEffect(() => {
     if (!selectedAirport) {
-      setContacts([]);
-      setSelectedContact(null);
+      setVendorContacts([]);
+      setSelectedVendorContact(null);
       return;
     }
 
     // Immediately clear contacts when switching airports to prevent stale data
-    setContacts([]);
-    setSelectedContact(null);
+    setVendorContacts([]);
+    setSelectedVendorContact(null);
 
     const loadContacts = async () => {
       // Check cache first
-      if (contactsCache[selectedAirport.id]) {
-        const cachedContacts = contactsCache[selectedAirport.id];
-        setContacts(cachedContacts);
-        setSelectedContact(cachedContacts.length > 0 ? cachedContacts[0] : null);
+      if (vendorContactsCache[selectedAirport.id]) {
+        const cachedContacts = vendorContactsCache[selectedAirport.id];
+        setVendorContacts(cachedContacts);
+        setSelectedVendorContact(cachedContacts.length > 0 ? cachedContacts[0] : null);
         return;
       }
 
-      setLoading((prev) => ({ ...prev, contacts: true, isRefreshing: false }));
-      setErrors((prev) => ({ ...prev, contacts: null }));
+      setLoading((prev) => ({ ...prev, vendorContacts: true, isRefreshing: false }));
+      setErrors((prev) => ({ ...prev, vendorContacts: null }));
 
       try {
-        const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
-        setContacts(contacts);
+        const contacts = await vendorContactClient.listVendorContactsByVendor(selectedAirport.id);
+        setVendorContacts(contacts);
 
         // Cache the contacts for this airport
-        setContactsCache((prev) => {
+        setVendorContactsCache((prev) => {
           const updated = {
             ...prev,
             [selectedAirport.id]: contacts,
@@ -326,26 +352,87 @@ export default function AirportHubProvider({
         });
 
         // Always set first contact as selected when loading contacts for a new airport
-        setSelectedContact(contacts.length > 0 ? contacts[0] : null);
+        setSelectedVendorContact(contacts.length > 0 ? contacts[0] : null);
       } catch (error) {
         console.error('Error loading contacts:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to load contacts';
         setErrors((prev) => ({
           ...prev,
-          contacts: errorMessage,
+          vendorContacts: errorMessage,
         }));
-        setContacts([]);
-        setSelectedContact(null);
+        setVendorContacts([]);
+        setSelectedVendorContact(null);
 
         // Show user-friendly toast notification
         toast.error(`Failed to load contacts: ${errorMessage}`);
       } finally {
-        setLoading((prev) => ({ ...prev, contacts: false, isRefreshing: false }));
+        setLoading((prev) => ({ ...prev, vendorContacts: false, isRefreshing: false }));
       }
     };
 
     loadContacts();
   }, [selectedAirport]); // Remove contactsCache dependency to avoid unnecessary re-runs
+
+  /**
+   * Load documents for the selected contract (only when contract changes)
+   */
+  useEffect(() => {
+    if (!selectedContract) {
+      setDocuments([]);
+      setSelectedDocument(null);
+      return;
+    }
+
+    // Immediately clear documents when switching contracts to prevent stale data
+    setDocuments([]);
+    setSelectedDocument(null);
+
+    const loadDocuments = async () => {
+      // Check cache first
+      if (documentsCache[selectedContract.id]) {
+        const cachedDocuments = documentsCache[selectedContract.id];
+        setDocuments(cachedDocuments);
+        setSelectedDocument(cachedDocuments.length > 0 ? cachedDocuments[0] : null);
+        return;
+      }
+
+      setLoading((prev) => ({ ...prev, documents: true, isRefreshing: false }));
+      setErrors((prev) => ({ ...prev, documents: null }));
+
+      try {
+        const documents = await documentClient.listDocumentsByContract(selectedContract.id);
+        setDocuments(documents);
+
+        // Cache the documents for this contract
+        setDocumentsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedContract.id]: documents,
+          };
+          return cleanupCache(updated, selectedContract.id);
+        });
+
+        // Always set first document as selected when loading documents for a new contract
+        setSelectedDocument(documents.length > 0 ? documents[0] : null);
+      } catch (error) {
+        console.error('Error loading documents:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load documents';
+        setErrors((prev) => ({
+          ...prev,
+          documents: errorMessage,
+        }));
+        setDocuments([]);
+        setSelectedDocument(null);
+
+        // Show user-friendly toast notification
+        toast.error(`Failed to load documents: ${errorMessage}`);
+      } finally {
+        setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
+      }
+    };
+
+    loadDocuments();
+  }, [selectedContract]); // Remove documentsCache dependency to avoid unnecessary re-runs
 
   /**
    * Refresh airports
@@ -357,7 +444,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, airports: null }));
 
     try {
-      const freshAirports = await airportServer.listAirportsByOrgId(dbUser.orgId);
+      const freshAirports = await airportClient.listAirports();
       const sortedAirports = sortAirports(freshAirports);
       setAirports(sortedAirports);
 
@@ -399,7 +486,7 @@ export default function AirportHubProvider({
     setErrors((prev) => ({ ...prev, contracts: null }));
 
     try {
-      const contracts = await contractServer.listContractsByAirport(selectedAirport.id);
+      const contracts = await contractClient.listContractsByAirport(selectedAirport.id);
       setContracts(contracts);
 
       // Update cache with fresh data
@@ -490,7 +577,7 @@ export default function AirportHubProvider({
     async (airportId: string) => {
       try {
         // Delete from the server
-        await airportServer.deleteAirport(airportId);
+        await airportClient.deleteAirport(airportId);
 
         // Remove from local state
         setAirports((prevAirports) => {
@@ -595,25 +682,25 @@ export default function AirportHubProvider({
   /**
    * Refresh contacts for the currently selected airport (clears cache)
    */
-  const refreshContacts = useCallback(async () => {
+  const refreshVendorContacts = useCallback(async () => {
     if (!selectedAirport) return;
 
     // Clear cache for this airport to force fresh data
-    setContactsCache((prev) => {
+    setVendorContactsCache((prev) => {
       const updated = { ...prev };
       delete updated[selectedAirport.id];
       return updated;
     });
 
-    setLoading((prev) => ({ ...prev, contacts: true, isRefreshing: true }));
-    setErrors((prev) => ({ ...prev, contacts: null }));
+    setLoading((prev) => ({ ...prev, vendorContacts: true, isRefreshing: true }));
+    setErrors((prev) => ({ ...prev, vendorContacts: null }));
 
     try {
-      const contacts = await contactServer.listContactsByVendor(selectedAirport.id);
-      setContacts(contacts);
+      const contacts = await vendorContactClient.listVendorContactsByVendor(selectedAirport.id);
+      setVendorContacts(contacts);
 
       // Update cache with fresh data
-      setContactsCache((prev) => {
+      setVendorContactsCache((prev) => {
         const updated = {
           ...prev,
           [selectedAirport.id]: contacts,
@@ -622,69 +709,71 @@ export default function AirportHubProvider({
       });
 
       // Preserve the currently selected contact if it still exists, otherwise select first
-      if (selectedContact) {
-        const updatedSelectedContact = contacts.find((c) => c.id === selectedContact.id);
-        setSelectedContact(updatedSelectedContact || (contacts.length > 0 ? contacts[0] : null));
+      if (selectedVendorContact) {
+        const updatedSelectedContact = contacts.find((c) => c.id === selectedVendorContact.id);
+        setSelectedVendorContact(
+          updatedSelectedContact || (contacts.length > 0 ? contacts[0] : null),
+        );
       } else if (contacts.length > 0) {
-        setSelectedContact(contacts[0]);
+        setSelectedVendorContact(contacts[0]);
       }
     } catch (error) {
       console.error('Error refreshing contacts:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to refresh contacts';
       setErrors((prev) => ({
         ...prev,
-        contacts: errorMessage,
+        vendorContacts: errorMessage,
       }));
 
       // Show user-friendly toast notification
       toast.error(`Failed to refresh contacts: ${errorMessage}`);
     } finally {
-      setLoading((prev) => ({ ...prev, contacts: false, isRefreshing: false }));
+      setLoading((prev) => ({ ...prev, vendorContacts: false, isRefreshing: false }));
     }
-  }, [selectedAirport, selectedContact]);
+  }, [selectedAirport, selectedVendorContact]);
 
   /**
-   * Update contact
+   * Update vendor contact
    */
-  const updateContact = useCallback(
-    (updatedContact: Contact) => {
-      setContacts((prevContacts) =>
-        prevContacts.map((contact) =>
-          contact.id === updatedContact.id ? updatedContact : contact,
+  const updateVendorContact = useCallback(
+    (updatedVendorContact: VendorContact) => {
+      setVendorContacts((prevContacts) =>
+        prevContacts.map((vendorContact) =>
+          vendorContact.id === updatedVendorContact.id ? updatedVendorContact : vendorContact,
         ),
       );
 
-      if (selectedContact?.id === updatedContact.id) {
-        setSelectedContact(updatedContact);
+      if (selectedVendorContact?.id === updatedVendorContact.id) {
+        setSelectedVendorContact(updatedVendorContact);
       }
 
       // Update cache as well
       if (selectedAirport) {
-        setContactsCache((prev) => ({
+        setVendorContactsCache((prev) => ({
           ...prev,
           [selectedAirport.id]:
             prev[selectedAirport.id]?.map((contact) =>
-              contact.id === updatedContact.id ? updatedContact : contact,
+              contact.id === updatedVendorContact.id ? updatedVendorContact : contact,
             ) || [],
         }));
       }
     },
-    [selectedContact, selectedAirport],
+    [selectedVendorContact, selectedAirport],
   );
 
   /**
-   * Add contact
+   * Add vendor contact
    */
-  const addContact = useCallback(
-    (newContact: Contact) => {
-      setContacts((prevContacts) => [newContact, ...prevContacts]);
+  const addVendorContact = useCallback(
+    (newVendorContact: VendorContact) => {
+      setVendorContacts((prevContacts) => [newVendorContact, ...prevContacts]);
 
       // Update cache as well
       if (selectedAirport) {
-        setContactsCache((prev) => {
+        setVendorContactsCache((prev) => {
           const updated = {
             ...prev,
-            [selectedAirport.id]: [newContact, ...(prev[selectedAirport.id] || [])],
+            [selectedAirport.id]: [newVendorContact, ...(prev[selectedAirport.id] || [])],
           };
           return cleanupCache(updated, selectedAirport.id);
         });
@@ -694,16 +783,16 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Remove contact
+   * Remove vendor contact
    */
-  const removeContact = useCallback(
-    (contactId: string) => {
-      setContacts((prevContacts) => {
-        const filteredContacts = prevContacts.filter((contact) => contact.id !== contactId);
+  const removeVendorContact = useCallback(
+    (vendorContactId: string) => {
+      setVendorContacts((prevContacts) => {
+        const filteredContacts = prevContacts.filter((contact) => contact.id !== vendorContactId);
 
         // If we're removing the currently selected contact, select the first available one
-        if (selectedContact?.id === contactId) {
-          setSelectedContact(filteredContacts.length > 0 ? filteredContacts[0] : null);
+        if (selectedVendorContact?.id === vendorContactId) {
+          setSelectedVendorContact(filteredContacts.length > 0 ? filteredContacts[0] : null);
         }
 
         return filteredContacts;
@@ -711,14 +800,143 @@ export default function AirportHubProvider({
 
       // Update cache as well
       if (selectedAirport) {
-        setContactsCache((prev) => ({
+        setVendorContactsCache((prev) => ({
           ...prev,
           [selectedAirport.id]:
-            prev[selectedAirport.id]?.filter((contact) => contact.id !== contactId) || [],
+            prev[selectedAirport.id]?.filter((contact) => contact.id !== vendorContactId) || [],
         }));
       }
     },
-    [selectedContact, selectedAirport],
+    [selectedVendorContact, selectedAirport],
+  );
+
+  /**
+   * Refresh documents for the currently selected contract (clears cache)
+   */
+  const refreshDocuments = useCallback(async () => {
+    if (!selectedContract) return;
+
+    // Clear cache for this contract to force fresh data
+    setDocumentsCache((prev) => {
+      const updated = { ...prev };
+      delete updated[selectedContract.id];
+      return updated;
+    });
+
+    setLoading((prev) => ({ ...prev, documents: true, isRefreshing: true }));
+    setErrors((prev) => ({ ...prev, documents: null }));
+
+    try {
+      const documents = await documentClient.listDocumentsByContract(selectedContract.id);
+      setDocuments(documents);
+
+      // Update cache with fresh data
+      setDocumentsCache((prev) => {
+        const updated = {
+          ...prev,
+          [selectedContract.id]: documents,
+        };
+        return cleanupCache(updated, selectedContract.id);
+      });
+
+      // Preserve the currently selected document if it still exists, otherwise select first
+      if (selectedDocument) {
+        const updatedSelectedDocument = documents.find((d) => d.id === selectedDocument.id);
+        setSelectedDocument(
+          updatedSelectedDocument || (documents.length > 0 ? documents[0] : null),
+        );
+      } else if (documents.length > 0) {
+        setSelectedDocument(documents[0]);
+      }
+    } catch (error) {
+      console.error('Error refreshing documents:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh documents';
+      setErrors((prev) => ({
+        ...prev,
+        documents: errorMessage,
+      }));
+      toast.error(`Failed to refresh documents: ${errorMessage}`);
+    } finally {
+      setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
+    }
+  }, [selectedContract, selectedDocument]);
+
+  /**
+   * Update document
+   */
+  const updateDocument = useCallback(
+    (updatedDocument: Document) => {
+      setDocuments((prevDocuments) =>
+        prevDocuments.map((document) =>
+          document.id === updatedDocument.id ? updatedDocument : document,
+        ),
+      );
+
+      if (selectedDocument?.id === updatedDocument.id) {
+        setSelectedDocument(updatedDocument);
+      }
+
+      // Update cache as well
+      if (selectedContract) {
+        setDocumentsCache((prev) => ({
+          ...prev,
+          [selectedContract.id]:
+            prev[selectedContract.id]?.map((document) =>
+              document.id === updatedDocument.id ? updatedDocument : document,
+            ) || [],
+        }));
+      }
+    },
+    [selectedDocument, selectedContract],
+  );
+
+  /**
+   * Add document
+   */
+  const addDocument = useCallback(
+    (newDocument: Document) => {
+      setDocuments((prevDocuments) => [newDocument, ...prevDocuments]);
+
+      // Update cache as well
+      if (selectedContract && selectedContract.id === newDocument.parentId) {
+        setDocumentsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedContract.id]: [newDocument, ...(prev[selectedContract.id] || [])],
+          };
+          return cleanupCache(updated, selectedContract.id);
+        });
+      }
+    },
+    [selectedContract, cleanupCache],
+  );
+
+  /**
+   * Remove document
+   */
+  const removeDocument = useCallback(
+    (documentId: string) => {
+      setDocuments((prevDocuments) => {
+        const filteredDocuments = prevDocuments.filter((document) => document.id !== documentId);
+
+        // If we're removing the currently selected document, select the first available one
+        if (selectedDocument?.id === documentId) {
+          setSelectedDocument(filteredDocuments.length > 0 ? filteredDocuments[0] : null);
+        }
+
+        return filteredDocuments;
+      });
+
+      // Update cache as well
+      if (selectedContract) {
+        setDocumentsCache((prev) => ({
+          ...prev,
+          [selectedContract.id]:
+            prev[selectedContract.id]?.filter((document) => document.id !== documentId) || [],
+        }));
+      }
+    },
+    [selectedDocument, selectedContract],
   );
 
   /**
@@ -735,7 +953,8 @@ export default function AirportHubProvider({
     setErrors({
       airports: null,
       contracts: null,
-      contacts: null,
+      documents: null,
+      vendorContacts: null,
       general: null,
     });
   }, []);
@@ -753,12 +972,13 @@ export default function AirportHubProvider({
         setLoading((prev) => ({
           ...prev,
           contracts: !contractsCache[airport.id], // Only set loading if not cached
-          contacts: !contactsCache[airport.id], // Only set loading if not cached
+          vendorContacts: !vendorContactsCache[airport.id], // Only set loading if not cached
+          documents: false, // Documents will be loaded when contract is selected
           isRefreshing: false,
         }));
       }
     },
-    [contractsCache, contactsCache],
+    [contractsCache, vendorContactsCache],
   );
 
   /**
@@ -782,14 +1002,22 @@ export default function AirportHubProvider({
     updateContract,
     addContract,
     removeContract,
-    contacts,
-    setContacts,
-    selectedContact,
-    setSelectedContact,
-    refreshContacts,
-    updateContact,
-    addContact,
-    removeContact,
+    documents,
+    setDocuments,
+    selectedDocument,
+    setSelectedDocument,
+    refreshDocuments,
+    updateDocument,
+    addDocument,
+    removeDocument,
+    vendorContacts,
+    setVendorContacts,
+    selectedVendorContact,
+    setSelectedVendorContact,
+    refreshVendorContacts,
+    updateVendorContact,
+    addVendorContact,
+    removeVendorContact,
     loading,
     errors,
     clearError,

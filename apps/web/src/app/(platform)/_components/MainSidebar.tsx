@@ -16,10 +16,9 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { useOrganization, UserButton, useUser } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import {
   BarChart,
   Fuel,
@@ -29,10 +28,12 @@ import {
   Settings,
   Settings2,
   ShoppingCart,
+  Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 interface SidebarTab {
   title: string;
@@ -49,6 +50,13 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       description: 'Overview & Analytics',
       url: '/dashboard',
       icon: LayoutDashboard,
+      isReady: true,
+    },
+    {
+      title: 'AI Assistant',
+      description: 'AI Assistant',
+      url: '/ai-assistant',
+      icon: Sparkles,
       isReady: true,
     },
     {
@@ -91,10 +99,10 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       isReady: true,
     },
   ],
-  dev: [
+  admin: [
     {
-      title: 'Dev Page',
-      url: '/dev-page',
+      title: 'Admin',
+      url: '/admin',
       icon: Settings2,
       isReady: true,
     },
@@ -122,12 +130,11 @@ const SIDEBAR_MENU_BUTTON_SIZES = {
 };
 
 const SIDEBAR_MENU_BUTTON_BASE =
-  'flex items-center truncate gap-2 font-normal text-gray-700 bg-gradient-to-r transition-colors duration-200';
+  'text-gray-500 flex items-center truncate gap-2 hover:text-gray-500 hover:bg-gradient-to-r hover:from-blue-50 hover:to-pink-50 transition-colors duration-200';
 
 const SIDEBAR_MENU_BUTTON_VARIANTS = {
-  default: 'hover:bg-gradient-to-r hover:from-blue-100 hover:to-pink-100/80',
-  active: 'bg-gradient-to-r from-blue-500 to-pink-300 text-white font-bold hover:text-white',
-  disabled: 'opacity-50',
+  active: 'font-bold text-gray-800 hover:text-gray-700',
+  disabled: 'opacity-40',
 };
 
 function SidebarNavItem({
@@ -140,9 +147,7 @@ function SidebarNavItem({
   isCollapsed: boolean;
 }) {
   const variantClass = item.isReady
-    ? isActive
-      ? SIDEBAR_MENU_BUTTON_VARIANTS.active
-      : SIDEBAR_MENU_BUTTON_VARIANTS.default
+    ? isActive && SIDEBAR_MENU_BUTTON_VARIANTS.active
     : SIDEBAR_MENU_BUTTON_VARIANTS.disabled;
 
   const menuButton = (
@@ -165,16 +170,14 @@ function SidebarNavItem({
         asChild
       >
         <div className="flex items-center">
-          <item.icon className="h-4 w-4 flex-shrink-0" />
-          <span
+          <item.icon
             className={cn(
-              'transition-all duration-200',
-              isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+              'h-4 w-4 flex-shrink-0 text-gray-500',
+              isActive && 'text-sky-600 stroke-3',
             )}
-          >
-            {item.title}
-          </span>
-          {!item.isReady && !isCollapsed && (
+          />
+          <span className="transition-all duration-200">{item.title}</span>
+          {!item.isReady && (
             <span className="text-[10px] px-1 py-0.5 ml-1 rounded bg-yellow-100 text-yellow-800 border border-yellow-300">
               Soon
             </span>
@@ -204,7 +207,9 @@ function SidebarNavItem({
                 isCollapsed ? 'rounded-lg justify-center' : 'rounded-xl',
               )}
             >
-              <item.icon className="h-4 w-4 flex-shrink-0" />
+              <item.icon
+                className={cn('h-4 w-4 flex-shrink-0', isActive && 'text-sky-600 stroke-3')}
+              />
             </SidebarMenuButton>
           </Link>
         </TooltipTrigger>
@@ -223,12 +228,18 @@ export function MainSidebar({
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
-  const { organization } = useOrganization();
   const isCollapsed = state === 'collapsed';
   const { user } = useUser();
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.organizationMemberships?.[0]?.organization?.imageUrl) {
+      setImageUrl(user.organizationMemberships[0].organization.imageUrl);
+    }
+  }, [user?.organizationMemberships?.[0]?.organization?.imageUrl]);
 
   return (
-    <Sidebar collapsible="icon" variant={variant} className="border-transparen">
+    <Sidebar collapsible="icon" variant={variant} className="border-transparent">
       <SidebarHeader
         className={cn(
           'flex flex-row items-center w-full h-16 min-h-16 px-2',
@@ -300,10 +311,10 @@ export function MainSidebar({
           </SidebarGroup>
 
           <SidebarGroup>
-            <SidebarGroupLabel>Dev</SidebarGroupLabel>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {sidebarTabs.dev.map((item) => (
+                {sidebarTabs.admin.map((item) => (
                   <SidebarNavItem
                     key={item.title}
                     item={item}
@@ -333,9 +344,9 @@ export function MainSidebar({
       </SidebarContent>
       <SidebarFooter>
         <div style={{ position: 'relative', width: '100%', height: '40px' }}>
-          {user?.organizationMemberships[0].organization.imageUrl && !isCollapsed && (
+          {!isCollapsed && (
             <Image
-              src={user.organizationMemberships[0].organization.imageUrl}
+              src={imageUrl ?? '/placeholder.png'}
               alt="Organization logo"
               fill
               sizes="200px"
@@ -352,26 +363,21 @@ export function MainSidebar({
 }
 
 function ClientUserButton({ showName }: { showName: boolean }) {
-  const { isSignedIn, isLoaded } = useUser();
-
-  if (!isLoaded || !isSignedIn) {
-    return (
-      <div className="h-8 w-8 flex items-center justify-center">
-        <Skeleton className="h-8 w-8 rounded-full" />
-      </div>
-    );
-  }
+  // Memoize appearance to prevent unnecessary re-renders
+  const appearance = useMemo(
+    () => ({
+      elements: {
+        userButtonBox: {
+          flexDirection: 'row-reverse' as const,
+        },
+      },
+    }),
+    [],
+  );
 
   return (
-    <UserButton
-      showName={showName}
-      appearance={{
-        elements: {
-          userButtonBox: {
-            flexDirection: 'row-reverse',
-          },
-        },
-      }}
-    />
+    <div suppressHydrationWarning>
+      <UserButton showName={showName} appearance={appearance} />
+    </div>
   );
 }

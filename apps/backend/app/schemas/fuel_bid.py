@@ -56,6 +56,6 @@ class FuelBid(BaseModel):
     
     # Validity
     validity_start_date: date | None = Field(None,description="Start date when the bid pricing becomes effective, in YYYY-MM-DD format.")
-    validity_end_date: date | None = Field(None,description="End date when the bid pricing expires, in YYYY-MM-DD format.")
+    validity_end_date: date | None = Field(None,description="The date when the bid pricing expires, in YYYY-MM-DD format.")
     minimum_order_quantity: Decimal | None = Field(None,description="Minimum fuel quantity required for this pricing, numeric value only.")
     minimum_order_unit: str | None = Field(None,description="Unit of measure for minimum order quantity.")

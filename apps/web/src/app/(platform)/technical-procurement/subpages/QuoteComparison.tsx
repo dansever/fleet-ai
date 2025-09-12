@@ -1,5 +1,5 @@
 import { CardContent } from '@/components/ui/card';
-import { createRandomQuote } from '@/features/quotes/createRandomQuote';
+import { generateRandomQuote } from '@/features/generateRandomObjects/quote';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
@@ -58,7 +58,7 @@ export default function QuoteComparison() {
   };
 
   const handleGenerateRandomQuote = async () => {
-    const quote = await createRandomQuote(selectedRfq?.id || '');
+    const quote = await generateRandomQuote('received', selectedRfq?.id || '');
     addQuote(quote);
     setUploadQuotePopoverOpen(false);
   };
@@ -88,7 +88,7 @@ export default function QuoteComparison() {
           <FileUploadPopover
             open={uploadQuotePopoverOpen}
             onOpenChange={setUploadQuotePopoverOpen}
-            trigger={<Button intent="secondary" text="Upload Quote" icon={Upload} size="md" />}
+            trigger={<Button intent="secondary" text="Upload Quote" icon={Upload} />}
             onSend={() => {}}
           >
             <div className="flex flex-col gap-2 text-sm">
