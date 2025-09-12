@@ -11,8 +11,9 @@ import { MainCard } from '../Card/Card';
 
 interface BasePopoverProps {
   trigger: ReactNode;
+  hasHeader?: boolean;
   headerGradient?: string;
-  title: string;
+  title?: string;
   description?: string;
   popoverContentAlign?: 'start' | 'center' | 'end';
   open?: boolean;
@@ -24,6 +25,7 @@ interface BasePopoverProps {
 export const BasePopover = ({
   trigger,
   headerGradient = 'from-sky-500 via-blue-600 to-indigo-500',
+  hasHeader = false,
   title,
   description,
   popoverContentAlign = 'end',
@@ -37,17 +39,19 @@ export const BasePopover = ({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         align={popoverContentAlign}
-        className={cn('w-80 p-0 rounded-2xl overflow-hidden border-0 backdrop-blur-sm', className)}
+        className={cn('p-0 rounded-3xl overflow-hidden border-0 backdrop-blur-sm', className)}
       >
-        <div className={cn(`bg-gradient-to-r ${headerGradient} opacity-80 text-white p-4`)}>
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col gap-1">
-              <h4 className="font-semibold">{title}</h4>
-              <p>{description}</p>
+        {hasHeader && (
+          <div className={cn(`bg-gradient-to-r ${headerGradient} opacity-80 text-white p-4`)}>
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-1">
+                <h4 className="font-semibold">{title}</h4>
+                <p>{description}</p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="p-2 bg-card">
+        )}
+        <div className="bg-card">
           <div className="flex gap-2 justify-start">{children}</div>
         </div>
       </PopoverContent>
@@ -254,7 +258,6 @@ export const FileUploadPopover = ({
 
   const handleCancel = () => {
     setSelectedFile(null);
-    close();
   };
 
   const formatFileSize = (bytes: number) => {
@@ -275,91 +278,96 @@ export const FileUploadPopover = ({
             'w-80 p-0 rounded-2xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
-          {!selectedFile ? (
-            <>
-              <MainCard
-                title="Upload Document"
-                subtitle="Drag and drop or click to select"
-                neutralHeader={false}
-              >
-                <div className="space-y-2">
-                  <div
-                    className={cn(
-                      'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
-                      isDragOver
-                        ? 'border-blue-400 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
-                    )}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <div className="space-y-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
-                        <Upload className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {isDragOver ? 'Drop your file here' : 'Click to upload or drag and drop'}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">Maximum file size: {maxSize}MB</p>
-                      </div>
+          <MainCard
+            title={selectedFile ? selectedFile.name : 'Upload Document'}
+            subtitle={!selectedFile ? 'Drag and drop or click to select' : undefined}
+            neutralHeader={false}
+          >
+            {!selectedFile ? (
+              <div className="space-y-2">
+                <div
+                  className={cn(
+                    'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+                    isDragOver
+                      ? 'border-blue-400 bg-blue-50'
+                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
+                  )}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+                      <Upload className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {isDragOver ? 'Drop your file here' : 'Click to upload or drag and drop'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Maximum file size: {maxSize}MB</p>
                     </div>
                   </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept={accept}
-                    onChange={handleFileInputChange}
-                    className="hidden"
-                  />
-
-                  {typeof children === 'function' ? children({ close }) : children}
                 </div>
-              </MainCard>
-            </>
-          ) : (
-            <>
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5" />
-                  <div>
-                    <h4 className="font-semibold text-sm">File Ready</h4>
-                    <p className="text-white/90 text-xs mt-1">Ready to send</p>
-                  </div>
-                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={accept}
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+
+                {typeof children === 'function' ? children({ close }) : children}
               </div>
-
-              <div className="p-4 bg-white">
-                <div className="bg-gray-50 rounded-xl p-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            ) : (
+              <div className="flex flex-col p-0 bg-white gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                       <FileText className="w-5 h-5 text-white" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                    <div className="flex flex-col gap-2 flex-1">
+                      <p className="text-sm font-medium text-gray-900 whitespace-break-spaces">
                         {selectedFile.name}
                       </p>
-                      <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex flex-col space-y-0">
+                          <span className="text-zinc-500 dark:text-zinc-400">Size</span>
+                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                            {formatFileSize(selectedFile.size)}
+                          </span>
+                        </div>
+                        <div className="flex flex-col space-y-0">
+                          <span className="text-zinc-500 dark:text-zinc-400">Type</span>
+                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                            {selectedFile.type.split('/')[1].toUpperCase() || 'Unknown'}
+                          </span>
+                        </div>
+                        <div className="flex flex-col space-y-0">
+                          <span className="text-zinc-500 dark:text-zinc-400">Modified</span>
+                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                            {new Date(selectedFile.lastModified).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex flex-col space-y-0">
+                          <span className="text-zinc-500 dark:text-zinc-400">Status</span>
+                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                            Ready
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button
-                    intent="secondary"
-                    onClick={handleCancel}
-                    size="sm"
-                    text="Cancel"
-                    icon={X}
-                  />
-                  <Button intent="success" onClick={handleSend} size="sm" text="Send" icon={Send} />
+                  <Button intent="secondary" onClick={handleCancel} text="Cancel" icon={X} />
+                  <Button intent="success" onClick={handleSend} text="Upload" icon={Send} />
                 </div>
               </div>
-            </>
-          )}
+            )}
+          </MainCard>
         </PopoverContent>
       </Popover>
     </div>

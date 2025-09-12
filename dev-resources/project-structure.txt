@@ -4,25 +4,274 @@
 |-- apps
 |   |-- backend
 |   |   |-- README.md
-|   |   |-- SETUP.md
+|   |   |-- __init__.py
 |   |   |-- app
+|   |   |   |-- __init__.py
+|   |   |   |-- __pycache__
+|   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   `-- main.cpython-313.pyc
+|   |   |   |-- ai
+|   |   |   |   |-- adapter.py
+|   |   |   |   |-- extractors
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   |-- llama_extractor.cpython-313.pyc
+|   |   |   |   |   |   `-- ocr_tesseract.cpython-313.pyc
+|   |   |   |   |   |-- llama_extractor.py
+|   |   |   |   |   `-- ocr_tesseract.py
+|   |   |   |   |-- providers
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   `-- openai_client.cpython-313.pyc
+|   |   |   |   |   |-- langchain_client.py
+|   |   |   |   |   |-- openai_client.py
+|   |   |   |   |   `-- usage_example.py
+|   |   |   |   |       `-- openai_client_example.py
+|   |   |   |   |-- rag
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   |-- chunker.cpython-313.pyc
+|   |   |   |   |   |   |-- embedder.cpython-313.pyc
+|   |   |   |   |   |   |-- loader.cpython-313.pyc
+|   |   |   |   |   |   `-- rag_pipeline.cpython-313.pyc
+|   |   |   |   |   |-- chunker.py
+|   |   |   |   |   |-- embedder.py
+|   |   |   |   |   |-- loader.py
+|   |   |   |   |   |-- rag_pipeline.py
+|   |   |   |   |   |-- retriever.py
+|   |   |   |   |   `-- vector_store.py
+|   |   |   |   `-- tools
+|   |   |   |       |-- __init__.py
+|   |   |   |       `-- web_search.py
 |   |   |   |-- api
-|   |   |   `-- features
-|   |   |-- config
-|   |   |-- db
-|   |   |-- main.py
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   `-- __init__.cpython-313.pyc
+|   |   |   |   `-- v1
+|   |   |   |       |-- __init__.py
+|   |   |   |       |-- __pycache__
+|   |   |   |       |   |-- __init__.cpython-313.pyc
+|   |   |   |       |   `-- router.cpython-313.pyc
+|   |   |   |       |-- endpoints
+|   |   |   |       |   |-- __init__.py
+|   |   |   |       |   |-- __pycache__
+|   |   |   |       |   |   |-- __init__.cpython-313.pyc
+|   |   |   |       |   |   |-- admin.cpython-313.pyc
+|   |   |   |       |   |   |-- extract.cpython-313.pyc
+|   |   |   |       |   |   |-- llm.cpython-313.pyc
+|   |   |   |       |   |   |-- process.cpython-313.pyc
+|   |   |   |       |   |   `-- quotes.cpython-313.pyc
+|   |   |   |       |   |-- admin.py
+|   |   |   |       |   |-- extract.py
+|   |   |   |       |   |-- llm.py
+|   |   |   |       |   |-- process.py
+|   |   |   |       |   `-- quotes.py
+|   |   |   |       `-- router.py
+|   |   |   |-- config
+|   |   |   |   |-- README.md
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   `-- ai_config.cpython-313.pyc
+|   |   |   |   |-- ai_config.py
+|   |   |   |   `-- google-credentials.json
+|   |   |   |-- core
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   `-- auth.cpython-313.pyc
+|   |   |   |   `-- auth.py
+|   |   |   |-- db
+|   |   |   |   |-- README.md
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |-- chromadb_client.cpython-313.pyc
+|   |   |   |   |   `-- session.cpython-313.pyc
+|   |   |   |   |-- chromadb_client.py
+|   |   |   |   |-- models.py
+|   |   |   |   |-- operations
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   |-- airports.cpython-313.pyc
+|   |   |   |   |   |   |-- contract_chunks.cpython-313.pyc
+|   |   |   |   |   |   |-- contract_documents.cpython-313.pyc
+|   |   |   |   |   |   |-- contracts.cpython-313.pyc
+|   |   |   |   |   |   |-- invoices.cpython-313.pyc
+|   |   |   |   |   |   |-- organizations.cpython-313.pyc
+|   |   |   |   |   |   |-- quotes.cpython-313.pyc
+|   |   |   |   |   |   |-- rfqs.cpython-313.pyc
+|   |   |   |   |   |   |-- users.cpython-313.pyc
+|   |   |   |   |   |   `-- vendors.cpython-313.pyc
+|   |   |   |   |   |-- airports.py
+|   |   |   |   |   |-- contract_chunks.py
+|   |   |   |   |   |-- contract_documents.py
+|   |   |   |   |   |-- contracts.py
+|   |   |   |   |   |-- invoices.py
+|   |   |   |   |   |-- organizations.py
+|   |   |   |   |   |-- quotes.py
+|   |   |   |   |   |-- rfqs.py
+|   |   |   |   |   |-- users.py
+|   |   |   |   |   `-- vendors.py
+|   |   |   |   `-- session.py
+|   |   |   |-- features
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   `-- __init__.cpython-313.pyc
+|   |   |   |   |-- contract
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   |-- contract_config.cpython-313.pyc
+|   |   |   |   |   |   `-- process_contract.cpython-313.pyc
+|   |   |   |   |   |-- contract_config.py
+|   |   |   |   |   `-- process_contract.py
+|   |   |   |   |-- fuel
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   |-- fuel_bid_extractor.cpython-313.pyc
+|   |   |   |   |   |   `-- fuel_config.cpython-313.pyc
+|   |   |   |   |   |-- fuel_bid_extractor.py
+|   |   |   |   |   `-- fuel_config.py
+|   |   |   |   |-- ground
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   `-- config.py
+|   |   |   |   |-- quotes
+|   |   |   |   |   |-- __init__.py
+|   |   |   |   |   |-- __pycache__
+|   |   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |   |-- compare_quotes.cpython-313.pyc
+|   |   |   |   |   |   |-- extract_quotes.cpython-313.pyc
+|   |   |   |   |   |   `-- quotes_config.cpython-313.pyc
+|   |   |   |   |   |-- compare_quotes.py
+|   |   |   |   |   |-- extract_quotes.py
+|   |   |   |   |   `-- quotes_config.py
+|   |   |   |   `-- rfqs
+|   |   |   |       |-- __init__.py
+|   |   |   |       |-- __pycache__
+|   |   |   |       |   |-- __init__.cpython-313.pyc
+|   |   |   |       |   |-- extract_rfq.cpython-313.pyc
+|   |   |   |       |   `-- rfqs_config.cpython-313.pyc
+|   |   |   |       |-- extract_rfq.py
+|   |   |   |       `-- rfqs_config.py
+|   |   |   |-- integrations
+|   |   |   |   `-- __init__.py
+|   |   |   |-- llama_extractor
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |-- extractor_system_prompts.cpython-313.pyc
+|   |   |   |   |   `-- manage_extractors.cpython-313.pyc
+|   |   |   |   |-- extractor_system_prompts.py
+|   |   |   |   `-- manage_extractors.py
+|   |   |   |-- main.py
+|   |   |   |-- middleware
+|   |   |   |   `-- __init__.py
+|   |   |   |-- notebooks
+|   |   |   |   |-- config_path.ipynb
+|   |   |   |   |-- examples
+|   |   |   |   |   `-- db_connect.ipynb
+|   |   |   |   `-- quick_testing
+|   |   |   |       `-- test.ipynb
+|   |   |   |-- schemas
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |-- contract.cpython-313.pyc
+|   |   |   |   |   |-- enums.cpython-313.pyc
+|   |   |   |   |   |-- fuel_bid.cpython-313.pyc
+|   |   |   |   |   |-- part.cpython-313.pyc
+|   |   |   |   |   |-- quote.cpython-313.pyc
+|   |   |   |   |   |-- rfq.cpython-313.pyc
+|   |   |   |   |   `-- vendor.cpython-313.pyc
+|   |   |   |   |-- contract.py
+|   |   |   |   |-- enums.py
+|   |   |   |   |-- fuel_bid.py
+|   |   |   |   |-- invoice.py
+|   |   |   |   |-- part.py
+|   |   |   |   |-- quote.py
+|   |   |   |   |-- rfq.py
+|   |   |   |   `-- vendor.py
+|   |   |   |-- services
+|   |   |   |   |-- __init__.py
+|   |   |   |   |-- __pycache__
+|   |   |   |   |   |-- __init__.cpython-313.pyc
+|   |   |   |   |   |-- clerk_service.cpython-313.pyc
+|   |   |   |   |   `-- document_extraction.cpython-313.pyc
+|   |   |   |   |-- clerk_service.py
+|   |   |   |   `-- document_extraction.py
+|   |   |   |-- shared
+|   |   |   |   |-- enums
+|   |   |   |   |   `-- __init__.py
+|   |   |   |   `-- schemas
+|   |   |   |       |-- __init__.py
+|   |   |   |       |-- __pycache__
+|   |   |   |       |   |-- __init__.cpython-313.pyc
+|   |   |   |       |   |-- llm_schemas.cpython-313.pyc
+|   |   |   |       |   `-- response_schemas.cpython-313.pyc
+|   |   |   |       |-- llm_schemas.py
+|   |   |   |       `-- response_schemas.py
+|   |   |   `-- utils
+|   |   |       |-- __init__.py
+|   |   |       |-- __pycache__
+|   |   |       |   |-- __init__.cpython-313.pyc
+|   |   |       |   |-- formatters.cpython-313.pyc
+|   |   |       |   `-- logger.cpython-313.pyc
+|   |   |       |-- formatters.py
+|   |   |       |-- io
+|   |   |       |   |-- __init__.py
+|   |   |       |   |-- __pycache__
+|   |   |       |   |   |-- __init__.cpython-313.pyc
+|   |   |       |   |   `-- file_helpers.cpython-313.pyc
+|   |   |       |   `-- file_helpers.py
+|   |   |       `-- logger.py
+|   |   |-- docs
+|   |   |   |-- AI_ARCHITECTURE.md
+|   |   |   `-- SETUP.md
 |   |   |-- middleware
+|   |   |   |-- __init__.py
 |   |   |   |-- auth.py
 |   |   |   |-- error_handling.py
 |   |   |   |-- logging.py
 |   |   |   `-- rate_limiting.py
 |   |   |-- notebooks
+|   |   |   |-- db
+|   |   |   |   `-- db_connection_test.ipynb
+|   |   |   |-- examples
+|   |   |   |   |-- __init__.py
+|   |   |   |   `-- db_connect.ipynb
+|   |   |   |-- file_extract
+|   |   |   |   |-- langchain.ipynb
+|   |   |   |   |-- llama.ipynb
+|   |   |   |   `-- openai.ipynb
+|   |   |   |-- ocr
+|   |   |   |   `-- ocr_tesseract.ipynb
+|   |   |   |-- rag
+|   |   |   |   |-- fetch_and_query.ipynb
+|   |   |   |   `-- rag_process.ipynb
+|   |   |   `-- utils.ipynb
+|   |   |-- pyrightconfig.json
 |   |   |-- requirements.txt
-|   |   |-- services
+|   |   |-- scripts
+|   |   |   |-- clean-pycache.ps1
+|   |   |   |-- clean-pycache.sh
+|   |   |   |-- generate-models.ps1
+|   |   |   `-- generate-models.sh
 |   |   |-- start.ps1
-|   |   `-- utils
+|   |   |-- start.sh
+|   |   `-- tests
+|   |       |-- __init__.py
+|   |       |-- simple_test.py
+|   |       |-- test_extraction.py
+|   |       `-- test_real_extraction.py
 |   `-- web
 |       |-- components.json
+|       |-- drizzle.config.ts
 |       |-- next-env.d.ts
 |       |-- next.config.ts
 |       |-- package.json
@@ -33,6 +282,11 @@
 |       |   |   |-- airports.csv
 |       |   |   `-- countries.csv
 |       |   |-- favicon.ico
+|       |   |-- images
+|       |   |   |-- ground_handling_catering.jpg
+|       |   |   |-- ground_handling_de_ice.jpg
+|       |   |   |-- ground_handling_power.jpg
+|       |   |   `-- ground_handling_push_back.jpg
 |       |   `-- logos
 |       |       `-- fleet-ai-logo.svg
 |       |-- src
@@ -45,49 +299,187 @@
 |       |   |   |   `-- sign-up
 |       |   |   |       `-- [[...sign-up]]
 |       |   |   |           `-- page.tsx
+|       |   |   |-- (error)
 |       |   |   |-- (platform)
 |       |   |   |   |-- _components
-|       |   |   |   |   |-- AirportList.tsx
-|       |   |   |   |   |-- AppDataTable.tsx
-|       |   |   |   |   |-- RecentActivity.tsx
-|       |   |   |   |   |-- TimePeriodSelector.tsx
-|       |   |   |   |   `-- sidebar
-|       |   |   |   |       |-- AppSidebar.tsx
-|       |   |   |   |       |-- ClientUserButton.tsx
-|       |   |   |   |       `-- SidebarTabs.ts
-|       |   |   |   |-- dashboard
+|       |   |   |   |   |-- AirportSidebar.tsx
+|       |   |   |   |   |-- MainSidebar.tsx
+|       |   |   |   |   |-- OrgLogo.tsx
+|       |   |   |   |   `-- RfqSidebar.tsx
+|       |   |   |   |-- admin
 |       |   |   |   |   |-- ClientPage.tsx
-|       |   |   |   |   |-- ContextProvider.tsx
 |       |   |   |   |   `-- page.tsx
-|       |   |   |   |-- fuel-procurement
+|       |   |   |   |-- ai-assistant
+|       |   |   |   |   |-- ClientPage.jsx
+|       |   |   |   |   |-- ContextProvider.tsx
+|       |   |   |   |   |-- README.md
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |   `-- ChatWindow.tsx
+|       |   |   |   |   `-- page.tsx
+|       |   |   |   |-- airport-hub
 |       |   |   |   |   |-- ClientPage.tsx
 |       |   |   |   |   |-- ContextProvider.tsx
 |       |   |   |   |   |-- _components
+|       |   |   |   |   |   |-- AskAI.tsx
+|       |   |   |   |   |   |-- ContractFiles.tsx
+|       |   |   |   |   |   |-- ContractOverview.tsx
+|       |   |   |   |   |   `-- ContractSidebar.tsx
 |       |   |   |   |   |-- page.tsx
 |       |   |   |   |   `-- subpages
-|       |   |   |   |       `-- FuelTenders.tsx
+|       |   |   |   |       |-- Airport.tsx
+|       |   |   |   |       |-- Contracts.tsx
+|       |   |   |   |       `-- Vendors.tsx
+|       |   |   |   |-- analytics
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |   |-- chart-area.tsx
+|       |   |   |   |   |   |-- chart-bar.tsx
+|       |   |   |   |   |   |-- chart-line.tsx
+|       |   |   |   |   |   `-- chart-pie.tsx
+|       |   |   |   |   `-- page.tsx
+|       |   |   |   |-- dashboard
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- ContextProvider.tsx
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |   |-- ActivityFeed.tsx
+|       |   |   |   |   |   |-- CatagorySpendingPie.tsx
+|       |   |   |   |   |   `-- RiskAndCompliance.tsx
+|       |   |   |   |   `-- page.tsx
+|       |   |   |   |-- error.tsx
+|       |   |   |   |-- file-upload
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- hooks
+|       |   |   |   |   |   |-- README.md
+|       |   |   |   |   |   |-- index.ts
+|       |   |   |   |   |   |-- useDocumentExtraction.ts
+|       |   |   |   |   |   |-- useFileProcessing.ts
+|       |   |   |   |   |   |-- useFileUpload.ts
+|       |   |   |   |   |   `-- useProgressAnimation.ts
+|       |   |   |   |   `-- page.tsx
+|       |   |   |   |-- fuel-procurement
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- README.md
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |   |-- FuelBidsDataTable.tsx
+|       |   |   |   |   |   |-- FuelBidsDataTableColumns.tsx
+|       |   |   |   |   |   |-- FuelInvoicesDataTable.tsx
+|       |   |   |   |   |   `-- FuelInvoicesDataTableColumns.tsx
+|       |   |   |   |   |-- contexts
+|       |   |   |   |   |   |-- AirportContext.tsx
+|       |   |   |   |   |   |-- FuelProcurementContext.tsx
+|       |   |   |   |   |   `-- index.ts
+|       |   |   |   |   |-- hooks
+|       |   |   |   |   |   |-- index.ts
+|       |   |   |   |   |   |-- useContracts.ts
+|       |   |   |   |   |   |-- useFuelBids.ts
+|       |   |   |   |   |   |-- useFuelTenders.ts
+|       |   |   |   |   |   `-- useInvoices.ts
+|       |   |   |   |   |-- page.tsx
+|       |   |   |   |   |-- subpages
+|       |   |   |   |   |   |-- Agreements.tsx
+|       |   |   |   |   |   |-- HistoricalData.tsx
+|       |   |   |   |   |   `-- Tenders.tsx
+|       |   |   |   |   `-- utils
+|       |   |   |   |       `-- cacheManager.ts
 |       |   |   |   |-- layout.tsx
 |       |   |   |   |-- settings
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- ContextProvider.tsx
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |   `-- header.tsx
+|       |   |   |   |   |-- page.tsx
+|       |   |   |   |   `-- subpages.tsx
+|       |   |   |   |       |-- Account.tsx
+|       |   |   |   |       `-- Account2.tsx
+|       |   |   |   |-- supplier-hub
+|       |   |   |   |   |-- ClientPage.tsx
+|       |   |   |   |   |-- ContextProvider.tsx
+|       |   |   |   |   |-- _components
+|       |   |   |   |   |   |-- QuoteAnalysis.tsx
+|       |   |   |   |   |   `-- QuotesComparison.tsx
 |       |   |   |   |   `-- page.tsx
 |       |   |   |   `-- technical-procurement
 |       |   |   |       |-- ClientPage.tsx
 |       |   |   |       |-- ContextProvider.tsx
 |       |   |   |       |-- _components
-|       |   |   |       |   `-- RfqList.tsx
-|       |   |   |       `-- page.tsx
+|       |   |   |       |   `-- QuotesDataTable.tsx
+|       |   |   |       |-- page.tsx
+|       |   |   |       `-- subpages
+|       |   |   |           |-- QuoteAnalysis.tsx
+|       |   |   |           `-- QuoteComparison.tsx
+|       |   |   |-- BackendApiAuth.tsx
+|       |   |   |-- ClerkOrgSetter.tsx
 |       |   |   |-- api
+|       |   |   |   |-- README.md
+|       |   |   |   |-- ai-chat
+|       |   |   |   |   `-- langchain
+|       |   |   |   |       `-- route.ts
 |       |   |   |   |-- airports
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- contracts
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- document-extraction
+|       |   |   |   |   |-- agent
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   |-- extract
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   |-- result
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   |-- status
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   `-- upload
+|       |   |   |   |       `-- route.ts
+|       |   |   |   |-- documents
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   |-- extraction
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- fuel-bids
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   `-- route.ts
 |       |   |   |   |-- fuel-tenders
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- health
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- invoices
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   `-- route.ts
 |       |   |   |   |-- orgs
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   `-- route.ts
 |       |   |   |   |-- quotes
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   `-- route.ts
 |       |   |   |   |-- rfqs
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   `-- route.ts
+|       |   |   |   |-- storage
+|       |   |   |   |   |-- buckets
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   |-- delete
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   `-- upload
+|       |   |   |   |       `-- route.ts
 |       |   |   |   |-- users
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   `-- route.ts
+|       |   |   |   |-- vendor-contacts
+|       |   |   |   |   |-- [id]
+|       |   |   |   |   |   `-- route.ts
+|       |   |   |   |   `-- route.ts
+|       |   |   |   |-- vendors
 |       |   |   |   `-- webhooks
 |       |   |   |       |-- clerk
 |       |   |   |       |   `-- route.ts
@@ -105,21 +497,32 @@
 |       |   |   `-- not-found.tsx
 |       |   |-- components
 |       |   |   |-- magicui
-|       |   |   |   `-- animated-grid-pattern.tsx
+|       |   |   |   |-- animated-grid-pattern.tsx
+|       |   |   |   `-- typing-animation.tsx
 |       |   |   |-- miscellaneous
 |       |   |   |   |-- BrandLogo.tsx
-|       |   |   |   `-- GlassCard.tsx
+|       |   |   |   |-- ComingSoon.tsx
+|       |   |   |   |-- CopyableText.tsx
+|       |   |   |   |-- FileUpload.tsx
+|       |   |   |   |-- GlassCard.tsx
+|       |   |   |   `-- Loading.tsx
+|       |   |   |-- runtime-db-check.tsx
 |       |   |   `-- ui
+|       |   |       |-- accordion.tsx
+|       |   |       |-- alert.tsx
 |       |   |       |-- avatar.tsx
 |       |   |       |-- badge.tsx
 |       |   |       |-- button.tsx
 |       |   |       |-- calendar.tsx
 |       |   |       |-- card.tsx
+|       |   |       |-- chart.tsx
 |       |   |       |-- checkbox.tsx
+|       |   |       |-- command.tsx
 |       |   |       |-- dialog.tsx
 |       |   |       |-- dropdown-menu.tsx
 |       |   |       |-- input.tsx
 |       |   |       |-- label.tsx
+|       |   |       |-- multi-select.tsx
 |       |   |       |-- popover.tsx
 |       |   |       |-- progress.tsx
 |       |   |       |-- radio-group.tsx
@@ -135,35 +538,31 @@
 |       |   |       |-- table.tsx
 |       |   |       |-- tabs.tsx
 |       |   |       |-- textarea.tsx
+|       |   |       |-- timeline.tsx
 |       |   |       `-- tooltip.tsx
-|       |   |-- db
-|       |   |   |-- airports
-|       |   |   |   `-- db-actions.ts
-|       |   |   |-- fuel-tenders
-|       |   |   |   `-- db-actions.ts
-|       |   |   |-- org-settings
-|       |   |   |   `-- db-actions.ts
-|       |   |   |-- orgs
-|       |   |   |   `-- db-actions.ts
-|       |   |   |-- quotes
-|       |   |   |   `-- db-actions.ts
-|       |   |   |-- rfqs
-|       |   |   |   `-- db-actions.ts
-|       |   |   |-- users
-|       |   |   |   `-- db-actions.ts
-|       |   |   `-- vendors
-|       |   |       `-- db-actions.ts
 |       |   |-- drizzle
-|       |   |   |-- db.ts
+|       |   |   |-- README.md
+|       |   |   |-- enums.ts
+|       |   |   |-- index.ts
 |       |   |   |-- migrations
-|       |   |   |   |-- 0000_square_kat_farrell.sql
+|       |   |   |   |-- 0000_dark_thor_girl.sql
+|       |   |   |   |-- 0001_enable_pgvector.sql
+|       |   |   |   |-- USEFUL.md
 |       |   |   |   `-- meta
 |       |   |   |       |-- 0000_snapshot.json
 |       |   |   |       `-- _journal.json
 |       |   |   |-- schema
-|       |   |   |   |-- enums.ts
-|       |   |   |   `-- schema.ts
-|       |   |   |-- schema.ts
+|       |   |   |   |-- common.ts
+|       |   |   |   |-- document-helpers.ts
+|       |   |   |   |-- index.ts
+|       |   |   |   |-- schema.contracts.ts
+|       |   |   |   |-- schema.core.ts
+|       |   |   |   |-- schema.documents.ts
+|       |   |   |   |-- schema.embeddings.ts
+|       |   |   |   |-- schema.fuel.ts
+|       |   |   |   |-- schema.invoices.ts
+|       |   |   |   |-- schema.technical.ts
+|       |   |   |   `-- schema.vendors.ts
 |       |   |   `-- types.ts
 |       |   |-- features
 |       |   |   |-- airports
@@ -171,24 +570,51 @@
 |       |   |   |   |-- AirportDialog.tsx
 |       |   |   |   |-- airportDatasetService.ts
 |       |   |   |   `-- airportDatasetType.ts
+|       |   |   |-- contracts
+|       |   |   |   |-- contracts
+|       |   |   |   |   |-- AddContractDialog.tsx
+|       |   |   |   |   |-- ContractDialog.tsx
+|       |   |   |   |   `-- createRandomContract.ts
+|       |   |   |   `-- invoices
+|       |   |   |       `-- createRandomInvoice.tsx
 |       |   |   |-- fuel
 |       |   |   |   |-- bid
+|       |   |   |   |   |-- FuelBidDialog.tsx
+|       |   |   |   |   |-- createRandomBid.ts
+|       |   |   |   |   `-- pydanticConverter.ts
 |       |   |   |   `-- tender
 |       |   |   |       `-- TenderDialog.tsx
+|       |   |   |-- pydantic-models
+|       |   |   |   `-- shared-pydantic-models.ts
 |       |   |   |-- quotes
-|       |   |   `-- rfqs
-|       |   |       `-- RfqDialog.tsx
+|       |   |   |   |-- createRandomQuote.ts
+|       |   |   |   |-- pydanticConverter.ts
+|       |   |   |   `-- quoteDialog.tsx
+|       |   |   |-- rfqs
+|       |   |   |   |-- RfqDialog.tsx
+|       |   |   |   |-- createRandomRfq.ts
+|       |   |   |   `-- pydanticConverter.ts
+|       |   |   `-- vendors
 |       |   |-- hooks
 |       |   |   |-- use-airport-autocomplete.ts
 |       |   |   |-- use-country-map.ts
 |       |   |   |-- use-mobile.ts
 |       |   |   `-- use-pdf-files.ts
 |       |   |-- lib
+|       |   |   |-- ai
+|       |   |   |   |-- embedding.ts
+|       |   |   |   |-- langchain-integration.ts
+|       |   |   |   |-- llamaCloud.ts
+|       |   |   |   |-- streaming-utils.ts
+|       |   |   |   `-- utils.ts
 |       |   |   |-- authorization
 |       |   |   |   |-- authorize-resource.ts
-|       |   |   |   `-- authorize-user.ts
+|       |   |   |   `-- get-auth-context.ts
+|       |   |   |-- constants
+|       |   |   |   |-- currencies.ts
+|       |   |   |   `-- units.ts
 |       |   |   |-- core
-|       |   |   |   |-- error.ts
+|       |   |   |   |-- errors.ts
 |       |   |   |   |-- fetcher.ts
 |       |   |   |   `-- formatters.ts
 |       |   |   |-- env
@@ -200,83 +626,156 @@
 |       |   |   |   |-- use-media-query.ts
 |       |   |   |   |-- use-mobile.ts
 |       |   |   |   |-- use-toast.ts
-|       |   |   |   `-- useWindowSize.ts
+|       |   |   |   `-- use-window-size.ts
+|       |   |   |-- supabase
+|       |   |   |   |-- README.md
+|       |   |   |   |-- admin.ts
+|       |   |   |   |-- clerk-server.ts
+|       |   |   |   |-- client.ts
+|       |   |   |   |-- middleware.ts
+|       |   |   |   |-- server.ts
+|       |   |   |   `-- storage.ts
 |       |   |   `-- utils.ts
 |       |   |-- middleware.ts
+|       |   |-- modules
+|       |   |   |-- README.md
+|       |   |   |-- admin
+|       |   |   |   `-- admin.client.ts
+|       |   |   |-- ai
+|       |   |   |   |-- README.md
+|       |   |   |   |-- chat
+|       |   |   |   |   |-- chat.client.ts
+|       |   |   |   |   `-- index.ts
+|       |   |   |   |-- extract
+|       |   |   |   |   |-- extract.client.ts
+|       |   |   |   |   |-- extract.server.ts
+|       |   |   |   |   |-- extract.types.ts
+|       |   |   |   |   `-- index.ts
+|       |   |   |   |-- index.ts
+|       |   |   |   `-- types.ts
+|       |   |   |-- contracts
+|       |   |   |   |-- contracts.client.ts
+|       |   |   |   |-- contracts.server.ts
+|       |   |   |   |-- contracts.types.ts
+|       |   |   |   `-- index.ts
+|       |   |   |-- core
+|       |   |   |   |-- airports
+|       |   |   |   |   |-- airports.client.ts
+|       |   |   |   |   |-- airports.server.ts
+|       |   |   |   |   |-- airports.types.ts
+|       |   |   |   |   `-- index.ts
+|       |   |   |   |-- index.ts
+|       |   |   |   |-- organizations
+|       |   |   |   |   |-- index.ts
+|       |   |   |   |   |-- organizations.client.ts
+|       |   |   |   |   |-- organizations.server.ts
+|       |   |   |   |   `-- organizations.types.ts
+|       |   |   |   `-- users
+|       |   |   |       |-- index.ts
+|       |   |   |       |-- users.client.ts
+|       |   |   |       |-- users.server.ts
+|       |   |   |       `-- users.types.ts
+|       |   |   |-- documents
+|       |   |   |   |-- documents.client.ts
+|       |   |   |   |-- documents.server.ts
+|       |   |   |   |-- documents.types.ts
+|       |   |   |   `-- index.ts
+|       |   |   |-- fuel
+|       |   |   |   |-- bids
+|       |   |   |   |   |-- bids.client.ts
+|       |   |   |   |   |-- bids.server.ts
+|       |   |   |   |   |-- bids.types.ts
+|       |   |   |   |   `-- index.ts
+|       |   |   |   `-- tenders
+|       |   |   |       |-- index.ts
+|       |   |   |       |-- tenders.client.ts
+|       |   |   |       |-- tenders.server.ts
+|       |   |   |       `-- tenders.types.ts
+|       |   |   |-- invoices
+|       |   |   |   |-- index.ts
+|       |   |   |   |-- invoices.client.ts
+|       |   |   |   |-- invoices.server.ts
+|       |   |   |   `-- invoices.types.ts
+|       |   |   |-- quotes
+|       |   |   |   |-- index.ts
+|       |   |   |   |-- quotes.client.ts
+|       |   |   |   |-- quotes.server.ts
+|       |   |   |   `-- quotes.types.ts
+|       |   |   |-- rfqs
+|       |   |   |   |-- index.ts
+|       |   |   |   |-- rfqs.client.ts
+|       |   |   |   |-- rfqs.server.ts
+|       |   |   |   `-- rfqs.types.ts
+|       |   |   |-- storage
+|       |   |   |   |-- index.ts
+|       |   |   |   |-- storage.client.ts
+|       |   |   |   |-- storage.server.ts
+|       |   |   |   `-- storage.types.ts
+|       |   |   `-- vendors
+|       |   |       |-- index.ts
+|       |   |       |-- vendor-contacts
+|       |   |       |   |-- index.ts
+|       |   |       |   |-- vendor-contacts.client.ts
+|       |   |       |   |-- vendor-contacts.server.ts
+|       |   |       |   `-- vendor-contacts.types.ts
+|       |   |       |-- vendors.client.ts
+|       |   |       |-- vendors.server.ts
+|       |   |       `-- vendors.types.ts
 |       |   |-- services
 |       |   |   |-- api-client.ts
-|       |   |   |-- core
-|       |   |   |   |-- airport-client.ts
-|       |   |   |   |-- org-client.ts
-|       |   |   |   `-- user-client.ts
-|       |   |   |-- fuel
-|       |   |   |   |-- fuel-bid-client.ts
-|       |   |   |   `-- fuel-tender-client.ts
-|       |   |   |-- technical
-|       |   |   |   |-- quote-client.ts
-|       |   |   |   `-- rfq-client.ts
-|       |   |   `-- vendors
-|       |   |       |-- contact-client.ts
-|       |   |       `-- vendor-client.ts
+|       |   |   `-- record-usage.ts
 |       |   |-- stories
 |       |   |   |-- Button
-|       |   |   |   |-- Button.stories.ts
+|       |   |   |   |-- Button.stories.tsx
 |       |   |   |   `-- Button.tsx
 |       |   |   |-- Card
-|       |   |   |   |-- Card.tsx
-|       |   |   |   |-- FeatureCard.stories.ts
-|       |   |   |   |-- ListItemCard.stories.ts
-|       |   |   |   |-- NotificationCard.stories.ts
-|       |   |   |   |-- ProfileCard.stories.ts
-|       |   |   |   |-- ProjectCard.stories.ts
-|       |   |   |   `-- StatsCard.stories.ts
+|       |   |   |   |-- Card.stories.tsx
+|       |   |   |   `-- Card.tsx
+|       |   |   |-- ChatBot
+|       |   |   |   |-- ChatBot.README.md
+|       |   |   |   |-- ChatBot.examples.tsx
+|       |   |   |   |-- ChatBot.stories.tsx
+|       |   |   |   `-- ChatBot.tsx
 |       |   |   |-- Configure.mdx
 |       |   |   |-- DataTable
-|       |   |   |   |-- DataTable.stories.ts
+|       |   |   |   |-- DataTable.stories.tsx
 |       |   |   |   `-- DataTable.tsx
 |       |   |   |-- Dialog
-|       |   |   |   |-- Dialog.stories.ts
+|       |   |   |   |-- Dialog.stories.tsx
 |       |   |   |   `-- Dialog.tsx
 |       |   |   |-- Form
-|       |   |   |   |-- Form.stories.ts
+|       |   |   |   |-- Form.stories.tsx
 |       |   |   |   `-- Form.tsx
-|       |   |   |-- Header
-|       |   |   |   |-- Header.stories.ts
-|       |   |   |   |-- Header.tsx
-|       |   |   |   `-- header.css
+|       |   |   |-- KeyValuePair
+|       |   |   |   |-- KeyValuePair.stories.tsx
+|       |   |   |   `-- KeyValuePair.tsx
 |       |   |   |-- PageLayout
 |       |   |   |   |-- PageLayout.stories.ts
 |       |   |   |   `-- PageLayout.tsx
+|       |   |   |-- Popover
+|       |   |   |   |-- Popover.stories.tsx
+|       |   |   |   `-- Popover.tsx
+|       |   |   |-- StatusBadge
+|       |   |   |   |-- StatusBadge.stories.tsx
+|       |   |   |   `-- StatusBadge.tsx
 |       |   |   |-- Tabs
-|       |   |   |   |-- Tabs.stories.ts
+|       |   |   |   |-- Tabs.stories.tsx
 |       |   |   |   `-- Tabs.tsx
-|       |   |   `-- assets
-|       |   |       |-- accessibility.png
-|       |   |       |-- accessibility.svg
-|       |   |       |-- addon-library.png
-|       |   |       |-- assets.png
-|       |   |       |-- avif-test-image.avif
-|       |   |       |-- context.png
-|       |   |       |-- discord.svg
-|       |   |       |-- docs.png
-|       |   |       |-- figma-plugin.png
-|       |   |       |-- github.svg
-|       |   |       |-- share.png
-|       |   |       |-- styling.png
-|       |   |       |-- testing.png
-|       |   |       |-- theming.png
-|       |   |       |-- tutorials.svg
-|       |   |       `-- youtube.svg
+|       |   |   |-- Timeline
+|       |   |   |   |-- Timeline.stories.tsx
+|       |   |   |   `-- Timeline.tsx
+|       |   |   `-- strorbook.md
 |       |   |-- styles
 |       |   |   `-- tailwindStyles.ts
+|       |   |-- types
+|       |   |   |-- backend-response.ts
+|       |   |   |-- from-backend-structure.json
+|       |   |   `-- quote-analysis.ts
 |       |   `-- utils
+|       |       |-- date-helpers.ts
 |       |       |-- download-csv.ts
 |       |       |-- get-airport-data-from-csv.ts
-|       |       |-- scroll.ts
-|       |       `-- supabase
-|       |           |-- client.ts
-|       |           |-- middleware.ts
-|       |           `-- server.ts
+|       |       `-- scroll.ts
 |       |-- tailwind.config.ts
 |       |-- tsconfig.json
 |       |-- tsconfig.tsbuildinfo
@@ -287,12 +786,12 @@
 |   |-- DEPLOYMENT.md
 |   |-- ENVIRONMENT.md
 |   |-- commands.sh
+|   |-- cr-prompt.txt
 |   `-- project-structure.txt
 |-- docker-compose.yml
-|-- drizzle.config.ts
 |-- google-credentials.json
 |-- package.json
 |-- pnpm-lock.yaml
 `-- pnpm-workspace.yaml
 
-93 directories, 202 files
+218 directories, 576 files

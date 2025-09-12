@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { foreignKey, index, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { foreignKey, index, integer, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { DocumentParentTypeEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
 import { organizationsTable } from './schema.core';
@@ -31,9 +31,11 @@ export const documentsTable = pgTable(
     parentId: uuid('parent_id'), // Generic FK to any parent entity
     parentType: DocumentParentTypeEnum('parent_type'), // contract | invoice | rfq | fuel_tender | fuel_bid | other
 
-    // Identity
+    // File data
+    storageId: text('storage_id'), // file storage id
+    fileName: text('file_name'), // file name
     fileType: text('file_type'), // 'pdf' | 'docx' | 'scan'
-    storageUrl: text('storage_url'), // S3, GCS, etc.
+    fileSize: integer('file_size'), // size in bytes
     storagePath: text('storage_path'), // path in the storage
     content: text('content'), // full extracted text
 

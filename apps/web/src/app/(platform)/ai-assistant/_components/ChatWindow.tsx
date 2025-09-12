@@ -235,10 +235,10 @@ export default function ChatWindow() {
             {/* Loading indicator - only show when thinking, not when streaming */}
             {isLoading && !isStreaming && (
               <div className="flex gap-4 max-w-4xl mx-auto">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted border">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white border">
                   <Bot className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="flex-1 space-y-2 rounded-2xl px-4 py-3 bg-muted mr-12">
+                <div className="flex-1 space-y-2 rounded-2xl px-4 py-3 bg-white mr-12">
                   <div className="text-sm font-medium">FleetAI Assistant</div>
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />

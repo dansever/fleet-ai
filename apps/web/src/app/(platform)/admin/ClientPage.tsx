@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
 import { updateExtractors } from '@/modules/admin/admin.client';
+import { getBucketFolderCounts } from '@/modules/storage/storage.client';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Tabs } from '@/stories/Tabs/Tabs';
@@ -18,7 +19,8 @@ import {
   CheckCircle,
   Cloud,
   Database,
-  Loader2,
+  FileText,
+  FolderOpen,
   Plus,
   RefreshCw,
   Settings,
@@ -38,6 +40,18 @@ interface StorageBucket {
   created_at: string;
   public: boolean;
   file_size_limit?: number;
+}
+
+interface StorageFile {
+  name: string;
+  created_at: string;
+  public: boolean;
+  file_size_limit?: number;
+}
+
+interface BucketFolderCounts {
+  contracts: number;
+  invoices: number;
 }
 
 export default function AdminClientPage() {
@@ -65,12 +79,17 @@ export default function AdminClientPage() {
 
   // Storage State
   const [buckets, setBuckets] = useState<StorageBucket[]>([]);
+  const [bucketFiles, setBucketFiles] = useState<StorageFile[]>([]);
+  const [bucketFolderCounts, setBucketFolderCounts] = useState<Record<string, BucketFolderCounts>>(
+    {},
+  );
   const [newBucketName, setNewBucketName] = useState('');
   const [isPublicBucket, setIsPublicBucket] = useState(false);
   const [loading, setLoading] = useState({
     agents: false,
     buckets: false,
     createBucket: false,
+    folderCounts: false,
   });
   const [alerts, setAlerts] = useState<{ type: 'success' | 'error'; message: string }[]>([]);
 
@@ -102,6 +121,8 @@ export default function AdminClientPage() {
       if (response.ok) {
         const data = await response.json();
         setBuckets(data.buckets || []);
+        // Load folder counts for all buckets
+        await loadAllBucketFolderCounts(data.buckets || []);
       } else {
         addAlert('error', 'Failed to load storage buckets');
       }
@@ -109,6 +130,57 @@ export default function AdminClientPage() {
       addAlert('error', 'Failed to load storage buckets');
     } finally {
       setLoading((prev) => ({ ...prev, buckets: false }));
+    }
+  };
+
+  const loadAllBucketFolderCounts = async (bucketsToLoad: StorageBucket[]) => {
+    setLoading((prev) => ({ ...prev, folderCounts: true }));
+
+    try {
+      const folderCountsPromises = bucketsToLoad.map(async (bucket) => {
+        try {
+          const counts = await getBucketFolderCounts(bucket.name);
+          return { bucketName: bucket.name, counts: counts.data };
+        } catch (error) {
+          console.error(`Failed to load folder counts for bucket ${bucket.name}:`, error);
+          return { bucketName: bucket.name, counts: { contracts: 0, invoices: 0 } };
+        }
+      });
+
+      const results = await Promise.all(folderCountsPromises);
+      const countsMap = results.reduce(
+        (acc, { bucketName, counts }) => {
+          acc[bucketName] = counts;
+          return acc;
+        },
+        {} as Record<string, BucketFolderCounts>,
+      );
+
+      setBucketFolderCounts(countsMap);
+    } catch (error) {
+      console.error('Failed to load bucket folder counts:', error);
+      addAlert('error', 'Failed to load folder counts');
+    } finally {
+      setLoading((prev) => ({ ...prev, folderCounts: false }));
+    }
+  };
+
+  const loadBucketFiles = async (bucketName: string) => {
+    console.log('Loading bucket files', bucketName);
+    try {
+      setLoading((prev) => ({ ...prev, bucketFiles: true }));
+      const response = await fetch(`/api/storage/buckets/${bucketName}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Bucket files', data);
+        setBucketFiles(data.files || []);
+      } else {
+        addAlert('error', 'Failed to load bucket files');
+      }
+    } catch (error) {
+      addAlert('error', 'Failed to load bucket files');
+    } finally {
+      setLoading((prev) => ({ ...prev, bucketFiles: false }));
     }
   };
 
@@ -134,7 +206,7 @@ export default function AdminClientPage() {
         addAlert('success', `Bucket "${newBucketName}" created successfully`);
         setNewBucketName('');
         setIsPublicBucket(false);
-        await loadBuckets(); // Refresh the list
+        await loadBuckets(); // Refresh the list and load folder counts
       } else {
         const error = await response.json();
         addAlert('error', error.error || 'Failed to create bucket');
@@ -167,40 +239,6 @@ export default function AdminClientPage() {
       }
     } catch (error) {
       addAlert('error', 'Failed to delete bucket');
-    }
-  };
-
-  const getStatusIcon = (status: ExtractionAgent['status']) => {
-    switch (status) {
-      case 'up-to-date':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'needs-update':
-        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'updating':
-        return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
-    }
-  };
-
-  const getStatusBadge = (status: ExtractionAgent['status']) => {
-    switch (status) {
-      case 'up-to-date':
-        return (
-          <Badge variant="secondary" className="bg-green-100 text-green-800">
-            Up to Date
-          </Badge>
-        );
-      case 'needs-update':
-        return (
-          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-            Needs Update
-          </Badge>
-        );
-      case 'updating':
-        return (
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-            Updating...
-          </Badge>
-        );
     }
   };
 
@@ -343,31 +381,63 @@ export default function AdminClientPage() {
                     <p className="text-sm">Click "Refresh" to load existing buckets</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    {buckets.map((bucket) => (
-                      <div
-                        key={bucket.name}
-                        className="flex items-center justify-between p-3 border rounded"
-                      >
-                        <div>
-                          <h4 className="font-medium">{bucket.name}</h4>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Created {new Date(bucket.created_at).toLocaleDateString()}</span>
-                            <span>•</span>
-                            <Badge variant={bucket.public ? 'default' : 'secondary'}>
-                              {bucket.public ? 'Public' : 'Private'}
-                            </Badge>
+                  <div className="space-y-4">
+                    {buckets.map((bucket) => {
+                      const folderCounts = bucketFolderCounts[bucket.name];
+                      return (
+                        <div key={bucket.name} className="border rounded-lg p-4 space-y-3">
+                          {/* Bucket Header */}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium">{bucket.name}</h4>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span>
+                                  Created {new Date(bucket.created_at).toLocaleDateString()}
+                                </span>
+                                <span>•</span>
+                                <Badge variant={bucket.public ? 'default' : 'secondary'}>
+                                  {bucket.public ? 'Public' : 'Private'}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                intent="primary"
+                                text="View Files"
+                                icon={FileText}
+                                onClick={() => loadBucketFiles(bucket.name)}
+                              />
+                              <ConfirmationPopover
+                                trigger={<Button intent="danger" text="Delete" icon={Trash2} />}
+                                title="Delete Bucket"
+                                popoverIntent="danger"
+                                description="Are you sure you want to delete this bucket?"
+                                onConfirm={() => deleteBucket(bucket.name)}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Folder Counts */}
+                          <div className="flex items-center gap-4 pl-4 border-l-2 border-gray-200">
+                            <div className="flex items-center gap-2 text-sm">
+                              <FolderOpen className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium">Contracts:</span>
+                              <Badge variant="outline">
+                                {loading.folderCounts ? '...' : (folderCounts?.contracts ?? 0)}{' '}
+                                files
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <FolderOpen className="h-4 w-4 text-green-600" />
+                              <span className="font-medium">Invoices:</span>
+                              <Badge variant="outline">
+                                {loading.folderCounts ? '...' : (folderCounts?.invoices ?? 0)} files
+                              </Badge>
+                            </div>
                           </div>
                         </div>
-                        <ConfirmationPopover
-                          trigger={<Button intent="danger" text="Delete" icon={Trash2} />}
-                          title="Delete Bucket"
-                          popoverIntent="danger"
-                          description="Are you sure you want to delete this bucket?"
-                          onConfirm={() => deleteBucket(bucket.name)}
-                        />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

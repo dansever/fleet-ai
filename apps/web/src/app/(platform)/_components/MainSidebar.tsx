@@ -130,12 +130,11 @@ const SIDEBAR_MENU_BUTTON_SIZES = {
 };
 
 const SIDEBAR_MENU_BUTTON_BASE =
-  'flex items-center truncate gap-2 font-normal text-gray-700 bg-gradient-to-r transition-colors duration-200';
+  'text-gray-500 flex items-center truncate gap-2 hover:text-gray-500 hover:bg-gradient-to-r hover:from-blue-50 hover:to-pink-50 transition-colors duration-200';
 
 const SIDEBAR_MENU_BUTTON_VARIANTS = {
-  default: 'hover:bg-gradient-to-r hover:from-blue-100 hover:to-pink-100/80',
-  active: 'bg-gradient-to-r from-blue-500 to-pink-300 text-white font-bold hover:text-white',
-  disabled: 'opacity-50',
+  active: 'font-bold text-gray-800 hover:text-gray-700',
+  disabled: 'opacity-40',
 };
 
 function SidebarNavItem({
@@ -148,9 +147,7 @@ function SidebarNavItem({
   isCollapsed: boolean;
 }) {
   const variantClass = item.isReady
-    ? isActive
-      ? SIDEBAR_MENU_BUTTON_VARIANTS.active
-      : SIDEBAR_MENU_BUTTON_VARIANTS.default
+    ? isActive && SIDEBAR_MENU_BUTTON_VARIANTS.active
     : SIDEBAR_MENU_BUTTON_VARIANTS.disabled;
 
   const menuButton = (
@@ -173,16 +170,14 @@ function SidebarNavItem({
         asChild
       >
         <div className="flex items-center">
-          <item.icon className="h-4 w-4 flex-shrink-0" />
-          <span
+          <item.icon
             className={cn(
-              'transition-all duration-200',
-              isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100',
+              'h-4 w-4 flex-shrink-0 text-gray-500',
+              isActive && 'text-sky-600 stroke-3',
             )}
-          >
-            {item.title}
-          </span>
-          {!item.isReady && !isCollapsed && (
+          />
+          <span className="transition-all duration-200">{item.title}</span>
+          {!item.isReady && (
             <span className="text-[10px] px-1 py-0.5 ml-1 rounded bg-yellow-100 text-yellow-800 border border-yellow-300">
               Soon
             </span>
@@ -212,7 +207,9 @@ function SidebarNavItem({
                 isCollapsed ? 'rounded-lg justify-center' : 'rounded-xl',
               )}
             >
-              <item.icon className="h-4 w-4 flex-shrink-0" />
+              <item.icon
+                className={cn('h-4 w-4 flex-shrink-0', isActive && 'text-sky-600 stroke-3')}
+              />
             </SidebarMenuButton>
           </Link>
         </TooltipTrigger>
@@ -242,7 +239,7 @@ export function MainSidebar({
   }, [user?.organizationMemberships?.[0]?.organization?.imageUrl]);
 
   return (
-    <Sidebar collapsible="icon" variant={variant} className="border-transparen">
+    <Sidebar collapsible="icon" variant={variant} className="border-transparent">
       <SidebarHeader
         className={cn(
           'flex flex-row items-center w-full h-16 min-h-16 px-2',

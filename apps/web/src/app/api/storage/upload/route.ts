@@ -56,15 +56,8 @@ export async function POST(request: NextRequest) {
       console.error('Supabase storage error:', supabaseError);
       return jsonError(`Failed to upload file: ${supabaseError.message}`, 500);
     }
-
-    // return the uploaded file data with additional metadata
-    return NextResponse.json({
-      ...data,
-      bucket,
-      originalName: file.name,
-      size: file.size,
-      contentType: file.type,
-    });
+    // return the uploaded file data
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Failed to upload file', error);
     return jsonError('Failed to upload file', 500);

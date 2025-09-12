@@ -77,7 +77,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Delete document
     await documentsServer.deleteDocument(id);
-
+    // TODO
     // Return success
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -5,17 +5,32 @@ import { api } from '@/services/api-client';
 const supabase = createClient();
 
 /**
+ * Retrieve a file blob from the storage
+ * @param path - the path to the file
+ * @param bucket - the bucket to download the file from
+ * @returns the file
+ */
+export async function retrieveFileBlob(bucket: string, path: string) {
+  const { data, error } = await supabase.storage.from(bucket).download(path);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data as Blob;
+}
+
+/**
  * Download a file from the storage
  * @param path - the path to the file
  * @param bucket - the bucket to download the file from
  * @returns the file
  */
-export async function downloadFile(path: string, bucket: string) {
-  const { data, error } = await supabase.storage.from(bucket).download(path);
-  if (error) {
-    throw new Error(error.message);
-  }
-  return data;
+export async function downloadFile(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName ?? 'file';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 /**
@@ -29,7 +44,7 @@ export async function downloadFile(path: string, bucket: string) {
  */
 export async function listFilesByBucket(
   bucket: string,
-  folder: string = '',
+  folder: string,
   search: string = '',
   limit: number = 100,
   offset: number = 0,
@@ -78,5 +93,15 @@ export async function deleteFile(path: string) {
       path,
     },
   });
+  return result.data;
+}
+
+/**
+ * Get file counts for contracts and invoices folders in a bucket
+ * @param bucketName - the name of the bucket
+ * @returns object with contracts and invoices counts
+ */
+export async function getBucketFolderCounts(bucketName: string) {
+  const result = await api.get(`/api/storage/buckets/${bucketName}?action=folder-counts`);
   return result.data;
 }
