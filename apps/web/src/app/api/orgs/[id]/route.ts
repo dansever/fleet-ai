@@ -5,6 +5,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
+/**
+ * GET /api/orgs/[id]
+ * Get an existing organization
+ * @param _request
+ * @param params
+ * @returns
+ */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, orgId, error } = await getAuthContext();
@@ -23,6 +30,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * PUT /api/orgs/[id]
+ * Update an existing organization
+ * @param request
+ * @param params
+ * @returns
+ */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, orgId, error } = await getAuthContext();
@@ -42,6 +56,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
+/**
+ * DELETE /api/orgs/[id]
+ * Delete an existing organization
+ * @param _request
+ * @param params
+ * @returns
+ */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, orgId, error } = await getAuthContext();

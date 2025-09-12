@@ -1,5 +1,4 @@
 import { UpdateAirport } from '@/drizzle/types';
-import { authorizeResource } from '@/lib/authorization/authorize-resource';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
@@ -9,13 +8,13 @@ type RouteParams = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await getAuthContext();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const { id } = await params;
     const airport = await airportServer.getAirportById(id);
     if (!airport) return jsonError('Airport not found', 404);
-    if (!authorizeResource(airport, dbUser)) return jsonError('Unauthorized', 401);
+    if (airport.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     return NextResponse.json(airport);
   } catch (error) {
@@ -32,13 +31,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await getAuthContext();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const { id } = await params;
     const existing = await airportServer.getAirportById(id);
     if (!existing) return jsonError('Airport not found', 404);
-    if (!authorizeResource(existing, dbUser)) return jsonError('Unauthorized', 401);
+    if (existing.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     const body: UpdateAirport = await request.json();
     const updated = await airportServer.updateAirport(id, body);
@@ -51,13 +50,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { dbUser, error } = await getAuthContext();
-    if (error || !dbUser) return jsonError('Unauthorized', 401);
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     const { id } = await params;
     const existing = await airportServer.getAirportById(id);
     if (!existing) return jsonError('Airport not found', 404);
-    if (!authorizeResource(existing, dbUser)) return jsonError('Unauthorized', 401);
+    if (existing.orgId !== orgId) return jsonError('Unauthorized', 401);
 
     await airportServer.deleteAirport(id);
     return NextResponse.json({ success: true });

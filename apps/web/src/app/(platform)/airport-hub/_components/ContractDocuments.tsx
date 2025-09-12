@@ -7,6 +7,7 @@ import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { useOrganization } from '@clerk/nextjs';
 import { Download, Eye, RefreshCw, Trash, Upload } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
 
@@ -14,6 +15,9 @@ export function ContractDocuments() {
   const { selectedContract, refreshContracts, documents, refreshDocuments, loading } =
     useAirportHub();
   const clerkOrg = useOrganization();
+  const [downloadFileLoading, setDownloadFileLoading] = useState(false);
+  const [viewDocumentLoading, setViewDocumentLoading] = useState(false);
+  const [deleteDocumentLoading, setDeleteDocumentLoading] = useState(false);
 
   // Handle file upload for contract extraction
   const handleUploadContractFile = async (file: File) => {
@@ -24,8 +28,7 @@ export function ContractDocuments() {
     try {
       // Upload file to storage
       const result = await storageClient.uploadFile(file, 'contracts');
-      toast.success('Contract file uploaded to the storage successfully');
-      console.log('RESULT', result);
+      console.log('✅File uploaded to storage');
 
       // Create document in the database
       await documentsClient.createDocument({
@@ -37,7 +40,8 @@ export function ContractDocuments() {
         fileSize: file.size,
         fileType: file.type,
       });
-      toast.success('Document created successfully in the database');
+      console.log('✅ Document created in DB');
+      toast.success('This document has been uploaded');
 
       // Retrieve file blob from storage
       const orgSlug = clerkOrg.organization?.slug ?? '';
@@ -54,12 +58,55 @@ export function ContractDocuments() {
     }
   };
 
-  const handleDownloadDocument = (storagePath: string) => {
-    console.log('TODO: Implement handleDownloadDocument');
+  const handleDownloadDocument = (storagePath: string | null) => {
+    if (!storagePath) {
+      toast.error('No storage path found');
+      return;
+    }
+    return async () => {
+      try {
+        setDownloadFileLoading(true);
+        const orgSlug = clerkOrg.organization?.slug ?? '';
+        const blob = await storageClient.retrieveFileBlob(orgSlug, storagePath);
+        storageClient.downloadFile(blob, storagePath);
+        toast.success('This document has been downloaded');
+      } catch (error) {
+        toast.error('Failed to download document');
+        console.error(error);
+      } finally {
+        setDownloadFileLoading(false);
+      }
+    };
   };
 
   const handleViewDocument = (storagePath: string) => {
-    console.log('TODO: Implement handleViewDocument');
+    if (!storagePath) {
+      toast.error('No storage path found');
+      return;
+    }
+    return async () => {
+      try {
+        setViewDocumentLoading(true);
+        const orgSlug = clerkOrg.organization?.slug ?? '';
+        const blob = await storageClient.retrieveFileBlob(orgSlug, storagePath);
+        storageClient.downloadFile(blob, storagePath);
+        toast.success('This document has been downloaded');
+      } catch (error) {
+        toast.error('Failed to view document');
+        console.error(error);
+      } finally {
+        setViewDocumentLoading(false);
+      }
+    };
+  };
+
+  const handleDeleteDocument = (id: string, storagePath: string) => {
+    return async () => {
+      // Cascade logic already implemented in the client
+      await documentsClient.deleteDocument(id, storagePath);
+      toast.success('This document has been deleted');
+      refreshDocuments();
+    };
   };
 
   return (
@@ -114,24 +161,24 @@ export function ContractDocuments() {
                     intent="ghost"
                     icon={Download}
                     className="hover:bg-white"
-                    onClick={() => handleDownloadDocument(document.storagePath ?? '')}
+                    onClick={handleDownloadDocument(document.storagePath)}
+                    disabled={downloadFileLoading}
                   />
                   <Button
                     intent="ghost"
                     icon={Eye}
                     className="hover:bg-white"
                     onClick={() => handleViewDocument(document.storagePath ?? '')}
+                    disabled={viewDocumentLoading}
                   />
                   <ConfirmationPopover
-                    onConfirm={async () => {
-                      await documentsClient.deleteDocument(document.id, document.storagePath);
-                      refreshDocuments();
-                    }}
+                    onConfirm={handleDeleteDocument(document.id, document.storagePath ?? '')}
                     trigger={
                       <Button
                         intent="ghost"
                         icon={Trash}
                         className="hover:bg-white hover:text-red-500"
+                        disabled={deleteDocumentLoading}
                       />
                     }
                     popoverIntent="danger"
