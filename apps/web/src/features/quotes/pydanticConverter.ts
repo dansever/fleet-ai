@@ -98,7 +98,7 @@ export function convertPydanticToQuote(
     partNumber: pydanticQuote.part.part_number,
     serialNumber: pydanticQuote.part.serial_number,
     partDescription: pydanticQuote.part.description,
-    partCondition: pydanticQuote.part.condition,
+    conditionCode: pydanticQuote.part.condition,
     unitOfMeasure: pydanticQuote.unit_of_measure,
     quantity: pydanticQuote.quantity,
 

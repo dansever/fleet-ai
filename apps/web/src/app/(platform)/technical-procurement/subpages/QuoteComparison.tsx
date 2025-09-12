@@ -1,5 +1,5 @@
 import { CardContent } from '@/components/ui/card';
-import { createRandomQuote } from '@/features/quotes/createRandomQuote';
+import { generateRandomQuote } from '@/features/generateRandomObjects/quote';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
@@ -58,7 +58,7 @@ export default function QuoteComparison() {
   };
 
   const handleGenerateRandomQuote = async () => {
-    const quote = await createRandomQuote(selectedRfq?.id || '');
+    const quote = await generateRandomQuote('received', selectedRfq?.id || '');
     addQuote(quote);
     setUploadQuotePopoverOpen(false);
   };

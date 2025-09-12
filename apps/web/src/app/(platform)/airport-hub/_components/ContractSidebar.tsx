@@ -3,17 +3,14 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '@/drizzle/enums';
-import { Airport, Contract } from '@/drizzle/types';
+import { Contract } from '@/drizzle/types';
 import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
-import { createRandomContract } from '@/features/contracts/contracts/createRandomContract';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
-import { BasePopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { Plus, PlusIcon, RefreshCw } from 'lucide-react';
+import { PlusIcon, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
 
 export default function ContractList() {
@@ -40,18 +37,6 @@ export default function ContractList() {
         : 'inactive';
   }
 
-  const handleGenerateRandomContract = async () => {
-    try {
-      setIsPopoverOpen(false); // Close popover
-      const newContract = await createRandomContract(selectedAirport?.id as Airport['id']);
-      addContract(newContract);
-      toast.success('Random contract generated successfully');
-    } catch (error) {
-      toast.error('Failed to generate random contract');
-      console.error(error);
-    }
-  };
-
   return (
     <div className="h-fit flex flex-col rounded-3xl bg-card">
       {/* Header */}
@@ -66,40 +51,23 @@ export default function ContractList() {
           size="sm"
           onClick={refreshContracts}
         />
-        <BasePopover
-          trigger={<Button intent="add" icon={Plus} />}
-          title="Add Contract"
-          description="Add a new service agreement to the airport hub"
-          open={isPopoverOpen}
-          onOpenChange={setIsPopoverOpen}
-        >
-          <div className="flex flex-col gap-1 w-full">
-            <SimpleContractDialog
-              airport={selectedAirport!}
-              trigger={<Button intent="secondary" icon={PlusIcon} text="Add Contract" />}
-              onOpenChange={(open) => {
-                if (!open) {
-                  // Close popover when dialog closes
-                  setIsPopoverOpen(false);
-                }
-              }}
-              onChange={(newContract) => {
-                if (addContract) {
-                  addContract(newContract);
-                  // Automatically select the newly created contract
-                  setSelectedContract(newContract);
-                }
-              }}
-            />
-            <Button
-              intent="ghost"
-              text="Or generate random (dev mode)"
-              size="sm"
-              className="text-gray-500"
-              onClick={handleGenerateRandomContract}
-            />
-          </div>
-        </BasePopover>
+        <SimpleContractDialog
+          airport={selectedAirport!}
+          trigger={<Button intent="add" icon={PlusIcon} />}
+          onOpenChange={(open) => {
+            if (!open) {
+              // Close popover when dialog closes
+              setIsPopoverOpen(false);
+            }
+          }}
+          onChange={(newContract) => {
+            if (addContract) {
+              addContract(newContract);
+              // Automatically select the newly created contract
+              setSelectedContract(newContract);
+            }
+          }}
+        />{' '}
       </div>
 
       {/* Contract List */}

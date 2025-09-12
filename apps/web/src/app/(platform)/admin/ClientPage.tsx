@@ -19,7 +19,6 @@ import {
   CheckCircle,
   Cloud,
   Database,
-  FileText,
   FolderOpen,
   Plus,
   RefreshCw,
@@ -162,25 +161,6 @@ export default function AdminClientPage() {
       addAlert('error', 'Failed to load folder counts');
     } finally {
       setLoading((prev) => ({ ...prev, folderCounts: false }));
-    }
-  };
-
-  const loadBucketFiles = async (bucketName: string) => {
-    console.log('Loading bucket files', bucketName);
-    try {
-      setLoading((prev) => ({ ...prev, bucketFiles: true }));
-      const response = await fetch(`/api/storage/buckets/${bucketName}`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Bucket files', data);
-        setBucketFiles(data.files || []);
-      } else {
-        addAlert('error', 'Failed to load bucket files');
-      }
-    } catch (error) {
-      addAlert('error', 'Failed to load bucket files');
-    } finally {
-      setLoading((prev) => ({ ...prev, bucketFiles: false }));
     }
   };
 
@@ -401,12 +381,6 @@ export default function AdminClientPage() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button
-                                intent="primary"
-                                text="View Files"
-                                icon={FileText}
-                                onClick={() => loadBucketFiles(bucket.name)}
-                              />
                               <ConfirmationPopover
                                 trigger={<Button intent="danger" text="Delete" icon={Trash2} />}
                                 title="Delete Bucket"

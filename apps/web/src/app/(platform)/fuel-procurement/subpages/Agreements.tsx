@@ -1,10 +1,9 @@
 'use client';
 
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { createRandomContract } from '@/features/contracts/contracts/createRandomContract';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
-import { AlertTriangle, Diff, Edit, Plus, Sigma, Upload, X } from 'lucide-react';
+import { AlertTriangle, Diff, Edit, Sigma, Upload, X } from 'lucide-react';
 import FuelInvoicesDataTable from '../_components/FuelInvoicesDataTable';
 import { useFuelProcurement } from '../contexts';
 import { useContracts } from '../hooks';
@@ -17,10 +16,6 @@ export default function AgreementsPage() {
   });
   const selectedContract = contracts[0];
   const { selectedAirport } = airports;
-
-  const handleGenerateRandomInvoice = () => {
-    const invoice = createRandomContract(selectedContract?.id);
-  };
 
   const agreementData = {
     id: 'AGR-2024-SHL-001',
@@ -146,13 +141,6 @@ export default function AgreementsPage() {
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <Button intent="warning" text="Generate Dispute" icon={AlertTriangle} />
-            <Button
-              intent="secondary"
-              size="sm"
-              text="Generate Random Invoice"
-              icon={Plus}
-              onClick={handleGenerateRandomInvoice}
-            />
           </div>
         </CardHeader>
         <CardContent>

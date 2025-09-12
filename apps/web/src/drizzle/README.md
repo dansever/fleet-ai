@@ -75,7 +75,7 @@ The database is organized into five main domains:
 ### `quotes`
 
 **Purpose**: Vendor responses to RFQs  
-**Key Fields**: `price`, `leadTime`, `partCondition`, `warranty`, `status`  
+**Key Fields**: `price`, `leadTime`, `conditionCode`, `warranty`, `status`  
 **Cardinality & Relations**: Many quotes belong to one `rfq` and one `organization`.  
 **Unique**: none  
 **On delete**: RFQ/org → quotes (cascade)

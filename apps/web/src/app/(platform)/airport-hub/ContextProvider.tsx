@@ -180,12 +180,13 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Cleanup both caches periodically
+   * Cleanup all caches periodically
    */
   const performCacheCleanup = useCallback(() => {
     setContractsCache((prev) => cleanupCache(prev, selectedAirport?.id));
     setVendorContactsCache((prev) => cleanupCache(prev, selectedAirport?.id));
-  }, [cleanupCache, selectedAirport?.id]);
+    setDocumentsCache((prev) => cleanupCache(prev, selectedContract?.id));
+  }, [cleanupCache, selectedAirport?.id, selectedContract?.id]);
 
   /**
    * Manually clear all caches (useful for troubleshooting or memory management)
@@ -193,6 +194,7 @@ export default function AirportHubProvider({
   const clearAllCaches = useCallback(() => {
     setContractsCache({});
     setVendorContactsCache({});
+    setDocumentsCache({});
     console.log('All caches cleared manually');
     toast.success('Cache cleared successfully');
   }, []);
@@ -231,10 +233,11 @@ export default function AirportHubProvider({
       () => {
         const contractsCacheSize = Object.keys(contractsCache).length;
         const vendorContactsCacheSize = Object.keys(vendorContactsCache).length;
+        const documentsCacheSize = Object.keys(documentsCache).length;
 
-        if (contractsCacheSize > 20 || vendorContactsCacheSize > 20) {
+        if (contractsCacheSize > 20 || vendorContactsCacheSize > 20 || documentsCacheSize > 20) {
           console.log(
-            `Cache stats - Contracts: ${contractsCacheSize}, Vendor Contacts: ${vendorContactsCacheSize}`,
+            `Cache stats - Contracts: ${contractsCacheSize}, Vendor Contacts: ${vendorContactsCacheSize}, Documents: ${documentsCacheSize}`,
           );
         }
       },
@@ -369,6 +372,67 @@ export default function AirportHubProvider({
 
     loadContacts();
   }, [selectedAirport]); // Remove contactsCache dependency to avoid unnecessary re-runs
+
+  /**
+   * Load documents for the selected contract (only when contract changes)
+   */
+  useEffect(() => {
+    if (!selectedContract) {
+      setDocuments([]);
+      setSelectedDocument(null);
+      return;
+    }
+
+    // Immediately clear documents when switching contracts to prevent stale data
+    setDocuments([]);
+    setSelectedDocument(null);
+
+    const loadDocuments = async () => {
+      // Check cache first
+      if (documentsCache[selectedContract.id]) {
+        const cachedDocuments = documentsCache[selectedContract.id];
+        setDocuments(cachedDocuments);
+        setSelectedDocument(cachedDocuments.length > 0 ? cachedDocuments[0] : null);
+        return;
+      }
+
+      setLoading((prev) => ({ ...prev, documents: true, isRefreshing: false }));
+      setErrors((prev) => ({ ...prev, documents: null }));
+
+      try {
+        const documents = await documentClient.listDocumentsByContract(selectedContract.id);
+        setDocuments(documents);
+
+        // Cache the documents for this contract
+        setDocumentsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedContract.id]: documents,
+          };
+          return cleanupCache(updated, selectedContract.id);
+        });
+
+        // Always set first document as selected when loading documents for a new contract
+        setSelectedDocument(documents.length > 0 ? documents[0] : null);
+      } catch (error) {
+        console.error('Error loading documents:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load documents';
+        setErrors((prev) => ({
+          ...prev,
+          documents: errorMessage,
+        }));
+        setDocuments([]);
+        setSelectedDocument(null);
+
+        // Show user-friendly toast notification
+        toast.error(`Failed to load documents: ${errorMessage}`);
+      } finally {
+        setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
+      }
+    };
+
+    loadDocuments();
+  }, [selectedContract]); // Remove documentsCache dependency to avoid unnecessary re-runs
 
   /**
    * Refresh airports
@@ -764,36 +828,116 @@ export default function AirportHubProvider({
 
     try {
       const documents = await documentClient.listDocumentsByContract(selectedContract.id);
-      // setDocuments(documents);
+      setDocuments(documents);
+
+      // Update cache with fresh data
+      setDocumentsCache((prev) => {
+        const updated = {
+          ...prev,
+          [selectedContract.id]: documents,
+        };
+        return cleanupCache(updated, selectedContract.id);
+      });
+
+      // Preserve the currently selected document if it still exists, otherwise select first
+      if (selectedDocument) {
+        const updatedSelectedDocument = documents.find((d) => d.id === selectedDocument.id);
+        setSelectedDocument(
+          updatedSelectedDocument || (documents.length > 0 ? documents[0] : null),
+        );
+      } else if (documents.length > 0) {
+        setSelectedDocument(documents[0]);
+      }
     } catch (error) {
       console.error('Error refreshing documents:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh documents';
+      setErrors((prev) => ({
+        ...prev,
+        documents: errorMessage,
+      }));
+      toast.error(`Failed to refresh documents: ${errorMessage}`);
+    } finally {
+      setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
     }
-  }, [selectedContract]);
+  }, [selectedContract, selectedDocument]);
 
   /**
    * Update document
    */
-  const updateDocument = useCallback((updatedDocument: Document) => {
-    setDocuments((prevDocuments) =>
-      prevDocuments.map((document) =>
-        document.id === updatedDocument.id ? updatedDocument : document,
-      ),
-    );
-  }, []);
+  const updateDocument = useCallback(
+    (updatedDocument: Document) => {
+      setDocuments((prevDocuments) =>
+        prevDocuments.map((document) =>
+          document.id === updatedDocument.id ? updatedDocument : document,
+        ),
+      );
+
+      if (selectedDocument?.id === updatedDocument.id) {
+        setSelectedDocument(updatedDocument);
+      }
+
+      // Update cache as well
+      if (selectedContract) {
+        setDocumentsCache((prev) => ({
+          ...prev,
+          [selectedContract.id]:
+            prev[selectedContract.id]?.map((document) =>
+              document.id === updatedDocument.id ? updatedDocument : document,
+            ) || [],
+        }));
+      }
+    },
+    [selectedDocument, selectedContract],
+  );
 
   /**
    * Add document
    */
-  const addDocument = useCallback((newDocument: Document) => {
-    setDocuments((prevDocuments) => [newDocument, ...prevDocuments]);
-  }, []);
+  const addDocument = useCallback(
+    (newDocument: Document) => {
+      setDocuments((prevDocuments) => [newDocument, ...prevDocuments]);
+
+      // Update cache as well
+      if (selectedContract && selectedContract.id === newDocument.parentId) {
+        setDocumentsCache((prev) => {
+          const updated = {
+            ...prev,
+            [selectedContract.id]: [newDocument, ...(prev[selectedContract.id] || [])],
+          };
+          return cleanupCache(updated, selectedContract.id);
+        });
+      }
+    },
+    [selectedContract, cleanupCache],
+  );
 
   /**
    * Remove document
    */
-  const removeDocument = useCallback((documentId: string) => {
-    setDocuments((prevDocuments) => prevDocuments.filter((document) => document.id !== documentId));
-  }, []);
+  const removeDocument = useCallback(
+    (documentId: string) => {
+      setDocuments((prevDocuments) => {
+        const filteredDocuments = prevDocuments.filter((document) => document.id !== documentId);
+
+        // If we're removing the currently selected document, select the first available one
+        if (selectedDocument?.id === documentId) {
+          setSelectedDocument(filteredDocuments.length > 0 ? filteredDocuments[0] : null);
+        }
+
+        return filteredDocuments;
+      });
+
+      // Update cache as well
+      if (selectedContract) {
+        setDocumentsCache((prev) => ({
+          ...prev,
+          [selectedContract.id]:
+            prev[selectedContract.id]?.filter((document) => document.id !== documentId) || [],
+        }));
+      }
+    },
+    [selectedDocument, selectedContract],
+  );
 
   /**
    * Clear specific error
@@ -829,6 +973,7 @@ export default function AirportHubProvider({
           ...prev,
           contracts: !contractsCache[airport.id], // Only set loading if not cached
           vendorContacts: !vendorContactsCache[airport.id], // Only set loading if not cached
+          documents: false, // Documents will be loaded when contract is selected
           isRefreshing: false,
         }));
       }

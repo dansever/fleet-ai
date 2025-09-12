@@ -53,7 +53,7 @@ export default function QuoteDialog({
     partNumber: quote?.partNumber || null,
     serialNumber: quote?.serialNumber || null,
     partDescription: quote?.partDescription || null,
-    partCondition: quote?.partCondition || null, // Note: schema uses 'partCondition', not 'conditionCode'
+    conditionCode: quote?.conditionCode || null, // Note: schema uses 'conditionCode', not 'conditionCode'
     unitOfMeasure: quote?.unitOfMeasure || null,
     quantity: quote?.quantity || null,
 
@@ -104,7 +104,7 @@ export default function QuoteDialog({
       partNumber: quote?.partNumber || null,
       serialNumber: quote?.serialNumber || null,
       partDescription: quote?.partDescription || null,
-      partCondition: quote?.partCondition || null,
+      conditionCode: quote?.conditionCode || null,
       unitOfMeasure: quote?.unitOfMeasure || null,
       quantity: quote?.quantity || null,
       price: quote?.price || null,
@@ -164,7 +164,7 @@ export default function QuoteDialog({
           partNumber: serializedFormData.partNumber,
           serialNumber: serializedFormData.serialNumber,
           partDescription: serializedFormData.partDescription,
-          partCondition: serializedFormData.partCondition,
+          conditionCode: serializedFormData.conditionCode,
           unitOfMeasure: serializedFormData.unitOfMeasure,
           quantity: serializedFormData.quantity,
           price: serializedFormData.price,
@@ -186,7 +186,7 @@ export default function QuoteDialog({
           taggedDate: serializedFormData.taggedDate,
           vendorComments: serializedFormData.vendorComments,
           processStatus: serializedFormData.processStatus,
-          sentAt: formData.sentAt?.toISOString() || null,
+          // sentAt: formData.sentAt?.toISOString() || (null as (Date & string) | null | undefined),
         };
         savedQuote = await client.createQuote(createData, rfqId);
         toast.success('Quote created successfully');
@@ -206,7 +206,7 @@ export default function QuoteDialog({
           partNumber: serializedFormData.partNumber,
           serialNumber: serializedFormData.serialNumber,
           partDescription: serializedFormData.partDescription,
-          partCondition: serializedFormData.partCondition,
+          conditionCode: serializedFormData.conditionCode,
           unitOfMeasure: serializedFormData.unitOfMeasure,
           quantity: serializedFormData.quantity,
           price: serializedFormData.price,
@@ -230,7 +230,7 @@ export default function QuoteDialog({
           processStatus: serializedFormData.processStatus,
           sentAt: formData.sentAt?.toISOString() || null,
         };
-        savedQuote = await client.updateQuote(quote.id, updateData);
+        savedQuote = await client.updateQuote(quote.id, updateData as Partial<QuoteCreateInput>);
         toast.success('Quote updated successfully');
       }
 
@@ -258,7 +258,7 @@ export default function QuoteDialog({
         partNumber: null,
         serialNumber: null,
         partDescription: null,
-        partCondition: null,
+        conditionCode: null,
         unitOfMeasure: null,
         quantity: null,
         price: null,
@@ -297,7 +297,7 @@ export default function QuoteDialog({
       partNumber: null,
       serialNumber: null,
       partDescription: null,
-      partCondition: null,
+      conditionCode: null,
       unitOfMeasure: null,
       quantity: null,
       price: null,
@@ -458,11 +458,11 @@ export default function QuoteDialog({
               />
               <KeyValuePair
                 label="Part Condition"
-                value={formData.partCondition}
+                value={formData.conditionCode}
                 valueType="string"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('partCondition', value)}
-                name="partCondition"
+                onChange={(value) => handleFieldChange('conditionCode', value)}
+                name="conditionCode"
               />
               <KeyValuePair
                 label="Unit of Measure"

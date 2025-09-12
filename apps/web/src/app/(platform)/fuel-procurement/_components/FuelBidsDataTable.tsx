@@ -2,8 +2,8 @@
 
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FuelBid, NewFuelBid } from '@/drizzle/types';
-import { createRandomFuelBid } from '@/features/fuel/bid/createRandomBid';
 import { convertPydanticToFuelBid } from '@/features/fuel/bid/pydanticConverter';
+import { generateRandomFuelBid } from '@/features/generateRandomObjects/fuel-bid';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
@@ -81,7 +81,7 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
               size="sm"
               className="text-gray-500"
               onClick={async () => {
-                const bid = await createRandomFuelBid(selectedTender.id);
+                const bid = await generateRandomFuelBid(selectedTender.id);
                 addFuelBid(bid as FuelBid);
                 setUploadFuelBidPopoverOpen(false);
               }}

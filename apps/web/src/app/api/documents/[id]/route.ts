@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const documentData = { ...data, id };
 
     // Update document
-    const document = await documentsServer.updateDocument(documentData);
+    const document = await documentsServer.updateDocument(id, documentData);
 
     // Return document
     return NextResponse.json(document);

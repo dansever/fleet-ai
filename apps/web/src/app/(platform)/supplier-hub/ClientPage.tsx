@@ -5,7 +5,7 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { TabsContent } from '@/components/ui/tabs';
 import { getUrgencyLevelDisplay, ProcessStatus, processStatusDisplayMap } from '@/drizzle/enums';
-import { createRandomQuote } from '@/features/quotes/createRandomQuote';
+import { generateRandomQuote } from '@/features/generateRandomObjects/quote';
 import { convertPydanticToQuote } from '@/features/quotes/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
@@ -352,7 +352,7 @@ export default function TechnicalProcurementClientPage() {
                       size="sm"
                       className="text-gray-500"
                       onClick={async () => {
-                        const quote = await createRandomQuote(selectedRfq.id);
+                        const quote = await generateRandomQuote('received', selectedRfq.id);
                         addQuote(quote);
                         console.log('Time to close the popover');
                         setUploadQuotePopoverOpen(false);

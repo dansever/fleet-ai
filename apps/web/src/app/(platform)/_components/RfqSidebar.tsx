@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSidebar } from '@/components/ui/sidebar';
 import { getProcessStatusDisplay, OrderDirection } from '@/drizzle/enums';
 import { Rfq } from '@/drizzle/types';
-import { createRandomRfq } from '@/features/rfqs/createRandomRfq';
+import { generateRandomRfq } from '@/features/generateRandomObjects/rfq';
 import { convertPydanticToRfq, PydanticRFQ } from '@/features/rfqs/pydanticConverter';
 import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
@@ -236,8 +236,8 @@ export default function RfqList({
                       size="sm"
                       className="text-gray-500"
                       onClick={async () => {
-                        const newRfq = await createRandomRfq(rfqsDirection);
-                        onCreatedRfq?.(newRfq);
+                        const newRfq = await generateRandomRfq(rfqsDirection);
+                        onCreatedRfq?.(newRfq as Rfq);
                         console.log('Time to close the popover');
                         setUploadRfqPopoverOpen(false);
                       }}

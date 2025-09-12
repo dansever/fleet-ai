@@ -28,11 +28,11 @@ export async function createDocument(document: NewDocument): Promise<Document> {
 /**
  * Update a document
  */
-export async function updateDocument(document: Document): Promise<Document> {
+export async function updateDocument(id: Document['id'], document: Document): Promise<Document> {
   const updatedDocument = await db
     .update(documentsTable)
     .set(document)
-    .where(eq(documentsTable.id, document.id))
+    .where(eq(documentsTable.id, id))
     .returning();
   return updatedDocument[0];
 }
@@ -40,12 +40,8 @@ export async function updateDocument(document: Document): Promise<Document> {
 /**
  * Get a document by ID
  */
-export async function getDocumentById(documentId: string): Promise<Document> {
-  const document = await db
-    .select()
-    .from(documentsTable)
-    .where(eq(documentsTable.id, documentId))
-    .limit(1);
+export async function getDocumentById(id: Document['id']): Promise<Document> {
+  const document = await db.select().from(documentsTable).where(eq(documentsTable.id, id)).limit(1);
 
   if (!document[0]) {
     throw new Error('Document not found');
@@ -56,7 +52,8 @@ export async function getDocumentById(documentId: string): Promise<Document> {
 
 /**
  * Delete a document
+ * @param id - The ID of the document to delete
  */
-export async function deleteDocument(documentId: string): Promise<void> {
-  await db.delete(documentsTable).where(eq(documentsTable.id, documentId));
+export async function deleteDocument(id: Document['id']): Promise<void> {
+  await db.delete(documentsTable).where(eq(documentsTable.id, id));
 }

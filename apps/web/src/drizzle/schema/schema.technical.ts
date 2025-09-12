@@ -120,7 +120,7 @@ export const quotesTable = pgTable(
     partNumber: text('part_number'),
     serialNumber: text('serial_number'),
     partDescription: text('part_description'),
-    partCondition: text('condition_code'),
+    conditionCode: text('condition_code'),
     unitOfMeasure: text('unit_of_measure'),
     quantity: integer('quantity'),
 

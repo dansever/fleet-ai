@@ -1,4 +1,5 @@
 import { Contract, Document } from '@/drizzle/types';
+import { client as storageClient } from '@/modules/storage';
 import { api } from '@/services/api-client';
 import { DocumentCreateInput, DocumentUpdateInput } from './documents.types';
 
@@ -36,4 +37,21 @@ export async function updateDocument(
 ): Promise<Document> {
   const res = await api.put(`/api/documents/${id}`, data);
   return res.data;
+}
+
+/**
+ * Delete a document
+ * @param id - The ID of the document to delete
+ * @param path - The path of the document to delete
+ * @returns void
+ */
+export async function deleteDocument(
+  id: Document['id'],
+  path: Document['storagePath'],
+): Promise<void> {
+  if (!path) return;
+  // delete the file from the storage
+  await storageClient.deleteFile(path);
+  // delete the document from the database
+  await api.delete(`/api/documents/${id}`);
 }

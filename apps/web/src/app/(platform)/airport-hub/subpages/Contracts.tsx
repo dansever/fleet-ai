@@ -8,7 +8,7 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { Banknote, BarChart, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AskAI from '../_components/AskAI';
-import { ContractFiles } from '../_components/ContractFiles';
+import { ContractDocuments } from '../_components/ContractDocuments';
 import { ContractOverview } from '../_components/ContractOverview';
 import ContractList from '../_components/ContractSidebar';
 
@@ -120,7 +120,7 @@ export default function ContractsPage() {
           <ContractOverview />
         </TabsContent>
         <TabsContent value="files">
-          <ContractFiles />
+          <ContractDocuments />
         </TabsContent>
         <TabsContent value="chatbot">
           <AskAI />
