@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // =====================================
     onProgress?.({ name: 'upload', description: 'Uploading file to storage...', progress: 20 }, 20);
     const storageResult = await storageServer.uploadFile(file, parentType, parentId);
-    console.log('✅ Storage upload completed:', storageResult);
+    console.log('✅ Storage upload completed');
 
     // =====================================
     // 2. Parse document with LlamaParse
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     onProgress?.({ name: 'parse', description: 'Parsing document...', progress: 30 }, 30);
     const parseResult = await parseServer.parseDocument(file);
     const parsedTextCombined = parseResult.map((part: any) => part.text).join('\n');
-    console.log('✅ Parsed text: ', parsedTextCombined.slice(0, 80) + '...');
+    console.log('✅ Parsed text completed');
 
     // =====================================
     // 3. Extract document data with LlamaExtract
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       file,
       extractUtils.getExtractionAgentName(parentType),
     );
-    console.log('✅ Extraction completed: ', extractResult);
+    console.log('✅ Extraction completed');
 
     // =====================================
     // 4. Update parent record with extracted data
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       summary: extractResult.data.summary,
       terms: extractResult.data.terms,
     });
-    console.log('✅ Contract record updated: ', updateResult);
+    console.log('✅ Contract record updated');
 
     // =====================================
     // 5. Save document record to database
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       fileType: file.type,
       content: parsedTextCombined,
     });
-    console.log('✅ Document record saved: ', saveResult);
+    console.log('✅ Document record saved');
 
     // =====================================
     // 6. Create chunks and embeddings
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       80,
     );
     const chunksResult = await chunksServer.createDocumentChunks(saveResult);
-    console.log('✅ Chunks created: ', chunksResult);
+    console.log('✅ Chunks created');
 
     // =====================================
     // 7. Complete

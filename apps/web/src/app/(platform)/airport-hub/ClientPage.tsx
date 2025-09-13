@@ -9,7 +9,7 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { Eye, FileText, MapPin, Star, Users } from 'lucide-react';
+import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useAirportHub } from './ContextProvider';
@@ -24,9 +24,13 @@ export default function AirportHubClientPage() {
     airports,
     setAirports,
     selectedAirport,
+    refreshAirports,
     setSelectedAirport,
     addAirport,
     updateAirport,
+    refreshContracts,
+    refreshDocuments,
+    refreshVendorContacts,
     loading,
     errors,
     clearError,
@@ -37,6 +41,15 @@ export default function AirportHubClientPage() {
   if (loading.airports) {
     return <LoadingComponent size="lg" text="Loading airports..." />;
   }
+
+  /**
+   * Refresh all except airports
+   */
+  const handleRefresh = () => {
+    refreshContracts();
+    refreshDocuments();
+    refreshVendorContacts();
+  };
 
   if (errors.airports) {
     return (
@@ -123,6 +136,13 @@ export default function AirportHubClientPage() {
                 airport={selectedAirport}
                 onChange={updateAirport}
                 DialogType="view"
+              />
+              <Button
+                intent="ghost"
+                text="Refresh"
+                icon={RefreshCw}
+                onClick={handleRefresh}
+                isLoading={loading.contracts || loading.documents || loading.vendorContacts}
               />
             </div>
           </div>

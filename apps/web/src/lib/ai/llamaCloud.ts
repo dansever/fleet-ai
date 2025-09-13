@@ -4,12 +4,11 @@ export function authHeaders() {
   const apiKey = process.env.LLAMA_CLOUD_API_KEY;
 
   if (!apiKey) {
-    console.error('❌ LLAMA_CLOUD_API_KEY is not set in environment variables');
     throw new Error('LLAMA_CLOUD_API_KEY is required for LlamaCloud authentication');
   }
 
   // Log first few characters for debugging (but not the full key for security)
-  console.log('🔑 Using LlamaCloud API key:', `${apiKey.slice(0, 8)}...`);
+  console.log('🔑 Using LlamaCloud API key:', `${apiKey.slice(0, 4)}...`);
 
   return {
     Authorization: `Bearer ${apiKey}`,

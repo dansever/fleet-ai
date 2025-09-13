@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { ListItemCard } from '@/stories/Card/Card';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { PlusIcon, RefreshCw } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useAirportHub } from '../ContextProvider';
 
@@ -44,13 +44,6 @@ export default function ContractList() {
         <div className="text-sm text-muted-foreground">
           {contracts.length} of {contracts.length} contracts
         </div>
-        <Button
-          intent="ghost"
-          disabled={loading.contracts && loading.isRefreshing}
-          icon={RefreshCw}
-          size="sm"
-          onClick={refreshContracts}
-        />
         <SimpleContractDialog
           airport={selectedAirport!}
           trigger={<Button intent="add" icon={PlusIcon} />}

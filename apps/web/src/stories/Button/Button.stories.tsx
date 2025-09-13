@@ -9,7 +9,9 @@ import {
   ExternalLink,
   Filter,
   Heart,
+  Loader2,
   Plus,
+  RefreshCw,
   Save,
   Search,
   Settings,
@@ -17,6 +19,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
+import * as React from 'react';
 import { Button } from './Button';
 
 const meta: Meta<typeof Button> = {
@@ -57,6 +60,283 @@ const meta: Meta<typeof Button> = {
 
 export default meta;
 type Story = StoryObj<typeof Button>;
+
+// Loading Animation Showcase
+export const LoadingAnimations: Story = {
+  render: () => (
+    <div className="space-y-8 max-w-4xl mx-auto p-6">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+          Loading Animation Showcase
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Elegant spinning animations for loading states
+        </p>
+      </div>
+
+      {/* Default Loading Icons */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+          Default Loading Animations
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          Default loading behavior uses Loader2 icon with smooth spinning animation
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">WITH TEXT</h3>
+            <div className="space-y-2">
+              <Button intent="primary" text="Saving..." isLoading />
+              <Button intent="secondary" text="Loading..." isLoading />
+              <Button intent="success" text="Processing..." isLoading />
+              <Button intent="warning" text="Updating..." isLoading />
+              <Button intent="danger" text="Deleting..." isLoading />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">ICON ONLY</h3>
+            <div className="flex flex-wrap gap-2">
+              <Button intent="primary" isLoading />
+              <Button intent="secondary" isLoading />
+              <Button intent="success" isLoading />
+              <Button intent="warning" isLoading />
+              <Button intent="danger" isLoading />
+              <Button intent="ghost" isLoading />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">DIFFERENT SIZES</h3>
+            <div className="space-y-2">
+              <Button size="sm" text="Small Loading" isLoading />
+              <Button size="md" text="Medium Loading" isLoading />
+              <Button size="lg" text="Large Loading" isLoading />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Smart Refresh Icon Behavior */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+          Smart Refresh Icon Behavior
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          When using RefreshCw icon, it automatically spins during loading state
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm text-violet-700">NORMAL STATE</h3>
+            <div className="space-y-2">
+              <Button text="Refresh Data" icon={RefreshCw} intent="secondary" />
+              <Button text="Sync" icon={RefreshCw} intent="primary" />
+              <Button icon={RefreshCw} intent="ghost" />
+              <Button text="Reload" icon={RefreshCw} iconPosition="right" intent="secondary" />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm text-violet-700">LOADING STATE</h3>
+            <div className="space-y-2">
+              <Button text="Refreshing..." icon={RefreshCw} intent="secondary" isLoading />
+              <Button text="Syncing..." icon={RefreshCw} intent="primary" isLoading />
+              <Button icon={RefreshCw} intent="ghost" isLoading />
+              <Button
+                text="Reloading..."
+                icon={RefreshCw}
+                iconPosition="right"
+                intent="secondary"
+                isLoading
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Custom Loading Icons */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+          Custom Loading Icons
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          Override default loading behavior with custom icons
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm text-violet-700">CUSTOM LOADER2</h3>
+            <div className="space-y-2">
+              <Button text="Custom Loading" icon={Save} loadingIcon={Loader2} isLoading />
+              <Button text="Processing" icon={Upload} loadingIcon={Loader2} isLoading />
+              <Button icon={Download} loadingIcon={Loader2} isLoading />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm text-violet-700">CUSTOM REFRESH</h3>
+            <div className="space-y-2">
+              <Button text="Syncing Data" icon={Save} loadingIcon={RefreshCw} isLoading />
+              <Button text="Updating" icon={Edit} loadingIcon={RefreshCw} isLoading />
+              <Button icon={Settings} loadingIcon={RefreshCw} isLoading />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Real-World Examples */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-violet-200 pb-2">
+          Fleet AI Real-World Loading Examples
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          Common loading scenarios in fleet management applications
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">DATA OPERATIONS</h3>
+            <div className="space-y-2">
+              <Button text="Saving Flight Plan..." icon={Save} isLoading />
+              <Button text="Uploading Document..." icon={Upload} isLoading />
+              <Button text="Exporting Report..." icon={Download} isLoading />
+              <Button text="Refreshing Fleet Status..." icon={RefreshCw} isLoading />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">OPERATIONS</h3>
+            <div className="space-y-2">
+              <Button text="Scheduling Flight..." intent="primary" isLoading />
+              <Button text="Approving Route..." intent="success" isLoading />
+              <Button text="Updating Maintenance..." intent="warning" isLoading />
+              <Button text="Processing Emergency..." intent="danger" isLoading />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">QUICK ACTIONS</h3>
+            <div className="flex flex-wrap gap-2">
+              <Button icon={RefreshCw} intent="ghost" isLoading />
+              <Button icon={Settings} intent="ghost" isLoading />
+              <Button icon={Search} intent="ghost" isLoading />
+              <Button icon={Filter} intent="secondary" isLoading />
+              <Button icon={Plus} intent="primary" isLoading />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Comprehensive showcase of loading animations including default behavior, smart refresh icon handling, and custom loading icons.',
+      },
+    },
+  },
+};
+
+// Interactive Loading Test
+export const InteractiveLoadingTest: Story = {
+  render: function InteractiveLoadingStory() {
+    const [loadingStates, setLoadingStates] = React.useState({
+      refresh: false,
+      save: false,
+      upload: false,
+      custom: false,
+    });
+
+    const toggleLoading = (key: keyof typeof loadingStates) => {
+      setLoadingStates((prev) => ({ ...prev, [key]: !prev[key] }));
+
+      // Auto-reset after 3 seconds for demo
+      setTimeout(() => {
+        setLoadingStates((prev) => ({ ...prev, [key]: false }));
+      }, 3000);
+    };
+
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto p-6">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+            Interactive Loading Test
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Click buttons to test loading animations (auto-resets after 3 seconds)
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">SMART REFRESH BEHAVIOR</h3>
+            <div className="flex gap-3">
+              <Button
+                text={loadingStates.refresh ? 'Refreshing...' : 'Refresh Data'}
+                icon={RefreshCw}
+                intent="secondary"
+                isLoading={loadingStates.refresh}
+                onClick={() => toggleLoading('refresh')}
+              />
+              <Button
+                icon={RefreshCw}
+                intent="ghost"
+                isLoading={loadingStates.refresh}
+                onClick={() => toggleLoading('refresh')}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">DEFAULT LOADING BEHAVIOR</h3>
+            <div className="flex gap-3">
+              <Button
+                text={loadingStates.save ? 'Saving...' : 'Save Document'}
+                icon={Save}
+                intent="primary"
+                isLoading={loadingStates.save}
+                onClick={() => toggleLoading('save')}
+              />
+              <Button
+                text={loadingStates.upload ? 'Uploading...' : 'Upload File'}
+                icon={Upload}
+                intent="secondary"
+                isLoading={loadingStates.upload}
+                onClick={() => toggleLoading('upload')}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm text-violet-700">CUSTOM LOADING ICON</h3>
+            <div className="flex gap-3">
+              <Button
+                text={loadingStates.custom ? 'Processing...' : 'Process Data'}
+                icon={Settings}
+                loadingIcon={RefreshCw}
+                intent="warning"
+                isLoading={loadingStates.custom}
+                onClick={() => toggleLoading('custom')}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive test to demonstrate loading animations in action. Click buttons to see the spinning animations.',
+      },
+    },
+  },
+};
 
 // Comprehensive Button Showcase - All variants in one story
 export const AllButtonVariants: Story = {

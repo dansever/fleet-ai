@@ -9,40 +9,17 @@ import { TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import type React from 'react';
 
-// Gradient palettes for FeatureCard
-export enum GradientPalette {
-  PinkPurpleBlue = 'PinkPurpleBlue',
-  RoseFuchsiaIndigo = 'RoseFuchsiaIndigo',
-  SkyIndigoViolet = 'SkyIndigoViolet',
-  VioletPinkRose = 'VioletPinkRose',
-  CyanBluePurple = 'CyanBluePurple',
-}
-
-export const paletteToClasses: Record<GradientPalette, string> = {
-  [GradientPalette.PinkPurpleBlue]: 'from-pink-500/90 via-purple-600/90 to-blue-700/90',
-  [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-500/90 via-fuchsia-600/90 to-indigo-700/90',
-  [GradientPalette.SkyIndigoViolet]: 'from-sky-600/90 via-indigo-700/90 to-violet-800/90',
-  [GradientPalette.VioletPinkRose]: 'from-violet-600/90 via-pink-600/90 to-rose-700/90',
-  [GradientPalette.CyanBluePurple]: 'from-cyan-500/90 via-blue-600/90 to-purple-700/90',
-};
-
 export interface BaseCardProps {
   className?: string;
   children?: React.ReactNode;
 }
-
-// Surface Card - Minimal base surface for custom layouts
-export const BaseCard = ({ className, children }: BaseCardProps) => (
-  <Card className={cn('rounded-3xl shadow-none border-0 overflow-hidden', className)}>
-    {children}
-  </Card>
-);
 
 // Common standardized props for all cards
 export interface StandardCardProps {
   className?: string;
   // Header options (either simple or custom)
   header?: React.ReactNode; // Takes precedence over title/subtitle
+  headerClassName?: string;
   title?: string;
   subtitle?: string;
   icon?: React.ReactNode;
@@ -53,6 +30,40 @@ export interface StandardCardProps {
   footer?: React.ReactNode;
   children?: React.ReactNode;
 }
+
+// Surface Card - Minimal base surface for custom layouts
+export const BaseCard = ({
+  className,
+  headerClassName,
+  header,
+  title,
+  subtitle,
+  actions,
+  body,
+  footer,
+}: StandardCardProps) => (
+  <Card className={cn('rounded-3xl shadow-none border-0 overflow-hidden pt-0 gap-2', className)}>
+    {header
+      ? header
+      : (title || subtitle) && (
+          <CardHeader
+            className={cn(
+              'py-2 flex flex items-center justify-between',
+              'bg-gradient-to-r',
+              headerClassName,
+            )}
+          >
+            <div className="flex flex-col space-y-1">
+              <CardTitle className="text-lg">{title}</CardTitle>
+              {subtitle}
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>
+          </CardHeader>
+        )}
+    {body && <CardContent className="py-2 px:4 sm:px-6 md:px-8">{body}</CardContent>}
+    {footer && <CardContent className="py-2 px:4 sm:px-6 md:px-8">{footer}</CardContent>}
+  </Card>
+);
 
 // Main Card - For displaying main content with header and actions
 export const MainCard = ({

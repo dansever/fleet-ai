@@ -202,6 +202,7 @@ export const FileUploadPopover = ({
     if (isControlled) onOpenChange?.(v);
     else setInternalOpen(v);
   };
+  const [loading, setLoading] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -250,8 +251,10 @@ export const FileUploadPopover = ({
 
   const handleSend = async () => {
     if (selectedFile && onSend) {
+      setLoading(true);
       await onSend(selectedFile);
       setSelectedFile(null);
+      setLoading(false);
       close();
     }
   };
@@ -362,8 +365,20 @@ export const FileUploadPopover = ({
                 </div>
 
                 <div className="flex gap-2">
-                  <Button intent="secondary" onClick={handleCancel} text="Cancel" icon={X} />
-                  <Button intent="success" onClick={handleSend} text="Upload" icon={Send} />
+                  <Button
+                    intent="secondary"
+                    onClick={handleCancel}
+                    text="Cancel"
+                    icon={X}
+                    isLoading={loading}
+                  />
+                  <Button
+                    intent="success"
+                    onClick={handleSend}
+                    text="Upload"
+                    icon={Send}
+                    isLoading={loading}
+                  />
                 </div>
               </div>
             )}

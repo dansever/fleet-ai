@@ -41,7 +41,7 @@ export default function AirportPage() {
         neutralHeader={true}
         actions={
           <ConfirmationPopover
-            trigger={<Button intent="danger" text="Delete" icon={Trash} />}
+            trigger={<Button intent="danger" icon={Trash} />}
             popoverIntent="danger"
             title="Delete Airport"
             onConfirm={async () => {

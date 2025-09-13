@@ -2,7 +2,6 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { VendorContact } from '@/drizzle/types';
-import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
@@ -131,14 +130,6 @@ export default function ContactsAndProviders() {
         neutralHeader={true}
         actions={
           <div className="flex gap-2">
-            <Button
-              intent="ghost"
-              icon={RefreshCw}
-              className={cn(loading.vendorContacts && loading.isRefreshing && 'animate-spin')}
-              disabled={loading.vendorContacts && loading.isRefreshing}
-              onClick={refreshVendorContacts}
-            />
-
             <Button
               intent="primary"
               text="Add Contact"

@@ -14,6 +14,7 @@ export type LoadingState = {
   documents: boolean;
   vendorContacts: boolean;
   isRefreshing: boolean; // Indicates if current loading is from a refresh action
+  uploadDocument: boolean;
 };
 
 export type ErrorState = {
@@ -22,6 +23,7 @@ export type ErrorState = {
   documents: string | null;
   vendorContacts: string | null;
   general: string | null;
+  uploadDocument: string | null;
 };
 
 export type AirportHubContextType = {
@@ -71,6 +73,7 @@ export type AirportHubContextType = {
   errors: ErrorState;
   clearError: (errorType: keyof ErrorState) => void;
   clearAllErrors: () => void;
+  setUploadLoading: (isLoading: boolean) => void;
 
   // Cache management
   clearAllCaches: () => void;
@@ -120,6 +123,7 @@ export default function AirportHubProvider({
     documents: false,
     vendorContacts: false,
     isRefreshing: false,
+    uploadDocument: false,
   });
 
   // Error states
@@ -129,6 +133,7 @@ export default function AirportHubProvider({
     documents: null,
     vendorContacts: null,
     general: null,
+    uploadDocument: null,
   });
 
   /**
@@ -921,7 +926,18 @@ export default function AirportHubProvider({
       documents: null,
       vendorContacts: null,
       general: null,
+      uploadDocument: null,
     });
+  }, []);
+
+  /**
+   * Set upload loading state
+   */
+  const setUploadLoading = useCallback((isLoading: boolean) => {
+    setLoading((prev) => ({ ...prev, uploadDocument: isLoading }));
+    if (isLoading) {
+      setErrors((prev) => ({ ...prev, uploadDocument: null }));
+    }
   }, []);
 
   /**
@@ -985,6 +1001,7 @@ export default function AirportHubProvider({
     errors,
     clearError,
     clearAllErrors,
+    setUploadLoading,
     clearAllCaches,
   };
 
