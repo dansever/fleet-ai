@@ -2,12 +2,8 @@
 
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { createClient } from '@/lib/supabase/server';
-import { getBucketName } from '@/lib/supabase/storage-helpers';
-import { server as orgServer } from '@/modules/core/organizations';
+import { server as storageServer } from '@/modules/storage';
 import { NextRequest, NextResponse } from 'next/server';
-
-const supabase = await createClient();
 
 /**
  * POST /api/storage/sign
@@ -24,24 +20,12 @@ export async function POST(req: NextRequest) {
     const { dbUser, orgId, error } = await getAuthContext();
     if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    // Get organization for bucket
-    const org = await orgServer.getOrgById(orgId);
-    if (!org) return jsonError('Organization not found', 404);
-    const bucket = getBucketName(org);
-
     // Get path and expiresIn from request
     const { path, expiresIn = 60 } = await req.json();
     if (typeof path !== 'string') return jsonError('Missing path', 400);
-    // TODO: Remove this after testing
-    console.log('path', path);
-    if (!path.startsWith(`${bucket}/`)) return jsonError('Forbidden', 403);
 
-    // Sign the file
-    const { data, error: err } = await supabase.storage
-      .from(bucket)
-      .createSignedUrl(path, expiresIn);
-    if (err) return jsonError(err.message, 500);
-    if (!data) return jsonError('No data returned', 404);
+    // Create signed URL using server function
+    const data = await storageServer.createSignedUrl(orgId, path, expiresIn);
 
     return NextResponse.json({ signedUrl: data.signedUrl });
   } catch (error) {

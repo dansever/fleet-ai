@@ -1,4 +1,6 @@
-import { authHeaders, withCtx } from '@/lib/ai/llamaCloud';
+import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { jsonError } from '@/lib/core/errors';
+import { server as extractServer } from '@/modules/documents/extract';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -8,28 +10,15 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function POST(req: NextRequest) {
   try {
+    // Authorize user
+    const { dbUser, orgId, error: authError } = await getAuthContext();
+    if (authError || !dbUser || !orgId) return jsonError('Unauthorized', 401);
+
     const body = await req.json();
     const { file_id, extraction_agent_id } = body;
 
-    if (!file_id || !extraction_agent_id) {
-      return NextResponse.json(
-        { error: 'Both file_id and extraction_agent_id are required in request body' },
-        { status: 400 },
-      );
-    }
-
-    const res = await fetch(withCtx('/api/v1/extraction/jobs'), {
-      method: 'POST',
-      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file_id, extraction_agent_id }),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      return NextResponse.json({ error: errorText }, { status: res.status });
-    }
-
-    const job = await res.json();
+    // Start extraction job using server function
+    const job = await extractServer.startExtractionJob(file_id, extraction_agent_id);
     return NextResponse.json(job);
   } catch (error) {
     return NextResponse.json(

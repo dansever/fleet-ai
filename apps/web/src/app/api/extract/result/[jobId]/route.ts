@@ -1,6 +1,6 @@
-import { authHeaders, withCtx } from '@/lib/ai/llamaCloud';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
-import { server as extractorServer } from '@/modules/documents/extract';
+import { jsonError } from '@/lib/core/errors';
+import { server as extractServer } from '@/modules/documents/extract';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { jobId: string };
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: RouteParams })
   try {
     const { dbUser, orgId, error } = await getAuthContext();
     if (!dbUser || !orgId || error) {
-      return NextResponse.json({ error: error }, { status: 401 });
+      return jsonError('Unauthorized', 401);
     }
 
     const { jobId } = await params;
@@ -22,19 +22,11 @@ export async function GET(req: NextRequest, { params }: { params: RouteParams })
       return NextResponse.json({ error: 'jobId is required' }, { status: 400 });
     }
 
-    const res = await fetch(withCtx(`/api/v1/extraction/jobs/${jobId}/result`), {
-      headers: authHeaders(),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      return NextResponse.json({ error: errorText }, { status: res.status });
-    }
-
-    const json = await res.json();
+    // Get job result using server function
+    const json = await extractServer.getExtractionJobResult(jobId);
 
     // Record usage for billing/analytics
-    extractorServer.recordExtractionUsage(json, dbUser.id, orgId);
+    await extractServer.recordExtractionUsage(json, dbUser.id, orgId);
 
     return NextResponse.json(json);
   } catch (error) {

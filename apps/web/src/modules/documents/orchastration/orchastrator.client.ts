@@ -44,8 +44,7 @@ export async function processDocument(
     // Step 2: Parse document with LlamaParse (30%)
     // =====================================
     onProgress?.({ name: 'parse', description: 'Parsing document...', progress: 30 }, 30);
-    const parseResult = await parseClient.parseFile(file);
-    const parsedTextCombined = parseResult.map((part: any) => part.text).join('\n');
+    const parsedTextCombined = await parseClient.parseFile(file);
     console.log('✅ Parsed text: ', parsedTextCombined.slice(0, 80) + '...');
 
     // =====================================
