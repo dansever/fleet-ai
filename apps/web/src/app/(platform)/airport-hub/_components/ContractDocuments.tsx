@@ -2,7 +2,7 @@
 
 import { client as documentsClient } from '@/modules/documents/documents';
 import { client as processDocumentClient } from '@/modules/documents/orchastration/';
-import { api } from '@/services/api-client';
+import { client as parseClient } from '@/modules/documents/parse';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
@@ -40,25 +40,6 @@ export function ContractDocuments() {
     }
   };
 
-  const handleParseDocument = async (file: File) => {
-    try {
-      if (!selectedContract) {
-        toast.error('No contract selected');
-        return;
-      }
-      const res = await api.post('/api/parse', {
-        file,
-      });
-      toast.success('This document has been parsed');
-      console.log(res.data);
-      // Refresh documents to update the cache and UI
-      refreshDocuments();
-    } catch (error) {
-      toast.error('Failed to parse document');
-      console.error(error);
-    }
-  };
-
   const handleDownloadDocument = (storagePath: string | null) => {
     console.log('Downloading document:', storagePath);
   };
@@ -76,6 +57,16 @@ export function ContractDocuments() {
     };
   };
 
+  const handleParseDocument = async (file: File) => {
+    try {
+      await parseClient.parseFile(file);
+      toast.success('This document has been parsed');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to parse document');
+    }
+  };
+
   return (
     <MainCard
       headerGradient={
@@ -91,8 +82,7 @@ export function ContractDocuments() {
             disabled={loading.documents && loading.isRefreshing}
           />
           <FileUploadPopover
-            // onSend={handleUploadContractFile}
-            onSend={handleParseDocument}
+            onSend={handleUploadContractFile}
             trigger={
               <Button
                 intent="add"

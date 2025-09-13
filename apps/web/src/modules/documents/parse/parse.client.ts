@@ -1,16 +1,22 @@
-import { LlamaParserName } from '@/lib/llama/utils';
+// src/services/parse.ts
+
 import { api } from '@/services/api-client';
-import 'dotenv/config';
 
 /**
- * This function is used to parse a document using the LlamaCloud API
- * @param file - the file to parse
- * @returns the parsed document
+ * Upload and parse a file via the /api/parse endpoint
+ * @param file - The File object to send
+ * @returns parsed content from the API
  */
-export const parseDocument = async (file: File) => {
-  const res = await api.post('/api/llama/parse', {
-    file,
-    parserName: LlamaParserName,
+export async function parseFile(file: File) {
+  const fd = new FormData();
+  fd.append('file', file);
+
+  const res = await api.post('/api/parse', fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    transformRequest: (x) => x, // avoid JSON serialization
   });
+  const parsedCombinedText = res.data.map((part: any) => part.text).join('\n');
+  console.log('✅✅✅✅ Parsed combined text', parsedCombinedText);
+
   return res.data;
-};
+}

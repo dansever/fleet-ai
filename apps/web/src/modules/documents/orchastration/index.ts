@@ -1,2 +1,2 @@
-export * as client from './document-processor.client';
-export * as types from './document-processor.types';
+export * as client from './orchastrator.client';
+export * as types from './orchastrator.types';
