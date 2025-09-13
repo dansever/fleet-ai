@@ -4,7 +4,7 @@ import { server as extractServer } from '@/modules/documents/extract';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * This API is used to start an extraction job for a file using an extraction agent
+ * This API is used to start an extraction job for an uploaded file using an extraction agent
  * @param req request with file_id and extraction_agent_id in body
  * @returns the extraction job with job ID
  */
@@ -14,8 +14,9 @@ export async function POST(req: NextRequest) {
     const { dbUser, orgId, error: authError } = await getAuthContext();
     if (authError || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    const body = await req.json();
-    const { file_id, extraction_agent_id } = body;
+    const body = await req.formData();
+    const file_id = body.get('file_id') as string;
+    const extraction_agent_id = body.get('extraction_agent_id') as string;
 
     // Start extraction job using server function
     const job = await extractServer.startExtractionJob(file_id, extraction_agent_id);

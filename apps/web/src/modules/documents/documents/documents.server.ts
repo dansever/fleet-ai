@@ -34,7 +34,10 @@ export async function listDocumentsByContract(contractId: Contract['id']): Promi
  * Create a new document
  */
 export async function createDocument(document: NewDocument): Promise<Document> {
-  const newDocument = await db.insert(documentsTable).values(document).returning();
+  const newDocument = await db
+    .insert(documentsTable)
+    .values({ ...document, orgId: document.orgId })
+    .returning();
   return newDocument[0];
 }
 

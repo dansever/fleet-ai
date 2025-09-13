@@ -1,17 +1,60 @@
 'use server';
 import 'server-only';
 
-import { jsonError } from '@/lib/core/errors';
+import { DocumentParentType, DocumentParentTypeEnum } from '@/drizzle/enums';
 import { createClient } from '@/lib/supabase/server';
 import { getBucketName } from '@/lib/supabase/storage-helpers';
 import { server as orgServer } from '@/modules/core/organizations';
 import { utils as storageUtils } from '@/modules/storage';
+import crypto from 'crypto';
+import slugify from 'slugify';
 
 /**
- * Upload a file to storage
+ * Upload a file to storage - overloaded function
  */
-export async function uploadFile(file: File, bucket: string, path: string) {
+export async function uploadFile(
+  file: File,
+  parentType: DocumentParentType,
+  parentId: string,
+): Promise<{ id: string; path: string; fullPath: string }>;
+export async function uploadFile(file: File, bucket: string, path: string): Promise<any>;
+export async function uploadFile(
+  file: File,
+  bucketOrParentType: string | DocumentParentType,
+  pathOrParentId: string,
+): Promise<any> {
   const supabase = await createClient();
+
+  // Determine if this is the new signature (parentType, parentId) or old signature (bucket, path)
+  const isNewSignature = DocumentParentTypeEnum.enumValues.includes(
+    bucketOrParentType as DocumentParentType,
+  );
+
+  let bucket: string;
+  let path: string;
+
+  if (isNewSignature) {
+    // New signature: (file, parentType, parentId)
+    const parentType = bucketOrParentType as DocumentParentType;
+    const parentId = pathOrParentId;
+
+    // Get bucket name from current organization
+    bucket = await storageUtils.getBucketName();
+
+    // Generate path: parentType/filename-uuid.ext
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    const fileNameSlug = slugify(base, { lower: true });
+    const unique = crypto.randomUUID();
+    path = `${parentType}/${fileNameSlug}-${unique}.${ext}`;
+
+    console.log(`📁 Uploading to bucket: ${bucket}, path: ${path}`);
+  } else {
+    // Old signature: (file, bucket, path)
+    bucket = bucketOrParentType;
+    path = pathOrParentId;
+  }
+
   const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
     cacheControl: '3600',
     upsert: false,
@@ -20,8 +63,18 @@ export async function uploadFile(file: File, bucket: string, path: string) {
 
   if (error) {
     console.error('Supabase storage error:', error);
-    return jsonError(`Failed to upload file: ${error.message}`, 500);
+    throw new Error(`Failed to upload file: ${error.message}`);
   }
+
+  if (isNewSignature) {
+    // Return structured data for new signature
+    return {
+      id: data.id || crypto.randomUUID(),
+      path: data.path,
+      fullPath: data.fullPath,
+    };
+  }
+
   return data;
 }
 
