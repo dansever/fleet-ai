@@ -54,6 +54,5 @@ export async function getSignedUrl(path: string, expiresIn = 60) {
  */
 export async function deleteFile(path: string) {
   // TODO: implement server route that validates org prefix then calls storage.remove
-  const { data } = await api.post('/api/storage/delete', { path });
-  return data;
+  await api.delete('/api/storage/delete', { data: { path } });
 }

@@ -50,21 +50,24 @@ export const contractsTable = pgTable(
     updatedAt,
   },
   (t) => [
+    // If the organization is deleted, delete the contract
     foreignKey({
       columns: [t.orgId],
       foreignColumns: [organizationsTable.id],
       name: 'fk_contracts_org_id',
     }).onDelete('cascade'),
+    // If the airport is deleted, delete the contract
     foreignKey({
       columns: [t.airportId],
       foreignColumns: [airportsTable.id],
       name: 'fk_contracts_airport_id',
     }).onDelete('cascade'),
+    // If the vendor is deleted, set the vendorId to null
     foreignKey({
       columns: [t.vendorId],
       foreignColumns: [vendorsTable.id],
       name: 'fk_contracts_vendor_id',
-    }).onDelete('cascade'),
+    }).onDelete('set null'),
 
     index('contracts_org_id_idx').on(t.orgId),
     index('contracts_airport_id_idx').on(t.airportId),

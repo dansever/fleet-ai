@@ -32,6 +32,7 @@ export async function DELETE(request: Request) {
       console.error('Supabase storage delete error:', error);
       return jsonError(`Failed to delete file: ${error.message}`, 500);
     }
+    console.log('✅ Deleted file from storage', path);
 
     return NextResponse.json({
       data,
