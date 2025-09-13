@@ -1,8 +1,14 @@
-/* Example usage:
-1. formatCompactNumber(1000, "en-US", 0);      // "1K"
-2. formatCompactNumber(2500000, "en-US", 1);   // "2.5M"
-3. formatCompactNumber(2500000, "en-US", 2);   // "2.53M"
-*/
+/**
+ * Format the number to compact
+ * @param number - The number to format
+ * @param locale - The locale to format
+ * @param maximumFractionDigits - The maximum fraction digits
+ * @returns The formatted number
+ * @example
+ * formatCompactNumber(1000, "en-US", 0);      // "1K"
+ * formatCompactNumber(2500000, "en-US", 1);   // "2.5M"
+ * formatCompactNumber(2500000, "en-US", 2);   // "2.53M"
+ */
 export function formatCompactNumber(
   number: number,
   locale: string = 'en-US',
@@ -103,13 +109,18 @@ export function formatDate(
   return d.toLocaleDateString(locale, { ...options, timeZone });
 }
 
-/* Example usage:
-1. formatCurrency(1234, "USD") → "$1,234"
-2. formatCurrency(500) → "$500"  (defaults to USD)
-3. formatCurrency(9876.54, "EUR") → "€9,877"
-4. formatCurrency(9999, "ILS") → "₪9,999"
-5. formatCurrency(2500, "usd") → "$2,500" (case-insensitive)
-6. formatCurrency(null, "EUR") → null (safely returns null on invalid input)
+/**
+ * Format the amount to currency
+ * @param amount - The amount to format
+ * @param currency - The currency to format
+ * @returns The formatted amount
+ * @example
+ * formatCurrency(1234, "USD") → "$1,234"
+ * formatCurrency(500) → "$500"  (defaults to USD)
+ * formatCurrency(9876.54, "EUR") → "€9,877"
+ * formatCurrency(9999, "ILS") → "₪9,999"
+ * formatCurrency(2500, "usd") → "$2,500" (case-insensitive)
+ * formatCurrency(null, "EUR") → null (safely returns null on invalid input)
  */
 export function formatCurrency(
   amount?: number | string | null,
@@ -129,12 +140,37 @@ export function formatCurrency(
   }).format(parsedAmount);
 }
 
-/* Example usage:
-1. formatSnakeCaseToTitle("hello_world") → "Hello World"
-*/
+/**
+ * Format the snake case to title
+ * @param text - The text to format
+ * @returns The formatted text
+ * @example
+ * formatSnakeCaseToTitle("hello_world") → "Hello World"
+ */
 export function formatSnakeCaseToTitle(text: string): string {
   return text
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+/**
+ * Format the size in bytes to KB, MB, GB
+ * @param size - The size in bytes
+ * @returns The size in KB, MB, GB
+ * @example
+ * formatFileSize(1024) → "1 KB"
+ * formatFileSize(1024 * 1024) → "1 MB"
+ * formatFileSize(1024 * 1024 * 1024) → "1 GB"
+ */
+export function formatFileSize(size: number): string {
+  if (size < 1024) {
+    return `${size} B`;
+  } else if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(2)} KB`;
+  } else if (size < 1024 * 1024 * 1024) {
+    return `${(size / 1024 / 1024).toFixed(2)} MB`;
+  } else {
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`;
+  }
 }

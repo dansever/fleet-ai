@@ -145,29 +145,38 @@ export function ContractOverview() {
                     Contract Terms
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col gap-4">
-                    {selectedContract.terms?.map((term: ContractTerm, idx: number) => (
-                      <div
-                        key={idx}
-                        className="border-1 rounded-2xl p-3 bg-muted/40 flex flex-col gap-1"
-                      >
-                        <div className="flex flex-row items-center gap-1">
-                          <div className="font-bold flex-1">{term.key}</div>
-                          <Copy
-                            className="w-4 h-4 stroke-gray-400 hover:stroke-gray-600 hover:scale-105 transition-all cursor-pointer"
-                            onClick={() => copyMessage(term.value?.value)}
-                          />
-                        </div>
-                        <div className="text-sm">{term.value?.value}</div>
-                        {term.section && (
-                          <div className="text-xs italic">Section: {term.section}</div>
-                        )}
-                        {term.source?.snippet && (
-                          <div className="text-xs text-muted-foreground border-l-2 pl-2 border-primary/40 mt-1">
-                            "{term.source.snippet}"
+                    {Array.isArray(selectedContract.terms) && selectedContract.terms.length > 0 ? (
+                      selectedContract.terms.map((term: ContractTerm, idx: number) => (
+                        <div
+                          key={idx}
+                          className="border-1 rounded-2xl p-3 bg-muted/40 flex flex-col gap-1"
+                        >
+                          <div className="flex flex-row items-center gap-1">
+                            <div className="font-bold flex-1">{term.key}</div>
+                            <Copy
+                              className="w-4 h-4 stroke-gray-400 hover:stroke-gray-600 hover:scale-105 transition-all cursor-pointer"
+                              onClick={() => copyMessage(term.value?.value)}
+                            />
                           </div>
-                        )}
+                          <div className="text-sm">{term.value?.value}</div>
+                          {term.section && (
+                            <div className="text-xs italic">Section: {term.section}</div>
+                          )}
+                          {term.source?.snippet && (
+                            <div className="text-xs text-muted-foreground border-l-2 pl-2 border-primary/40 mt-1">
+                              "{term.source.snippet}"
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="text-sm">No contract terms available yet.</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Terms will appear here after document processing.
+                        </p>
                       </div>
-                    ))}
+                    )}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

@@ -49,10 +49,8 @@ export type AirportHubContextType = {
   removeContract: (contractId: Contract['id']) => void;
 
   // Documents
-  documents: Document[];
-  setDocuments: (documents: Document[]) => void;
-  selectedDocument: Document | null;
-  setSelectedDocument: (document: Document | null) => void;
+  document: Document | null;
+  setDocument: (document: Document | null) => void;
   refreshDocuments: () => Promise<void>;
   updateDocument: (updatedDocument: Document) => void;
   addDocument: (newDocument: Document) => void;
@@ -101,9 +99,8 @@ export default function AirportHubProvider({
   const [contractsCache, setContractsCache] = useState<Record<string, Contract[]>>({});
 
   // Documents
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [documentsCache, setDocumentsCache] = useState<Record<string, Document[]>>({});
+  const [document, setDocument] = useState<Document | null>(null);
+  const [documentsCache, setDocumentsCache] = useState<Record<string, Document | null>>({});
 
   // Vendor Contacts
   const [vendorContacts, setVendorContacts] = useState<VendorContact[]>([]);
@@ -374,25 +371,22 @@ export default function AirportHubProvider({
   }, [selectedAirport]); // Remove contactsCache dependency to avoid unnecessary re-runs
 
   /**
-   * Load documents for the selected contract (only when contract changes)
+   * Load document for the selected contract (only when contract changes)
    */
   useEffect(() => {
     if (!selectedContract) {
-      setDocuments([]);
-      setSelectedDocument(null);
+      setDocument(null);
       return;
     }
 
-    // Immediately clear documents when switching contracts to prevent stale data
-    setDocuments([]);
-    setSelectedDocument(null);
+    // Immediately clear document when switching contracts to prevent stale data
+    setDocument(null);
 
-    const loadDocuments = async () => {
+    const loadDocument = async () => {
       // Check cache first
-      if (documentsCache[selectedContract.id]) {
-        const cachedDocuments = documentsCache[selectedContract.id];
-        setDocuments(cachedDocuments);
-        setSelectedDocument(cachedDocuments.length > 0 ? cachedDocuments[0] : null);
+      if (documentsCache[selectedContract.id] !== undefined) {
+        const cachedDocument = documentsCache[selectedContract.id];
+        setDocument(cachedDocument);
         return;
       }
 
@@ -401,37 +395,34 @@ export default function AirportHubProvider({
 
       try {
         const documents = await documentClient.listDocumentsByContract(selectedContract.id);
-        setDocuments(documents);
+        const contractDocument = documents.length > 0 ? documents[0] : null;
+        setDocument(contractDocument);
 
-        // Cache the documents for this contract
+        // Cache the document for this contract
         setDocumentsCache((prev) => {
           const updated = {
             ...prev,
-            [selectedContract.id]: documents,
+            [selectedContract.id]: contractDocument,
           };
           return cleanupCache(updated, selectedContract.id);
         });
-
-        // Always set first document as selected when loading documents for a new contract
-        setSelectedDocument(documents.length > 0 ? documents[0] : null);
       } catch (error) {
-        console.error('Error loading documents:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load documents';
+        console.error('Error loading document:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load document';
         setErrors((prev) => ({
           ...prev,
           documents: errorMessage,
         }));
-        setDocuments([]);
-        setSelectedDocument(null);
+        setDocument(null);
 
         // Show user-friendly toast notification
-        toast.error(`Failed to load documents: ${errorMessage}`);
+        toast.error(`Failed to load document: ${errorMessage}`);
       } finally {
         setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
       }
     };
 
-    loadDocuments();
+    loadDocument();
   }, [selectedContract]); // Remove documentsCache dependency to avoid unnecessary re-runs
 
   /**
@@ -811,7 +802,7 @@ export default function AirportHubProvider({
   );
 
   /**
-   * Refresh documents for the currently selected contract (clears cache)
+   * Refresh document for the currently selected contract (clears cache)
    */
   const refreshDocuments = useCallback(async () => {
     if (!selectedContract) return;
@@ -828,81 +819,63 @@ export default function AirportHubProvider({
 
     try {
       const documents = await documentClient.listDocumentsByContract(selectedContract.id);
-      setDocuments(documents);
+      const contractDocument = documents.length > 0 ? documents[0] : null;
+      setDocument(contractDocument);
 
       // Update cache with fresh data
       setDocumentsCache((prev) => {
         const updated = {
           ...prev,
-          [selectedContract.id]: documents,
+          [selectedContract.id]: contractDocument,
         };
         return cleanupCache(updated, selectedContract.id);
       });
-
-      // Preserve the currently selected document if it still exists, otherwise select first
-      if (selectedDocument) {
-        const updatedSelectedDocument = documents.find((d) => d.id === selectedDocument.id);
-        setSelectedDocument(
-          updatedSelectedDocument || (documents.length > 0 ? documents[0] : null),
-        );
-      } else if (documents.length > 0) {
-        setSelectedDocument(documents[0]);
-      }
     } catch (error) {
-      console.error('Error refreshing documents:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh documents';
+      console.error('Error refreshing document:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh document';
       setErrors((prev) => ({
         ...prev,
         documents: errorMessage,
       }));
-      toast.error(`Failed to refresh documents: ${errorMessage}`);
+      toast.error(`Failed to refresh document: ${errorMessage}`);
     } finally {
       setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
     }
-  }, [selectedContract, selectedDocument]);
+  }, [selectedContract]);
 
   /**
    * Update document
    */
   const updateDocument = useCallback(
     (updatedDocument: Document) => {
-      setDocuments((prevDocuments) =>
-        prevDocuments.map((document) =>
-          document.id === updatedDocument.id ? updatedDocument : document,
-        ),
-      );
+      if (document?.id === updatedDocument.id) {
+        setDocument(updatedDocument);
 
-      if (selectedDocument?.id === updatedDocument.id) {
-        setSelectedDocument(updatedDocument);
-      }
-
-      // Update cache as well
-      if (selectedContract) {
-        setDocumentsCache((prev) => ({
-          ...prev,
-          [selectedContract.id]:
-            prev[selectedContract.id]?.map((document) =>
-              document.id === updatedDocument.id ? updatedDocument : document,
-            ) || [],
-        }));
+        // Update cache as well
+        if (selectedContract) {
+          setDocumentsCache((prev) => ({
+            ...prev,
+            [selectedContract.id]: updatedDocument,
+          }));
+        }
       }
     },
-    [selectedDocument, selectedContract],
+    [document, selectedContract],
   );
 
   /**
-   * Add document
+   * Add document (replaces existing document if any)
    */
   const addDocument = useCallback(
     (newDocument: Document) => {
-      setDocuments((prevDocuments) => [newDocument, ...prevDocuments]);
+      setDocument(newDocument);
 
       // Update cache as well
       if (selectedContract && selectedContract.id === newDocument.parentId) {
         setDocumentsCache((prev) => {
           const updated = {
             ...prev,
-            [selectedContract.id]: [newDocument, ...(prev[selectedContract.id] || [])],
+            [selectedContract.id]: newDocument,
           };
           return cleanupCache(updated, selectedContract.id);
         });
@@ -916,27 +889,19 @@ export default function AirportHubProvider({
    */
   const removeDocument = useCallback(
     (documentId: string) => {
-      setDocuments((prevDocuments) => {
-        const filteredDocuments = prevDocuments.filter((document) => document.id !== documentId);
+      if (document?.id === documentId) {
+        setDocument(null);
 
-        // If we're removing the currently selected document, select the first available one
-        if (selectedDocument?.id === documentId) {
-          setSelectedDocument(filteredDocuments.length > 0 ? filteredDocuments[0] : null);
+        // Update cache as well
+        if (selectedContract) {
+          setDocumentsCache((prev) => ({
+            ...prev,
+            [selectedContract.id]: null,
+          }));
         }
-
-        return filteredDocuments;
-      });
-
-      // Update cache as well
-      if (selectedContract) {
-        setDocumentsCache((prev) => ({
-          ...prev,
-          [selectedContract.id]:
-            prev[selectedContract.id]?.filter((document) => document.id !== documentId) || [],
-        }));
       }
     },
-    [selectedDocument, selectedContract],
+    [document, selectedContract],
   );
 
   /**
@@ -973,7 +938,7 @@ export default function AirportHubProvider({
           ...prev,
           contracts: !contractsCache[airport.id], // Only set loading if not cached
           vendorContacts: !vendorContactsCache[airport.id], // Only set loading if not cached
-          documents: false, // Documents will be loaded when contract is selected
+          documents: false, // Document will be loaded when contract is selected
           isRefreshing: false,
         }));
       }
@@ -1002,10 +967,8 @@ export default function AirportHubProvider({
     updateContract,
     addContract,
     removeContract,
-    documents,
-    setDocuments,
-    selectedDocument,
-    setSelectedDocument,
+    document,
+    setDocument,
     refreshDocuments,
     updateDocument,
     addDocument,
