@@ -7,7 +7,15 @@ export function authHeaders() {
   };
 }
 
-// Add ?project_id & ?organization_id to every call
+/**
+ * Add ?project_id & ?organization_id to every call
+ * @param path - the path to the llama cloud api
+ * @returns the path with ?project_id & ?organization_id
+ * @example
+ * const path = withCtx('/api/v1/extraction/jobs');
+ * console.log(path);
+ * // https://api.cloud.llamaindex.ai/api/v1/extraction/jobs?project_id=123&organization_id=456
+ */
 export function withCtx(path: string) {
   const p = new URL(path, LLAMA_BASE);
   p.searchParams.set('project_id', process.env.LLAMA_EXTRACT_PROJECT_ID!);

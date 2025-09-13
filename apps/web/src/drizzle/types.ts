@@ -1,8 +1,7 @@
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { contractsTable } from './schema/schema.contracts';
 import { airportsTable, organizationsTable, usersTable } from './schema/schema.core';
-import { documentsTable } from './schema/schema.documents';
-import { embeddingsTable } from './schema/schema.embeddings';
+import { chunksTable, documentsTable } from './schema/schema.documents';
 import { fuelBidsTable, fuelTendersTable } from './schema/schema.fuel';
 import { invoicesTable } from './schema/schema.invoices';
 import { quotesTable, rfqsTable } from './schema/schema.technical';
@@ -68,7 +67,7 @@ export type Document = InferSelectModel<typeof documentsTable>;
 export type NewDocument = InferInsertModel<typeof documentsTable>;
 export type UpdateDocument = Partial<NewDocument>;
 
-// ==================== DOCUMENTS CHUNKS ====================
-export type Embedding = InferSelectModel<typeof embeddingsTable>;
-export type NewEmbedding = InferInsertModel<typeof embeddingsTable>;
-export type UpdateEmbedding = Partial<NewEmbedding>;
+// ==================== CHUNKS ====================
+export type Chunk = InferSelectModel<typeof chunksTable>;
+export type NewChunk = InferInsertModel<typeof chunksTable>;
+export type UpdateChunk = Partial<NewChunk>;

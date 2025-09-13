@@ -1,51 +1,51 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+// src/app/api/storage/upload/route.ts
+
+import { getActiveClerkOrg, getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { createClient } from '@/lib/supabase/client';
-import { server as orgServer } from '@/modules/core/organizations';
 import { NextRequest, NextResponse } from 'next/server';
 import slugify from 'slugify';
+
 const supabase = createClient();
+export const runtime = 'nodejs'; // Needed to avoid edge body limits
 
 /**
  * POST /api/storage/upload - Upload a file to the storage
- * @param request
+ * @param request - The request object.
+ * Query parameters:
+ * - documentType - The document type to upload the file to
+ * @returns The uploaded file data
  */
 export async function POST(request: NextRequest) {
   try {
+    // Authorize user
     const { dbUser, orgId, error: authError } = await getAuthContext();
     if (authError || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-    // get the organization for the bucket
-    const org = await orgServer.getOrgById(orgId);
-    if (!org || !org.name) return jsonError('Organization not found', 404);
-    const bucket = slugify(org.name, { lower: true });
+    const clerkOrg = await getActiveClerkOrg();
+    if (!clerkOrg || !clerkOrg.slug) return jsonError('Clerk organization not found', 404);
+    const bucket = clerkOrg.slug;
 
-    // get the file from the request
+    // Get the file from the request
     const formData = await request.formData();
     const file = formData.get('file') as File;
     if (!file) return jsonError('No file uploaded', 400);
 
-    // get the document type from the request
-    const documentType = formData.get('documentType') as string;
+    // Get the document type from the request
+    const documentType = String(formData.get('documentType') || '');
     if (!documentType) return jsonError('No document type uploaded', 400);
 
-    // get the file extension and name: "fileName.pdf" -> "pdf"
-    const ext = (() => {
-      const e = file.name.split('.').pop();
-      return e ? e.toLowerCase() : 'bin';
-    })();
+    // Create filename slug:
+    // @Example: fileName.pdf -> fileName
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    const fileNameSlug = slugify(base, { lower: true });
 
-    // get the file name without extension for slug: "fileName.pdf" -> "fileName"
-    const fileNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-    const fileNameSlug = slugify(fileNameWithoutExt, { lower: true });
-
-    // add a UUID to avoid collisions
+    // Final path: contracts/fileName-unique.pdf
     const unique = crypto.randomUUID();
+    const path = `${documentType}/${fileNameSlug}-${unique}.${ext}`;
 
-    // "contracts/fileName-1234.pdf"
-    const path = `${documentType}/${fileNameSlug}-${unique.slice(0, 4)}.${ext}`;
-
-    // upload the file to the storage
+    // Upload the file to the storage
     const { data, error: supabaseError } = await supabase.storage.from(bucket).upload(path, file, {
       cacheControl: '3600',
       upsert: false,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       console.error('Supabase storage error:', supabaseError);
       return jsonError(`Failed to upload file: ${supabaseError.message}`, 500);
     }
-    // return the uploaded file data
+
     return NextResponse.json(data);
   } catch (error) {
     console.error('Failed to upload file', error);

@@ -1,4 +1,4 @@
 // AI Module exports
+export * as extract from '../documents/extract';
 export * as chat from './chat';
-export * as extract from './extract';
 export * from './types';

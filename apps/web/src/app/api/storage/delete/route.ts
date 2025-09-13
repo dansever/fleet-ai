@@ -1,11 +1,10 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getActiveClerkOrg, getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { createClient } from '@/lib/supabase/client';
-import { server as orgServer } from '@/modules/core/organizations';
 import { NextResponse } from 'next/server';
-import slugify from 'slugify';
 
 const supabase = createClient();
+export const runtime = 'nodejs'; // Needed to avoid edge body limits
 
 /**
  * DELETE /api/storage/delete
@@ -19,9 +18,9 @@ export async function DELETE(request: Request) {
     if (authError || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // get the organization for the bucket
-    const org = await orgServer.getOrgById(orgId);
-    if (!org || !org.name) return jsonError('Organization not found', 404);
-    const bucket = slugify(org.name, { lower: true });
+    const clerkOrg = await getActiveClerkOrg();
+    if (!clerkOrg || !clerkOrg.slug) return jsonError('Clerk organization not found', 404);
+    const bucket = clerkOrg.slug;
 
     // get the path from the request
     const { path } = await request.json();

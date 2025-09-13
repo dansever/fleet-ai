@@ -3,7 +3,7 @@
 import 'server-only';
 
 import { server as userServer } from '@/modules/core/users';
-import { currentUser } from '@clerk/nextjs/server';
+import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
 export async function getAuthContext() {
   const clerkUser = await currentUser();
@@ -24,14 +24,14 @@ export async function getAuthContext() {
   return { dbUser, orgId, error: null };
 }
 
-/**
- * Convenience wrapper if you only need the orgId.
- * Throws if auth fails.
- */
-export async function getOrgId(): Promise<string> {
-  const { orgId, error } = await getAuthContext();
-  if (error || !orgId) {
-    throw new Error(error ?? 'Unauthorized');
-  }
-  return orgId;
+export async function getActiveClerkOrg() {
+  const user = await currentUser();
+
+  // Get the organization membership list for the user
+  const reponse = await (
+    await clerkClient()
+  ).users.getOrganizationMembershipList({
+    userId: user?.id ?? '',
+  });
+  return reponse.data[0]?.organization;
 }

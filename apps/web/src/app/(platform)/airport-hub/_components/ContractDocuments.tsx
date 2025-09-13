@@ -1,7 +1,8 @@
 'use client';
 
-import { client as documentsClient } from '@/modules/documents';
-import { client as storageClient } from '@/modules/storage';
+import { client as documentsClient } from '@/modules/documents/documents';
+import { client as processDocumentClient } from '@/modules/documents/orchastration/';
+import { api } from '@/services/api-client';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
@@ -26,30 +27,11 @@ export function ContractDocuments() {
       return;
     }
     try {
-      // Upload file to storage
-      const result = await storageClient.uploadFile(file, 'contracts');
-      console.log('✅File uploaded to storage');
-
-      // Create document in the database
-      await documentsClient.createDocument({
+      await processDocumentClient.processDocument(file, {
         parentId: selectedContract.id,
         parentType: 'contract',
-        storageId: result.id,
-        storagePath: result.path,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
       });
-      console.log('✅ Document created in DB');
       toast.success('This document has been uploaded');
-
-      // Retrieve file blob from storage
-      const orgSlug = clerkOrg.organization?.slug ?? '';
-      // const blob = await storageClient.retrieveFileBlob(orgSlug, result.path);
-
-      const files = await storageClient.listFilesByBucket(orgSlug, 'contracts');
-      console.log('FILES', files);
-
       // Refresh documents to update the cache and UI
       refreshDocuments();
     } catch (error) {
@@ -58,46 +40,31 @@ export function ContractDocuments() {
     }
   };
 
-  const handleDownloadDocument = (storagePath: string | null) => {
-    if (!storagePath) {
-      toast.error('No storage path found');
-      return;
-    }
-    return async () => {
-      try {
-        setDownloadFileLoading(true);
-        const orgSlug = clerkOrg.organization?.slug ?? '';
-        const blob = await storageClient.retrieveFileBlob(orgSlug, storagePath);
-        storageClient.downloadFile(blob, storagePath);
-        toast.success('This document has been downloaded');
-      } catch (error) {
-        toast.error('Failed to download document');
-        console.error(error);
-      } finally {
-        setDownloadFileLoading(false);
+  const handleParseDocument = async (file: File) => {
+    try {
+      if (!selectedContract) {
+        toast.error('No contract selected');
+        return;
       }
-    };
+      const res = await api.post('/api/parse', {
+        file,
+      });
+      toast.success('This document has been parsed');
+      console.log(res.data);
+      // Refresh documents to update the cache and UI
+      refreshDocuments();
+    } catch (error) {
+      toast.error('Failed to parse document');
+      console.error(error);
+    }
+  };
+
+  const handleDownloadDocument = (storagePath: string | null) => {
+    console.log('Downloading document:', storagePath);
   };
 
   const handleViewDocument = (storagePath: string) => {
-    if (!storagePath) {
-      toast.error('No storage path found');
-      return;
-    }
-    return async () => {
-      try {
-        setViewDocumentLoading(true);
-        const orgSlug = clerkOrg.organization?.slug ?? '';
-        const blob = await storageClient.retrieveFileBlob(orgSlug, storagePath);
-        storageClient.downloadFile(blob, storagePath);
-        toast.success('This document has been downloaded');
-      } catch (error) {
-        toast.error('Failed to view document');
-        console.error(error);
-      } finally {
-        setViewDocumentLoading(false);
-      }
-    };
+    console.log('Viewing document:', storagePath);
   };
 
   const handleDeleteDocument = (id: string, storagePath: string) => {
@@ -124,7 +91,8 @@ export function ContractDocuments() {
             disabled={loading.documents && loading.isRefreshing}
           />
           <FileUploadPopover
-            onSend={handleUploadContractFile}
+            // onSend={handleUploadContractFile}
+            onSend={handleParseDocument}
             trigger={
               <Button
                 intent="add"
@@ -150,7 +118,7 @@ export function ContractDocuments() {
             return (
               <BaseCard
                 key={document.id}
-                className="px-4 py-2 flex flex-col gap-1 border-1 border-primary/20 bg-gradient-to-br from-orange-50 to-orange-100"
+                className="px-4 py-2 flex flex-col gap-1 bg-gradient-to-br from-slate-100 to-slate-200"
               >
                 <div>
                   <div className="text-sm font-semibold">{document.fileName ?? ''}</div>
@@ -161,7 +129,7 @@ export function ContractDocuments() {
                     intent="ghost"
                     icon={Download}
                     className="hover:bg-white"
-                    onClick={handleDownloadDocument(document.storagePath)}
+                    onClick={() => handleDownloadDocument(document.storagePath)}
                     disabled={downloadFileLoading}
                   />
                   <Button

@@ -3,11 +3,12 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { ChatOpenAI } from '@langchain/openai';
+import { active_openai_model } from './utils';
 
 // Initialize the LangChain OpenAI model with optimal settings
 export const createLangChainModel = () => {
   return new ChatOpenAI({
-    model: 'gpt-4o', // Use the GPT-4o model
+    model: active_openai_model, // Use the GPT-4o model
     temperature: 0.7, // Adjust temperature for desired creativity
     maxTokens: 500, // Increased for more detailed responses
     streaming: true, // Enable streaming mode

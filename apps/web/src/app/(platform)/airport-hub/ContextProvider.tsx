@@ -3,7 +3,7 @@
 import { Airport, Contract, Document, User, VendorContact } from '@/drizzle/types';
 import { client as contractClient } from '@/modules/contracts';
 import { client as airportClient } from '@/modules/core/airports';
-import { client as documentClient } from '@/modules/documents';
+import { client as documentClient } from '@/modules/documents/documents';
 import { client as vendorContactClient } from '@/modules/vendors/vendor-contacts';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
