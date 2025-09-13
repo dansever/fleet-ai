@@ -15,7 +15,7 @@ export namespace DocumentProcessorTypes {
   }
 
   export interface ProcessingStep {
-    name: 'upload' | 'parse' | 'extract' | 'save' | 'chunk' | 'embed' | 'complete';
+    name: 'upload' | 'parse' | 'extract' | 'update' | 'save' | 'chunk' | 'embed' | 'complete';
     description: string;
     progress: number;
   }

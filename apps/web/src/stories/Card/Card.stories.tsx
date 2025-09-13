@@ -1,15 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { ArrowDown, Globe, Mail, MapPin, Phone, Star, TrendingUp, Users, Zap } from 'lucide-react';
-import {
-  BadgeGroup,
-  FeatureCard,
-  GradientPalette,
-  ListItemCard,
-  MainCard,
-  MetricCard,
-  ProfileCard,
-  ProjectCard,
-} from './Card';
+import { ArrowDown, Mail, MapPin, Phone, Star, TrendingUp, Zap } from 'lucide-react';
+import { BadgeGroup, ListItemCard, MainCard, MetricCard, ProfileCard, ProjectCard } from './Card';
 
 const meta: Meta = {
   title: 'Components/Cards',
@@ -48,54 +39,6 @@ export const AllCardVariants: StoryObj = {
         <p className="text-muted-foreground mb-6">
           Showcase features with gradient backgrounds and icons
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FeatureCard
-            title="AI Processing"
-            subtitle="Advanced machine learning capabilities for intelligent fleet management"
-            icon={<Zap className="w-5 h-5" />}
-            palette={GradientPalette.VioletPinkRose}
-          >
-            Cutting-edge models power smart decisions across your fleet.
-          </FeatureCard>
-          <FeatureCard
-            title="Real-time Analytics"
-            subtitle="Live dashboards and comprehensive reporting tools"
-            icon={<TrendingUp className="w-5 h-5" />}
-            palette={GradientPalette.SkyIndigoViolet}
-          >
-            Monitor KPIs as they change, with minimal lag.
-          </FeatureCard>
-          <FeatureCard
-            title="Team Collaboration"
-            subtitle="Seamless communication and project coordination"
-            icon={<Users className="w-5 h-5" />}
-            palette={GradientPalette.CyanBluePurple}
-          >
-            Chat, tasks, and notifications bring teams together.
-          </FeatureCard>
-          <FeatureCard
-            title="Global Reach"
-            subtitle="Worldwide fleet management and optimization"
-            icon={<Globe className="w-5 h-5" />}
-            palette={GradientPalette.PinkPurpleBlue}
-          >
-            Built for global operations and multi-region deployments.
-          </FeatureCard>
-          <FeatureCard
-            title="Premium Features"
-            subtitle="Advanced tools for enterprise customers"
-            icon={<Star className="w-5 h-5" />}
-            palette={GradientPalette.RoseFuchsiaIndigo}
-            actions={
-              <div className="flex items-center gap-2 text-sm">
-                <Star className="w-4 h-4 fill-current" />
-                <span>Most Popular</span>
-              </div>
-            }
-          >
-            Unlock priority support and enterprise integrations.
-          </FeatureCard>
-        </div>
       </section>
 
       {/* Project Card Section */}

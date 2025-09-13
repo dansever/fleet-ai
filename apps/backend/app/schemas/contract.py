@@ -1,96 +1,116 @@
 # backend/app/schemas/contract.py
-from typing import Dict
-from pydantic import BaseModel, Field
-from app.schemas.enums import ContractTypes
-from app.schemas.vendor import Vendor
+from __future__ import annotations
+from typing import List, Literal, Optional, Union
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import date
 
-class Contract(BaseModel):
-    """Structured contract information extracted from procurement documents."""
+from app.schemas.enums import ContractTypes
+from app.schemas.vendor import Vendor
 
-    vendor: Vendor = Field(
-        ...,
-        description="Supplier information (name, address, and contacts if available)."
-    )
+# Base that forbids extra keys -> JSON Schema uses additionalProperties: false
+class StrictBase(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-    vendor_comments: str | None = Field(
-        None,
-        description="Any free-text remarks from the vendor. Verbatim if present, otherwise null."
-    )
+# ---------- Small key/value helpers instead of dicts ----------
 
-    title: str | None = Field(
-        None,
-        description="Official contract title. If absent, synthesize a clear identifier (e.g., 'Fuel Supply Agreement - TLV - 2025')."
-    )
+class TagItem(StrictBase):
+    key: str
+    value: str
 
-    contract_type: ContractTypes | None = Field(
-        None,
-        description="Most specific contract type from the enum."
-    )
+class VariableKV(StrictBase):
+    name: str
+    value: float
 
-    effective_from: date | None = Field(
-        None,
-        description="Start date of contract (prefer effective over signature date)."
-    )
+# ---------- Typed values (kept simple) ----------
 
-    effective_to: date | None = Field(
-        None,
-        description="End or renewal boundary. Leave null if evergreen/auto-renewing."
-    )
+class MoneyValue(StrictBase):
+    type: Literal["money"] = "money"
+    amount: float
+    currency: str  # ISO code
 
-    summary: str | None = Field(
-        None,
-        description="2-3 sentence executive synopsis covering parties, purpose, scope, term, renewal, value if given, pricing model, payment terms, and major SLAs/liabilities."
-    )
+class PercentageValue(StrictBase):
+    type: Literal["percentage"] = "percentage"
+    value: float   # 0..100
 
-    commercial_terms: str | None = Field(
-        None,
-        description="Key commercial and pricing terms in 1–2 sentences: pricing model, rates/formulas, unit, minimums, surcharges, discounts, payment terms, invoicing, caps."
-    )
+class NumberValue(StrictBase):
+    type: Literal["number"] = "number"
+    value: float
 
-    slas: str | None = Field(
-        None,
-        description="1-3 sentence summary of major SLAs: uptime/availability, dispatch times, throughput, penalties/credits, and quality standards."
-    )
+class BooleanValue(StrictBase):
+    type: Literal["boolean"] = "boolean"
+    value: bool
 
-    edge_cases: str | None = Field(
-        None,
-        description="1-3 sentences on unusual conditions affecting scope, pricing, or service (e.g., outages, surcharges, restrictions, exceptions)."
-    )
+class TextValue(StrictBase):
+    type: Literal["text"] = "text"
+    value: str
 
-    risk_liability: str | None = Field(
-        None,
-        description="1-3 sentences on liability and risk allocation: caps, insurance, indemnities, warranties, IP, confidentiality, compliance standards."
-    )
+class DurationValue(StrictBase):
+    type: Literal["duration"] = "duration"
+    days: int
 
-    termination_law: str | None = Field(
-        None,
-        description="1-3 sentences on termination and legal terms: notice/cure, auto-renewal, governing law, jurisdiction, and dispute resolution."
-    )
+class DateValue(StrictBase):
+    type: Literal["date"] = "date"
+    value: date
 
-    operational_baselines: str | None = Field(
-        None,
-        description="1-3 sentences on operational setup: locations, coverage, schedules, reporting, onboarding, acceptance, and incident protocols."
-    )
+class DateRangeValue(StrictBase):
+    type: Literal["date_range"] = "date_range"
+    start: Optional[date]
+    end: Optional[date]
 
-    tags: dict | None = Field(
-        None,
-        description="Machine-readable key:value pairs for analytics (e.g., currency, pricing_model, unit, unit_rate, min_commit, payment_terms_days, governing_law, auto_renew). Use snake_case and normalized values."
-    )
+class RateValue(StrictBase):
+    type: Literal["rate"] = "rate"
+    amount: float
+    currency: Optional[str] = None
+    numerator_unit: Optional[str] = None
+    denominator_unit: Optional[str] = None
+    formula: Optional[str] = None  # human readable
 
+class FormulaValue(StrictBase):
+    type: Literal["formula"] = "formula"
+    expression: str
+    # was Dict[str, float] -> now explicit list of pairs
+    variables: List[VariableKV] = Field(default_factory=list)
 
-class ContractDocument(BaseModel):
-    """Contract document information extracted from procurement documents"""
-    title: str | None = Field(None, description="The title of the document.")
-    version: int | None = Field(None, description="The version of the document.")
-    source_type: str | None = Field(None, description="The source type of the document.")
-    storage_url: str | None = Field(None, description="The storage URL of the document.")
-    raw_text: str | None = Field(None, description="The raw text of the document.")
+AttributeValue = Union[
+    MoneyValue,
+    PercentageValue,
+    NumberValue,
+    BooleanValue,
+    TextValue,
+    DurationValue,
+    DateValue,
+    DateRangeValue,
+    RateValue,
+    FormulaValue,
+]
 
-class ContractChunk(BaseModel):
-    """Contract chunk information extracted from procurement documents"""
-    order: int | None = Field(None, description="The order of the chunk within the document.")
-    label: str | None = Field(None, description="The label of the chunk.")
-    content: str | None = Field(None, description="The content of the chunk.")
-    embedding: list[float] | None = Field(None, description="The embedding of the chunk.")
-    meta: dict | None = Field(None, description="Metadata about the chunk - page, span, tokens.")
+class SourceRef(StrictBase):
+    page: Optional[int] = None
+    span: Optional[List[int]] = None  # [start_char, end_char]
+    snippet: Optional[str] = None
+
+class Term(StrictBase):
+    key: str
+    value: AttributeValue
+    section: Optional[str] = None
+    source: Optional[SourceRef] = None
+
+# ---------- Contract aggregate ----------
+
+class Contract(StrictBase):
+    vendor: Vendor
+    buyer_name: Optional[str] = None
+
+    title: Optional[str] = None
+    contract_type: Optional[ContractTypes] = None
+
+    effective_from: Optional[date] = None
+    effective_to: Optional[date] = None
+
+    summary: Optional[str] = None
+
+    # flexible facts
+    terms: List[Term] = Field(default_factory=list)
+
+    # was Dict[str, str] -> now explicit list
+    tags: Optional[List[TagItem]] = None

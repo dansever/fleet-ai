@@ -30,7 +30,6 @@ import {
   ShoppingCart,
   Sparkles,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -343,7 +342,7 @@ export function MainSidebar({
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        <div style={{ position: 'relative', width: '100%', height: '40px' }}>
+        {/* <div style={{ position: 'relative', width: '100%', height: '40px' }}>
           {!isCollapsed && (
             <Image
               src={imageUrl ?? '/placeholder.png'}
@@ -353,10 +352,8 @@ export function MainSidebar({
               style={{ objectFit: 'contain' }}
             />
           )}
-        </div>
-        <SidebarMenuButton className="px-0 group-data-[collapsible=icon]:p-0!">
-          <ClientUserButton showName={!isCollapsed} />
-        </SidebarMenuButton>
+        </div> */}
+        <ClientUserButton showName={!isCollapsed} />
       </SidebarFooter>
     </Sidebar>
   );

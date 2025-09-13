@@ -8,13 +8,19 @@ import { NextRequest, NextResponse } from 'next/server';
  * Create a new document
  */
 export async function POST(request: NextRequest) {
-  const { dbUser, orgId, error } = await getAuthContext();
-  if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
-
   try {
+    // Authorize user
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
+
+    // Get request body
     const data = await request.json();
     const documentData = { ...data, orgId };
+
+    // Create document
     const document = await documentsServer.createDocument(documentData);
+
+    // Return document
     return NextResponse.json(document);
   } catch (err) {
     console.error('Error creating document:', err);

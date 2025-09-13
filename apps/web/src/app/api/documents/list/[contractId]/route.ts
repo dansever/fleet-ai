@@ -14,13 +14,27 @@ type RouteParams = { params: Promise<{ contractId: string }> };
  * @returns The documents
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const { dbUser, orgId, error } = await getAuthContext();
-  if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
+  try {
+    // Authorize user
+    const { dbUser, orgId, error } = await getAuthContext();
+    if (error || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
-  const { contractId } = await params;
-  if (!contractId) {
-    return jsonError('Contract ID is required', 400);
+    // Get contract id
+    const { contractId } = await params;
+    if (!contractId) {
+      return jsonError('Contract ID is required', 400);
+    }
+
+    // Get documents by contract
+    const documents = await documentsServer.listDocumentsByContract(contractId);
+    if (!documents) {
+      return jsonError('Documents not found', 404);
+    }
+
+    // Return documents
+    return NextResponse.json(documents);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    return jsonError('Failed to fetch documents', 500);
   }
-  const documents = await documentsServer.listDocumentsByContract(contractId);
-  return NextResponse.json(documents);
 }

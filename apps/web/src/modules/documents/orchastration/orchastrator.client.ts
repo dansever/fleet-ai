@@ -1,12 +1,12 @@
 import { DocumentParentType } from '@/drizzle/schema';
 import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
+import { client as contractsClient } from '@/modules/contracts';
 import { client as chunksClient } from '@/modules/documents/chunks';
 import { client as documentsClient } from '@/modules/documents/documents';
 import { client as extractClient } from '@/modules/documents/extract';
 import { client as parseClient } from '@/modules/documents/parse';
 import { client as storageClient } from '@/modules/storage';
 import { DocumentProcessorTypes } from './orchastrator.types';
-
 /**
  * Complete document processing orchestrator
  * Handles: Upload → Extract → Save (Document) → Chunk → Embed -> Save (Chunks)
@@ -38,7 +38,7 @@ export async function processDocument(
     // =====================================
     onProgress?.({ name: 'upload', description: 'Uploading file to storage...', progress: 20 }, 20);
     const storageResult = await storageClient.uploadFile(file, parentType);
-    console.log('✅ Storage upload completed', storageResult);
+    console.log('✅ Storage upload completed:', storageResult);
 
     // =====================================
     // Step 2: Parse document with LlamaParse (30%)
@@ -46,7 +46,7 @@ export async function processDocument(
     onProgress?.({ name: 'parse', description: 'Parsing document...', progress: 30 }, 30);
     const parseResult = await parseClient.parseFile(file);
     const parsedTextCombined = parseResult.map((part: any) => part.text).join('\n');
-    console.log('✅✅✅✅ Parsed combined text', parsedTextCombined.slice(0, 80));
+    console.log('✅ Parsed text: ', parsedTextCombined.slice(0, 80) + '...');
 
     // =====================================
     // Step 3: Extract document data with LlamaExtract (40%)
@@ -56,7 +56,17 @@ export async function processDocument(
       file,
       getExtractionAgentName(parentType),
     );
-    console.log('✅ Extraction completed', extractionResult);
+    console.log('✅ Extraction completed: ', extractionResult);
+
+    // =====================================
+    // Step 3.1: Update contract record with extracted data (45%)
+    // =====================================
+    onProgress?.({ name: 'update', description: 'Updating contract record...', progress: 45 }, 45);
+    const updateResult = await contractsClient.updateContract(parentId, {
+      summary: extractionResult.data.summary,
+      terms: extractionResult.data.terms,
+    });
+    console.log('✅ Contract record updated: ', updateResult);
 
     // =====================================
     // Step 4: Save document record to database (70%)
@@ -72,7 +82,7 @@ export async function processDocument(
       fileType: file.type, // File type
       content: parsedTextCombined, // Extracted text content
     });
-    console.log('✅ Document created in database', document);
+    console.log('✅ Document created in database: ', document);
 
     // =====================================
     // Step 5: Create chunks and embeddings (90%)
@@ -91,7 +101,7 @@ export async function processDocument(
       console.warn('Failed to create chunks:', chunksResult.error);
     }
 
-    console.log('✅ Chunks created', chunksResult);
+    console.log('✅ Chunks created: ', chunksResult);
 
     // =====================================
     // Step 6: Complete (100%)

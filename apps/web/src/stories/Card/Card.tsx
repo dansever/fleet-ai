@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import type React from 'react';
-import { useMemo } from 'react';
 
 // Gradient palettes for FeatureCard
 export enum GradientPalette {
@@ -43,16 +42,16 @@ export const BaseCard = ({ className, children }: BaseCardProps) => (
 export interface StandardCardProps {
   className?: string;
   // Header options (either simple or custom)
-  icon?: React.ReactNode;
+  header?: React.ReactNode; // Takes precedence over title/subtitle
   title?: string;
   subtitle?: string;
-  header?: React.ReactNode; // Takes precedence over title/subtitle
-  // Actions (consistent naming)
+  icon?: React.ReactNode;
   actions?: React.ReactNode;
   // Content
-  children?: React.ReactNode;
-  // Optional footer
+  body?: React.ReactNode;
+  // footer
   footer?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 // Main Card - For displaying main content with header and actions
@@ -119,65 +118,6 @@ export const MainCard = ({
     {footer && <CardContent>{footer}</CardContent>}
   </Card>
 );
-
-// Feature Card - For showcasing features or services
-export const FeatureCard = ({
-  title,
-  subtitle, // Add for consistency
-  header,
-  icon,
-  palette = GradientPalette.VioletPinkRose,
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  palette?: GradientPalette;
-}) => {
-  // Choose classes based on enum or manual override; no randomization
-  const chosenGradient = useMemo(() => {
-    return paletteToClasses[palette] ?? paletteToClasses[GradientPalette.VioletPinkRose];
-  }, [palette]);
-
-  return (
-    <Card className={cn('!rounded-4xl border-0 overflow-hidden p-0 relative group', className)}>
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className={cn(
-            'absolute -inset-24 blur-3xl opacity-70 bg-gradient-to-br transition-all duration-500 group-hover:opacity-80',
-            chosenGradient,
-          )}
-        />
-        <div className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20" />
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/5" />
-      </div>
-
-      {/* Foreground content */}
-      <div className="relative z-10 p-6 text-white">
-        {header ? (
-          header
-        ) : (
-          <div className="flex items-center gap-3 mb-4 justify-between">
-            <div className="flex flex-row gap-2 items-center">
-              {icon && (
-                <div className="p-2 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20">
-                  {icon}
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold">{title}</h3>
-                {subtitle && <p className="text-white/70 text-sm">{subtitle}</p>}
-              </div>
-            </div>
-            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-          </div>
-        )}
-        <div className="text-white/85">{children}</div>
-        {footer && <div className="text-white/75 mt-3">{footer}</div>}
-      </div>
-    </Card>
-  );
-};
 
 // Project Card - For displaying projects or portfolio items
 export const ProjectCard = ({
@@ -395,7 +335,7 @@ export const ListItemCard = ({
 }) => (
   <Card
     className={cn(
-      'border-1 border-muted/60 bg-gradient-to-br shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
+      'border border-muted bg-gradient-to-br shadow-none overflow-hidden rounded-xl p-2 transition-colors duration-300 ease-in-out cursor-pointer w-full min-w-0',
       isSelected
         ? 'border-purple-100 from-blue-200/40 via-purple-200/40 to-orange-100'
         : 'hover:from-blue-50/50 hover:via-purple-50/50 hover:to-orange-50/50',

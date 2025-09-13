@@ -9,7 +9,9 @@ import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
-import { Eye, FileText, PlusIcon, RefreshCw, Trash } from 'lucide-react';
+import { ContractTerm } from '@/types/contracts';
+import { Copy, Eye, FileText, PlusIcon, RefreshCw, Trash } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
 
 export function ContractOverview() {
@@ -75,6 +77,11 @@ export function ContractOverview() {
     </div>
   );
 
+  const copyMessage = (message: string | number | boolean) => {
+    navigator.clipboard.writeText(message.toString());
+    toast.info('Copied to clipboard');
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <MainCard
@@ -127,7 +134,7 @@ export function ContractOverview() {
               <Accordion type="multiple" className="w-full" defaultValue={['item-1']}>
                 <AccordionItem value="item-1">
                   <AccordionTrigger className="cursor-pointer font-bold">
-                    Contract Information
+                    Contract Summary
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col gap-4">
                     {selectedContract.summary}
@@ -135,40 +142,32 @@ export function ContractOverview() {
                 </AccordionItem>
                 <AccordionItem value="item-2">
                   <AccordionTrigger className="cursor-pointer font-bold">
-                    Commercial Terms
+                    Contract Terms
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col gap-4">
-                    {selectedContract.commercialTerms}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-3">
-                  <AccordionTrigger className="cursor-pointer font-bold">SLAs</AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4">
-                    {selectedContract.slas}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-4">
-                  <AccordionTrigger className="cursor-pointer font-bold">
-                    Edge Cases
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4">
-                    {selectedContract.edgeCases}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-5">
-                  <AccordionTrigger className="cursor-pointer font-bold">
-                    Risk & Liability
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4">
-                    {selectedContract.riskLiability}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-6">
-                  <AccordionTrigger className="cursor-pointer font-bold">
-                    Termination Law
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col gap-4">
-                    {selectedContract.terminationLaw}
+                    {selectedContract.terms?.map((term: ContractTerm, idx: number) => (
+                      <div
+                        key={idx}
+                        className="border-1 rounded-2xl p-3 bg-muted/40 flex flex-col gap-1"
+                      >
+                        <div className="flex flex-row items-center gap-1">
+                          <div className="font-bold flex-1">{term.key}</div>
+                          <Copy
+                            className="w-4 h-4 stroke-gray-400 hover:stroke-gray-600 hover:scale-105 transition-all cursor-pointer"
+                            onClick={() => copyMessage(term.value?.value)}
+                          />
+                        </div>
+                        <div className="text-sm">{term.value?.value}</div>
+                        {term.section && (
+                          <div className="text-xs italic">Section: {term.section}</div>
+                        )}
+                        {term.source?.snippet && (
+                          <div className="text-xs text-muted-foreground border-l-2 pl-2 border-primary/40 mt-1">
+                            "{term.source.snippet}"
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

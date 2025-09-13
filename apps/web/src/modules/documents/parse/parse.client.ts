@@ -15,8 +15,6 @@ export async function parseFile(file: File) {
     headers: { 'Content-Type': 'multipart/form-data' },
     transformRequest: (x) => x, // avoid JSON serialization
   });
-  const parsedCombinedText = res.data.map((part: any) => part.text).join('\n');
-  console.log('✅✅✅✅ Parsed combined text', parsedCombinedText);
-
-  return res.data;
+  const parsedTextCombined = res.data.map((part: any) => part.text).join('\n');
+  return parsedTextCombined;
 }
