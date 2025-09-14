@@ -22,6 +22,9 @@ export function ContractDocument() {
     refreshDocuments,
     loading,
     setUploadLoading,
+    addDocument,
+    removeDocument,
+    updateContract,
   } = useAirportHub();
   const [downloadFileLoading, setDownloadFileLoading] = useState(false);
   const [viewDocumentLoading, setViewDocumentLoading] = useState(false);
@@ -34,16 +37,28 @@ export function ContractDocument() {
       toast.error('No contract selected');
       return;
     }
-
     setUploadLoading(true);
     try {
-      await processDocumentClient.processDocument(file, {
+      // Delete the existing document if it exists
+      if (document) {
+        await documentsClient.deleteDocument(document.id, document.storagePath ?? '');
+        // Immediately remove from local state
+        removeDocument(document.id);
+      }
+
+      // Process the new document
+      const result = await processDocumentClient.processDocument(file, {
         parentId: selectedContract.id,
         parentType: 'contract',
       });
+
       toast.success(document ? 'Document has been replaced' : 'Document has been uploaded');
-      // Refresh documents to update the cache and UI
-      refreshDocuments();
+
+      // Refresh documents to get the newly created document and update both cache and UI
+      await refreshDocuments();
+
+      // Refresh contracts as document processing might have updated contract terms
+      // This ensures contract terms are updated in the UI
       refreshContracts();
     } catch (error) {
       toast.error('Failed to process contract file');
@@ -87,8 +102,14 @@ export function ContractDocument() {
       setDeleteDocumentLoading(true);
       // Cascade logic already implemented in the client
       await documentsClient.deleteDocument(document.id, document.storagePath ?? '');
+
+      // Immediately update local state to reflect deletion
+      removeDocument(document.id);
+
       toast.success('Document has been deleted');
-      refreshDocuments();
+
+      // Note: No need to call refreshDocuments() since we've already updated local state
+      // The removeDocument function handles both state and cache updates
     } catch (error) {
       toast.error('Failed to delete document');
       console.error(error);

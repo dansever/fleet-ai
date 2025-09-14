@@ -37,9 +37,16 @@ export function ContractOverview() {
   const handleDeleteContract = async () => {
     try {
       if (!selectedContract) return;
-      await contractsClient.deleteContract(selectedContract?.id);
-      await removeContract(selectedContract?.id);
+
+      // Delete from server first
+      await contractsClient.deleteContract(selectedContract.id);
+
+      // Immediately update local state - removeContract is synchronous
+      removeContract(selectedContract.id);
+
+      // Clear selection since the contract no longer exists
       setSelectedContract(null);
+
       toast.success('Contract has been deleted');
     } catch (error) {
       console.error('Failed to delete contract:', error);
