@@ -1,4 +1,3 @@
-import { ContractTerms } from '@/types/contracts';
 import { relations } from 'drizzle-orm';
 import { date, foreignKey, index, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
 import { ContractTypeEnum, ProcessStatusEnum } from '../enums';
@@ -35,8 +34,8 @@ export const contractsTable = pgTable(
     processStatus: ProcessStatusEnum('process_status').default('pending'),
 
     // LLM narratives
-    summary: text('summary'),
-    terms: jsonb('terms').$type<ContractTerms>().default([]),
+    summary: text('summary'), // Aggregated summary from all documents
+    keyTerms: jsonb('key_terms').default([]), // Key terms across all documents
 
     // Timestamps
     createdAt,

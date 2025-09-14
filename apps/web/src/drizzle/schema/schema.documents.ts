@@ -10,8 +10,10 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgTable,
   text,
+  timestamp,
   uuid,
   vector,
 } from 'drizzle-orm/pg-core';
@@ -52,6 +54,12 @@ export const documentsTable = pgTable(
     fileSize: integer('file_size'), // size in bytes
     storagePath: text('storage_path'), // path in the storage
     content: text('content'), // full extracted text
+
+    // Knowledge extraction fields
+    extractedData: jsonb('extracted_data').default({}), // Document-specific extracted knowledge
+    summary: text('summary'), // Document-specific summary
+    confidence: numeric('confidence'), // AI extraction confidence score
+    extractedAt: timestamp('extracted_at', { withTimezone: true }),
 
     // Timestamps
     createdAt,

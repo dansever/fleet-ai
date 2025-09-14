@@ -51,6 +51,8 @@ export const ModernInput = ({
   type = 'text',
   className,
   icon,
+  value,
+  onChange,
   ...props
 }: {
   label?: string;
@@ -60,33 +62,41 @@ export const ModernInput = ({
   type?: string;
   className?: string;
   icon?: React.ReactNode;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   [key: string]: unknown;
-}) => (
-  <div className="w-full">
-    {label && <label className={formStyles.label}>{label}</label>}
-    <div className="relative">
-      {icon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
-          {icon}
-        </div>
-      )}
-      <Input
-        type={type}
-        autoComplete="off"
-        placeholder={placeholder}
-        className={cn(
-          formStyles.input,
-          icon && 'pl-10',
-          error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
-          className,
+}) => {
+  // Determine if this should be controlled or uncontrolled
+  const isControlled = value !== undefined;
+
+  return (
+    <div className="w-full">
+      {label && <label className={formStyles.label}>{label}</label>}
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+            {icon}
+          </div>
         )}
-        {...props}
-      />
+        <Input
+          type={type}
+          autoComplete="off"
+          placeholder={placeholder}
+          className={cn(
+            formStyles.input,
+            icon && 'pl-10',
+            error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
+            className,
+          )}
+          {...(isControlled ? { value, onChange } : {})}
+          {...props}
+        />
+      </div>
+      {error && <p className={formStyles.error}>{error}</p>}
+      {helper && !error && <p className={formStyles.helper}>{helper}</p>}
     </div>
-    {error && <p className={formStyles.error}>{error}</p>}
-    {helper && !error && <p className={formStyles.helper}>{helper}</p>}
-  </div>
-);
+  );
+};
 
 export const SearchInput = ({
   label,
@@ -345,34 +355,35 @@ export const ModernTextarea = ({
   </div>
 );
 
+type Option = { value: string; label: React.ReactNode };
+
 export const ModernSelect = ({
   label,
   error,
   helper,
   placeholder = 'Select an option',
   options,
-  TriggerClassName,
   value,
+  onValueChange,
   ...props
 }: {
   label?: string;
   error?: string;
   helper?: string;
   placeholder?: string;
-  options: { value: string; label: React.ReactNode }[];
-  TriggerClassName?: string;
+  options: Option[];
   value?: string;
+  onValueChange?: (value: string) => void;
   [key: string]: unknown;
 }) => (
   <div>
     {label && <label className={formStyles.label}>{label}</label>}
-    <Select {...props} value={value || ''}>
+    <Select {...props} value={value || ''} onValueChange={onValueChange || (() => {})}>
       <SelectTrigger
         className={cn(
           formStyles.input,
           'cursor-pointer',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
-          TriggerClassName,
         )}
       >
         <SelectValue placeholder={placeholder} />

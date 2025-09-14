@@ -4,7 +4,6 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { AlertTriangle, Diff, Edit, Sigma, Upload, X } from 'lucide-react';
-import FuelInvoicesDataTable from '../_components/FuelInvoicesDataTable';
 import { useFuelProcurement } from '../contexts';
 
 export default function AgreementsPage() {
@@ -195,7 +194,7 @@ export default function AgreementsPage() {
               Error loading invoices: {errors.invoices}
             </div>
           ) : (
-            <FuelInvoicesDataTable invoices={invoices} />
+            <p>Invoices Table</p>
           )}
         </CardContent>
       </BaseCard>

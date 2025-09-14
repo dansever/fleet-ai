@@ -103,17 +103,19 @@ export default function AirportHubClientPage() {
           </div>
         ) : selectedAirport ? (
           <div className="flex flex-row items-start gap-4 justify-between w-full">
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1 min-w-0">
               <div className="flex flex-row items-center gap-4">
-                <h1>{selectedAirport.name}</h1>
+                <h1 title={selectedAirport.name}>{selectedAirport.name}</h1>
               </div>
               <div className="flex items-center gap-2 text-gray-600 text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>
-                  {selectedAirport.city}
-                  {selectedAirport.state && ', ' + selectedAirport.state}
-                  {selectedAirport.country && ', ' + selectedAirport.country}
-                </span>
+                <div className="flex flex-row items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>
+                    {selectedAirport.city}
+                    {selectedAirport.state && ', ' + selectedAirport.state}
+                    {selectedAirport.country && ', ' + selectedAirport.country}
+                  </span>
+                </div>
                 <div className="flex flex-row items-center gap-1">
                   {selectedAirport.icao && (
                     <StatusBadge status="secondary" text={selectedAirport.icao} />
@@ -128,17 +130,17 @@ export default function AirportHubClientPage() {
                     </div>
                   )}
                 </div>
+                <AirportDialog
+                  trigger={<Button intent="ghost" icon={Eye} text="View" size="sm" />}
+                  airport={selectedAirport}
+                  onChange={updateAirport}
+                  DialogType="view"
+                />
               </div>
             </div>
-            <div className="flex gap-2">
-              <AirportDialog
-                trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
-                airport={selectedAirport}
-                onChange={updateAirport}
-                DialogType="view"
-              />
+            <div className="fixed top-3 right-36">
               <Button
-                intent="ghost"
+                intent="glass"
                 text="Refresh"
                 icon={RefreshCw}
                 onClick={handleRefresh}

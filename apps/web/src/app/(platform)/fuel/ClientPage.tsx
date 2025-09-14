@@ -53,25 +53,25 @@ export default function FuelProcurementClientPage() {
         />
       }
       headerContent={
-        <div className="flex flex-row items-center gap-4 justify-between w-full">
-          <div className="flex flex-col">
+        <div className="flex flex-row items-start gap-4 justify-between w-full">
+          <div className="flex flex-col flex-1 min-w-0">
+            <h1>{selectedAirport?.name}</h1>
             <div className="flex flex-row items-center gap-4">
-              <h1>{selectedAirport?.name}</h1>
               <div className="flex flex-row items-center gap-1">
                 <StatusBadge status="secondary" text={selectedAirport?.icao || ''} />
                 <StatusBadge status="secondary" text={selectedAirport?.iata || ''} />
               </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600 text-sm">
-              <MapPin className="w-4 h-4" />
-              <span>
-                {selectedAirport?.city}
-                {selectedAirport?.state && ', ' + selectedAirport?.state}
-                {selectedAirport?.country && ', ' + selectedAirport?.country}
-              </span>
+              <div className="flex items-center gap-2 text-gray-600 text-sm">
+                <MapPin className="w-4 h-4" />
+                <span>
+                  {selectedAirport?.city}
+                  {selectedAirport?.state && ', ' + selectedAirport?.state}
+                  {selectedAirport?.country && ', ' + selectedAirport?.country}
+                </span>
+              </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <AirportDialog
               trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
               airport={selectedAirport}
@@ -119,8 +119,8 @@ function MainContentSection() {
   return (
     <Tabs
       tabs={[
-        { label: 'Fuel Tenders', value: 'fuel-tenders', icon: <TrendingUpDown /> },
-        { label: 'Fuel Agreements', value: 'fuel-agreements', icon: <FileText /> },
+        { label: 'Tenders', value: 'fuel-tenders', icon: <TrendingUpDown /> },
+        { label: 'Agreements', value: 'fuel-agreements', icon: <FileText /> },
         { label: 'Historical Data', value: 'historical-data', icon: <ChartBar /> },
       ]}
       defaultTab="fuel-tenders"

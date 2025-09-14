@@ -27,14 +27,11 @@ export const PageLayout: FC<PageLayoutProps> = ({
 }) => {
   const sidebarElement = sidebarContent && (
     <div
-      className="flex bg-transparent flex-col overflow-hidden min-w-0 flex-shrink-0"
+      className="flex bg-transparent flex-col overflow-hidden min-w-0 flex-shrink-0 h-full"
       style={{
-        // Smooth width transition
         width: 'var(--sidebar-w)',
         transition: 'width 240ms ease',
-        // Drive width via CSS var so React prop changes animate
         ['--sidebar-w' as string]: sidebarWidth,
-        // Helps the browser plan for width changes
         willChange: 'width',
       }}
     >
@@ -43,23 +40,24 @@ export const PageLayout: FC<PageLayoutProps> = ({
   );
 
   return (
-    <div className={cn('flex flex-row h-screen gap-2', className)}>
+    <div className={cn('flex flex-row h-full gap-2', className)}>
       {/* Left Sidebar Panel */}
       {sidebarPosition === 'left' && sidebarElement}
 
       {/* Right Main Panel */}
-      <ScrollArea className="px-2 pb-2 flex-1 min-w-0 flex flex-col gap-2">
+      <ScrollArea className="pb-2 flex-1 min-w-0 flex flex-col gap-2 h-full overflow-x-hidden">
         {/* Fixed Header */}
         {headerContent && (
-          <header className="p-2 sticky top-0 z-50 w-full">
+          <header className="p-2 sticky top-0 z-50 w-full flex-shrink-0">
             <div className="px-2 py-1 rounded-xl backdrop-blur-sm supports-[backdrop-filter]:bg-white/20">
               {headerContent}
             </div>
           </header>
         )}
-
         {/* Scrollable Main Content */}
-        <main className="px-4 py-2 flex-1">{mainContent}</main>
+        <main className="px-4 py-2 flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+          {mainContent}
+        </main>{' '}
         <ScrollBar orientation="vertical" className="" />
       </ScrollArea>
 

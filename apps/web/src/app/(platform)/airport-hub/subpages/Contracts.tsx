@@ -8,9 +8,9 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { Banknote, BarChart, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AskAI from '../_components/AskAI';
-import { ContractDocument } from '../_components/ContractDocument';
-import { ContractOverview } from '../_components/ContractOverview';
 import ContractList from '../_components/ContractSidebar';
+import { ContractDocument } from '../_components/Files';
+import { ContractOverview } from '../_components/Overview';
 
 export default function ContractsPage() {
   const {

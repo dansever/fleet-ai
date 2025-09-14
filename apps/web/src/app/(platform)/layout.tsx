@@ -6,7 +6,7 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
       <MainSidebar variant="sidebar" />
-      <main className="flex-1 overflow-hidden">{children}</main>
+      <main className="flex-1 min-w-0 h-screen overflow-hidden">{children}</main>
     </SidebarProvider>
   );
 }

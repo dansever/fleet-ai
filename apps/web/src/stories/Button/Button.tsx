@@ -39,6 +39,8 @@ const buttonStyles = cva(
           'bg-gradient-to-r from-red-500 to-red-500 opacity-80 hover:from-red-600 hover:to-red-700 text-white',
         // Ghost action - minimal prominence, tertiary actions, icon buttons
         ghost: 'bg-transparent hover:bg-muted/80 text-primary/70 shadow-none hover:shadow-none',
+        // Glass
+        glass: 'bg-white/20 hover:bg-white/30 backdrop-blur-md shadow-md transition-all',
       },
       size: {
         sm: 'h-8 p-2 rounded-lg text-sm',
@@ -62,7 +64,8 @@ type ButtonIntent =
   | 'success'
   | 'warning'
   | 'danger'
-  | 'ghost';
+  | 'ghost'
+  | 'glass';
 type ButtonSize = 'sm' | 'md' | 'lg';
 type ButtonType = 'button' | 'submit' | 'reset';
 type ButtonIconPosition = 'left' | 'right';

@@ -39,10 +39,9 @@ export const BaseCard = ({
   title,
   subtitle,
   actions,
-  body,
-  footer,
+  children,
 }: StandardCardProps) => (
-  <Card className={cn('rounded-3xl shadow-none border-0 overflow-hidden pt-0 gap-2', className)}>
+  <Card className={cn('w-full rounded-3xl shadow-none border-0 overflow-hidden pt-0', className)}>
     {header
       ? header
       : (title || subtitle) && (
@@ -53,15 +52,14 @@ export const BaseCard = ({
               headerClassName,
             )}
           >
-            <div className="flex flex-col space-y-1">
-              <CardTitle className="text-lg">{title}</CardTitle>
-              {subtitle}
+            <div className=" flex flex-col space-y-0 flex-1">
+              <h2>{title}</h2>
+              <h4>{subtitle}</h4>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>
           </CardHeader>
         )}
-    {body && <CardContent className="py-2 px:4 sm:px-6 md:px-8">{body}</CardContent>}
-    {footer && <CardContent className="py-2 px:4 sm:px-6 md:px-8">{footer}</CardContent>}
+    {children}
   </Card>
 );
 
@@ -70,7 +68,7 @@ export const MainCard = ({
   title,
   subtitle,
   icon,
-  header, // Custom header option
+  header,
   headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
   neutralHeader = false,
   actions,
@@ -84,7 +82,10 @@ export const MainCard = ({
   cardContentClassName?: string;
 }) => (
   <Card
-    className={cn('rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden', className)}
+    className={cn(
+      'w-full rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden',
+      className,
+    )}
   >
     {(header || title) && (
       <CardHeader className="px-0">
