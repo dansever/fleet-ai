@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useStatusStore } from '@/stores/statusStore';
+import { Button } from '@/stories/Button/Button';
 import { useEffect, useMemo, useState } from 'react';
 
 export function StatusIndicator({ className }: { className?: string }) {
@@ -92,10 +93,7 @@ export function StatusIndicator({ className }: { className?: string }) {
     <div className={cn('fixed top-4 right-6 z-50 print:hidden', className)}>
       <DropdownMenu modal={false} open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <button
-            className="backdrop-blur-md rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer transition-all duration-300 p-3 focus:outline-none"
-            aria-label="Open system status"
-          >
+          <Button intent="glass" aria-label="Open system status" className="hover:scale-105">
             <div className="flex items-center gap-3">
               {icon}
               <div className="flex items-center gap-2">
@@ -114,7 +112,7 @@ export function StatusIndicator({ className }: { className?: string }) {
               </div>
               <div className="text-xs text-muted-foreground">▼</div>
             </div>
-          </button>
+          </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent

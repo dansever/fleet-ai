@@ -138,7 +138,7 @@ export default function AirportHubClientPage() {
                 />
               </div>
             </div>
-            <div className="fixed top-3 right-36">
+            <div className="fixed top-2 right-36">
               <Button
                 intent="glass"
                 text="Refresh"

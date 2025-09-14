@@ -57,6 +57,12 @@
   --sidebar-accent-foreground: 240 5.9% 10%;
   --sidebar-border: white;
   --sidebar-ring: white;
+
+  /* ========= STATUS INDICATOR COLORS ========= */
+  --status-processing: #3b82f6;
+  --status-success: #10b981;
+  --status-background: rgba(17, 24, 39, 0.6);
+  --status-border: rgba(255, 255, 255, 0.1);
 }
 
 @theme {
@@ -108,6 +114,11 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --color-status-processing: hsl(var(--status-processing));
+  --color-status-success: hsl(var(--status-success));
+  --color-status-background: hsl(var(--status-background));
+  --color-status-border: hsl(var(--status-border));
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -168,6 +179,10 @@
     --chart-3: var(--chart-3);
     --chart-4: var(--chart-4);
     --chart-5: var(--chart-5);
+    --status-processing: var(--status-processing);
+    --status-success: var(--status-success);
+    --status-background: var(--status-background);
+    --status-border: var(--status-border);
     --radius: var(--radius);
     --sidebar: var(--sidebar);
     --sidebar-background: var(--sidebar-background);
@@ -246,6 +261,10 @@
   --border: hsl(240 3.7% 15.9%);
   --input: hsl(240 3.7% 15.9%);
   --ring: hsl(240 4.9% 83.9%);
+  --status-processing: hsl(220 70% 50%);
+  --status-success: hsl(160 60% 45%);
+  --status-background: hsl(30 80% 55%);
+  --status-border: hsl(280 65% 60%);
   --chart-1: hsl(220 70% 50%);
   --chart-2: hsl(160 60% 45%);
   --chart-3: hsl(30 80% 55%);
@@ -287,6 +306,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-status-processing: var(--status-processing);
+  --color-status-success: var(--status-success);
+  --color-status-background: var(--status-background);
+  --color-status-border: var(--status-border);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

@@ -83,6 +83,7 @@ export interface ButtonProps
   loadingIcon?: LucideIcon; // Custom loading icon (defaults to Loader2, or RefreshCw if original icon is RefreshCw)
   href?: string; // Link to navigate to (renders as Link instead of button)
   external?: boolean; // Open link in new tab
+  children?: React.ReactNode; // Children to display in the button
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -99,6 +100,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       href,
       external = false,
       className,
+      children,
       ...props
     },
     ref,
@@ -184,6 +186,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {content}
+        {children}
       </button>
     );
   },

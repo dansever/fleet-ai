@@ -2,13 +2,14 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { useSidebar } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
 import AirportDialog from '@/features/airports/AirportDialog';
 import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { ChartBar, Eye, FileText, MapPin, RefreshCw, TrendingUpDown } from 'lucide-react';
+import { ChartBar, Eye, FileText, MapPin, RefreshCw, Star, TrendingUpDown } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useFuelProcurement } from './contexts';
@@ -53,40 +54,71 @@ export default function FuelProcurementClientPage() {
         />
       }
       headerContent={
-        <div className="flex flex-row items-start gap-4 justify-between w-full">
-          <div className="flex flex-col flex-1 min-w-0">
-            <h1>{selectedAirport?.name}</h1>
-            <div className="flex flex-row items-center gap-4">
-              <div className="flex flex-row items-center gap-1">
-                <StatusBadge status="secondary" text={selectedAirport?.icao || ''} />
-                <StatusBadge status="secondary" text={selectedAirport?.iata || ''} />
-              </div>
-              <div className="flex items-center gap-2 text-gray-600 text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>
-                  {selectedAirport?.city}
-                  {selectedAirport?.state && ', ' + selectedAirport?.state}
-                  {selectedAirport?.country && ', ' + selectedAirport?.country}
-                </span>
-              </div>
+        loading.airports ? (
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <AirportDialog
-              trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
-              airport={selectedAirport}
-              onChange={() => {}}
-              DialogType="view"
-            />
-            <Button
-              intent="ghost"
-              text="Refresh"
-              icon={RefreshCw}
-              onClick={refreshAll}
-              isLoading={loading.any}
-            />
+        ) : selectedAirport ? (
+          <div className="flex flex-row items-start gap-4 justify-between w-full">
+            <div className="flex flex-col flex-1 min-w-0">
+              <div className="flex flex-row items-center gap-4">
+                <h1 title={selectedAirport.name}>{selectedAirport.name}</h1>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600 text-sm">
+                <div className="flex flex-row items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>
+                    {selectedAirport.city}
+                    {selectedAirport.state && ', ' + selectedAirport.state}
+                    {selectedAirport.country && ', ' + selectedAirport.country}
+                  </span>
+                </div>
+                <div className="flex flex-row items-center gap-1">
+                  {selectedAirport.icao && (
+                    <StatusBadge status="secondary" text={selectedAirport.icao} />
+                  )}
+                  {selectedAirport.iata && (
+                    <StatusBadge status="secondary" text={selectedAirport.iata} />
+                  )}
+                  {selectedAirport.isHub && (
+                    <div className="ml-2 px-2 flex flex-row gap-1 items-center rounded-lg border border-yellow-400 bg-gradient-to-br from-yellow-100 to-yellow-200 opacity-80">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      Hub
+                    </div>
+                  )}
+                </div>
+                <AirportDialog
+                  trigger={<Button intent="ghost" icon={Eye} text="View" size="sm" />}
+                  airport={selectedAirport}
+                  onChange={() => {}}
+                  DialogType="view"
+                />
+              </div>
+            </div>
+            <div className="fixed top-2 right-36">
+              <Button
+                intent="glass"
+                text="Refresh"
+                icon={RefreshCw}
+                onClick={() => {}}
+                isLoading={loading.tenders || loading.bids}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-row items-center gap-4 justify-between w-full">
+            <div className="flex flex-col">
+              <h1 className="text-gray-400">No Airport Selected</h1>
+              <p className="text-sm text-gray-500">
+                Select an airport from the sidebar to continue
+              </p>
+            </div>
+          </div>
+        )
       }
       mainContent={<MainContentSection />}
       sidebarWidth={isCollapsed ? '20rem' : '18rem'}

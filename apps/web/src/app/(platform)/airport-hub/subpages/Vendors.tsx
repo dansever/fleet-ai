@@ -4,7 +4,6 @@ import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { VendorContact } from '@/drizzle/types';
 import { Button } from '@/stories/Button/Button';
 import { MainCard } from '@/stories/Card/Card';
-import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { Building2, Mail, Phone, RefreshCw, User, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
