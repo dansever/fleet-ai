@@ -9,7 +9,7 @@ The Fuel Procurement module provides a comprehensive solution for managing fuel 
 ### Structure
 
 ```
-fuel-procurement/
+fuel/
 ├── contexts/                    # Context providers
 │   ├── AirportContext.tsx      # Airport state management
 │   ├── FuelProcurementContext.tsx # Main orchestrator

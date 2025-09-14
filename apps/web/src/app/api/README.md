@@ -27,7 +27,7 @@ Each API folder represents a distinct business domain:
 
 1. **AI Chat** - Conversational AI functionality for user assistance
 2. **Document Extraction** - Processing and extracting data from documents
-3. **Other domains** - Add new folders as needed (e.g., `/api/fleet-management/`, `/api/fuel-procurement/`)
+3. **Other domains** - Add new folders as needed (e.g., `/api/fleet-management/`, `/api/fuel/`)
 
 ## Usage Examples
 
