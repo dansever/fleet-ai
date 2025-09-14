@@ -10,13 +10,13 @@ import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 type UploadStatus = 'idle' | 'dragging' | 'uploading' | 'success' | 'error';
 
 interface FileUploadProps {
-  onUpload?: (file: File, onProgress?: (progress: number) => void) => Promise<void>;
-  onUploadSuccess?: (file: File) => void;
-  onUploadError?: (error: string) => void;
+  onUpload?: (file: File, onProgress?: (progress: number) => void) => Promise<void>; // Upload function, throws an error if the upload fails
+  onUploadSuccess?: (file: File) => void; // Callback function that is called when the file is uploaded successfully
+  onUploadError?: (error: string) => void; // Callback function that is called when the file upload fails
   acceptedFileTypes?: string[]; // e.g., ["image/png", "image/jpeg"]
   maxFileSize?: number; // in bytes
   currentFile?: File | null; // Add current file prop
-  onFileRemove?: () => void; // Add callback for file removal
+  onFileRemove?: () => void; // Callback function that is called when the file is removed
 }
 
 const cardVariants = {
@@ -276,356 +276,355 @@ export default function FileUpload({
         } as React.CSSProperties
       }
     >
-      <Card className="p-0 w-full max-w-md mx-auto overflow-hidden flex flex-col bg-white border-zinc-200/50 rounded-3xl shadow-lg">
-        <CardContent className="py-8 flex-1 flex flex-col items-center justify-center text-center relative bg-gradient-to-br from-violet-50 to-orange-50 transparent">
-          <div className="relative z-10 w-full">
-            <AnimatePresence mode="wait" initial={false}>
-              {file && (status === 'idle' || status === 'error') ? (
-                <motion.div
-                  key="preview"
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                  }}
-                  className="flex flex-col items-center text-center w-full"
-                  aria-live="polite"
-                >
-                  {previewUrl && (
-                    <motion.div
-                      className="relative w-32 h-32 mb-4 rounded-lg overflow-hidden ring-2 ring-violet-500/20"
-                      initial={{
-                        rotate: -10,
-                        scale: 0.9,
-                      }}
-                      animate={{ rotate: 0, scale: 1 }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 20,
-                      }}
-                    >
-                      <img
-                        src={previewUrl}
-                        alt={`Preview of ${file.name}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </motion.div>
-                  )}
-                  {!previewUrl && (
-                    <FileIcon className="w-16 h-16 mb-4 text-violet-500" aria-hidden="true" />
-                  )}
-                  <h3 className="text-lg font-semibold text-zinc-900 ">Current File</h3>
-                  <div className="w-full max-w-xs bg-zinc-50/50 dark:bg-zinc-800/50 rounded-lg p-3 mb-4 backdrop-blur-sm">
-                    <p
-                      className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2 truncate"
-                      title={file.name}
-                    >
-                      {file.name}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-zinc-500 dark:text-zinc-400">Size</span>
-                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                          {formatBytes(file.size)}
-                        </span>
-                      </div>
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-zinc-500 dark:text-zinc-400">Type</span>
-                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                          {file.type.split('/')[1].toUpperCase() || 'Unknown'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-zinc-500 dark:text-zinc-400">Modified</span>
-                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                          {new Date(file.lastModified).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-zinc-500 dark:text-zinc-400">Status</span>
-                        <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                          Ready
-                        </span>
-                      </div>
+      <Card className="p-0 w-80 mx-auto overflow-hidden flex flex-col rounded-3xl shadow-lg">
+        <CardContent className="relative z-10 w-full py-4 flex-1 flex flex-col items-center justify-center text-center relative transparent">
+          <AnimatePresence mode="wait" initial={false}>
+            {file && (status === 'idle' || status === 'error') ? (
+              // Click to upload" component - before a file is uploaded
+              <motion.div
+                key="preview"
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 25,
+                }}
+                className="flex flex-col items-center text-center w-full"
+                aria-live="polite"
+              >
+                {previewUrl && (
+                  <motion.div
+                    className="relative w-32 h-32 mb-4 rounded-lg overflow-hidden ring-2 ring-violet-500/20"
+                    initial={{
+                      rotate: -10,
+                      scale: 0.9,
+                    }}
+                    animate={{ rotate: 0, scale: 1 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 20,
+                    }}
+                  >
+                    <img
+                      src={previewUrl}
+                      alt={`Preview of ${file.name}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </motion.div>
+                )}
+                {!previewUrl && (
+                  <FileIcon className="w-16 h-16 text-violet-500" aria-hidden="true" />
+                )}
+                <div className="max-w-xs bg-zinc-50/50 dark:bg-zinc-800/50 rounded-lg p-4 backdrop-blur-sm flex flex-col gap-2">
+                  <p
+                    className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate"
+                    title={file.name}
+                  >
+                    {file.name}
+                  </p>
+                  <div className="grid grid-cols-3 gap-8 text-xs">
+                    <div className="flex flex-col space-y-1">
+                      <span className="text-zinc-500 dark:text-zinc-400">Size</span>
+                      <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                        {formatBytes(file.size)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <span className="text-zinc-500 dark:text-zinc-400">Type</span>
+                      <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                        {file.type.split('/')[1].toUpperCase() || 'Unknown'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <span className="text-zinc-500 dark:text-zinc-400">Status</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                        Ready
+                      </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      intent="primary"
-                      onClick={handleUpload}
-                      text="Upload"
-                      aria-label="Upload file"
-                    />
-                    <Button
-                      onClick={handleRemoveFile}
-                      intent="danger"
-                      text="Remove"
-                      aria-label="Remove file"
-                    />
-                  </div>
-                </motion.div>
-              ) : status === 'idle' || status === 'dragging' ? (
-                <motion.div
-                  key="dropzone"
-                  variants={dropzoneVariants}
-                  initial="idle"
-                  animate={status === 'dragging' ? 'dragging' : 'idle'}
-                  className={`w-full h-full flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    intent="add"
+                    onClick={handleUpload}
+                    text="Upload"
+                    aria-label="Upload file"
+                    isLoading={false}
+                  />
+                  <Button
+                    onClick={handleRemoveFile}
+                    intent="secondary"
+                    text="Remove"
+                    aria-label="Remove file"
+                    className="text-red-500 border-red-500 hover:text-red-600 hover:border-red-600 hover:bg-red-50/50"
+                    isLoading={false}
+                  />
+                </div>
+              </motion.div>
+            ) : status === 'idle' || status === 'dragging' ? (
+              // "Dropzone" component - dashed area for dragging and dropping a file
+              <motion.div
+                key="dropzone"
+                variants={dropzoneVariants}
+                initial="idle"
+                animate={status === 'dragging' ? 'dragging' : 'idle'}
+                className={`w-full h-full flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg
                                         ${
                                           status === 'dragging'
                                             ? 'border-violet-500 dark:border-violet-400 bg-violet-50/20 dark:bg-violet-500/10'
                                             : 'border-zinc-200/50 dark:border-zinc-800/50 hover:border-violet-400 dark:hover:border-violet-600 hover:bg-violet-50/10 dark:hover:bg-violet-500/5 group cursor-pointer'
                                         } transition-all duration-500 ease-in-out backdrop-blur-sm relative overflow-hidden`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={triggerFileInput}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      triggerFileInput();
-                    }
-                  }}
-                  aria-label="File upload dropzone"
-                >
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                      <div className="absolute inset-0 bg-gradient-to-b from-violet-500/[0.02] via-transparent to-violet-500/[0.02] dark:from-violet-400/[0.02] dark:to-violet-400/[0.02] animate-shimmer" />
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.02),transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.03),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    </div>
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={triggerFileInput}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    triggerFileInput();
+                  }
+                }}
+                aria-label="File upload dropzone"
+              >
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    <div className="absolute inset-0 bg-gradient-to-b from-violet-500/[0.02] via-transparent to-violet-500/[0.02] dark:from-violet-400/[0.02] dark:to-violet-400/[0.02] animate-shimmer" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.02),transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.03),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                   </div>
-                  <motion.div
-                    variants={iconVariants}
-                    initial="idle"
-                    animate={status === 'dragging' ? 'dragging' : 'idle'}
-                  >
-                    <UploadCloud
-                      className={`w-12 h-12 mb-4 ${
-                        status === 'dragging'
-                          ? 'text-violet-600 dark:text-violet-400'
-                          : 'text-zinc-400 dark:text-zinc-500 group-hover:text-violet-500 group-hover:translate-y-[-2px]'
-                      } transform transition-all duration-500 ease-out`}
-                      aria-label="Upload cloud icon"
-                    />
-                  </motion.div>
-                  <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400 transition-all duration-500">
-                    <span className="font-semibold text-violet-600/90 dark:text-violet-400/90 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-500">
-                      Click to upload
-                    </span>{' '}
-                    or drag and drop
-                  </p>
-                  <p className="text-xs text-zinc-500/90 dark:text-zinc-500/90 group-hover:text-zinc-500 dark:group-hover:text-zinc-400 transition-colors duration-500">
-                    {acceptedFileTypes && acceptedFileTypes.length > 0
-                      ? `Accepted: ${acceptedFileTypes
-                          .map((t) => t.split('/')[1])
-                          .join(', ')
-                          .toUpperCase()}`
-                      : 'SVG, PNG, JPG or GIF'}{' '}
-                    {/* Default text */}
-                    {maxFileSize && ` (Max ${formatBytes(maxFileSize)})`}
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="sr-only"
-                    onChange={handleFileInputChange}
-                    accept={acceptedFileTypes?.join(',')}
-                    aria-label="File input"
+                </div>
+                <motion.div
+                  variants={iconVariants}
+                  initial="idle"
+                  animate={status === 'dragging' ? 'dragging' : 'idle'}
+                >
+                  <UploadCloud
+                    className={`w-12 h-12 mb-4 ${
+                      status === 'dragging'
+                        ? 'text-violet-600 dark:text-violet-400'
+                        : 'text-zinc-400 dark:text-zinc-500 group-hover:text-violet-500 group-hover:translate-y-[-2px]'
+                    } transform transition-all duration-500 ease-out`}
+                    aria-label="Upload cloud icon"
                   />
                 </motion.div>
-              ) : status === 'uploading' && file ? (
-                <motion.div
-                  key="uploading"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                  }}
-                  className="w-full flex flex-col items-center"
-                  aria-live="polite"
-                  aria-busy="true"
-                >
-                  <div className="w-16 h-16 mb-4 relative flex items-center justify-center">
-                    <motion.svg
-                      className="w-full h-full transform -rotate-90"
-                      viewBox="0 0 36 36"
-                      initial={{ rotate: 0 }}
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 2,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: 'linear',
-                      }}
-                      aria-label="Upload progress indicator"
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={progress}
-                    >
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="16"
-                        fill="none"
-                        className="stroke-current text-zinc-100 dark:text-zinc-800"
-                        strokeWidth="2.5"
-                      />
-                      <motion.circle
-                        cx="18"
-                        cy="18"
-                        r="16"
-                        fill="none"
-                        className="stroke-current text-violet-500 dark:text-violet-400"
-                        strokeWidth="2.5"
-                        strokeDasharray="100"
-                        variants={progressVariants}
-                        initial="initial"
-                        animate="animate"
-                        custom={progress}
-                      />
-                    </motion.svg>
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{
-                        delay: 0.2,
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 25,
-                      }}
-                    >
-                      <FileIcon
-                        className="w-8 h-8 absolute text-violet-600 dark:text-violet-400"
-                        aria-hidden="true"
-                      />
-                    </motion.div>
-                  </div>
-                  <p
-                    className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-1 truncate max-w-[200px]"
-                    title={file.name}
-                  >
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Uploading... {Math.round(progress)}%
-                  </p>
-                  <button
-                    onClick={resetState}
-                    type="button"
-                    className="mt-4 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-md border border-red-200/50 dark:border-red-800/50 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-all duration-300"
-                    aria-label="Cancel upload"
-                  >
-                    Cancel
-                  </button>
-                </motion.div>
-              ) : status === 'success' && file ? (
-                <motion.div
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                  }}
-                  className="flex flex-col items-center text-center"
-                  aria-live="polite"
-                >
-                  <div className="relative mb-4">
-                    <motion.div
-                      className="absolute inset-0 blur-2xl bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1.5 }}
-                      transition={{
-                        delay: 0.1,
-                        duration: 0.8,
-                        ease: 'easeOut',
-                      }}
-                    />
-                    <motion.div variants={successIconVariants} initial="initial" animate="animate">
-                      <CheckCircle
-                        className="w-16 h-16 text-emerald-500 dark:text-emerald-400 relative z-10 drop-shadow-lg"
-                        aria-label="Success"
-                      />
-                    </motion.div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
-                    Upload Successful!
-                  </h3>
-                  <p
-                    className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 truncate max-w-[200px]"
-                    title={file.name}
-                  >
-                    {file.name} ({formatBytes(file.size)})
-                  </p>
-                  <button
-                    onClick={resetState}
-                    type="button"
-                    className="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 rounded-lg transition-all duration-300 shadow-lg shadow-violet-500/20 dark:shadow-violet-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
-                    aria-label="Upload another file"
-                  >
-                    Upload Another File
-                  </button>
-                </motion.div>
-              ) : status === 'error' ? (
-                <motion.div
-                  key="error"
-                  initial={{
-                    opacity: 0,
-                    scale: 0.8,
-                    rotate: -10,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    scale: 1,
-                    rotate: 0,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    scale: 0.8,
-                    rotate: 10,
-                  }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                  }}
-                  className="flex flex-col items-center text-center text-red-600 dark:text-red-500"
-                  role="alert"
-                >
-                  <motion.div
+                <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400 transition-all duration-500">
+                  <span className="font-semibold text-violet-600/90 dark:text-violet-400/90 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-500">
+                    Click to upload
+                  </span>{' '}
+                  or drag and drop
+                </p>
+                <p className="text-xs text-zinc-500/90 dark:text-zinc-500/90 group-hover:text-zinc-500 dark:group-hover:text-zinc-400 transition-colors duration-500">
+                  {acceptedFileTypes && acceptedFileTypes.length > 0
+                    ? `Accepted: ${acceptedFileTypes
+                        .map((t) => t.split('/')[1])
+                        .join(', ')
+                        .toUpperCase()}`
+                    : 'SVG, PNG, JPG or GIF'}{' '}
+                  {/* Default text */}
+                  {maxFileSize && ` (Max ${formatBytes(maxFileSize)})`}
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="sr-only"
+                  onChange={handleFileInputChange}
+                  accept={acceptedFileTypes?.join(',')}
+                  aria-label="File input"
+                />
+              </motion.div>
+            ) : status === 'uploading' && file ? (
+              // "Uploading" component - while a file is uploading
+              <motion.div
+                key="uploading"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 25,
+                }}
+                className="w-full flex flex-col items-center"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <div className="w-16 h-16 mb-4 relative flex items-center justify-center">
+                  <motion.svg
+                    className="w-full h-full transform -rotate-90"
+                    viewBox="0 0 36 36"
                     initial={{ rotate: 0 }}
-                    animate={{
-                      rotate: [0, -10, 10, -10, 10, 0],
-                    }}
+                    animate={{ rotate: 360 }}
                     transition={{
-                      duration: 0.5,
-                      ease: 'easeInOut',
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'linear',
+                    }}
+                    aria-label="Upload progress indicator"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progress}
+                  >
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="16"
+                      fill="none"
+                      className="stroke-current text-zinc-100 dark:text-zinc-800"
+                      strokeWidth="2.5"
+                    />
+                    <motion.circle
+                      cx="18"
+                      cy="18"
+                      r="16"
+                      fill="none"
+                      className="stroke-current text-violet-500 dark:text-violet-400"
+                      strokeWidth="2.5"
+                      strokeDasharray="100"
+                      variants={progressVariants}
+                      initial="initial"
+                      animate="animate"
+                      custom={progress}
+                    />
+                  </motion.svg>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      delay: 0.2,
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 25,
                     }}
                   >
-                    <X className="w-12 h-12 mb-3" aria-hidden="true" />
+                    <FileIcon
+                      className="w-8 h-8 absolute text-violet-600 dark:text-violet-400"
+                      aria-hidden="true"
+                    />
                   </motion.div>
-                  <p className="text-sm font-medium mb-1">Upload Failed</p>
-                  <p className="text-xs mb-4 max-w-xs">{error || 'An unknown error occurred.'}</p>
-                  <button
-                    onClick={resetState}
-                    type="button"
-                    className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 rounded-lg transition-all duration-300 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
-                    aria-label="Try uploading again"
-                  >
-                    Try Again
-                  </button>
+                </div>
+                <p
+                  className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-1 truncate max-w-[200px]"
+                  title={file.name}
+                >
+                  {file.name}
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Uploading... {Math.round(progress)}%
+                </p>
+                <button
+                  onClick={resetState}
+                  type="button"
+                  className="mt-4 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-md border border-red-200/50 dark:border-red-800/50 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-all duration-300"
+                  aria-label="Cancel upload"
+                >
+                  Cancel
+                </button>
+              </motion.div>
+            ) : status === 'success' && file ? (
+              // "Success" component - after a file is uploaded
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 25,
+                }}
+                className="flex flex-col items-center text-center"
+                aria-live="polite"
+              >
+                <div className="relative mb-4">
+                  <motion.div
+                    className="absolute inset-0 blur-2xl bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1.5 }}
+                    transition={{
+                      delay: 0.1,
+                      duration: 0.8,
+                      ease: 'easeOut',
+                    }}
+                  />
+                  <motion.div variants={successIconVariants} initial="initial" animate="animate">
+                    <CheckCircle
+                      className="w-16 h-16 text-emerald-500 dark:text-emerald-400 relative z-10 drop-shadow-lg"
+                      aria-label="Success"
+                    />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
+                  Upload Successful!
+                </h3>
+                <p
+                  className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 truncate max-w-[200px]"
+                  title={file.name}
+                >
+                  {file.name} ({formatBytes(file.size)})
+                </p>
+                <button
+                  onClick={resetState}
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 rounded-lg transition-all duration-300 shadow-lg shadow-violet-500/20 dark:shadow-violet-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
+                  aria-label="Upload another file"
+                >
+                  Upload Another File
+                </button>
+              </motion.div>
+            ) : status === 'error' ? (
+              // "Error" component - after a file upload fails
+              <motion.div
+                key="error"
+                initial={{
+                  opacity: 0,
+                  scale: 0.8,
+                  rotate: -10,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  rotate: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.8,
+                  rotate: 10,
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 25,
+                }}
+                className="flex flex-col items-center text-center text-red-600 dark:text-red-500"
+                role="alert"
+              >
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{
+                    rotate: [0, -10, 10, -10, 10, 0],
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <X className="w-12 h-12 mb-3" aria-hidden="true" />
                 </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </div>
+                <p className="text-sm font-medium mb-1">Upload Failed</p>
+                <p className="text-xs mb-4 max-w-xs">{error || 'An unknown error occurred.'}</p>
+                <button
+                  onClick={resetState}
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 rounded-lg transition-all duration-300 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
+                  aria-label="Try uploading again"
+                >
+                  Try Again
+                </button>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </CardContent>
       </Card>
     </motion.div>

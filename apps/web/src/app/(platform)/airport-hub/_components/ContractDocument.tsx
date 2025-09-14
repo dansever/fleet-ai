@@ -146,60 +146,56 @@ export function ContractDocument() {
               <p>Upload a document to this contract to get started</p>
             </div>
           ) : (
-            <div>
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-4 gap-4">
-                  {/* Basic Information */}
-                  <div className="col-span-full flex items-center gap-2 rounded-xl p-2 bg-slate-100">
-                    <File className="w-6 h-6" />
-                    <p className="text-lg text-slate-900 font-mono px-2">
-                      {document.fileName || 'Unknown'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-slate-600">File Type:</span>
-                    <p>{document.fileType || 'Unknown'}</p>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-slate-600">File Size:</span>
-                    <p>{document.fileSize ? formatFileSize(document.fileSize) : 'Unknown'}</p>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-slate-600">Created:</span>
-                    <p>{document.createdAt ? formatDate(document.createdAt) : 'Unknown'}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-slate-600">Updated:</span>
-                    <p>{document.updatedAt ? formatDate(document.updatedAt) : 'Unknown'}</p>
-                  </div>
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-4 gap-4">
+                {/* Basic Information */}
+                <div className="col-span-full flex items-center gap-2 rounded-xl p-2 bg-slate-100">
+                  <File className="w-6 h-6" />
+                  <p className="text-lg text-slate-900 font-mono px-2">
+                    {document.fileName || 'Unknown'}
+                  </p>
                 </div>
 
-                {/* Document Content */}
-                <Separator />
-                <div className="col-span-full flex justify-between items-center gap-2 p-2">
-                  <h3 className="font-medium text-slate-600">Document Content</h3>
-                  <Button
-                    intent="ghost"
-                    icon={isContentExpanded ? ChevronUp : ChevronDown}
-                    text={isContentExpanded ? 'Show Less' : 'Show Full Content'}
-                    onClick={() => setIsContentExpanded(!isContentExpanded)}
-                  />
+                <div>
+                  <span className="font-medium text-slate-600">File Type:</span>
+                  <p>{document.fileType || 'Unknown'}</p>
                 </div>
 
-                <div
-                  className={`col-span-full rounded-xl ${!isContentExpanded ? 'max-h-96' : 'max-h-none'} overflow-y-auto`}
-                >
-                  <pre className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
-                    {document.content?.length &&
-                    document.content?.length > 2000 &&
-                    !isContentExpanded
-                      ? `${document.content?.substring(0, 2000)}...\n\n[Content truncated - showing first 2000 characters. Click "Show Full Content" to view all ${document.content?.length.toLocaleString()} characters]`
-                      : document.content}
-                  </pre>
+                <div>
+                  <span className="font-medium text-slate-600">File Size:</span>
+                  <p>{document.fileSize ? formatFileSize(document.fileSize) : 'Unknown'}</p>
                 </div>
+
+                <div>
+                  <span className="font-medium text-slate-600">Created:</span>
+                  <p>{document.createdAt ? formatDate(document.createdAt) : 'Unknown'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-slate-600">Updated:</span>
+                  <p>{document.updatedAt ? formatDate(document.updatedAt) : 'Unknown'}</p>
+                </div>
+              </div>
+
+              {/* Document Content */}
+              <Separator />
+              <div className="col-span-full flex justify-between items-center gap-2 p-2">
+                <h3 className="font-medium text-slate-600">Document Content</h3>
+                <Button
+                  intent="ghost"
+                  icon={isContentExpanded ? ChevronUp : ChevronDown}
+                  text={isContentExpanded ? 'Show Less' : 'Show Full Content'}
+                  onClick={() => setIsContentExpanded(!isContentExpanded)}
+                />
+              </div>
+
+              <div
+                className={`col-span-full rounded-xl ${!isContentExpanded ? 'max-h-96' : 'max-h-none'} overflow-y-auto`}
+              >
+                <pre className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                  {document.content?.length && document.content?.length > 2000 && !isContentExpanded
+                    ? `${document.content?.substring(0, 2000)}...\n\n[Content truncated - showing first 2000 characters. Click "Show Full Content" to view all ${document.content?.length.toLocaleString()} characters]`
+                    : document.content}
+                </pre>
               </div>
             </div>
           )}

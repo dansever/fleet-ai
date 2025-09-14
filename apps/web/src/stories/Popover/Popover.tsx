@@ -2,6 +2,7 @@
 
 import type React from 'react';
 
+import FileUpload from '@/components/miscellaneous/FileUpload';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
@@ -278,7 +279,7 @@ export const FileUploadPopover = ({
         <PopoverContent
           align={popoverContentAlign}
           className={cn(
-            'w-80 p-0 rounded-2xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
+            'w-80 p-0 rounded-3xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
           <MainCard
@@ -364,7 +365,7 @@ export const FileUploadPopover = ({
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-end">
                   <Button
                     intent="secondary"
                     onClick={handleCancel}
@@ -383,6 +384,41 @@ export const FileUploadPopover = ({
               </div>
             )}
           </MainCard>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+export const FileUploadPopoverNew = ({
+  trigger,
+  onSend,
+  accept = '*/*',
+  maxSize = 10,
+  className,
+  popoverContentAlign = 'end',
+  open,
+  onOpenChange,
+  children,
+}: FileUploadPopoverProps) => {
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isControlled ? open! : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
+  return (
+    <div className={cn('space-y-3 flex flex-row gap-2', className)}>
+      <Popover open={isOpen} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverContent
+          align={popoverContentAlign}
+          className={cn(
+            'w-full p-0 bg-transparent shadow-none rounded-3xl overflow-hidden border-0',
+          )}
+        >
+          <FileUpload />
         </PopoverContent>
       </Popover>
     </div>
