@@ -3,7 +3,6 @@ import 'server-only';
 
 import { DocumentParentType, DocumentParentTypeEnum } from '@/drizzle/enums';
 import { createClient } from '@/lib/supabase/server';
-import { getBucketName } from '@/lib/supabase/storage-helpers';
 import { server as orgServer } from '@/modules/core/organizations';
 import { utils as storageUtils } from '@/modules/storage';
 import crypto from 'crypto';
@@ -89,12 +88,7 @@ export async function createSignedUrl(orgId: string, path: string, expiresIn: nu
   if (!org) {
     throw new Error('Organization not found');
   }
-  const bucket = getBucketName(org);
-
-  // Validate path starts with bucket name
-  if (!path.startsWith(`${bucket}/`)) {
-    throw new Error('Forbidden - invalid path');
-  }
+  const bucket = await storageUtils.getBucketName();
 
   // Sign the file
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
@@ -121,7 +115,7 @@ export async function listFiles(orgId: string, documentType: string) {
   if (!org) {
     throw new Error('Organization not found');
   }
-  const bucket = getBucketName(org);
+  const bucket = await storageUtils.getBucketName();
 
   // List files from storage
   const { data, error } = await supabase.storage.from(bucket).list(documentType, {
@@ -166,4 +160,19 @@ export async function deleteFile(path: string) {
     data,
     message: 'File deleted successfully',
   };
+}
+
+/**
+ * Download a file from storage
+ */
+export async function downloadFile(path: string) {
+  const supabase = await createClient();
+  const bucket = await storageUtils.getBucketName();
+  const { data, error } = await supabase.storage.from(bucket).download(path);
+
+  if (error) {
+    throw new Error(`Failed to download file: ${error.message}`);
+  }
+
+  return data;
 }

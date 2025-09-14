@@ -49,14 +49,13 @@ const getDecisionBadge = (decision: string | null) => {
 };
 
 export const useFuelBidColumns = (): Column<FuelBid>[] => {
-  const { fuelBids } = useFuelProcurement();
-  const { refreshFuelBids } = fuelBids;
+  const { refreshBids } = useFuelProcurement();
 
   const handleDeleteBid = async (bidId: string) => {
     try {
       await fuelBidClient.deleteFuelBid(bidId);
       toast.success('Bid deleted successfully');
-      refreshFuelBids();
+      refreshBids();
     } catch (error) {
       toast.error('Error deleting bid');
     }

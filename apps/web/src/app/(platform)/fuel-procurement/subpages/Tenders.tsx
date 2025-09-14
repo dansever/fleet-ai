@@ -33,51 +33,31 @@ import FuelBidsDataTable from '../_components/FuelBidsDataTable';
 import { useFuelProcurement } from '../contexts';
 
 const FuelTendersPage = memo(function TendersPage() {
-  const { airports, tenders, fuelBids } = useFuelProcurement();
-  const { selectedAirport } = airports;
   const {
-    tenders: airportTenders,
+    selectedAirport,
     selectedTender,
-    setSelectedTender,
-    refreshTenders,
-    updateTender,
+    tenders,
+    bids,
+    loading,
+    errors,
+    selectTender,
     addTender,
-    loading: tenderLoading,
-    error: tenderError,
-  } = tenders;
-  const {
-    fuelBids: bids,
-    refreshFuelBids,
-    updateFuelBid,
-    addFuelBid,
-    removeFuelBid,
-    loading: bidsLoading,
-    error: bidsError,
-  } = fuelBids;
+    updateTender,
+    refreshTenders,
+    refreshBids,
+    addBid,
+    updateBid,
+    removeBid,
+  } = useFuelProcurement();
 
   const [showTenderDropdown, setShowTenderDropdown] = useState(false);
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
-
-  const [volumeForecast, setVolumeForecast] = useState({
-    jan: '45000',
-    feb: '42000',
-    mar: '48000',
-    apr: '46000',
-    may: '50000',
-    jun: '52000',
-    jul: '85000',
-    aug: '48000',
-    sep: '46000',
-    oct: '50000',
-    nov: '52000',
-    dev: '85000',
-  });
 
   // Handle tender addition
   const handleTenderAdded = (newTender: FuelTender) => {
     addTender(newTender);
     // Select the newly added tender
-    setSelectedTender(newTender);
+    selectTender(newTender);
   };
 
   // Handle tender update
@@ -99,19 +79,19 @@ const FuelTendersPage = memo(function TendersPage() {
 
   if (!selectedAirport) return null;
 
-  const currentTender = selectedTender || (airportTenders.length > 0 ? airportTenders[0] : null);
+  const currentTender = selectedTender || (tenders.length > 0 ? tenders[0] : null);
 
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-8xl mx-auto space-y-4">
         {/* Error State */}
-        {tenderError && (
+        {errors.tenders && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-start">
               <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
               <div className="flex-1">
                 <h3 className="font-medium text-red-800">Error Loading Tenders</h3>
-                <p className="text-sm text-red-700 mt-1">{tenderError}</p>
+                <p className="text-sm text-red-700 mt-1">{errors.tenders}</p>
                 <div className="mt-3 flex gap-2">
                   <button
                     onClick={() => refreshTenders()}
@@ -126,16 +106,16 @@ const FuelTendersPage = memo(function TendersPage() {
         )}
 
         {/* Fuel Bids Error State */}
-        {bidsError && (
+        {errors.bids && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-start">
               <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
               <div className="flex-1">
                 <h3 className="font-medium text-red-800">Error Loading Fuel Bids</h3>
-                <p className="text-sm text-red-700 mt-1">{bidsError}</p>
+                <p className="text-sm text-red-700 mt-1">{errors.bids}</p>
                 <div className="mt-3 flex gap-2">
                   <button
-                    onClick={() => refreshFuelBids()}
+                    onClick={() => refreshBids()}
                     className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
                   >
                     Retry
@@ -150,13 +130,13 @@ const FuelTendersPage = memo(function TendersPage() {
           <ModernSelect
             placeholder="Select a tender"
             onValueChange={(id: string) => {
-              const tender = airportTenders.find((t) => t.id === id);
-              if (tender) setSelectedTender(tender);
+              const tender = tenders.find((t) => t.id === id);
+              if (tender) selectTender(tender);
             }}
             value={selectedTender?.id}
-            disabled={!airportTenders.length}
+            disabled={!tenders.length}
             TriggerClassName="min-h-12"
-            options={airportTenders.map((tender) => ({
+            options={tenders.map((tender) => ({
               value: tender.id,
               label: (
                 <div className="flex flex-col text-left whitespace-normal">
@@ -181,7 +161,7 @@ const FuelTendersPage = memo(function TendersPage() {
         </div>
 
         {/* Loading State */}
-        {tenderLoading && <LoadingComponent size="md" text="Loading fuel tenders..." />}
+        {loading.tenders && <LoadingComponent size="md" text="Loading fuel tenders..." />}
 
         {currentTender && (
           <div className="flex flex-col gap-4">
@@ -313,10 +293,10 @@ const FuelTendersPage = memo(function TendersPage() {
             </MainCard>
 
             {/* Fuel Bids Loading State */}
-            {bidsLoading ? (
+            {loading.bids ? (
               <LoadingComponent size="md" text="Loading fuel bids..." />
             ) : (
-              <FuelBidsDataTable onRefresh={refreshFuelBids} isRefreshing={bidsLoading} />
+              <FuelBidsDataTable onRefresh={refreshBids} isRefreshing={false} />
             )}
           </div>
         )}

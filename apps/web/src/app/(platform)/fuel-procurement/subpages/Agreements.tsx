@@ -6,16 +6,58 @@ import { BaseCard, MainCard } from '@/stories/Card/Card';
 import { AlertTriangle, Diff, Edit, Sigma, Upload, X } from 'lucide-react';
 import FuelInvoicesDataTable from '../_components/FuelInvoicesDataTable';
 import { useFuelProcurement } from '../contexts';
-import { useContracts } from '../hooks';
 
 export default function AgreementsPage() {
-  const { airports, invoices } = useFuelProcurement();
-  const { contracts, addContract } = useContracts({
-    airportId: airports.selectedAirport?.id || null,
-    enabled: !!airports.selectedAirport,
-  });
+  const { selectedAirport, contracts, invoices, loading, errors, selectContract } =
+    useFuelProcurement();
   const selectedContract = contracts[0];
-  const { selectedAirport } = airports;
+
+  // Show message when no airport is selected
+  if (!selectedAirport) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">No Airport Selected</h3>
+          <p className="text-sm">
+            Please select an airport from the sidebar to view fuel agreements.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state for contracts
+  if (loading.contracts) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading fuel agreements...</div>
+      </div>
+    );
+  }
+
+  // Show error state for contracts
+  if (errors.contracts) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-red-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">Error Loading Agreements</h3>
+          <p className="text-sm">{errors.contracts}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state when no contracts
+  if (contracts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">No Fuel Agreements</h3>
+          <p className="text-sm">No active fuel agreements found for {selectedAirport.name}.</p>
+        </div>
+      </div>
+    );
+  }
 
   const agreementData = {
     id: 'AGR-2024-SHL-001',
@@ -144,12 +186,22 @@ export default function AgreementsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <FuelInvoicesDataTable invoices={invoices.invoices} />
+          {loading.invoices ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-gray-500">Loading invoices...</div>
+            </div>
+          ) : errors.invoices ? (
+            <div className="flex items-center justify-center py-8 text-red-500">
+              Error loading invoices: {errors.invoices}
+            </div>
+          ) : (
+            <FuelInvoicesDataTable invoices={invoices} />
+          )}
         </CardContent>
       </BaseCard>
 
       {/* Dispute Generation */}
-      {invoices.invoices.length > 0 && (
+      {invoices.length > 0 && (
         <MainCard
           title="Generate Dispute"
           subtitle="Review variance details before creating dispute"
@@ -159,7 +211,7 @@ export default function AgreementsPage() {
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 <span className="font-medium text-yellow-800">
-                  {invoices.invoices.length} invoice(s) selected for dispute
+                  {invoices.length} invoice(s) selected for dispute
                 </span>
               </div>
               <div className="text-sm text-yellow-700">

@@ -5,8 +5,7 @@ import { BarChart, Calendar, TrendingUp } from 'lucide-react';
 import { useFuelProcurement } from '../contexts';
 
 export default function HistoricalDataPage() {
-  const { airports } = useFuelProcurement();
-  const { selectedAirport } = airports;
+  const { selectedAirport } = useFuelProcurement();
 
   if (!selectedAirport) {
     return (

@@ -8,7 +8,7 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { ChartBar, Eye, FileText, MapPin, TrendingUpDown } from 'lucide-react';
+import { ChartBar, Eye, FileText, MapPin, RefreshCw, TrendingUpDown } from 'lucide-react';
 import { useState } from 'react';
 import AirportList from '../_components/AirportSidebar';
 import { useFuelProcurement } from './contexts';
@@ -19,29 +19,35 @@ import TendersPage from './subpages/Tenders';
 type TabValue = 'fuel-tenders' | 'fuel-agreements' | 'historical-data';
 
 export default function FuelProcurementClientPage() {
-  const { airports } = useFuelProcurement();
-  const { selectedAirport, setSelectedAirport, loading, error } = airports;
+  const { airports, selectedAirport, loading, errors, selectAirport, refreshAll } =
+    useFuelProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (loading.airports) {
+    return <LoadingComponent size="lg" text="Loading airports..." />;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (errors.airports) {
+    return (
+      <div className="flex items-center justify-center h-64 text-red-500">
+        Error: {errors.airports}
+      </div>
+    );
   }
 
-  if (!airports.airports || airports.airports.length === 0) {
-    return <div>No airports found</div>;
+  if (airports.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">No airports found</div>
+    );
   }
 
   return (
     <PageLayout
       sidebarContent={
         <AirportList
-          airports={airports.airports}
-          onAirportSelect={setSelectedAirport}
+          airports={airports}
+          onAirportSelect={selectAirport}
           selectedAirport={selectedAirport}
           InsertAddAirportButton={false}
         />
@@ -65,12 +71,21 @@ export default function FuelProcurementClientPage() {
               </span>
             </div>
           </div>
-          <AirportDialog
-            trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
-            airport={selectedAirport}
-            onChange={() => {}}
-            DialogType="view"
-          />
+          <div className="flex gap-2">
+            <AirportDialog
+              trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
+              airport={selectedAirport}
+              onChange={() => {}}
+              DialogType="view"
+            />
+            <Button
+              intent="ghost"
+              text="Refresh"
+              icon={RefreshCw}
+              onClick={refreshAll}
+              isLoading={loading.any}
+            />
+          </div>
         </div>
       }
       mainContent={<MainContentSection />}
@@ -81,10 +96,7 @@ export default function FuelProcurementClientPage() {
 
 function MainContentSection() {
   const [selectedTab, setSelectedTab] = useState<TabValue>('fuel-tenders');
-  const { airports, tenders, fuelBids } = useFuelProcurement();
-  const { selectedAirport } = airports;
-  const { loading: tendersLoading } = tenders;
-  const { loading: bidsLoading } = fuelBids;
+  const { selectedAirport, loading } = useFuelProcurement();
 
   if (!selectedAirport) {
     return (
@@ -99,9 +111,8 @@ function MainContentSection() {
     );
   }
 
-  // Show loading state when switching airports
-  const isLoadingData = tendersLoading || bidsLoading;
-  if (isLoadingData) {
+  // Show loading state when switching airports or loading initial data
+  if (loading.initial) {
     return <LoadingComponent size="md" text="Loading fuel procurement data..." />;
   }
 

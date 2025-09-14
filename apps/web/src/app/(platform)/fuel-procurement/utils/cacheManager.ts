@@ -56,7 +56,28 @@ class CacheManager {
 // Singleton instance
 export const cacheManager = new CacheManager();
 
-// Utility functions
+// ============================================================================
+// Cache Configuration
+// ============================================================================
+
+export const CACHE_TTL = {
+  TENDERS: 5 * 60 * 1000, // 5 minutes
+  BIDS: 3 * 60 * 1000, // 3 minutes
+  CONTRACTS: 10 * 60 * 1000, // 10 minutes
+  INVOICES: 5 * 60 * 1000, // 5 minutes
+} as const;
+
+export const CACHE_KEYS = {
+  TENDERS: 'tenders',
+  BIDS: 'bids',
+  CONTRACTS: 'contracts',
+  INVOICES: 'invoices',
+} as const;
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
 export const createCacheKey = (prefix: string, id: string): string => `${prefix}-${id}`;
 
 export const isCacheValid = (key: string, ttl?: number): boolean => {

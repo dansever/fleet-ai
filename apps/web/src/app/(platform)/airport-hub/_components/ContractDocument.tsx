@@ -5,10 +5,11 @@ import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { client as documentsClient } from '@/modules/documents/documents';
 import { client as processDocumentClient } from '@/modules/documents/orchastration/';
 import { client as parseClient } from '@/modules/documents/parse';
+import { client as storageClient } from '@/modules/storage';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
-import { ChevronDown, ChevronUp, Download, Eye, File, Trash, Upload } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, File, Trash, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
@@ -52,12 +53,31 @@ export function ContractDocument() {
     }
   };
 
-  const handleDownloadDocument = (storagePath: string | null) => {
-    console.log('Downloading document:', storagePath);
-  };
+  const handleViewDocument = async (storagePath: string | null) => {
+    if (!storagePath) return;
 
-  const handleViewDocument = (storagePath: string) => {
-    console.log('Viewing document:', storagePath);
+    setViewDocumentLoading(true);
+    try {
+      const signedUrl = await storageClient.getSignedUrl(storagePath, 300); // 5 minutes
+
+      // Prefer opening in a new tab for preview; browsers may still download
+      const fileName = storagePath.split('/').pop() || 'download';
+      const link = window.document.createElement('a');
+      link.href = signedUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.download = fileName; // hint to download with a name when applicable
+      window.document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success('Document view started');
+    } catch (error) {
+      toast.error('Failed to view document');
+      console.error(error);
+    } finally {
+      setViewDocumentLoading(false);
+    }
   };
 
   const handleDeleteDocument = async () => {
@@ -109,18 +129,12 @@ export function ContractDocument() {
           />
           <Button
             intent="secondaryInverted"
-            icon={Download}
-            onClick={() => handleDownloadDocument(document?.storagePath ?? '')}
-            disabled={downloadFileLoading}
-            isLoading={downloadFileLoading}
-          />
-          <Button
-            intent="secondaryInverted"
             icon={Eye}
             onClick={() => handleViewDocument(document?.storagePath ?? '')}
             disabled={viewDocumentLoading}
             isLoading={viewDocumentLoading}
           />
+
           <ConfirmationPopover
             onConfirm={handleDeleteDocument}
             trigger={

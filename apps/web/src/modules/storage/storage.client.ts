@@ -56,3 +56,14 @@ export async function deleteFile(path: string) {
   // TODO: implement server route that validates org prefix then calls storage.remove
   await api.delete('/api/storage/delete', { data: { path } });
 }
+
+/**
+ * Download a file from storage
+ * @param path - the path to the file
+ * @returns the file
+ */
+export async function downloadFile(path: string) {
+  console.log('Downloading file:', path);
+  const { data } = await api.get('/api/storage/download', { params: { path } });
+  return data;
+}

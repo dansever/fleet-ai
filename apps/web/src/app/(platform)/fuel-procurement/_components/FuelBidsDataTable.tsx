@@ -24,9 +24,7 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
   onRefresh,
   isRefreshing,
 }: FuelBidsDataTableProps) {
-  const { tenders, fuelBids } = useFuelProcurement();
-  const { selectedTender } = tenders;
-  const { fuelBids: bids, addFuelBid } = fuelBids;
+  const { selectedTender, bids, addBid } = useFuelProcurement();
   const [newBid, setNewBid] = useState<NewFuelBid | null>(null);
   const fuelBidColumns = useFuelBidColumns();
   const [uploadFuelBidPopoverOpen, setUploadFuelBidPopoverOpen] = useState(false);
@@ -40,7 +38,7 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
       const result = await fuelBidClient.extractFuelBid(file);
       const convertedBid = convertPydanticToFuelBid(result, selectedTender.id);
       const createdBid = await fuelBidClient.createFuelBid(selectedTender.id, convertedBid);
-      addFuelBid(createdBid);
+      addBid(createdBid);
       toast.success('Fuel bid extracted successfully');
     } catch (error) {
       toast.error('Error extracting fuel bid');
@@ -82,7 +80,7 @@ const FuelBidsDataTable = memo(function FuelBidsDataTable({
               className="text-gray-500"
               onClick={async () => {
                 const bid = await generateRandomFuelBid(selectedTender.id);
-                addFuelBid(bid as FuelBid);
+                addBid(bid as FuelBid);
                 setUploadFuelBidPopoverOpen(false);
               }}
             />
