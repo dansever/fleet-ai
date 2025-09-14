@@ -352,6 +352,7 @@ export const ModernSelect = ({
   placeholder = 'Select an option',
   options,
   TriggerClassName,
+  value,
   ...props
 }: {
   label?: string;
@@ -360,11 +361,12 @@ export const ModernSelect = ({
   placeholder?: string;
   options: { value: string; label: React.ReactNode }[];
   TriggerClassName?: string;
+  value?: string;
   [key: string]: unknown;
 }) => (
   <div>
     {label && <label className={formStyles.label}>{label}</label>}
-    <Select {...props}>
+    <Select {...props} value={value || ''}>
       <SelectTrigger
         className={cn(
           formStyles.input,
