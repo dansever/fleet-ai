@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
-import { BaseCard, MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { QuoteAnalysisResponse } from '@/types/quote-analysis';
 import {
   AlertTriangle,
@@ -134,7 +134,7 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
         {analysisResult && (
           <div className="space-y-4">
             {/* Analysis Summary */}
-            <MainCard title="Analysis Summary" className="space-y-3" neutralHeader={true}>
+            <BaseCard title="Analysis Summary" className="space-y-3" neutralHeader={true}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
@@ -162,10 +162,10 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
                   </Badge>
                 </div>
               </div>
-            </MainCard>
+            </BaseCard>
 
             {/* Quotes Summary */}
-            <MainCard title="Quotes Overview" className="space-y-3" neutralHeader={true}>
+            <BaseCard title="Quotes Overview" className="space-y-3" neutralHeader={true}>
               <div className="space-y-2">
                 {analysisResult.quotes_summary.map((quote, index) => (
                   <div
@@ -198,11 +198,11 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
                   </div>
                 ))}
               </div>
-            </MainCard>
+            </BaseCard>
 
             {/* AI Analysis Results */}
             {analysisResult.llm_analysis && (
-              <MainCard title="AI Insights" className="space-y-3" neutralHeader={true}>
+              <BaseCard title="AI Insights" className="space-y-3" neutralHeader={true}>
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg border">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles className="h-5 w-5 text-purple-500" />
@@ -251,7 +251,7 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
                     </div>
                   )}
                 </div>
-              </MainCard>
+              </BaseCard>
             )}
           </div>
         )}

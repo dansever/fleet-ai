@@ -1,6 +1,6 @@
 'use client';
 
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { useSettings } from '../ContextProvider';
 
@@ -8,7 +8,7 @@ export default function AccountPage() {
   const { user, org } = useSettings();
   return (
     <div className="grid grid-cols-5 gap-4">
-      <MainCard className="col-span-3" title="Personal Settings">
+      <BaseCard className="col-span-3" title="Personal Settings">
         <div className="flex flex-col gap-2">
           <h3>Details</h3>
           <KeyValuePair
@@ -46,8 +46,8 @@ export default function AccountPage() {
             valueType="date"
           />
         </div>
-      </MainCard>
-      <MainCard className="col-span-2" title="Organizational Settings">
+      </BaseCard>
+      <BaseCard className="col-span-2" title="Organizational Settings">
         <div className="flex flex-col gap-2">
           <h3>Details</h3>
           <KeyValuePair label="Organization Name" value={org.name} valueType="string" />
@@ -67,7 +67,7 @@ export default function AccountPage() {
           />
           <KeyValuePair label="Files Uploaded" value={org.filesUploaded} valueType="number" />
         </div>
-      </MainCard>
+      </BaseCard>
     </div>
   );
 }

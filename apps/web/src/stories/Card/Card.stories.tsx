@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { ArrowDown, Mail, MapPin, Phone, Star, TrendingUp, Zap } from 'lucide-react';
-import { BadgeGroup, ListItemCard, MainCard, MetricCard, ProfileCard, ProjectCard } from './Card';
+import { BadgeGroup, BaseCard, ListItemCard, MetricCard, ProfileCard, ProjectCard } from './Card';
 
 const meta: Meta = {
   title: 'Components/Cards',
@@ -217,7 +217,7 @@ export const AllCardVariants: StoryObj = {
           Primary content containers with headers and actions
         </p>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-          <MainCard
+          <BaseCard
             title="Fleet Statistics"
             subtitle="Current performance metrics"
             headerGradient="from-blue-600 via-violet-600 to-blue-700"
@@ -237,8 +237,8 @@ export const AllCardVariants: StoryObj = {
                 Current fleet performance metrics and operational statistics.
               </p>
             </div>
-          </MainCard>
-          <MainCard title="System Overview" subtitle="Neutral header styling" neutralHeader={true}>
+          </BaseCard>
+          <BaseCard title="System Overview" subtitle="Neutral header styling" neutralHeader={true}>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">System Status</span>
@@ -253,7 +253,7 @@ export const AllCardVariants: StoryObj = {
                 <span className="text-sm font-medium">1,247</span>
               </div>
             </div>
-          </MainCard>
+          </BaseCard>
         </div>
       </section>
 

@@ -4,7 +4,7 @@ import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { client as airportClient } from '@/modules/core/airports';
 import { AirportCreateInput } from '@/modules/core/airports/airports.types';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { useEffect, useState } from 'react';
@@ -159,7 +159,7 @@ export default function AirportDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <MainCard title="Airport Information" neutralHeader={true}>
+          <BaseCard title="Airport Information" neutralHeader={true}>
             <div className="flex flex-col justify-between ">
               {isEditing && isAdd ? (
                 <AirportAutocomplete
@@ -205,9 +205,9 @@ export default function AirportDialog({
                 value={formData.isHub}
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Location Information" neutralHeader={true}>
+          <BaseCard title="Location Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="City"
@@ -234,7 +234,7 @@ export default function AirportDialog({
                 name="country"
               />
             </div>
-          </MainCard>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

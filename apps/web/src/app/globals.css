@@ -342,7 +342,7 @@
 
   /* ========= HEADINGS & TEXT ========= */
   h1 {
-    @apply text-2xl font-bold py-1;
+    @apply text-2xl font-semibold py-1;
   }
   h2 {
     @apply text-xl font-semibold py-1;

@@ -1,7 +1,6 @@
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { ChartTooltip } from '@/components/ui/chart';
 import { BaseCard } from '@/stories/Card/Card';
-import { PieChart as PieChartIcon } from 'lucide-react';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 
 export function CatagorySpendingPie({
@@ -12,14 +11,8 @@ export function CatagorySpendingPie({
   categoryColors: string[];
 }) {
   return (
-    <BaseCard className="col-span-4">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <PieChartIcon className="h-5 w-5" />
-          Spend by Category
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="h-80">
+    <BaseCard title="Spend by Category">
+      <CardContent>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

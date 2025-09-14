@@ -90,16 +90,15 @@ export function ContractOverview() {
 
   if (!selectedContract) {
     return (
-      <BaseCard
-        body={
+      <BaseCard title="Please select a contract to view its details">
+        <CardContent>
           <div className="text-center py-8 text-gray-500 flex flex-col gap-4">
-            <h4 className="font-bold">Please select a contract to view its details</h4>
             <p className="text-sm">
               Select a contract from the list to view its details, edit it, or delete it.
             </p>
           </div>
-        }
-      />
+        </CardContent>
+      </BaseCard>
     );
   }
 
@@ -107,7 +106,7 @@ export function ContractOverview() {
     <div className="flex flex-col gap-4">
       <BaseCard
         title={selectedContract?.title || 'Service Agreements'}
-        headerClassName="text-white from-blue-500 via-blue-400 to-blue-600 opacity-80"
+        headerClassName="text-white from-blue-400 via-blue-300 to-blue-500"
         actions={actionsWhenSelected}
       >
         <CardContent className="flex flex-col gap-4">

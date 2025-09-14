@@ -12,7 +12,7 @@ import type { Quote, Rfq } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { client } from '@/modules/quotes';
 import { QuoteCreateInput } from '@/modules/quotes/quotes.types';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { serializeDatesForAPI } from '@/utils/date-helpers';
@@ -338,7 +338,7 @@ export default function QuoteDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MainCard title="Quote Information" neutralHeader={true}>
+          <BaseCard title="Quote Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="RFQ Number"
@@ -383,9 +383,9 @@ export default function QuoteDialog({
                 name="sentAt"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Vendor Information" neutralHeader={true}>
+          <BaseCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
@@ -428,9 +428,9 @@ export default function QuoteDialog({
                 name="vendorContactPhone"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Part Details" neutralHeader={true}>
+          <BaseCard title="Part Details" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Part Number"
@@ -482,9 +482,9 @@ export default function QuoteDialog({
                 min={1}
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Pricing & Commercial Terms" neutralHeader={true}>
+          <BaseCard title="Pricing & Commercial Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Price"
@@ -539,9 +539,9 @@ export default function QuoteDialog({
                 name="coreChange"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Delivery & Terms" neutralHeader={true}>
+          <BaseCard title="Delivery & Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Payment Terms"
@@ -593,9 +593,9 @@ export default function QuoteDialog({
                 name="quoteExpirationDate"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Compliance & Traceability" neutralHeader={true}>
+          <BaseCard title="Compliance & Traceability" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Trace To"
@@ -638,7 +638,7 @@ export default function QuoteDialog({
                 name="vendorComments"
               />
             </div>
-          </MainCard>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

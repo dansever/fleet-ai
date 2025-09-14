@@ -7,7 +7,7 @@ import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { client as fuelTenderClient } from '@/modules/fuel/tenders';
 import { FuelTenderCreateInput, FuelTenderUpdateInput } from '@/modules/fuel/tenders/tenders.types';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { serializeDatesForAPI } from '@/utils/date-helpers';
@@ -187,7 +187,7 @@ export default function TenderDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MainCard title="Tender Information" neutralHeader={true}>
+          <BaseCard title="Tender Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
@@ -236,9 +236,9 @@ export default function TenderDialog({
                 }))}
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard
+          <BaseCard
             title="Configuration & Timeline"
             neutralHeader={true}
             headerGradient="from-orange-500 to-orange-400"
@@ -301,7 +301,7 @@ export default function TenderDialog({
                 name="deliveryEnds"
               />
             </div>
-          </MainCard>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

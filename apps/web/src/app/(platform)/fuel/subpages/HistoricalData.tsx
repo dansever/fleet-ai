@@ -1,6 +1,7 @@
 'use client';
 
-import { MainCard } from '@/stories/Card/Card';
+import { CardContent } from '@/components/ui/card';
+import { BaseCard } from '@/stories/Card/Card';
 import { BarChart, Calendar, TrendingUp } from 'lucide-react';
 import { useFuelProcurement } from '../contexts';
 
@@ -20,11 +21,12 @@ export default function HistoricalDataPage() {
 
   return (
     <div className="space-y-6">
-      <MainCard
+      <BaseCard
         title="Historical Fuel Procurement Data"
         subtitle={`${selectedAirport.name} • ${selectedAirport.icao}`}
+        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="flex items-center gap-3 mb-4">
               <TrendingUp className="w-5 h-5 text-blue-600" />
@@ -42,7 +44,18 @@ export default function HistoricalDataPage() {
               <h3 className="font-semibold">Volume Analytics</h3>
             </div>
             <p className="text-sm text-gray-600">
-              Fuel consumption patterns and volume forecasting data.
+              Historical fuel price analysis and trends for this airport.
+            </p>
+            <div className="mt-4 text-xs text-gray-500">Coming Soon</div>
+          </div>
+
+          <div className="bg-gray-50 p-6 rounded-lg">
+            <div className="flex items-center gap-3 mb-4">
+              <BarChart className="w-5 h-5 text-green-600" />
+              <h3 className="font-semibold">Volume Analytics</h3>
+            </div>
+            <p className="text-sm text-gray-600">
+              Past contracts, performance metrics, and supplier analysis.
             </p>
             <div className="mt-4 text-xs text-gray-500">Coming Soon</div>
           </div>
@@ -53,12 +66,12 @@ export default function HistoricalDataPage() {
               <h3 className="font-semibold">Contract History</h3>
             </div>
             <p className="text-sm text-gray-600">
-              Past contracts, performance metrics, and supplier analysis.
+              Fuel consumption patterns and volume forecasting data.
             </p>
             <div className="mt-4 text-xs text-gray-500">Coming Soon</div>
           </div>
-        </div>
-      </MainCard>
+        </CardContent>
+      </BaseCard>
     </div>
   );
 }

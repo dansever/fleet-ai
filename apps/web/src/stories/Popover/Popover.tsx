@@ -3,12 +3,13 @@
 import type React from 'react';
 
 import FileUpload from '@/components/miscellaneous/FileUpload';
+import { CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
 import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '../Button/Button';
-import { MainCard } from '../Card/Card';
+import { BaseCard } from '../Card/Card';
 
 interface BasePopoverProps {
   trigger: ReactNode;
@@ -282,13 +283,13 @@ export const FileUploadPopover = ({
             'w-80 p-0 rounded-3xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
-          <MainCard
+          <BaseCard
             title={selectedFile ? selectedFile.name : 'Upload Document'}
             subtitle={!selectedFile ? 'Drag and drop or click to select' : undefined}
-            neutralHeader={false}
+            headerClassName="text-white from-green-500 to-emerald-500 "
           >
             {!selectedFile ? (
-              <div className="space-y-2">
+              <CardContent className="space-y-2">
                 <div
                   className={cn(
                     'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
@@ -323,9 +324,9 @@ export const FileUploadPopover = ({
                 />
 
                 {typeof children === 'function' ? children({ close }) : children}
-              </div>
+              </CardContent>
             ) : (
-              <div className="flex flex-col p-0 bg-white gap-4">
+              <CardContent className="flex flex-col p-0 bg-white gap-4">
                 <div className="bg-gray-50 rounded-xl p-4">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -333,7 +334,7 @@ export const FileUploadPopover = ({
                     </div>
                     <div className="flex flex-col gap-2 flex-1">
                       <p className="text-sm font-medium text-gray-900 whitespace-break-spaces">
-                        {selectedFile.name}
+                        {selectedFile?.name}
                       </p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="flex flex-col space-y-0">
@@ -381,9 +382,9 @@ export const FileUploadPopover = ({
                     isLoading={loading}
                   />
                 </div>
-              </div>
+              </CardContent>
             )}
-          </MainCard>
+          </BaseCard>
         </PopoverContent>
       </Popover>
     </div>

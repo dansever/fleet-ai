@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { MainCard, MetricCard } from '@/stories/Card/Card';
+import { BaseCard, MetricCard } from '@/stories/Card/Card';
 import { useOrganization, useUser } from '@clerk/nextjs';
 import { Package, Users } from 'lucide-react';
 import Image from 'next/image';
@@ -53,7 +53,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Main Content */}
-          <MainCard
+          <BaseCard
             className="bg-transparent"
             headerGradient="from-orange-500 to-violet-500 opacity-80"
             title="Account Settings"
@@ -86,7 +86,7 @@ export default function ProfilePage() {
                 icon={<Users />}
               />
             </CardContent>
-          </MainCard>
+          </BaseCard>
         </div>
       </main>
     </div>

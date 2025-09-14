@@ -8,7 +8,7 @@ import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { CreateFuelBidData } from '@/modules/fuel/bids/bids.client';
 import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { useEffect, useState } from 'react';
@@ -251,7 +251,7 @@ export default function FuelBidDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bid Information & Timeline */}
-          <MainCard title="Bid Information & Timeline" neutralHeader={true}>
+          <BaseCard title="Bid Information & Timeline" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Title"
@@ -308,10 +308,10 @@ export default function FuelBidDialog({
                 name="aiSummary"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
           {/* Vendor Information */}
-          <MainCard title="Vendor Information" neutralHeader={true}>
+          <BaseCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Vendor Name"
@@ -362,10 +362,10 @@ export default function FuelBidDialog({
                 name="vendorComments"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
           {/* Pricing Structure & Terms */}
-          <MainCard title="Pricing Structure & Terms" neutralHeader={true}>
+          <BaseCard title="Pricing Structure & Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Price Type"
@@ -422,10 +422,10 @@ export default function FuelBidDialog({
                 min={0}
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
           {/* Index-Linked Pricing */}
-          <MainCard title="Index-Linked Pricing" neutralHeader={true}>
+          <BaseCard title="Index-Linked Pricing" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Index Name"
@@ -469,10 +469,10 @@ export default function FuelBidDialog({
                 name="formulaNotes"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
           {/* Fees & Specifications */}
-          <MainCard title="Fees & Specifications" neutralHeader={true}>
+          <BaseCard title="Fees & Specifications" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Into Plane Fee"
@@ -529,10 +529,10 @@ export default function FuelBidDialog({
                 name="includesAirportFees"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
           {/* Calculated Fields */}
-          <MainCard title="Calculated Fields" neutralHeader={true}>
+          <BaseCard title="Calculated Fields" neutralHeader={true}>
             <div className="flex flex-col justify-between space-y-4">
               <KeyValuePair
                 label="Density at 15°C (kg/m³)"
@@ -555,7 +555,7 @@ export default function FuelBidDialog({
                 min={0}
               />
             </div>
-          </MainCard>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

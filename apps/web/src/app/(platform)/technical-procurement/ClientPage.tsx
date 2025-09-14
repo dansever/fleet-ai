@@ -9,7 +9,7 @@ import RfqDialog from '@/features/rfqs/RfqDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
@@ -173,7 +173,7 @@ export default function TechnicalProcurementClientPage() {
       <div>
         {/* RFQ Details */}
         {selectedRfq && (
-          <MainCard
+          <BaseCard
             title={selectedRfq.rfqNumber || 'N/A'}
             subtitle={selectedRfq.buyerComments || 'No buyer comments available'}
             actions={
@@ -204,7 +204,7 @@ export default function TechnicalProcurementClientPage() {
           >
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tender Information */}
-              <MainCard neutralHeader={true} title="Details">
+              <BaseCard neutralHeader={true} title="Details">
                 <KeyValuePair
                   label="Part Number"
                   value={selectedRfq.partNumber || ''}
@@ -226,9 +226,9 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.quantity || ''}
                   valueType="number"
                 />
-              </MainCard>
+              </BaseCard>
               {/* Timeline */}
-              <MainCard title="Vendor Information" neutralHeader={true}>
+              <BaseCard title="Vendor Information" neutralHeader={true}>
                 <KeyValuePair
                   label="Name"
                   value={selectedRfq.vendorName || ''}
@@ -255,10 +255,10 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.vendorContactPhone || ''}
                   valueType="string"
                 />
-              </MainCard>
+              </BaseCard>
 
               {/* Quick Stats */}
-              <MainCard title="General" neutralHeader={true}>
+              <BaseCard title="General" neutralHeader={true}>
                 <KeyValuePair
                   keyClassName="max-w-1/2"
                   label="Status"
@@ -283,9 +283,9 @@ export default function TechnicalProcurementClientPage() {
                   value={selectedRfq.buyerComments || ''}
                   valueType="string"
                 />
-              </MainCard>
+              </BaseCard>
             </div>
-          </MainCard>
+          </BaseCard>
         )}
       </div>
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Button } from '@/stories/Button/Button';
-import { BaseCard, MainCard } from '@/stories/Card/Card';
-import { AlertTriangle, Diff, Edit, Sigma, Upload, X } from 'lucide-react';
+import { BaseCard } from '@/stories/Card/Card';
+import { AlertTriangle, Edit, Upload, X } from 'lucide-react';
 import { useFuelProcurement } from '../contexts';
 
 export default function AgreementsPage() {
@@ -81,17 +81,18 @@ export default function AgreementsPage() {
   return (
     <div className="space-y-6">
       {/* Active Agreement Summary */}
-      <MainCard
+      <BaseCard
         title="Active Agreement & Reconciliation"
         subtitle={`${agreementData.supplier} • ${agreementData.id}`}
+        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
         actions={
           <div className="flex gap-2">
-            <Button intent="secondaryInverted" text="Upload Invoices" icon={Upload} />
-            <Button intent="secondaryInverted" text="Edit Agreement" icon={Edit} />
+            <Button intent="secondary" text="Upload Invoices" icon={Upload} />
+            <Button intent="secondary" text="Edit Agreement" icon={Edit} />
           </div>
         }
       >
-        <div className="grid grid-cols-6 gap-4">
+        <CardContent className="grid grid-cols-6 gap-4">
           <div className="text-center space-y-2">
             <div className="text-sm text-gray-500">Expected Price</div>
             <div className="text-xl font-bold text-blue-600">
@@ -124,21 +125,16 @@ export default function AgreementsPage() {
               ${reconciliationKPIs.avgVariance.toFixed(3)}/L
             </div>
           </div>
-        </div>
-      </MainCard>
+        </CardContent>
+      </BaseCard>
 
       {/* Pricing Formula */}
-      <BaseCard>
-        <CardHeader className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Sigma className="w-6 h-6 text-blue-500" />
-              Current Pricing Formula
-            </CardTitle>
-            <p className="text-slate-600 mt-1">How we calculate expected prices</p>
-          </div>
-        </CardHeader>
-        <CardContent className="grid grid-cols-6 gap-4">
+      <BaseCard
+        title="Current Pricing Formula"
+        subtitle="How we calculate expected prices"
+        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+      >
+        <CardContent className="grid grid-cols-6">
           <div className="text-center space-y-2">
             <div className="text-gray-600">Base Price</div>
             <div className="font-bold">${agreementData.basePrice.toFixed(3)}</div>
@@ -159,8 +155,8 @@ export default function AgreementsPage() {
             <div className="text-gray-600">Handling</div>
             <div className="font-bold">{agreementData.handlingFee}</div>
           </div>
-          <div className="text-center space-y-2 bg-accent/50 rounded-lg">
-            <div className="text-gray-600">Total</div>
+          <div className="text-center space-y-2 bg-secondary rounded-xl text-white">
+            <div>Total</div>
             <div className="font-bold text-lg">
               ${agreementData.totalExpectedPrice.toFixed(3)}/L
             </div>
@@ -169,21 +165,16 @@ export default function AgreementsPage() {
       </BaseCard>
 
       {/* Invoice Comparison */}
-      <BaseCard>
-        <CardHeader className="flex items-center justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Diff className="w-6 h-6 text-blue-500" />
-              Invoice vs Expected Pricing
-            </CardTitle>
-            <p className="text-slate-600 mt-1">
-              Compare and evaluate fuel bids for {selectedAirport?.name}
-            </p>
-          </div>
+      <BaseCard
+        title="Invoice vs Expected Pricing"
+        subtitle={`Compare and evaluate fuel bids for ${selectedAirport?.name}`}
+        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+        actions={
           <div className="flex gap-2 flex-shrink-0">
             <Button intent="warning" text="Generate Dispute" icon={AlertTriangle} />
           </div>
-        </CardHeader>
+        }
+      >
         <CardContent>
           {loading.invoices ? (
             <div className="flex items-center justify-center py-8">
@@ -201,7 +192,7 @@ export default function AgreementsPage() {
 
       {/* Dispute Generation */}
       {invoices.length > 0 && (
-        <MainCard
+        <BaseCard
           title="Generate Dispute"
           subtitle="Review variance details before creating dispute"
         >
@@ -223,7 +214,7 @@ export default function AgreementsPage() {
               <Button intent="secondary" onClick={() => {}} text="Cancel" icon={X} />
             </div>
           </div>
-        </MainCard>
+        </BaseCard>
       )}
     </div>
   );

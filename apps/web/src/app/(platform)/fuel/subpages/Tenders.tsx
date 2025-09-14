@@ -1,6 +1,7 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { CardContent } from '@/components/ui/card';
 import { getProcessStatusDisplay } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
@@ -9,7 +10,7 @@ import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
 import { client as fuelTenderClient } from '@/modules/fuel/tenders';
 import { Button } from '@/stories/Button/Button';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
@@ -81,7 +82,7 @@ const FuelTendersPage = memo(function TendersPage() {
   const currentTender = selectedTender || (tenders.length > 0 ? tenders[0] : null);
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen">
       <div className="max-w-8xl mx-auto space-y-4">
         {/* Error State */}
         {errors.tenders && (
@@ -164,15 +165,15 @@ const FuelTendersPage = memo(function TendersPage() {
 
         {currentTender && (
           <div className="flex flex-col gap-4">
-            <MainCard
+            <BaseCard
               title={currentTender.title}
               subtitle={currentTender.description || 'No description available'}
+              headerClassName="from-sky-500 via-sky-500/60 to-sky-400/60 text-white"
               actions={
-                // Buttons
                 <div className="flex gap-2">
                   <TenderDialog
                     key={`view-tender-${currentTender.id}`}
-                    trigger={<Button intent="secondaryInverted" icon={Eye} />}
+                    trigger={<Button intent="secondary" icon={Eye} />}
                     tender={currentTender}
                     airportId={selectedAirport.id}
                     onChange={handleTenderUpdated}
@@ -180,7 +181,7 @@ const FuelTendersPage = memo(function TendersPage() {
                   />
                   <TenderDialog
                     key={`edit-tender-${currentTender.id}`}
-                    trigger={<Button intent="secondaryInverted" icon={Pencil} />}
+                    trigger={<Button intent="secondary" icon={Pencil} />}
                     tender={currentTender}
                     airportId={selectedAirport.id}
                     onChange={handleTenderUpdated}
@@ -188,11 +189,7 @@ const FuelTendersPage = memo(function TendersPage() {
                   />
                   <ConfirmationPopover
                     trigger={
-                      <Button
-                        intent="secondaryInverted"
-                        icon={TrashIcon}
-                        className="hover:bg-red-500"
-                      />
+                      <Button intent="secondary" icon={TrashIcon} className="hover:bg-red-500" />
                     }
                     popoverIntent="danger"
                     title="Delete Tender"
@@ -203,7 +200,7 @@ const FuelTendersPage = memo(function TendersPage() {
                 </div>
               }
             >
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <CardContent className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* grid col*/}
                 <div className="flex flex-col gap-4">
                   <div className="space-y-2">
@@ -288,8 +285,8 @@ const FuelTendersPage = memo(function TendersPage() {
                     <div className="text-sm font-medium">{bids.length} responded</div>
                   </div>
                 </div>
-              </div>
-            </MainCard>
+              </CardContent>
+            </BaseCard>
 
             {/* Fuel Bids Loading State */}
             {loading.bids ? (

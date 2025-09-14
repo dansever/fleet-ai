@@ -1,6 +1,5 @@
 'use client';
 
-import FileUpload from '@/components/miscellaneous/FileUpload';
 import ChatBot, { ChatBotConfig } from '@/stories/ChatBot/ChatBot';
 
 export default function AskAI() {
@@ -60,10 +59,5 @@ export default function AskAI() {
     },
   };
 
-  return (
-    <div className="h-full">
-      <FileUpload />
-      <ChatBot config={config} />
-    </div>
-  );
+  return <ChatBot config={config} />;
 }

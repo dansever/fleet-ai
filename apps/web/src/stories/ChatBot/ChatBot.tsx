@@ -1,5 +1,6 @@
 'use client';
 
+import { CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
@@ -354,7 +355,7 @@ export default function ChatBot({
         <div
           className={cn(
             'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-            message.role === 'user' ? 'bg-primary' : 'bg-muted',
+            message.role === 'user' ? 'bg-primary' : 'bg-white',
           )}
         >
           {message.role === 'user' ? (
@@ -370,7 +371,7 @@ export default function ChatBot({
             'flex-1 space-y-2 rounded-2xl px-4 py-3',
             message.role === 'user'
               ? 'max-w-[70%] bg-primary text-primary-foreground ml-8'
-              : 'bg-muted text-foreground mr-8',
+              : 'bg-white border border-green-500 text-foreground mr-8',
             config.theme === 'minimal' && 'rounded-lg',
             config.theme === 'rounded' && 'rounded-3xl',
           )}
@@ -441,7 +442,7 @@ export default function ChatBot({
     );
 
   const chatContent = (
-    <div
+    <CardContent
       className={cn(getContainerClasses())}
       style={{
         height: height,
@@ -530,7 +531,7 @@ export default function ChatBot({
           />
         </form>
       </div>
-    </div>
+    </CardContent>
   );
 
   // Return BaseCard wrapper for component variant, direct content for full variant
@@ -562,7 +563,8 @@ export default function ChatBot({
       title={cardTitle}
       subtitle={cardSubtitle}
       actions={cardActions}
-      body={chatContent}
-    />
+    >
+      {chatContent}
+    </BaseCard>
   );
 }

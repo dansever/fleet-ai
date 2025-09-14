@@ -3,7 +3,7 @@
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { VendorContact } from '@/drizzle/types';
 import { Button } from '@/stories/Button/Button';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { Building2, Mail, Phone, RefreshCw, User, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -163,7 +163,7 @@ export default function ContactsAndProviders() {
 
   return (
     <div className="flex flex-col gap-6">
-      <MainCard
+      <BaseCard
         title="Airport Contacts"
         subtitle={`All contacts associated with ${selectedAirport?.name || 'this airport'} including direct airport contacts and vendor contacts.`}
         neutralHeader={true}
@@ -215,7 +215,7 @@ export default function ContactsAndProviders() {
             />
           )}
         </div>
-      </MainCard>
+      </BaseCard>
     </div>
   );
 }

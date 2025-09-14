@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { BaseCard } from '@/stories/Card/Card';
 import { AlertTriangle, Bot, Clock, User } from 'lucide-react';
 
@@ -79,10 +79,7 @@ export function ActivityFeed() {
   };
 
   return (
-    <BaseCard className="col-span-4">
-      <CardHeader>
-        <CardTitle className="text-lg">Activity Feed</CardTitle>
-      </CardHeader>
+    <BaseCard className="col-span-4" title="Activity Feed">
       <CardContent className="space-y-4">
         {activities.map((activity) => (
           <div key={activity.id} className="flex items-start space-x-3">

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/stories/Button/Button';
-import { MainCard, MetricCard } from '@/stories/Card/Card';
+import { BaseCard, MetricCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Building2, Plane, Star, Trash } from 'lucide-react';
@@ -35,7 +35,7 @@ export default function AirportPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Airport Information */}
-      <MainCard
+      <BaseCard
         title="Airport Information"
         subtitle={`Information about ${selectedAirport?.name || 'this airport'}.`}
         neutralHeader={true}
@@ -74,7 +74,7 @@ export default function AirportPage() {
             valueType="boolean"
           />
         </div>
-      </MainCard>
+      </BaseCard>
       {/* Airport Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <MetricCard

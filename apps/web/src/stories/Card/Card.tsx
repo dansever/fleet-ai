@@ -1,21 +1,14 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { TrendingUp } from 'lucide-react';
-import Image from 'next/image';
 import type React from 'react';
-
-export interface BaseCardProps {
-  className?: string;
-  children?: React.ReactNode;
-}
+import { forwardRef } from 'react';
 
 // Common standardized props for all cards
-export interface StandardCardProps {
+export interface StandardCardProps extends React.ComponentPropsWithoutRef<typeof Card> {
   className?: string;
   // Header options (either simple or custom)
   header?: React.ReactNode; // Takes precedence over title/subtitle
@@ -52,9 +45,9 @@ export const BaseCard = ({
               headerClassName,
             )}
           >
-            <div className=" flex flex-col space-y-0 flex-1">
-              <h2>{title}</h2>
-              <h4>{subtitle}</h4>
+            <div className="flex flex-col space-y-0 flex-1">
+              <h3>{title}</h3>
+              <h5>{subtitle}</h5>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>
           </CardHeader>
@@ -63,267 +56,166 @@ export const BaseCard = ({
   </Card>
 );
 
-// Main Card - For displaying main content with header and actions
-export const MainCard = ({
-  title,
-  subtitle,
-  icon,
-  header,
-  headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
-  neutralHeader = false,
-  actions,
-  children,
-  footer,
-  className,
-  cardContentClassName,
-}: StandardCardProps & {
-  headerGradient?: string;
-  neutralHeader?: boolean;
-  cardContentClassName?: string;
-}) => (
-  <Card
-    className={cn(
-      'w-full rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden',
-      className,
-    )}
-  >
-    {(header || title) && (
-      <CardHeader className="px-0">
-        {header ? (
-          header
-        ) : (
-          <div
-            className={cn(
-              'px-6 py-2 relative overflow-hidden',
-              neutralHeader
-                ? 'bg-white text-gray-900'
-                : `bg-gradient-to-r text-white ${headerGradient}`,
-            )}
-          >
-            {!neutralHeader && (
-              <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
-            )}
+/**
+ * MetricCard
+ * - Minimal, flexible API
+ * - Beautiful defaults with full override capability
+ * - Sensible a11y and resilience for undefined/empty props
+ */
 
-            <div className="relative z-10 flex items-start justify-between gap-2">
-              <div className="flex flex-col gap-1">
-                <div className="flex flex-row items-center gap-3">
-                  {icon && icon}
-                  <div className="flex flex-col gap-1">
-                    <h3>{title}</h3>
-                    {subtitle && (
-                      <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>
-                        {subtitle}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-            </div>
-          </div>
-        )}
-      </CardHeader>
-    )}
+export type MetricCardProps = {
+  /** Main label shown at the top-left */
+  title?: React.ReactNode;
+  /** Optional smaller text under the title */
+  subtitle?: React.ReactNode;
 
-    {/* Content area */}
-    <CardContent className={cardContentClassName}>{children}</CardContent>
-    {footer && <CardContent>{footer}</CardContent>}
-  </Card>
-);
+  /** Primary value. Accepts string, number or a custom node (e.g., <span>12%</span>) */
+  value?: React.ReactNode;
 
-// Project Card - For displaying projects or portfolio items
-export const ProjectCard = ({
-  title,
-  subtitle, // Use instead of description for consistency
-  header,
-  imagePath,
-  progress,
-  badgeText,
-  badgeColor,
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  imagePath?: string;
-  progress?: number;
-  badgeText?: string | null;
-  badgeColor?: string;
-}) => (
-  <Card
-    className={cn(
-      'rounded-3xl overflow-hidden shadow-none border-0 gap-2',
-      imagePath && 'pt-0',
-      className,
-    )}
-  >
-    {imagePath && (
-      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative">
-        <Image
-          src={imagePath ?? '/placeholder.svg'}
-          alt={title || 'Project Image'}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority
-        />
-        {badgeText && (
-          <Badge
-            className={cn(
-              'absolute top-3 right-3 text-white rounded-xl',
-              badgeColor ?? 'bg-gradient-to-r from-pink-500 to-red-500',
-            )}
-          >
-            {badgeText}
-          </Badge>
-        )}
-      </div>
-    )}
-    {(header || title) && (
-      <CardHeader className="px-4">
-        {header ? (
-          header
-        ) : (
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <CardTitle className="text-lg font-bold">{title}</CardTitle>
-              {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
-            </div>
-          </div>
-        )}
-      </CardHeader>
-    )}
-    <CardContent className="px-4">
-      {children}
-      {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-    </CardContent>
-    {footer && <CardContent>{footer}</CardContent>}
-    {progress !== undefined && (
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{progress}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
-      </CardContent>
-    )}
-  </Card>
-);
+  /**
+   * Optional change indicator (e.g., "+12% MoM" or "-3.1% since yesterday").
+   * If `changeClassName` is not provided, color is inferred automatically:
+   *  - leading '-' → negative (red)
+   *  - leading '+' or no sign → positive (green)
+   *  - set `neutralChange` true to force neutral color
+   */
+  change?: React.ReactNode;
+  neutralChange?: boolean;
+  changeClassName?: string; // full override for change color/typography
+  changeVisuallyHiddenLabel?: string; // a11y helper for screen readers
 
-// Stats Card - For displaying metrics and statistics
-export const MetricCard = ({
-  title,
-  subtitle,
-  header,
-  value,
-  change,
-  icon = <TrendingUp className="w-6 h-6 text-violet-600" />,
-  trend = 'up',
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  value?: string | number;
-  change?: string;
+  /** Optional right-side icon */
   icon?: React.ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
-}) => (
-  <Card className={cn('rounded-3xl p-4 border-0 shadow-none gap-4', className)}>
-    {(header || title) && (
-      <div className="">
-        {header ? (
-          header
-        ) : (
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{title}</p>
-              {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-            </div>
+  /** Background classes for the icon container */
+  iconBgClassName?: string;
+
+  /** Fully custom header override (replaces title/subtitle/actions area) */
+  header?: React.ReactNode;
+  /** Right-aligned header actions (buttons, menus, etc.) */
+  actions?: React.ReactNode;
+
+  /** Optional content below the stat row */
+  children?: React.ReactNode;
+  /** Optional footer separated by a divider */
+  footer?: React.ReactNode;
+
+  /** Layout/style overrides */
+  className?: string;
+} & React.ComponentPropsWithoutRef<typeof Card>;
+
+const inferChangeTone = (
+  change: React.ReactNode,
+  neutral?: boolean,
+): 'positive' | 'negative' | 'neutral' => {
+  if (neutral) return 'neutral';
+  if (typeof change === 'string') {
+    const trimmed = change.trim();
+    if (trimmed.startsWith('-')) return 'negative';
+    if (trimmed.startsWith('+')) return 'positive';
+  }
+  if (typeof change === 'number') return change < 0 ? 'negative' : 'positive';
+  return 'neutral';
+};
+
+export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
+  (
+    {
+      title,
+      subtitle,
+      value,
+      change,
+      neutralChange,
+      changeClassName,
+      changeVisuallyHiddenLabel,
+      icon = <TrendingUp className="w-5 h-5" aria-hidden="true" />,
+      iconBgClassName = 'p-2 rounded-2xl bg-gradient-to-br from-violet-200 to-blue-100',
+      header,
+      actions,
+      children,
+      footer,
+      className,
+      ...cardProps
+    },
+    ref,
+  ) => {
+    const tone = inferChangeTone(change ?? '', neutralChange);
+
+    const toneClass =
+      changeClassName ??
+      (tone === 'positive'
+        ? 'text-green-600'
+        : tone === 'negative'
+          ? 'text-red-600'
+          : 'text-muted-foreground');
+
+    return (
+      <Card
+        ref={ref}
+        className={cn(
+          'rounded-3xl border-0 px-4 py-1 sm:py-2 md:py-3',
+          'flex flex-col gap-4',
+          className,
+        )}
+        {...cardProps}
+      >
+        {(header || title) && (
+          <div className="flex items-start justify-between gap-3">
+            {header ? (
+              header
+            ) : (
+              <div className="min-w-0">
+                {title && (
+                  <p
+                    className="text-sm font-medium text-muted-foreground truncate"
+                    title={typeof title === 'string' ? title : undefined}
+                  >
+                    {title}
+                  </p>
+                )}
+                {subtitle && (
+                  <p
+                    className="text-xs text-muted-foreground/80 truncate"
+                    title={typeof subtitle === 'string' ? subtitle : undefined}
+                  >
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+            )}
             {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
           </div>
         )}
-      </div>
-    )}
-    <div className="flex items-center justify-between">
-      <div>
-        {value && <h3>{value}</h3>}
-        {change && (
-          <p
-            className={cn(
-              'text-sm mt-1',
-              trend === 'up'
-                ? 'text-green-600'
-                : trend === 'down'
-                  ? 'text-red-600'
-                  : 'text-muted-foreground',
-            )}
-          >
-            {change}
-          </p>
-        )}
-      </div>
-      <div className="p-2 bg-gradient-to-br from-violet-50 to-blue-50 rounded-2xl">{icon}</div>
-    </div>
-    {children && <div className="mt-4">{children}</div>}
-    {footer && <div className="mt-4 pt-4 border-t">{footer}</div>}
-  </Card>
-);
 
-// Profile Card - For user profiles or team members
-export const ProfileCard = ({
-  title, // name
-  subtitle, // role
-  header,
-  avatar,
-  bio,
-  stats,
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  avatar?: string;
-  bio?: string;
-  stats?: { label: string; value: string }[];
-}) => (
-  <Card className={cn('rounded-3xl p-4 text-center gap-4 border-0 shadow-none', className)}>
-    {header ? (
-      header
-    ) : (
-      <>
-        <Avatar className="w-20 h-20 mx-auto">
-          <AvatarImage src={avatar || '/placeholder.svg'} />
-          <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-violet-500 to-blue-500 text-white">
-            {title
-              ?.split(' ')
-              .map((n) => n[0])
-              .join('') || 'U'}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h3>{title}</h3>
-          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
-          {actions && <div className="flex justify-center gap-2 mt-2">{actions}</div>}
-        </div>
-      </>
-    )}
-    {bio && <p className="text-sm text-muted-foreground mb-4">{bio}</p>}
-    {children && <div className="mb-4">{children}</div>}
-    {stats && (
-      <div className="flex justify-center pt-4 border-t">
-        {stats.map((stat, index) => (
-          <div key={index} className="text-center">
-            <p className="text-lg font-bold">{stat.value}</p>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            {value !== undefined && value !== null && (
+              <h3 className="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight">
+                {value}
+              </h3>
+            )}
+            {change !== undefined && change !== null && (
+              <p className={cn('text-sm mt-1', toneClass)}>
+                {changeVisuallyHiddenLabel && (
+                  <span className="sr-only">{changeVisuallyHiddenLabel}</span>
+                )}
+                {change}
+              </p>
+            )}
           </div>
-        ))}
-      </div>
-    )}
-    {footer && <div className="pt-4 border-t">{footer}</div>}
-  </Card>
+
+          {icon && (
+            <div className={cn('flex-shrink-0', iconBgClassName)} aria-hidden="true">
+              {icon}
+            </div>
+          )}
+        </div>
+
+        {children && <div className="mt-1">{children}</div>}
+
+        {footer && <div className="mt-3 pt-3 border-t">{footer}</div>}
+      </Card>
+    );
+  },
 );
 
 // List Item Card - For scrollable lists with flexible content (renamed from ListItemCard)

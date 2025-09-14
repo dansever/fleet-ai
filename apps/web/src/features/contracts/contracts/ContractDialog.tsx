@@ -7,7 +7,7 @@ import { formatDate } from '@/lib/core/formatters';
 import { client as contractClient } from '@/modules/contracts';
 import { type ContractCreateInput } from '@/modules/contracts/contracts.types';
 import { client as airportClient } from '@/modules/core/airports';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { ModernTimeline } from '@/stories/Timeline/Timeline';
@@ -199,7 +199,7 @@ export default function ContractDialog({
     >
       {(isEditing: boolean) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <MainCard title="Contract Information" neutralHeader={true}>
+          <BaseCard title="Contract Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
@@ -230,9 +230,9 @@ export default function ContractDialog({
                 name="airport"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Vendor Information" neutralHeader={true}>
+          <BaseCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
@@ -283,9 +283,9 @@ export default function ContractDialog({
                 name="vendorComments"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Contract Period" neutralHeader={true}>
+          <BaseCard title="Contract Period" neutralHeader={true}>
             {!isEditing && (
               <ModernTimeline
                 orientation="horizontal"
@@ -333,7 +333,7 @@ export default function ContractDialog({
                 />
               </div>
             )}
-          </MainCard>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

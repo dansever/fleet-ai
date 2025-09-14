@@ -1,6 +1,6 @@
 'use client';
 
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartLegend,
@@ -16,7 +16,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   Award,
-  BarChart3,
   DollarSign,
   Target,
 } from 'lucide-react';
@@ -112,7 +111,7 @@ export default function DashboardClientPage({
             title={metric.title}
             value={metric.value}
             change={metric.change}
-            trend={metric.trend as 'up' | 'down' | 'neutral'}
+            neutralChange={metric.trend === 'neutral'}
             icon={
               metric.trend === 'up' ? (
                 <ArrowUpRight className="text-green-500" />
@@ -128,13 +127,7 @@ export default function DashboardClientPage({
 
       <div className="col-span-4 flex flex-col gap-4">
         {/* Charts and Analytics */}
-        <BaseCard>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Monthly Spend vs Budget
-            </CardTitle>
-          </CardHeader>
+        <BaseCard title="Monthly Spend vs Budget">
           <CardContent>
             <ChartContainer config={chartConfig}>
               <BarChart data={monthlySpendData}>
