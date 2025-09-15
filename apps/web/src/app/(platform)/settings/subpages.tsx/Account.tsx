@@ -55,7 +55,7 @@ export default function ProfilePage() {
           {/* Main Content */}
           <BaseCard
             className="bg-transparent"
-            headerGradient="from-orange-500 to-violet-500 opacity-80"
+            headerClassName="from-orange-500 to-violet-500 opacity-80"
             title="Account Settings"
           >
             <CardContent className="grid grid-cols-3 gap-4 px-0">

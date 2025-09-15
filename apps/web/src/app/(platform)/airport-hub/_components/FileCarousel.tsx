@@ -22,6 +22,7 @@ interface FileCarouselProps {
     size: number;
     type: string;
     action: () => void;
+    isSelected?: boolean;
   }>;
 }
 
@@ -59,7 +60,7 @@ export const FileCarousel: React.FC<FileCarouselProps> = ({ files }) => {
   return (
     <>
       <style>{noScrollbarCSS}</style>
-      <div className="relative w-full rounded-3xl backdrop-blur-xl  ">
+      <div className="relative w-full rounded-3xl backdrop-blur-xl">
         <motion.div
           ref={carouselRef}
           className="flex space-x-6 overflow-x-auto scrollbar-hide p-4 no-scrollbar"
@@ -73,6 +74,7 @@ export const FileCarousel: React.FC<FileCarouselProps> = ({ files }) => {
                   size={file.size}
                   type={file.type.toLowerCase()}
                   onClick={file.action}
+                  isSelected={file.isSelected}
                 />
               }
             </motion.div>
@@ -114,14 +116,17 @@ interface FileCardProps {
   size: number;
   type: string;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
-const FileCard: React.FC<FileCardProps> = ({ name, size, type, onClick }) => {
+const FileCard: React.FC<FileCardProps> = ({ name, size, type, onClick, isSelected }) => {
   return (
     <motion.div
       whileHover={{ y: -2, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
       whileTap={{ scale: 0.95 }}
-      className="bg-white rounded-2xl p-2 shadow-md cursor-pointer flex flex-col justify-between transition-colors duration-300 hover:bg-gray-50"
+      className={`rounded-2xl p-2 shadow-md cursor-pointer flex flex-col justify-between transition-colors duration-300 hover:bg-gray-50 ${
+        isSelected ? 'bg-blue-50 border-2 border-blue-500 shadow-lg' : 'bg-white'
+      }`}
       onClick={onClick}
     >
       <div className="flex flex-row items-center text-center gap-4">

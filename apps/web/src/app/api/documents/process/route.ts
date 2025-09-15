@@ -1,8 +1,6 @@
 import { DocumentParentType } from '@/drizzle/enums';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as contractsServer } from '@/modules/contracts';
-import { server as chunksServer } from '@/modules/documents/chunks';
 import { server as documentsServer } from '@/modules/documents/documents';
 import { server as extractServer, utils as extractUtils } from '@/modules/documents/extract';
 import { types as documentProcessorTypes } from '@/modules/documents/orchastration';
@@ -50,66 +48,88 @@ export async function POST(request: NextRequest) {
     };
 
     // =====================================
-    // 1. Upload file to storage
+    // 1. Save document record to database
+    // =====================================
+    onProgress?.({ name: 'save', description: 'Saving document record...', progress: 10 }, 10);
+    const documentRecord = await documentsServer.createDocument({
+      orgId,
+      parentId,
+      parentType,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+    console.log('✅ Document record saved');
+
+    // =====================================
+    // 2. Upload file to storage
     // =====================================
     onProgress?.({ name: 'upload', description: 'Uploading file to storage...', progress: 20 }, 20);
     const storageResult = await storageServer.uploadFile(file, parentType, parentId);
     console.log('✅ Storage upload completed');
 
     // =====================================
-    // 2. Parse document with LlamaParse
-    // =====================================
-    onProgress?.({ name: 'parse', description: 'Parsing document...', progress: 30 }, 30);
-    const parseResult = await parseServer.parseDocument(file);
-    const parsedTextCombined = parseResult.map((part: any) => part.text).join('\n');
-    console.log('✅ Parsed text completed');
-
-    // =====================================
-    // 3. Extract document data with LlamaExtract
-    // =====================================
-    onProgress?.({ name: 'extract', description: 'Extracting document data...', progress: 40 }, 40);
-    const extractResult = await extractServer.fileExtractorOrchestrator(
-      file,
-      extractUtils.getExtractionAgentName(parentType),
-    );
-    console.log('✅ Extraction completed');
-
-    // =====================================
-    // 4. Update parent record with extracted data
-    // =====================================
-    onProgress?.({ name: 'update', description: 'Updating contract record...', progress: 50 }, 50);
-    const updateResult = await contractsServer.updateContract(parentId, {
-      summary: extractResult.data.summary,
-      terms: extractResult.data.terms,
-    });
-    console.log('✅ Contract record updated');
-
-    // =====================================
-    // 5. Save document record to database
-    // =====================================
-    onProgress?.({ name: 'save', description: 'Saving document record...', progress: 70 }, 70);
-    const saveResult = await documentsServer.createDocument({
-      orgId,
-      parentId,
-      parentType,
-      storageId: storageResult.id,
-      storagePath: storageResult.path,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      content: parsedTextCombined,
-    });
-    console.log('✅ Document record saved');
-
-    // =====================================
-    // 6. Create chunks and embeddings
+    // 2.1 Update document record with storage data
     // =====================================
     onProgress?.(
-      { name: 'chunk', description: 'Creating text chunks and embeddings...', progress: 80 },
-      80,
+      {
+        name: 'update',
+        description: 'Updating document record with storage data...',
+        progress: 25,
+      },
+      25,
     );
-    const chunksResult = await chunksServer.createDocumentChunks(saveResult);
-    console.log('✅ Chunks created');
+    await documentsServer.updateDocument(documentRecord.id, {
+      storageId: storageResult.id,
+      storagePath: storageResult.path,
+    });
+    console.log('✅ Document record updated with storage data');
+
+    // =====================================
+    // 3 & 4. Parse document AND Extract data simultaneously
+    // =====================================
+    onProgress?.(
+      {
+        name: 'parse_extract',
+        description: 'Parsing document and extracting data...',
+        progress: 30,
+      },
+      30,
+    );
+
+    const [parseResult, extractResult] = await Promise.all([
+      parseServer.parseDocument(file),
+      extractServer.fileExtractorOrchestrator(
+        file,
+        extractUtils.getExtractionAgentName(parentType),
+      ),
+    ]);
+
+    const parsedTextCombined = parseResult.map((part: any) => part.text).join('\n');
+    console.log('✅ Parsing and extraction completed simultaneously');
+
+    // =====================================
+    // 5. Update document record with extracted data
+    // =====================================
+    onProgress?.({ name: 'update', description: 'Updating document record...', progress: 50 }, 50);
+    await documentsServer.updateDocument(documentRecord.id, {
+      content: parsedTextCombined,
+      summary: extractResult.data.summary,
+      extractedData: extractResult.data.terms,
+      confidence: extractResult.data.confidence,
+      extractedAt: new Date(),
+    });
+    console.log('✅ Document record updated');
+
+    // // =====================================
+    // // 6. Create chunks and embeddings
+    // // =====================================
+    // onProgress?.(
+    //   { name: 'chunk', description: 'Creating text chunks and embeddings...', progress: 80 },
+    //   80,
+    // );
+    // const chunksResult = await chunksServer.createDocumentChunks(documentRecord);
+    // console.log('✅ Chunks created');
 
     // =====================================
     // 7. Complete

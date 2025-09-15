@@ -286,7 +286,8 @@ export const FileUploadPopover = ({
           <BaseCard
             title={selectedFile ? selectedFile.name : 'Upload Document'}
             subtitle={!selectedFile ? 'Drag and drop or click to select' : undefined}
-            headerClassName="text-white from-green-500 to-emerald-500 "
+            headerClassName="text-white from-green-500 to-emerald-500"
+            className="gap-2 pb-2"
           >
             {!selectedFile ? (
               <CardContent className="space-y-2">
@@ -326,8 +327,8 @@ export const FileUploadPopover = ({
                 {typeof children === 'function' ? children({ close }) : children}
               </CardContent>
             ) : (
-              <CardContent className="flex flex-col p-0 bg-white gap-4">
-                <div className="bg-gray-50 rounded-xl p-4">
+              <CardContent className="flex flex-col gap-2">
+                <div className="bg-gray-50 rounded-xl p-2">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                       <FileText className="w-5 h-5 text-white" />

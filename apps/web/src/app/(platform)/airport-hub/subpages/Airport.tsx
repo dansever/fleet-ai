@@ -1,10 +1,11 @@
 'use client';
 
+import { CardContent } from '@/components/ui/card';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, MetricCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
-import { Building2, Plane, Star, Trash } from 'lucide-react';
+import { Building2, Plane, Trash } from 'lucide-react';
 import { useAirportHub } from '../ContextProvider';
 
 export default function AirportPage() {
@@ -38,7 +39,6 @@ export default function AirportPage() {
       <BaseCard
         title="Airport Information"
         subtitle={`Information about ${selectedAirport?.name || 'this airport'}.`}
-        neutralHeader={true}
         actions={
           <ConfirmationPopover
             trigger={<Button intent="danger" icon={Trash} />}
@@ -57,7 +57,7 @@ export default function AirportPage() {
           />
         }
       >
-        <div className="grid grid-cols-2">
+        <CardContent className="grid grid-cols-2">
           <KeyValuePair
             label="Airport Name"
             value={selectedAirport?.name || ''}
@@ -73,7 +73,7 @@ export default function AirportPage() {
             value={selectedAirport?.isHub || false}
             valueType="boolean"
           />
-        </div>
+        </CardContent>
       </BaseCard>
       {/* Airport Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -81,26 +81,13 @@ export default function AirportPage() {
           title="Total Contracts"
           value={airportStats.totalContracts}
           icon={<Building2 className="w-6 h-6 text-blue-600" />}
-          trend="neutral"
         />
         <MetricCard
           title="Active Contracts"
           value={airportStats.activeContracts}
           change={`${airportStats.totalContracts - airportStats.activeContracts} expired`}
           icon={<Plane className="w-6 h-6 text-green-600" />}
-          trend={airportStats.activeContracts > 0 ? 'up' : 'neutral'}
-        />
-        <MetricCard
-          title="Airport Type"
-          value={airportStats.hubStatus}
-          icon={
-            selectedAirport.isHub ? (
-              <Star className="text-yellow-400 fill-yellow-400" />
-            ) : (
-              <Plane className="text-blue-600" />
-            )
-          }
-          trend="neutral"
+          neutralChange={true}
         />
       </div>
     </div>

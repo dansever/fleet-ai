@@ -49,7 +49,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
         {/* Inner wrapper inside the ScrollArea viewport */}
         <div className="flex flex-col min-w-0 h-full gap-2">
           {headerContent && (
-            <header className="p-2 sticky top-0 z-50 w-full shrink-0">
+            <header className="p-2 sticky top-0 z-50 w-full">
               <div className="px-2 py-1 rounded-xl backdrop-blur-sm supports-[backdrop-filter]:bg-white/20">
                 {headerContent}
               </div>

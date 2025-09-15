@@ -1,6 +1,7 @@
 // Updated by CursorAI on Sep 2 2025
 'use client';
 
+import { CardContent } from '@/components/ui/card';
 import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
 import type { Airport, Contract } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
@@ -199,8 +200,8 @@ export default function ContractDialog({
     >
       {(isEditing: boolean) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <BaseCard title="Contract Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between">
+          <BaseCard title="Contract Information">
+            <CardContent className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -229,11 +230,11 @@ export default function ContractDialog({
                 onChange={(value) => handleFieldChange('airport', value)}
                 name="airport"
               />
-            </div>
+            </CardContent>
           </BaseCard>
 
-          <BaseCard title="Vendor Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between">
+          <BaseCard title="Vendor Information">
+            <CardContent className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -282,57 +283,59 @@ export default function ContractDialog({
                 onChange={(value) => handleFieldChange('vendorComments', value)}
                 name="vendorComments"
               />
-            </div>
+            </CardContent>
           </BaseCard>
 
-          <BaseCard title="Contract Period" neutralHeader={true}>
-            {!isEditing && (
-              <ModernTimeline
-                orientation="horizontal"
-                items={[
-                  {
-                    id: '1',
-                    title: 'Starts',
-                    timestamp: formatDate(formData.effectiveFrom),
-                    status: 'current',
-                  },
-                  {
-                    id: '2',
-                    title: 'Today',
-                    timestamp: formatDate(new Date()),
-                    status: 'current',
-                  },
-                  {
-                    id: '3',
-                    title: 'Ends',
-                    timestamp: formatDate(formData.effectiveTo),
-                    status: 'current',
-                  },
-                ]}
-              />
-            )}
-            {isEditing && (
-              <div className="flex flex-col">
-                <KeyValuePair
-                  label="Effective From"
-                  value={formData.effectiveFrom?.toISOString().split('T')[0] || ''}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) =>
-                    handleFieldChange('effectiveFrom', value ? new Date(value as string) : null)
-                  }
+          <BaseCard title="Contract Period">
+            <CardContent>
+              {!isEditing && (
+                <ModernTimeline
+                  orientation="horizontal"
+                  items={[
+                    {
+                      id: '1',
+                      title: 'Starts',
+                      timestamp: formatDate(formData.effectiveFrom),
+                      status: 'current',
+                    },
+                    {
+                      id: '2',
+                      title: 'Today',
+                      timestamp: formatDate(new Date()),
+                      status: 'current',
+                    },
+                    {
+                      id: '3',
+                      title: 'Ends',
+                      timestamp: formatDate(formData.effectiveTo),
+                      status: 'current',
+                    },
+                  ]}
                 />
-                <KeyValuePair
-                  label="Effective To"
-                  value={formData.effectiveTo?.toISOString().split('T')[0] || ''}
-                  valueType="date"
-                  editMode={isEditing}
-                  onChange={(value) =>
-                    handleFieldChange('effectiveTo', value ? new Date(value as string) : null)
-                  }
-                />
-              </div>
-            )}
+              )}
+              {isEditing && (
+                <div className="flex flex-col">
+                  <KeyValuePair
+                    label="Effective From"
+                    value={formData.effectiveFrom?.toISOString().split('T')[0] || ''}
+                    valueType="date"
+                    editMode={isEditing}
+                    onChange={(value) =>
+                      handleFieldChange('effectiveFrom', value ? new Date(value as string) : null)
+                    }
+                  />
+                  <KeyValuePair
+                    label="Effective To"
+                    value={formData.effectiveTo?.toISOString().split('T')[0] || ''}
+                    valueType="date"
+                    editMode={isEditing}
+                    onChange={(value) =>
+                      handleFieldChange('effectiveTo', value ? new Date(value as string) : null)
+                    }
+                  />
+                </div>
+              )}
+            </CardContent>
           </BaseCard>
         </div>
       )}

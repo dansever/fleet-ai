@@ -166,9 +166,7 @@ export default function AirportList({
                   <div className="flex flex-row gap-2">
                     {/* Left side: main airport info */}
                     <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-sm font-medium">
-                        <span className="text-sm font-medium">{airport.name}</span>
-                      </span>
+                      <span className="text-sm font-medium">{airport.name}</span>
                       <span className="text-xs text-muted-foreground">
                         {airport.city && `${airport.city}`}
                         {airport.state && `, ${airport.state}`}

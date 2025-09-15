@@ -2,6 +2,7 @@
 
 import { CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { client as documentsClient } from '@/modules/documents/documents';
 import { client as processDocumentClient } from '@/modules/documents/orchastration/';
@@ -9,8 +10,10 @@ import { client as parseClient } from '@/modules/documents/parse';
 import { client as storageClient } from '@/modules/storage';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
+import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
-import { ChevronDown, ChevronUp, Eye, File, Trash, Upload } from 'lucide-react';
+import { ContractTerm } from '@/types/contracts';
+import { ChevronDown, ChevronUp, Copy, Eye, File, Trash, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
@@ -27,11 +30,14 @@ export function ContractDocument() {
     addDocument,
     removeDocument,
     updateContract,
+    selectedDocument,
+    setSelectedDocument,
   } = useAirportHub();
   const [downloadFileLoading, setDownloadFileLoading] = useState(false);
   const [viewDocumentLoading, setViewDocumentLoading] = useState(false);
   const [deleteDocumentLoading, setDeleteDocumentLoading] = useState(false);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [searchTerms, setSearchTerms] = useState('');
 
   // Handle file upload for contract extraction
   const handleUploadContractFile = async (file: File) => {
@@ -124,6 +130,20 @@ export function ContractDocument() {
     }
   };
 
+  const copyMessage = (message: string | number | boolean) => {
+    navigator.clipboard.writeText(message.toString());
+    toast.info('Copied to clipboard');
+  };
+
+  const filteredTerms = Array.isArray(selectedDocument?.extractedData)
+    ? selectedDocument.extractedData.filter((term: ContractTerm) => {
+        const searchLower = searchTerms.toLowerCase();
+        const keyMatch = term.key.toLowerCase().includes(searchLower);
+        const contentMatch = term.value?.value?.toString().toLowerCase().includes(searchLower);
+        return keyMatch || contentMatch;
+      })
+    : [];
+
   return (
     <BaseCard
       headerClassName={
@@ -139,83 +159,156 @@ export function ContractDocument() {
         />
       }
     >
-      <CardContent className="flex flex-col gap-4">
-        <FileCarousel
-          files={documents.map((document) => ({
-            name: document.fileName ?? '',
-            size: document.fileSize ?? 0,
-            type: document.fileType ?? '',
-            action: () => handleViewDocument(document.storagePath ?? ''),
-          }))}
-        />
+      <CardContent className="flex flex-col ">
+        {/* Document Selection via FileCarousel */}
+        {documents.length > 0 && (
+          <div>
+            <FileCarousel
+              files={documents.map((document) => ({
+                name: document.fileName ?? '',
+                size: document.fileSize ?? 0,
+                type: document.fileType ?? '',
+                action: () => setSelectedDocument(document),
+                isSelected: selectedDocument?.id === document.id,
+              }))}
+            />
+          </div>
+        )}
+
         {documents.length === 0 ? (
           <div className="text-center text-sm text-muted-foreground py-8 gap-4 flex flex-col items-center">
             <h2>No documents found for this contract</h2>
             <p>Upload documents to this contract to get started</p>
           </div>
+        ) : !selectedDocument ? (
+          <div className="text-center text-sm text-muted-foreground py-8 gap-4 flex flex-col items-center">
+            <h2>Select a document to view its details</h2>
+            <p>Choose a document from the dropdown above</p>
+          </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {documents.map((document, index) => (
-              <div key={document.id} className="flex flex-col gap-4">
-                <div className="grid grid-cols-4 gap-4">
-                  {/* Basic Information */}
-                  <div className="col-span-full flex items-center justify-between gap-2 rounded-xl p-2 bg-slate-100">
-                    <div className="flex items-center gap-2">
-                      <File className="w-6 h-6" />
-                      <p className="text-lg text-slate-900 font-mono px-2">
-                        {document.fileName || 'Unknown'}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
+            <div className="grid grid-cols-4 gap-4">
+              {/* Basic Information */}
+              <div className="col-span-full flex items-center justify-between gap-2 rounded-xl p-2 bg-slate-100">
+                <div className="flex items-center gap-2">
+                  <File className="w-6 h-6" />
+                  <p className="text-lg text-slate-900 font-mono px-2">
+                    {selectedDocument.fileName || 'Unknown'}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    intent="secondary"
+                    icon={Eye}
+                    onClick={() => handleViewDocument(selectedDocument.storagePath ?? '')}
+                    disabled={viewDocumentLoading}
+                    isLoading={viewDocumentLoading}
+                  />
+                  <ConfirmationPopover
+                    onConfirm={() => handleDeleteDocument(selectedDocument.id)}
+                    trigger={
                       <Button
                         intent="secondary"
-                        icon={Eye}
-                        onClick={() => handleViewDocument(document.storagePath ?? '')}
-                        disabled={viewDocumentLoading}
-                        isLoading={viewDocumentLoading}
+                        icon={Trash}
+                        text="Delete"
+                        disabled={deleteDocumentLoading}
+                        isLoading={deleteDocumentLoading}
                       />
-                      <ConfirmationPopover
-                        onConfirm={() => handleDeleteDocument(document.id)}
-                        trigger={
-                          <Button
-                            intent="secondary"
-                            icon={Trash}
-                            text="Delete"
-                            disabled={deleteDocumentLoading}
-                            isLoading={deleteDocumentLoading}
-                          />
-                        }
-                        popoverIntent="danger"
-                        title="Delete Document"
-                        description="Are you sure you want to delete this document? This action cannot be undone."
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-slate-600">File Type:</span>
-                    <p>{document.fileType || 'Unknown'}</p>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-slate-600">File Size:</span>
-                    <p>{document.fileSize ? formatFileSize(document.fileSize) : 'Unknown'}</p>
-                  </div>
-
-                  <div>
-                    <span className="font-medium text-slate-600">Created:</span>
-                    <p>{document.createdAt ? formatDate(document.createdAt) : 'Unknown'}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-slate-600">Updated:</span>
-                    <p>{document.updatedAt ? formatDate(document.updatedAt) : 'Unknown'}</p>
-                  </div>
+                    }
+                    popoverIntent="danger"
+                    title="Delete Document"
+                    description="Are you sure you want to delete this document? This action cannot be undone."
+                  />
                 </div>
+              </div>
 
-                {/* Document Content */}
-                <Separator />
-                <div className="col-span-full flex justify-between items-center gap-2 p-2">
-                  <h3 className="font-medium text-slate-600">Document Content</h3>
+              <div>
+                <span className="font-medium text-slate-600">File Type:</span>
+                <p>{selectedDocument.fileType || 'Unknown'}</p>
+              </div>
+
+              <div>
+                <span className="font-medium text-slate-600">File Size:</span>
+                <p>
+                  {selectedDocument.fileSize
+                    ? formatFileSize(selectedDocument.fileSize)
+                    : 'Unknown'}
+                </p>
+              </div>
+
+              <div>
+                <span className="font-medium text-slate-600">Created:</span>
+                <p>
+                  {selectedDocument.createdAt ? formatDate(selectedDocument.createdAt) : 'Unknown'}
+                </p>
+              </div>
+              <div>
+                <span className="font-medium text-slate-600">Updated:</span>
+                <p>
+                  {selectedDocument.updatedAt ? formatDate(selectedDocument.updatedAt) : 'Unknown'}
+                </p>
+              </div>
+            </div>
+
+            {/* Document Content */}
+            <Separator />
+
+            <Tabs>
+              <TabsList className="flex flex-row gap-2">
+                <TabsTrigger value="summary">Summary</TabsTrigger>
+                <TabsTrigger value="extractedData">Extracted Data</TabsTrigger>
+                <TabsTrigger value="content">Content</TabsTrigger>
+              </TabsList>
+              <TabsContent value="summary">
+                <p className="text-base rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 p-4 whitespace-pre-wrap leading-relaxed">
+                  {selectedDocument.summary}
+                </p>
+              </TabsContent>
+              <TabsContent value="extractedData">
+                <div className="flex flex-col gap-2">
+                  <ModernInput
+                    placeholder="Search terms"
+                    value={searchTerms}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSearchTerms(e.target.value)
+                    }
+                  />
+                  {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
+                    filteredTerms.map((term: ContractTerm, idx: number) => (
+                      <div
+                        key={idx}
+                        className="border-1 rounded-2xl p-3 bg-muted/40 flex flex-col gap-1"
+                      >
+                        <div className="flex flex-row items-center gap-1">
+                          <div className="font-bold flex-1">{term.key}</div>
+                          <Copy
+                            className="w-4 h-4 stroke-gray-400 hover:stroke-gray-600 hover:scale-105 transition-all cursor-pointer"
+                            onClick={() => copyMessage(term.value?.value)}
+                          />
+                        </div>
+                        <div className="text-sm">{term.value?.value}</div>
+                        {term.section && (
+                          <div className="text-xs italic">Section: {term.section}</div>
+                        )}
+                        {term.source?.snippet && (
+                          <div className="text-xs text-muted-foreground border-l-2 pl-2 border-primary/40 mt-1">
+                            "{term.source.snippet}"
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p className="text-sm">No contract terms available yet.</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Terms will appear here after document processing.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="content">
+                <div className="col-span-full flex justify-end items-center gap-2 p-2">
                   <Button
                     intent="ghost"
                     icon={isContentExpanded ? ChevronUp : ChevronDown}
@@ -228,16 +321,15 @@ export function ContractDocument() {
                   className={`col-span-full rounded-xl ${!isContentExpanded ? 'max-h-96' : 'max-h-none'} overflow-y-auto`}
                 >
                   <pre className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
-                    {document.content?.length &&
-                    document.content?.length > 2000 &&
+                    {selectedDocument.content?.length &&
+                    selectedDocument.content?.length > 2000 &&
                     !isContentExpanded
-                      ? `${document.content?.substring(0, 2000)}...\n\n[Content truncated - showing first 2000 characters. Click "Show Full Content" to view all ${document.content?.length.toLocaleString()} characters]`
-                      : document.content}
+                      ? `${selectedDocument.content?.substring(0, 2000)}...\n\n[Content truncated - showing first 2000 characters. Click "Show Full Content" to view all ${selectedDocument.content?.length.toLocaleString()} characters]`
+                      : selectedDocument.content}
                   </pre>
                 </div>
-                {index < documents.length - 1 && <Separator className="my-4" />}
-              </div>
-            ))}
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </CardContent>

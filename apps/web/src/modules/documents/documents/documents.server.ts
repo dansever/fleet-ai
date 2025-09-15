@@ -5,7 +5,7 @@ import { db } from '@/drizzle';
 import { documentsTable } from '@/drizzle/schema/schema.documents';
 import { Contract, Document, NewDocument } from '@/drizzle/types';
 import { and, eq } from 'drizzle-orm';
-
+import { DocumentUpdateInput } from './documents.types';
 /**
  * Get a document by ID
  */
@@ -44,7 +44,10 @@ export async function createDocument(document: NewDocument): Promise<Document> {
 /**
  * Update a document
  */
-export async function updateDocument(id: Document['id'], document: Document): Promise<Document> {
+export async function updateDocument(
+  id: Document['id'],
+  document: DocumentUpdateInput,
+): Promise<Document> {
   const updatedDocument = await db
     .update(documentsTable)
     .set(document)

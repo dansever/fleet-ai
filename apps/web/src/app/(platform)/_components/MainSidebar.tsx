@@ -124,7 +124,7 @@ function isPathActive(pathname: string, baseUrl: string) {
 }
 
 const SIDEBAR_MENU_BUTTON_SIZES = {
-  md: 'text-base pl-3 pr-1 py-5',
+  md: 'text-base px-1 py-4',
   lg: 'text-lg pl-3 pr-1 py-6',
 };
 

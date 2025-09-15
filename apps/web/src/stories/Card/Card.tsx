@@ -40,7 +40,7 @@ export const BaseCard = ({
       : (title || subtitle) && (
           <CardHeader
             className={cn(
-              'py-2 flex flex items-center justify-between',
+              'py-4 flex flex items-start justify-between',
               'bg-gradient-to-r',
               headerClassName,
             )}
