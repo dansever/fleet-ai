@@ -7,8 +7,11 @@ import { TrendingUp } from 'lucide-react';
 import type React from 'react';
 import { forwardRef } from 'react';
 
-// Common standardized props for all cards
-export interface StandardCardProps extends React.ComponentPropsWithoutRef<typeof Card> {
+// ==============================================================
+// CardProps
+// ==============================================================
+
+export interface CardProps extends React.ComponentPropsWithoutRef<typeof Card> {
   className?: string;
   // Header options (either simple or custom)
   header?: React.ReactNode; // Takes precedence over title/subtitle
@@ -17,14 +20,17 @@ export interface StandardCardProps extends React.ComponentPropsWithoutRef<typeof
   subtitle?: string;
   icon?: React.ReactNode;
   actions?: React.ReactNode;
-  // Content
-  body?: React.ReactNode;
   // footer
   footer?: React.ReactNode;
+  // children
   children?: React.ReactNode;
+  contentClassName?: string;
 }
 
-// Surface Card - Minimal base surface for custom layouts
+// ==============================================================
+// BaseCard
+// ==============================================================
+
 export const BaseCard = ({
   className,
   headerClassName,
@@ -33,8 +39,9 @@ export const BaseCard = ({
   subtitle,
   actions,
   children,
-}: StandardCardProps) => (
-  <Card className={cn('w-full rounded-3xl shadow-none border-0 overflow-hidden pt-0', className)}>
+  contentClassName,
+}: CardProps) => (
+  <Card className={cn('w-full rounded-3xl border-0 overflow-hidden pt-0', className)}>
     {header
       ? header
       : (title || subtitle) && (
@@ -52,70 +59,47 @@ export const BaseCard = ({
             <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>
           </CardHeader>
         )}
-    {children}
+    <CardContent className={contentClassName}>{children}</CardContent>
   </Card>
 );
 
-/**
- * MetricCard
- * - Minimal, flexible API
- * - Beautiful defaults with full override capability
- * - Sensible a11y and resilience for undefined/empty props
- */
+// ==============================================================
+// MetricCard
+// ==============================================================
 
-export type MetricCardProps = {
-  /** Main label shown at the top-left */
-  title?: React.ReactNode;
-  /** Optional smaller text under the title */
+export type MetricTone = 'positive' | 'negative' | 'neutral';
+
+export type MetricCardProps = React.HTMLAttributes<HTMLDivElement> & {
+  title: React.ReactNode;
   subtitle?: React.ReactNode;
-
-  /** Primary value. Accepts string, number or a custom node (e.g., <span>12%</span>) */
+  /** Main KPI value. Accepts text or React node for formatting. */
   value?: React.ReactNode;
-
-  /**
-   * Optional change indicator (e.g., "+12% MoM" or "-3.1% since yesterday").
-   * If `changeClassName` is not provided, color is inferred automatically:
-   *  - leading '-' → negative (red)
-   *  - leading '+' or no sign → positive (green)
-   *  - set `neutralChange` true to force neutral color
-   */
+  /** Delta text, e.g. "+12% MoM" or "-3.1". */
   change?: React.ReactNode;
-  neutralChange?: boolean;
-  changeClassName?: string; // full override for change color/typography
-  changeVisuallyHiddenLabel?: string; // a11y helper for screen readers
-
-  /** Optional right-side icon */
+  /** Force tone; otherwise inferred from the first char of `change` if string. */
+  tone?: MetricTone;
+  /** Optional icon shown on the right. */
   icon?: React.ReactNode;
-  /** Background classes for the icon container */
-  iconBgClassName?: string;
-
-  /** Fully custom header override (replaces title/subtitle/actions area) */
+  /** Optional custom header/actions area. When provided, it replaces the default title/subtitle row. */
   header?: React.ReactNode;
-  /** Right-aligned header actions (buttons, menus, etc.) */
-  actions?: React.ReactNode;
-
-  /** Optional content below the stat row */
-  children?: React.ReactNode;
-  /** Optional footer separated by a divider */
+  /** Optional footer content (notes, links). */
   footer?: React.ReactNode;
-
-  /** Layout/style overrides */
-  className?: string;
-} & React.ComponentPropsWithoutRef<typeof Card>;
-
-const inferChangeTone = (
-  change: React.ReactNode,
-  neutral?: boolean,
-): 'positive' | 'negative' | 'neutral' => {
-  if (neutral) return 'neutral';
-  if (typeof change === 'string') {
-    const trimmed = change.trim();
-    if (trimmed.startsWith('-')) return 'negative';
-    if (trimmed.startsWith('+')) return 'positive';
-  }
-  if (typeof change === 'number') return change < 0 ? 'negative' : 'positive';
-  return 'neutral';
 };
+
+const toneToClass: Record<MetricTone, string> = {
+  positive: 'text-green-600',
+  negative: 'text-red-600',
+  neutral: 'text-muted-foreground',
+};
+
+function inferTone(change: React.ReactNode | undefined): MetricTone {
+  if (typeof change === 'string' && change.trim()) {
+    const first = change.trim()[0];
+    if (first === '+') return 'positive';
+    if (first === '-') return 'negative';
+  }
+  return 'neutral';
+}
 
 export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
   (
@@ -124,57 +108,39 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
       subtitle,
       value,
       change,
-      neutralChange,
-      changeClassName,
-      changeVisuallyHiddenLabel,
-      icon = <TrendingUp className="w-5 h-5" aria-hidden="true" />,
-      iconBgClassName = 'p-2 rounded-2xl bg-gradient-to-br from-violet-200 to-blue-100',
+      tone,
+      icon = <TrendingUp className="h-5 w-5" aria-hidden="true" />,
       header,
-      actions,
-      children,
       footer,
       className,
-      ...cardProps
+      children,
+      ...rest
     },
     ref,
   ) => {
-    const tone = inferChangeTone(change ?? '', neutralChange);
-
-    const toneClass =
-      changeClassName ??
-      (tone === 'positive'
-        ? 'text-green-600'
-        : tone === 'negative'
-          ? 'text-red-600'
-          : 'text-muted-foreground');
+    const resolvedTone = tone ?? inferTone(change);
 
     return (
       <Card
         ref={ref}
-        className={cn(
-          'rounded-3xl border-0 px-4 py-1 sm:py-2 md:py-3',
-          'flex flex-col gap-4',
-          className,
-        )}
-        {...cardProps}
+        className={cn('rounded-3xl border-0 p-4', 'flex flex-col gap-2', className)}
+        {...rest}
       >
         {(header || title) && (
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-2">
             {header ? (
               header
             ) : (
               <div className="min-w-0">
-                {title && (
-                  <p
-                    className="text-sm font-medium text-muted-foreground truncate"
-                    title={typeof title === 'string' ? title : undefined}
-                  >
-                    {title}
-                  </p>
-                )}
+                <p
+                  className="truncate text-sm font-medium text-muted-foreground"
+                  title={typeof title === 'string' ? title : undefined}
+                >
+                  {title}
+                </p>
                 {subtitle && (
                   <p
-                    className="text-xs text-muted-foreground/80 truncate"
+                    className="truncate text-xs text-muted-foreground/80"
                     title={typeof subtitle === 'string' ? subtitle : undefined}
                   >
                     {subtitle}
@@ -182,43 +148,39 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
                 )}
               </div>
             )}
-            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+            {icon && (
+              <div
+                className="flex-shrink-0 rounded-2xl bg-gradient-to-br from-violet-200 to-blue-100 p-2"
+                aria-hidden
+              >
+                {icon}
+              </div>
+            )}
           </div>
         )}
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            {value !== undefined && value !== null && (
-              <h3 className="text-2xl sm:text-3xl font-semibold leading-tight tracking-tight">
-                {value}
-              </h3>
+        {(value !== undefined || change !== undefined) && (
+          <div className="flex items-end gap-4">
+            {value !== undefined && (
+              <h2 className="p-0 truncate font-semibold leading-tight tracking-tight">{value}</h2>
             )}
-            {change !== undefined && change !== null && (
-              <p className={cn('text-sm mt-1', toneClass)}>
-                {changeVisuallyHiddenLabel && (
-                  <span className="sr-only">{changeVisuallyHiddenLabel}</span>
-                )}
-                {change}
-              </p>
+            {change !== undefined && (
+              <p className={cn('text-sm p-0', toneToClass[resolvedTone])}>{change}</p>
             )}
           </div>
-
-          {icon && (
-            <div className={cn('flex-shrink-0', iconBgClassName)} aria-hidden="true">
-              {icon}
-            </div>
-          )}
-        </div>
-
-        {children && <div className="mt-1">{children}</div>}
-
-        {footer && <div className="mt-3 pt-3 border-t">{footer}</div>}
+        )}
+        {children && <div>{children}</div>}
+        {footer && <div className="text-xs text-muted-foreground">{footer}</div>}
       </Card>
     );
   },
 );
 
-// List Item Card - For scrollable lists with flexible content (renamed from ListItemCard)
+MetricCard.displayName = 'MetricCard';
+
+// ==============================================================
+// List Item Card
+// ==============================================================
+
 export const ListItemCard = ({
   title,
   subtitle,
@@ -231,7 +193,7 @@ export const ListItemCard = ({
   children,
   footer,
   className,
-}: StandardCardProps & {
+}: CardProps & {
   icon?: React.ReactNode;
   iconBackgroundClassName?: string;
   isSelected?: boolean;

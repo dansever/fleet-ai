@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -382,7 +383,7 @@ export const ModernSelect = ({
       <SelectTrigger
         className={cn(
           formStyles.input,
-          'cursor-pointer',
+          'cursor-pointer h-[20px]',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
         )}
       >
@@ -621,6 +622,31 @@ export const FileUpload = ({
         </div>
       )}
 
+      {error && <p className={formStyles.error}>{error}</p>}
+      {helper && !error && <p className={formStyles.helper}>{helper}</p>}
+    </div>
+  );
+};
+
+export const ModernDropDowm = ({
+  label,
+  error,
+  helper,
+  options,
+  value,
+  ...props
+}: {
+  label?: string;
+  error?: string;
+  helper?: string;
+  options: { value: string; label: string }[];
+  [key: string]: unknown;
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="w-fit">
+      {label && <label className={formStyles.label}>{label}</label>}
+      <DropdownMenu open={open} onOpenChange={setOpen} {...props} />
       {error && <p className={formStyles.error}>{error}</p>}
       {helper && !error && <p className={formStyles.helper}>{helper}</p>}
     </div>

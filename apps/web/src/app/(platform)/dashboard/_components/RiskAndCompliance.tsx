@@ -9,7 +9,7 @@ export function RiskAndCompliance() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500" />
               <span className="text-sm font-medium">Low Risk</span>
             </div>
             <p className="text-2xl font-bold">67%</p>
@@ -17,7 +17,7 @@ export function RiskAndCompliance() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <span className="text-sm font-medium">Medium Risk</span>
             </div>
             <p className="text-2xl font-bold">28%</p>

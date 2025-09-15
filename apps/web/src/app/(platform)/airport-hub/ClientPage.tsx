@@ -11,7 +11,7 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
-import AirportList from '../_components/AirportSidebar';
+import AirportDropdown from '../_components/AirportDropdown';
 import { useAirportHub } from './ContextProvider';
 import AirportPage from './subpages/Airport';
 import ContractsPage from './subpages/Contracts';
@@ -83,15 +83,15 @@ export default function AirportHubClientPage() {
 
   return (
     <PageLayout
-      sidebarContent={
-        <AirportList
-          airports={airports}
-          onAirportSelect={setSelectedAirport}
-          selectedAirport={selectedAirport}
-          InsertAddAirportButton={true}
-          onAirportAdd={addAirport}
-        />
-      }
+      // sidebarContent={
+      //   <AirportList
+      //     airports={airports}
+      //     onAirportSelect={setSelectedAirport}
+      //     selectedAirport={selectedAirport}
+      //     InsertAddAirportButton={true}
+      //     onAirportAdd={addAirport}
+      //   />
+      // }
       headerContent={
         loading.airports ? (
           <div className="flex items-center space-x-4">
@@ -103,9 +103,13 @@ export default function AirportHubClientPage() {
           </div>
         ) : selectedAirport ? (
           <div className="flex flex-row items-start gap-4 justify-between w-full">
-            <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex flex-col flex-1 min-w-0 gap-1">
               <div className="flex flex-row items-center gap-4">
-                <h1 title={selectedAirport.name}>{selectedAirport.name}</h1>
+                <AirportDropdown
+                  airports={airports}
+                  selectedAirport={selectedAirport}
+                  onAirportSelect={setSelectedAirport}
+                />
               </div>
               <div className="flex items-center gap-2 text-gray-600 text-sm">
                 <div className="flex flex-row items-center gap-1">

@@ -12,6 +12,7 @@ const buttonStyles = cva(
     'transition-colors duration-200',
     'font-normal text-center',
     'cursor-pointer flex-shrink-0',
+    'hover:scale-105 transition-transform duration-200',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],
@@ -38,9 +39,10 @@ const buttonStyles = cva(
         danger:
           'bg-gradient-to-r from-red-500 to-red-500 opacity-80 hover:from-red-600 hover:to-red-700 text-white',
         // Ghost action - minimal prominence, tertiary actions, icon buttons
-        ghost: 'bg-transparent hover:bg-muted/80 text-primary/70 shadow-none hover:shadow-none',
+        ghost: 'bg-transparent hover:bg-muted/20 text-primary/70 shadow-none hover:shadow-none',
         // Glass
-        glass: 'bg-white/20 hover:bg-white/30 backdrop-blur-md shadow-md transition-all',
+        glass:
+          'bg-white/20 hover:bg-white/50 backdrop-blur-md shadow-sm hover:shadow-md transition-all',
       },
       size: {
         sm: 'h-8 p-2 rounded-lg text-sm',

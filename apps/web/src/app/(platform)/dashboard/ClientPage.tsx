@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ActivityFeed } from './_components/ActivityFeed';
-import { CatagorySpendingPie } from './_components/CatagorySpendingPie';
+import { CategorySpendingPie } from './_components/CategorySpendingPie';
 import { RiskAndCompliance } from './_components/RiskAndCompliance';
 
 export default function DashboardClientPage({
@@ -45,6 +45,7 @@ export default function DashboardClientPage({
       value: '$47.2M',
       change: '+8.2%',
       trend: 'up',
+      tone: 'positive',
       icon: DollarSign,
       description: 'YTD procurement spend',
     },
@@ -53,6 +54,7 @@ export default function DashboardClientPage({
       value: '$1.8M',
       change: '-15.4%',
       trend: 'down',
+      tone: 'negative',
       icon: Target,
       description: 'vs. previous year',
     },
@@ -60,15 +62,18 @@ export default function DashboardClientPage({
       title: 'Supplier Performance',
       value: '94.2%',
       change: '+2.1%',
+      footer: 'Since last month',
       trend: 'up',
+      tone: 'positive',
       icon: Award,
       description: 'On-time delivery',
     },
     {
       title: 'Risk Score',
       value: 'Low',
-      change: '-12%',
+      // change: '-12%',
       trend: 'neutral',
+      tone: 'neutral',
       icon: AlertTriangle,
       description: 'Supply chain risk',
     },
@@ -111,7 +116,14 @@ export default function DashboardClientPage({
             title={metric.title}
             value={metric.value}
             change={metric.change}
-            neutralChange={metric.trend === 'neutral'}
+            footer={metric.footer}
+            tone={
+              metric.trend === 'neutral'
+                ? 'neutral'
+                : metric.trend === 'up'
+                  ? 'positive'
+                  : 'negative'
+            }
             icon={
               metric.trend === 'up' ? (
                 <ArrowUpRight className="text-green-500" />
@@ -143,8 +155,7 @@ export default function DashboardClientPage({
             </ChartContainer>
           </CardContent>
         </BaseCard>
-
-        <CatagorySpendingPie categoryData={categoryData} categoryColors={categoryColors} />
+        <CategorySpendingPie categoryData={categoryData} categoryColors={categoryColors} />
       </div>
 
       <div className="col-span-2 flex flex-col gap-4">
