@@ -50,6 +50,7 @@ interface FuelProcurementContextType {
 
   // Selections
   selectedAirport: Airport | null;
+  setSelectedAirport: (airport: Airport | null) => void;
   selectedTender: FuelTender | null;
   selectedContract: Contract | null;
 
@@ -335,6 +336,9 @@ export function FuelProcurementProvider({
 
     // Selections
     selectedAirport: state.selectedAirport,
+    setSelectedAirport: (airport: Airport | null) => {
+      updateState({ selectedAirport: airport });
+    },
     selectedTender: state.selectedTender,
     selectedContract: state.selectedContract,
 

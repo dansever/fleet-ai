@@ -11,7 +11,7 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
-import AirportDropdown from '../_components/AirportDropdown';
+import AirportDropdown from '../_components/AirportsDropdown';
 import { useAirportHub } from './ContextProvider';
 import AirportPage from './subpages/Airport';
 import ContractsPage from './subpages/Contracts';
@@ -163,9 +163,10 @@ export default function AirportHubClientPage() {
           </div>
         )
       }
-      mainContent={<MainContentSection />}
       sidebarWidth={isCollapsed ? '18rem' : '18rem'}
-    />
+    >
+      <MainContentSection />
+    </PageLayout>
   );
 }
 
