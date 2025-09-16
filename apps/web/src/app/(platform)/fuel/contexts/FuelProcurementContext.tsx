@@ -31,6 +31,7 @@ interface FuelProcurementState {
   loadingBids: boolean;
   loadingContracts: boolean;
   loadingInvoices: boolean;
+  uploadingDocument: boolean;
 
   // Errors
   airportsError: string | null;
@@ -61,6 +62,7 @@ interface FuelProcurementContextType {
     bids: boolean;
     contracts: boolean;
     invoices: boolean;
+    uploadDocument: boolean;
     any: boolean;
     initial: boolean; // Critical initial data
   };
@@ -79,6 +81,9 @@ interface FuelProcurementContextType {
   selectAirport: (airport: Airport | null) => void;
   selectTender: (tender: FuelTender | null) => void;
   selectContract: (contract: Contract | null) => void;
+
+  // Document upload
+  setUploadDocument: (uploading: boolean) => void;
 
   // Refresh functions
   refreshTenders: () => Promise<void>;
@@ -139,6 +144,7 @@ export function FuelProcurementProvider({
       loadingBids: false,
       loadingContracts: false,
       loadingInvoices: false,
+      uploadingDocument: false,
       airportsError: null,
       tendersError: null,
       bidsError: null,
@@ -349,11 +355,13 @@ export function FuelProcurementProvider({
       bids: state.loadingBids,
       contracts: state.loadingContracts,
       invoices: state.loadingInvoices,
+      uploadDocument: state.uploadingDocument,
       any:
         state.loadingTenders ||
         state.loadingBids ||
         state.loadingContracts ||
-        state.loadingInvoices,
+        state.loadingInvoices ||
+        state.uploadingDocument,
       initial: state.loadingTenders || state.loadingContracts, // Critical initial data
     },
 
@@ -398,6 +406,11 @@ export function FuelProcurementProvider({
         selectedContract: contract,
         invoices: [],
       });
+    },
+
+    // Document upload
+    setUploadDocument: (uploading: boolean) => {
+      updateState({ uploadingDocument: uploading });
     },
 
     // Refresh functions (force refresh to bypass cache)

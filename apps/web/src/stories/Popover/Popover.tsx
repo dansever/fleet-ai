@@ -304,7 +304,7 @@ export const FileUploadPopover = ({
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="space-y-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center mx-auto">
                       <Upload className="w-6 h-6 text-white" />
                     </div>
                     <div>

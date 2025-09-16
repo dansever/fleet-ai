@@ -21,17 +21,14 @@ import TendersPage from './subpages/Tenders';
 type TabValue = 'fuel-tenders' | 'fuel-agreements' | 'historical-data';
 
 export default function FuelProcurementClientPage() {
-  const {
-    airports,
-    selectedAirport,
-    loading,
-    errors,
-    selectAirport,
-    refreshAll,
-    setSelectedAirport,
-  } = useFuelProcurement();
+  const { airports, selectedAirport, loading, errors, setSelectedAirport, refreshAll } =
+    useFuelProcurement();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+
+  const handleRefresh = () => {
+    refreshAll();
+  };
 
   if (loading.airports) {
     return <LoadingComponent size="lg" text="Loading airports..." />;
@@ -64,7 +61,7 @@ export default function FuelProcurementClientPage() {
           </div>
         ) : selectedAirport ? (
           <div className="flex flex-row items-start gap-4 justify-between w-full">
-            <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
               <div className="flex flex-row items-center gap-4">
                 <AirportsPanel
                   airports={airports}
@@ -114,7 +111,7 @@ export default function FuelProcurementClientPage() {
                 intent="glass"
                 text="Refresh"
                 icon={RefreshCw}
-                onClick={() => {}}
+                onClick={handleRefresh}
                 isLoading={loading.tenders || loading.bids}
               />
             </div>

@@ -126,10 +126,11 @@ export const fuelBidsTable = pgTable(
 
     // Calculated Fields
     densityAt15C: numeric('density_at_15c'), // kg/m3 if mass quote present
-    normalizedUnitPriceUsdPerUsg: numeric('norm_usd_per_usg'), // computed and stored
 
     // AI Processing
     aiSummary: text('ai_summary'),
+    terms: json('terms').$type<Record<string, any>>(),
+    tags: json('tags').$type<Record<string, any>>(),
 
     // Decision Tracking
     decision: decisionEnum('decision'),

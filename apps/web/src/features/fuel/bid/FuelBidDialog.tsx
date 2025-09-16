@@ -73,10 +73,11 @@ export default function FuelBidDialog({
 
     // Calculated Fields (matching schema)
     densityAt15C: bid?.densityAt15C || null,
-    normalizedUnitPriceUsdPerUsg: bid?.normalizedUnitPriceUsdPerUsg || null,
 
     // AI Processing (matching schema)
     aiSummary: bid?.aiSummary || null,
+    terms: bid?.terms || null,
+    tags: bid?.tags || null,
 
     // Decision Tracking (matching schema)
     decision: bid?.decision || null,
@@ -115,8 +116,9 @@ export default function FuelBidDialog({
       includesTaxes: bid?.includesTaxes || false,
       includesAirportFees: bid?.includesAirportFees || false,
       densityAt15C: bid?.densityAt15C || null,
-      normalizedUnitPriceUsdPerUsg: bid?.normalizedUnitPriceUsdPerUsg || null,
       aiSummary: bid?.aiSummary || null,
+      terms: bid?.terms || null,
+      tags: bid?.tags || null,
       decision: bid?.decision || null,
       decisionNotes: bid?.decisionNotes || null,
     });
@@ -191,8 +193,9 @@ export default function FuelBidDialog({
         includesTaxes: false,
         includesAirportFees: false,
         densityAt15C: null,
-        normalizedUnitPriceUsdPerUsg: null,
         aiSummary: null,
+        terms: null,
+        tags: null,
         decision: null,
         decisionNotes: null,
       });
@@ -227,7 +230,8 @@ export default function FuelBidDialog({
       includesTaxes: false,
       includesAirportFees: false,
       densityAt15C: null,
-      normalizedUnitPriceUsdPerUsg: null,
+      terms: null,
+      tags: null,
       aiSummary: null,
       decision: null,
       decisionNotes: null,
@@ -251,8 +255,8 @@ export default function FuelBidDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bid Information & Timeline */}
-          <BaseCard title="Bid Information & Timeline" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <BaseCard title="Bid Information & Timeline">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -311,8 +315,8 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Vendor Information */}
-          <BaseCard title="Vendor Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <BaseCard title="Vendor Information">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -365,8 +369,8 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Pricing Structure & Terms */}
-          <BaseCard title="Pricing Structure & Terms" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <BaseCard title="Pricing Structure & Terms">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Price Type"
                 value={formData.priceType}
@@ -425,8 +429,8 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Index-Linked Pricing */}
-          <BaseCard title="Index-Linked Pricing" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <BaseCard title="Index-Linked Pricing">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Index Name"
                 value={formData.indexName}
@@ -472,8 +476,8 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Fees & Specifications */}
-          <BaseCard title="Fees & Specifications" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <BaseCard title="Fees & Specifications">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Into Plane Fee"
                 value={formData.intoPlaneFee}
@@ -532,8 +536,8 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Calculated Fields */}
-          <BaseCard title="Calculated Fields" neutralHeader={true}>
-            <div className="flex flex-col justify-between space-y-4">
+          <BaseCard title="Calculated Fields">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Density at 15°C (kg/m³)"
                 value={formData.densityAt15C}
@@ -541,16 +545,6 @@ export default function FuelBidDialog({
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('densityAt15C', value)}
                 name="densityAt15C"
-                step={0.01}
-                min={0}
-              />
-              <KeyValuePair
-                label="Normalized USD per USG"
-                value={formData.normalizedUnitPriceUsdPerUsg}
-                valueType="number"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('normalizedUnitPriceUsdPerUsg', value)}
-                name="normalizedUnitPriceUsdPerUsg"
                 step={0.01}
                 min={0}
               />

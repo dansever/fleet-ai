@@ -126,7 +126,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         key: 'vendor',
         header: <span className="whitespace-nowrap">Vendor</span>,
         accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5 min-w-[180px]">
+          <div className="space-y-1.5">
             <h3 className="font-semibold text-sm text-slate-900 leading-tight">
               {bid.vendorName || 'Unknown Vendor'}
             </h3>
@@ -149,7 +149,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         header: <span className="whitespace-nowrap">Price</span>,
         accessor: (bid: FuelBid) => {
           return (
-            <div className="space-y-1.5 min-w-[180px]">
+            <div className="space-y-1.5">
               {/* headline */}
               <h3 className="text-green-600 font-semibold text-sm">
                 {formatCurrency(bid.baseUnitPrice, bid.currency) || (
@@ -188,7 +188,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         key: 'bidDetails',
         header: <span className="whitespace-nowrap">Bid Details</span>,
         accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5 min-w-[180px]">
+          <div className="space-y-1.5 min-w-[200px]">
             <h4 className="font-semibold text-sm text-slate-900 leading-tight">
               {bid.title || `Bid ${bid.id?.slice(0, 8) || 'Unknown'}`}
             </h4>
@@ -224,7 +224,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
             Number.parseFloat(bid.otherFee || '0');
 
           return (
-            <div className="space-y-1.5 min-w-[180px]">
+            <div className="space-y-1.5">
               <h4 className="font-semibold text-sm text-slate-900">
                 {formatCurrency(totalFees, bid.currency)}
               </h4>
@@ -265,7 +265,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         key: 'terms',
         header: <span className="whitespace-nowrap">Terms & Specs</span>,
         accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5 min-w-[180px]">
+          <div className="space-y-1.5">
             {bid.paymentTerms && (
               <p className="text-xs text-slate-600 font-medium">{bid.paymentTerms}</p>
             )}
@@ -304,7 +304,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         key: 'analysis',
         header: <span className="whitespace-nowrap">Analysis</span>,
         accessor: (bid: FuelBid) => (
-          <div className="min-w-[240px]">
+          <div className="space-y-1.5 min-w-[240px]">
             {bid.aiSummary ? (
               <div className="space-y-2 bg-gradient-to-br from-pink-50/80 to-blue-50/80 border border-purple-200/60 rounded-lg p-3">
                 <Badge

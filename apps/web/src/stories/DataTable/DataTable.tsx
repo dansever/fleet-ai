@@ -229,12 +229,22 @@ export function DataTable<T extends Record<string, unknown>>({
         </div>
       </div>
 
-      <div
-        className={`bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg ${className}`}
-      >
-        {/* Table */}
-        <div className="w-full max-w-full overflow-x-auto">
-          <ScrollArea className="w-full max-w-full rounded-xl">
+      {/* <div
+        className={`bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-3xl ${className}`}
+      > */}
+      {/* Table */}
+      <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-200/50">
+        {/* Empty State */}
+        {paginatedData.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="text-gray-400 mb-2">
+              <FilterIcon className="w-12 h-12 mx-auto mb-4" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">No results found</h4>
+            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+          </div>
+        ) : (
+          <ScrollArea className="w-full max-w-full">
             <table className="min-w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-400/50">
@@ -299,7 +309,7 @@ export function DataTable<T extends Record<string, unknown>>({
                                   : ''
                             }`}
                           >
-                            {/* Small prefix label only once per row if you like */}
+                            {/* Small prefix label only once per row */}
                             {i === 0 ? (
                               <span className="inline-flex items-center gap-2">
                                 <span className="rounded bg-gray-200 px-2 py-0.5 text-xs uppercase tracking-wide text-gray-700">
@@ -323,65 +333,54 @@ export function DataTable<T extends Record<string, unknown>>({
               </tbody>
             </table>
             <br />
-            <ScrollBar orientation="horizontal" className="px-4" />
+            <ScrollBar orientation="horizontal" />
           </ScrollArea>
-        </div>
-
-        {/* Empty State */}
-        {paginatedData.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="text-gray-400 mb-2">
-              <FilterIcon className="w-12 h-12 mx-auto mb-4" />
-            </div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">No results found</h4>
-            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {pagination && totalPages > 1 && (
-          <div className="p-6 border-t border-gray-200/50 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Showing {(currentPage - 1) * pageSize + 1} to{' '}
-              {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length}{' '}
-              results
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                intent="ghost"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="rounded-xl"
-                text="Previous"
-              />
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Button
-                      key={page}
-                      intent={currentPage === page ? 'primary' : 'ghost'}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className="rounded-xl w-10"
-                      text={page.toString()}
-                    />
-                  );
-                })}
-              </div>
-              <Button
-                intent="ghost"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="rounded-xl"
-                text="Next"
-              />
-            </div>
-          </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination && totalPages > 1 && (
+        <div className="p-6 border-t border-gray-200/50 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} results
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              intent="ghost"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="rounded-xl"
+              text="Previous"
+            />
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <Button
+                    key={page}
+                    intent={currentPage === page ? 'primary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className="rounded-xl w-10"
+                    text={page.toString()}
+                  />
+                );
+              })}
+            </div>
+            <Button
+              intent="ghost"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-xl"
+              text="Next"
+            />
+          </div>
+        </div>
+      )}
+      {/* </div> */}
     </div>
   );
 }
