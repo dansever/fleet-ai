@@ -1,6 +1,11 @@
 'use client';
 
 import { Calendar } from '@/components/ui/calendar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -627,3 +632,28 @@ export const FileUpload = ({
     </div>
   );
 };
+
+export const ModernDropdownMenu = ({
+  trigger,
+  content,
+  error,
+  helper,
+  align = 'end',
+  className,
+  ...props
+}: {
+  trigger: React.ReactNode;
+  content: React.ReactNode;
+  error?: string;
+  helper?: string;
+  align?: 'start' | 'center' | 'end';
+  className?: string;
+  [key: string]: unknown;
+}) => (
+  <DropdownMenu {...props}>
+    <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+    <DropdownMenuContent align={align} className={cn('bg-white rounded-xl', className)}>
+      {content}
+    </DropdownMenuContent>
+  </DropdownMenu>
+);

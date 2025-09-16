@@ -2,7 +2,7 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { getProcessStatusDisplay } from '@/drizzle/enums';
-import type { FuelTender } from '@/drizzle/types';
+import type { FuelBid, FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
@@ -10,8 +10,9 @@ import { formatDate } from '@/lib/core/formatters';
 import { client as fuelTenderClient } from '@/modules/fuel/tenders';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
+import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { ModernSelect } from '@/stories/Form/Form';
-import { ConfirmationPopover } from '@/stories/Popover/Popover';
+import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import {
   AlertCircle,
@@ -296,8 +297,20 @@ const FuelTendersPage = memo(function TendersPage() {
               {loading.bids ? (
                 <LoadingComponent size="md" text="Loading fuel bids..." />
               ) : (
-                <BaseCard title="Fuel Bids">
-                  {/* <DataTable data={bids} columns={fuelBidColumns as Column<FuelBid>[]} /> */}
+                <BaseCard
+                  title="Fuel Bids"
+                  subtitle="List of fuel bids for the selected tender"
+                  actions={
+                    <FileUploadPopover
+                      trigger={<Button intent="secondary" icon={Plus} text="Add Bid" />}
+                      onSend={(file) => console.log('Fuel bid uploaded:', file.name)}
+                      accept=".pdf,.doc,.docx"
+                      maxSize={10}
+                      onOpenChange={(open) => console.log('Fuel bid upload popover open:', open)}
+                    />
+                  }
+                >
+                  <DataTable data={bids} columns={fuelBidColumns as Column<FuelBid>[]} />
                 </BaseCard>
               )}
             </div>

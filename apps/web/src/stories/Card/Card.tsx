@@ -47,16 +47,16 @@ export const BaseCard = ({
       : (title || subtitle) && (
           <CardHeader
             className={cn(
-              'py-2 flex flex-col items-start justify-between gap-0',
+              'py-2 flex flex-row items-start justify-between gap-2',
               'bg-gradient-to-r',
               headerClassName,
             )}
           >
-            <div className="flex flex-row flex-1 w-full items-center justify-between gap-4">
-              <h3 className="flex-1">{title}</h3>
-              <div className="flex flex-wrap items-center gap-2 max-w-1/2">{actions}</div>
+            <div className="flex flex-col flex-1 w-full items-start justify-between gap-0">
+              <h3>{title}</h3>
+              <div className="leading-tight">{subtitle}</div>
             </div>
-            <h5>{subtitle}</h5>
+            <div className="flex flex-wrap items-center gap-2 max-w-1/2">{actions}</div>
           </CardHeader>
         )}
     <CardContent className={contentClassName}>{children}</CardContent>
