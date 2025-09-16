@@ -1,7 +1,6 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { CardContent } from '@/components/ui/card';
 import { getProcessStatusDisplay } from '@/drizzle/enums';
 import type { FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
@@ -30,6 +29,7 @@ import {
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
+import { useFuelBidColumns } from '../_components/FuelBidsDataTableColumns';
 import { useFuelProcurement } from '../contexts';
 
 const FuelTendersPage = memo(function TendersPage() {
@@ -50,7 +50,7 @@ const FuelTendersPage = memo(function TendersPage() {
     loading,
   } = useFuelProcurement();
   const selectedAirport = airports[0];
-
+  const fuelBidColumns = useFuelBidColumns();
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
 
   // Handle tender addition
@@ -127,29 +127,32 @@ const FuelTendersPage = memo(function TendersPage() {
         )}
 
         <div className="flex justify-between gap-2 items-center">
-          <ModernSelect
-            placeholder="Select a tender"
-            onValueChange={(id: string) => {
-              const tender = tenders.find((t) => t.id === id);
-              if (tender) selectTender(tender);
-            }}
-            value={selectedTender?.id}
-            disabled={!tenders.length}
-            TriggerClassName="min-h-12"
-            options={tenders.map((tender) => ({
-              value: tender.id,
-              label: (
-                <div className="flex flex-col text-left whitespace-normal">
-                  <span className="font-bold">{tender.title}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {tender.biddingStarts && tender.biddingEnds
-                      ? `${formatDate(tender.biddingStarts)} - ${formatDate(tender.biddingEnds)}`
-                      : ''}
-                  </span>
-                </div>
-              ),
-            }))}
-          />
+          <div className="flex flex-row gap-2 items-center">
+            Choose Tender:{' '}
+            <ModernSelect
+              placeholder="Select a tender"
+              onValueChange={(id: string) => {
+                const tender = tenders.find((t) => t.id === id);
+                if (tender) selectTender(tender);
+              }}
+              value={selectedTender?.id}
+              disabled={!tenders.length}
+              TriggerClassName="min-h-12"
+              options={tenders.map((tender) => ({
+                value: tender.id,
+                label: (
+                  <div className="flex flex-col text-left whitespace-normal">
+                    <span className="font-bold">{tender.title}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {tender.biddingStarts && tender.biddingEnds
+                        ? `${formatDate(tender.biddingStarts)} - ${formatDate(tender.biddingEnds)}`
+                        : ''}
+                    </span>
+                  </div>
+                ),
+              }))}
+            />
+          </div>
           <TenderDialog
             key="add-tender"
             trigger={<Button intent="secondary" icon={Plus} text="Add Tender" />}
@@ -162,15 +165,15 @@ const FuelTendersPage = memo(function TendersPage() {
 
         {/* Loading State */}
         {loading.tenders && <LoadingComponent size="md" text="Loading fuel tenders..." />}
-
-        {currentTender && (
-          <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-10 gap-4">
+          {currentTender && (
             <BaseCard
               title={currentTender.title}
+              className="col-span-3"
               subtitle={currentTender.description || 'No description available'}
               headerClassName="from-sky-500 via-sky-500/60 to-sky-400/60 text-white"
               actions={
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <TenderDialog
                     key={`view-tender-${currentTender.id}`}
                     trigger={<Button intent="secondary" icon={Eye} />}
@@ -188,9 +191,7 @@ const FuelTendersPage = memo(function TendersPage() {
                     DialogType="edit"
                   />
                   <ConfirmationPopover
-                    trigger={
-                      <Button intent="secondary" icon={TrashIcon} className="hover:bg-red-500" />
-                    }
+                    trigger={<Button intent="secondary" icon={TrashIcon} />}
                     popoverIntent="danger"
                     title="Delete Tender"
                     onConfirm={handleTenderDelete}
@@ -200,73 +201,73 @@ const FuelTendersPage = memo(function TendersPage() {
                 </div>
               }
             >
-              <CardContent className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* grid col*/}
-                <div className="flex flex-col gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Fuel className="h-4 w-4" />
-                      Fuel Type
-                    </div>
-                    <div className="text-sm font-medium">{currentTender.fuelType}</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 space-y-1">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Calendar className="h-4 w-4" />
+                    Tender Period
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <TrendingUpDown className="h-4 w-4" />
-                      Volume Forecast
-                    </div>
-                    <div className="text-sm font-medium">
-                      {currentTender.projectedAnnualVolume?.toLocaleString() +
-                        ' ' +
-                        BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)
-                          ?.label || ''}
-                    </div>
+                  <div className="text-sm font-medium">
+                    {currentTender.biddingStarts && currentTender.biddingEnds
+                      ? `${formatDate(currentTender.biddingStarts)} - ${formatDate(currentTender.biddingEnds)}`
+                      : 'N/A'}
                   </div>
                 </div>
-                {/* grid col*/}
-                <div className="flex flex-col gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4" />
-                      Tender Period
-                    </div>
-                    <div className="text-sm font-medium">
-                      {currentTender.biddingStarts} - {currentTender.biddingEnds}
-                    </div>
+                <div className="col-span-2 space-y-1">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Calendar className="h-4 w-4" />
+                    Agreement Period
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4" />
-                      Agreement Period
-                    </div>
-                    <div className="text-sm font-medium">
-                      {currentTender.deliveryStarts} - {currentTender.deliveryEnds}
-                    </div>
+                  <div className="text-sm font-medium">
+                    {currentTender.deliveryStarts && currentTender.deliveryEnds
+                      ? `${formatDate(currentTender.deliveryStarts)} - ${formatDate(currentTender.deliveryEnds)}`
+                      : 'N/A'}
                   </div>
                 </div>
-                {/* grid col*/}
-                <div className="flex flex-col gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Coins className="h-4 w-4" />
-                      Base Currency
-                    </div>
-                    <div className="text-sm font-medium">
-                      {CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
-                    </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Fuel className="h-4 w-4" />
+                    Fuel Type
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Ruler className="h-4 w-4" />
-                      Base Unit of Measure
-                    </div>
-                    <div className="text-sm font-medium">
-                      {BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
-                        ''}
-                    </div>
+                  <div className="text-sm font-medium">{currentTender.fuelType}</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <TrendingUpDown className="h-4 w-4" />
+                    Volume Forecast
+                  </div>
+                  <div className="text-sm font-medium">
+                    {currentTender.projectedAnnualVolume
+                      ? currentTender.projectedAnnualVolume?.toLocaleString() +
+                          ' ' +
+                          BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)
+                            ?.label || ''
+                      : 'N/A'}
                   </div>
                 </div>
-                <div className="flex flex-col gap-4">
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Coins className="h-4 w-4" />
+                    Base Currency
+                  </div>
+                  <div className="text-sm font-medium">
+                    {CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Ruler className="h-4 w-4" />
+                    Base Unit of Measure
+                  </div>
+                  <div className="text-sm font-medium">
+                    {BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
+                      ''}
+                  </div>
+                </div>
+
+                <div className=" col-span-2 grid grid-cols-2 gap-4 bg-slate-100 rounded-lg p-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <FileText className="h-4 w-4" />
@@ -277,6 +278,7 @@ const FuelTendersPage = memo(function TendersPage() {
                       text={getProcessStatusDisplay(currentTender.processStatus)}
                     />
                   </div>
+
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Users className="h-4 w-4" />
@@ -285,18 +287,22 @@ const FuelTendersPage = memo(function TendersPage() {
                     <div className="text-sm font-medium">{bids.length} responded</div>
                   </div>
                 </div>
-              </CardContent>
+              </div>
             </BaseCard>
-
-            {/* Fuel Bids Loading State */}
-            {loading.bids ? (
-              <LoadingComponent size="md" text="Loading fuel bids..." />
-            ) : (
-              <p> DATA TABLE</p>
-              // <FuelBidsDataTable onRefresh={refreshBids} isRefreshing={loading.bids} />
-            )}
-          </div>
-        )}
+          )}
+          {currentTender && (
+            <div className="flex flex-col gap-4 col-span-7">
+              {/* Fuel Bids Loading State */}
+              {loading.bids ? (
+                <LoadingComponent size="md" text="Loading fuel bids..." />
+              ) : (
+                <BaseCard title="Fuel Bids">
+                  {/* <DataTable data={bids} columns={fuelBidColumns as Column<FuelBid>[]} /> */}
+                </BaseCard>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

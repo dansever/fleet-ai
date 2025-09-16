@@ -64,6 +64,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
   return useMemo(
     () => [
       {
+        id: 'decision',
         key: 'decision',
         header: <span className="whitespace-nowrap">Status</span>,
         accessor: (bid: FuelBid) => (
@@ -76,6 +77,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'round',
         key: 'round',
         header: <span className="whitespace-nowrap">Round</span>,
         accessor: (bid: FuelBid) => (
@@ -90,6 +92,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'vendor',
         key: 'vendor',
         header: <span className="whitespace-nowrap">Vendor</span>,
         accessor: (bid: FuelBid) => (
@@ -103,6 +106,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'pricing',
         key: 'pricing',
         header: <span className="whitespace-nowrap">Price</span>,
         accessor: (bid: FuelBid) => {
@@ -137,6 +141,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'bidDetails',
         key: 'bidDetails',
         header: <span className="whitespace-nowrap">Bid Details</span>,
         accessor: (bid: FuelBid) => (
@@ -158,6 +163,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'additionalCosts',
         key: 'additionalCosts',
         header: <span className="whitespace-nowrap">Additional Costs</span>,
         accessor: (bid: FuelBid) => {
@@ -184,6 +190,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'terms',
         key: 'terms',
         header: <span className="whitespace-nowrap">Terms & Specs</span>,
         accessor: (bid: FuelBid) => (
@@ -205,6 +212,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'analysis',
         key: 'analysis',
         header: <span className="whitespace-nowrap">Analysis</span>,
         accessor: (bid: FuelBid) => (
@@ -227,6 +235,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
+        id: 'actions',
         key: 'actions',
         header: <span className="whitespace-nowrap">Actions</span>,
         accessor: (bid: FuelBid) => (
