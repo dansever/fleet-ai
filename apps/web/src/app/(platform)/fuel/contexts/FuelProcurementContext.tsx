@@ -442,69 +442,99 @@ export function FuelProcurementProvider({
 
     // CRUD operations with cache invalidation
     addTender: (tender: FuelTender) => {
-      // Invalidate tenders cache for the airport
-      if (tender.airportId) {
-        const cacheKey = createCacheKey(CACHE_KEYS.TENDERS, tender.airportId);
-        cacheManager.delete(cacheKey);
+      try {
+        // Invalidate tenders cache for the airport
+        if (tender.airportId) {
+          const cacheKey = createCacheKey(CACHE_KEYS.TENDERS, tender.airportId);
+          cacheManager.delete(cacheKey);
+        }
+        updateState({ tenders: [tender, ...state.tenders] });
+      } catch (error) {
+        console.error('Error adding tender to context:', error);
+        // Could add error state handling here if needed
       }
-      updateState({ tenders: [tender, ...state.tenders] });
     },
 
     updateTender: (tender: FuelTender) => {
-      // Invalidate tenders cache for the airport
-      if (tender.airportId) {
-        const cacheKey = createCacheKey(CACHE_KEYS.TENDERS, tender.airportId);
-        cacheManager.delete(cacheKey);
+      try {
+        // Invalidate tenders cache for the airport
+        if (tender.airportId) {
+          const cacheKey = createCacheKey(CACHE_KEYS.TENDERS, tender.airportId);
+          cacheManager.delete(cacheKey);
+        }
+        updateState({
+          tenders: state.tenders.map((t) => (t.id === tender.id ? tender : t)),
+          selectedTender: state.selectedTender?.id === tender.id ? tender : state.selectedTender,
+        });
+      } catch (error) {
+        console.error('Error updating tender in context:', error);
+        // Could add error state handling here if needed
       }
-      updateState({
-        tenders: state.tenders.map((t) => (t.id === tender.id ? tender : t)),
-        selectedTender: state.selectedTender?.id === tender.id ? tender : state.selectedTender,
-      });
     },
 
     removeTender: (tenderId: string) => {
-      const tender = state.tenders.find((t) => t.id === tenderId);
-      // Invalidate tenders cache for the airport
-      if (tender?.airportId) {
-        const cacheKey = createCacheKey(CACHE_KEYS.TENDERS, tender.airportId);
-        cacheManager.delete(cacheKey);
+      try {
+        const tender = state.tenders.find((t) => t.id === tenderId);
+        // Invalidate tenders cache for the airport
+        if (tender?.airportId) {
+          const cacheKey = createCacheKey(CACHE_KEYS.TENDERS, tender.airportId);
+          cacheManager.delete(cacheKey);
+        }
+        updateState({
+          tenders: state.tenders.filter((t) => t.id !== tenderId),
+          selectedTender: state.selectedTender?.id === tenderId ? null : state.selectedTender,
+        });
+      } catch (error) {
+        console.error('Error removing tender from context:', error);
+        // Could add error state handling here if needed
       }
-      updateState({
-        tenders: state.tenders.filter((t) => t.id !== tenderId),
-        selectedTender: state.selectedTender?.id === tenderId ? null : state.selectedTender,
-      });
     },
 
     addBid: (bid: FuelBid) => {
-      // Invalidate bids cache for the tender
-      if (bid.tenderId) {
-        const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
-        cacheManager.delete(cacheKey);
+      try {
+        // Invalidate bids cache for the tender
+        if (bid.tenderId) {
+          const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
+          cacheManager.delete(cacheKey);
+        }
+        updateState({ bids: [bid, ...state.bids] });
+      } catch (error) {
+        console.error('Error adding bid to context:', error);
+        // Could add error state handling here if needed
       }
-      updateState({ bids: [bid, ...state.bids] });
     },
 
     updateBid: (bid: FuelBid) => {
-      // Invalidate bids cache for the tender
-      if (bid.tenderId) {
-        const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
-        cacheManager.delete(cacheKey);
+      try {
+        // Invalidate bids cache for the tender
+        if (bid.tenderId) {
+          const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
+          cacheManager.delete(cacheKey);
+        }
+        updateState({
+          bids: state.bids.map((b) => (b.id === bid.id ? bid : b)),
+        });
+      } catch (error) {
+        console.error('Error updating bid in context:', error);
+        // Could add error state handling here if needed
       }
-      updateState({
-        bids: state.bids.map((b) => (b.id === bid.id ? bid : b)),
-      });
     },
 
     removeBid: (bidId: string) => {
-      const bid = state.bids.find((b) => b.id === bidId);
-      // Invalidate bids cache for the tender
-      if (bid?.tenderId) {
-        const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
-        cacheManager.delete(cacheKey);
+      try {
+        const bid = state.bids.find((b) => b.id === bidId);
+        // Invalidate bids cache for the tender
+        if (bid?.tenderId) {
+          const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
+          cacheManager.delete(cacheKey);
+        }
+        updateState({
+          bids: state.bids.filter((b) => b.id !== bidId),
+        });
+      } catch (error) {
+        console.error('Error removing bid from context:', error);
+        // Could add error state handling here if needed
       }
-      updateState({
-        bids: state.bids.filter((b) => b.id !== bidId),
-      });
     },
   };
 

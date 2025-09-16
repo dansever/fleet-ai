@@ -2,9 +2,9 @@ import { DocumentParentType } from '@/drizzle/enums';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as documentsServer } from '@/modules/documents/documents';
-import { server as extractServer, utils as extractUtils } from '@/modules/documents/extract';
 import { types as documentProcessorTypes } from '@/modules/documents/orchastration';
 import { server as parseServer } from '@/modules/documents/parse';
+import { server as extractServer, utils as extractUtils } from '@/modules/extract';
 import { server as storageServer } from '@/modules/storage';
 import { NextRequest, NextResponse } from 'next/server';
 

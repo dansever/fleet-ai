@@ -3,9 +3,10 @@ import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { getRandomFloat, getRandomInt, pickOne } from '@/lib/utils';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 
-export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number) {
+export async function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number) {
   const VENDOR_NAMES = [
     'Global Fuel Services',
     'AeroJet Supply',
@@ -251,7 +252,6 @@ export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number
 
     // Calculated Fields
     densityAt15C: getRandomFloat(775, 825, 1).toString(),
-    normalizedUnitPriceUsdPerUsg: null, // calculated server-side
 
     // AI Processing
     aiSummary: pickOne(AI_SUMMARIES),
@@ -261,6 +261,8 @@ export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number
     decisionByUserId: null,
     decisionNotes: pickOne(DECISION_NOTES),
   };
+
+  await fuelBidClient.createFuelBid(tenderId, fuelBid);
 
   return fuelBid;
 }

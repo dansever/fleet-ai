@@ -26,7 +26,7 @@ LLAMA_RFQ_EXTRACTOR_AGENT_NAME = "fleet-ai-rfq-extractor"
 LLAMA_FUEL_BID_EXTRACTOR_AGENT_NAME = "fleet-ai-fuel-bid-extractor"
 
 def make_config(
-    extraction_mode: ExtractMode  = ExtractMode.BALANCED,
+    extraction_mode: ExtractMode  = ExtractMode.FAST,
     extraction_target: ExtractTarget  = ExtractTarget.PER_DOC,
     system_prompt: str  = "",
     chunk_mode: ChunkMode = ChunkMode.PAGE,

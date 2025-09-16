@@ -24,23 +24,43 @@ export async function fileExtractorOrchestrator(
 ): Promise<ExtractionResult> {
   try {
     console.log(
-      '📍 Starting file Extractor Orchestrator for:',
-      file.name,
-      'with agent:',
-      agentName,
+      `📍 Starting file Extractor Orchestrator for: ${file.name}`,
+      `with agent: ${agentName}`,
     );
-    // Step 1: Get the extraction agent
+    // Phase 1: Prepare file and agent
+    // 1.1: Get the extraction agent
     const agent = await getExtractionAgent(agentName);
-    // Step 2: Upload the file
+    // 1.2: Upload the file
     const uploadedFile = await uploadFileForExtraction(file);
-    // Step 3: Start extraction job
+
+    // Phase 2: Start extraction job
     const job = await startExtractionJob(uploadedFile.id, agent.id);
-    // Step 4: Poll for completion and get results
-    const result = await pollExtractionJob(job.id, 30, 5000);
+
+    // Phase 3: Poll for completion and get results
+    const result = await pollExtractionJob(job.id, 30, 2000);
+
+    // Phase 4: Record usage
+    await recordExtractionUsage(result, uploadedFile.id, agent.id);
+
+    // Return result
     return result;
   } catch (error) {
     throw error instanceof Error ? error : new Error('Unknown extraction error');
   }
+}
+
+/**
+ * Get extraction agent by name
+ */
+export async function getExtractionAgent(agentName: string): Promise<ExtractionAgent> {
+  const res = await api.get(
+    withCtx(`/api/v1/extraction/extraction-agents/by-name/${encodeURIComponent(agentName)}`),
+    { headers: authHeaders() },
+  );
+  if (res.status !== 200) {
+    throw new Error(`Failed to get extraction agent: ${res.data}`);
+  }
+  return res.data;
 }
 
 /**
@@ -50,16 +70,12 @@ export async function uploadFileForExtraction(file: File): Promise<UploadedFile>
   // Prepare form data for LlamaCloud API
   const formData = new FormData();
   formData.append('upload_file', file, file.name ?? 'upload.bin');
-
   const res = await api.post(withCtx('/api/v1/files'), formData, {
     headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
   });
-
   if (res.status !== 200) {
-    const errorText = res.data;
-    throw new Error(`Failed to upload file: ${errorText}`);
+    throw new Error(`Failed to upload file: ${res.data}`);
   }
-
   return res.data;
 }
 
@@ -73,23 +89,14 @@ export async function startExtractionJob(
   if (!fileId || !extractionAgentId) {
     throw new Error('Both file_id and extraction_agent_id are required');
   }
-
   const res = await api.post(
     withCtx('/api/v1/extraction/jobs'),
-    {
-      file_id: fileId,
-      extraction_agent_id: extractionAgentId,
-    },
-    {
-      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-    },
+    { file_id: fileId, extraction_agent_id: extractionAgentId },
+    { headers: { ...authHeaders(), 'Content-Type': 'application/json' } },
   );
-
   if (res.status !== 200) {
-    const errorText = res.data;
-    throw new Error(`Failed to start extraction job: ${errorText}`);
+    throw new Error(`Failed to start extraction job: ${res.data}`);
   }
-
   return res.data;
 }
 
@@ -100,12 +107,9 @@ export async function getExtractionJobStatus(jobId: string): Promise<ExtractionJ
   const res = await api.get(withCtx(`/api/v1/extraction/jobs/${jobId}`), {
     headers: authHeaders(),
   });
-
   if (res.status !== 200) {
-    const errorText = res.data;
-    throw new Error(`Failed to get job status: ${errorText}`);
+    throw new Error(`Failed to get job status: ${res.data}`);
   }
-
   return res.data;
 }
 
@@ -116,31 +120,9 @@ export async function getExtractionJobResult(jobId: string): Promise<ExtractionR
   const res = await api.get(withCtx(`/api/v1/extraction/jobs/${jobId}/result`), {
     headers: authHeaders(),
   });
-
   if (res.status !== 200) {
-    const errorText = res.data;
-    throw new Error(`Failed to get job result: ${errorText}`);
+    throw new Error(`Failed to get job result: ${res.data}`);
   }
-
-  return res.data;
-}
-
-/**
- * Get extraction agent by name
- */
-export async function getExtractionAgent(agentName: string): Promise<ExtractionAgent> {
-  const res = await api.get(
-    withCtx(`/api/v1/extraction/extraction-agents/by-name/${encodeURIComponent(agentName)}`),
-    {
-      headers: authHeaders(),
-    },
-  );
-
-  if (res.status !== 200) {
-    const errorText = res.data;
-    throw new Error(`Failed to get extraction agent: ${errorText}`);
-  }
-
   return res.data;
 }
 
@@ -150,32 +132,28 @@ export async function getExtractionAgent(agentName: string): Promise<ExtractionA
 export async function pollExtractionJob(
   jobId: string,
   maxAttempts: number = 30,
-  intervalMs: number = 5000, // 5 seconds
+  intervalMs: number = 2000, // 2 seconds
 ): Promise<ExtractionResult> {
   console.log(
-    '📍 Server: Entering Poll Extraction Job for jobId:',
-    jobId,
-    'with maxAttempts:',
-    maxAttempts,
-    'and intervalMs:',
-    intervalMs,
+    `📍 Server: Entering Poll Extraction Job for jobId: ${jobId}`,
+    `with maxAttempts = ${maxAttempts}`,
+    `and intervalMs = ${intervalMs}`,
   );
   let attempts = 0;
 
   while (attempts < maxAttempts) {
     const jobStatus = await getExtractionJobStatus(jobId);
-
     if (jobStatus.status === 'SUCCESS') {
+      console.log('[jobStatus=SUCCESS after ', attempts, 'polling attempts]');
       return await getExtractionJobResult(jobId);
     } else if (jobStatus.status === 'FAILED') {
+      console.log('[jobStatus = FAILED after ', attempts, 'polling attempts]');
       throw new Error('Extraction job failed');
     }
-
     // Job is still processing, wait and retry
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
     attempts++;
   }
-
   throw new Error('Extraction job timed out');
 }
 
@@ -192,14 +170,8 @@ export async function recordExtractionUsage(
     console.warn('No usage metadata found in extraction result');
     return;
   }
-
   const totalTokens =
     result.extraction_metadata.usage.num_document_tokens +
     result.extraction_metadata.usage.num_output_tokens;
-
-  await recordAiTokenUsage({
-    userId,
-    orgId,
-    totalTokens,
-  });
+  await recordAiTokenUsage({ userId, orgId, totalTokens });
 }

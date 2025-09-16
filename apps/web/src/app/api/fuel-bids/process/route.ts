@@ -2,6 +2,7 @@ import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 import { jsonError } from '@/lib/core/errors';
 import { server as extractServer } from '@/modules/extract';
+import { server as fuelBidServer } from '@/modules/fuel/bids';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -17,10 +18,24 @@ export async function POST(req: NextRequest) {
 
     const body = await req.formData();
     const file = body.get('file') as File;
-    const extraction_agent_name = body.get('extraction_agent_name') as ExtractionAgentName;
+    const tenderId = body.get('tenderId') as string;
 
-    // Start extraction
-    const result = await extractServer.fileExtractorOrchestrator(file, extraction_agent_name);
+    // 1 - Create bid record
+    const bid = await fuelBidServer.createFuelBid({ orgId, tenderId });
+
+    // 2 - Extract bid data
+    const result = await extractServer.fileExtractorOrchestrator(
+      file,
+      ExtractionAgentName.FUEL_BID_EXTRACTOR,
+    );
+
+    // 3 - Update bid record
+    await fuelBidServer.updateFuelBid(bid.id, {
+      terms: result.data.terms,
+      aiSummary: result.data.aiSummary,
+      tags: result.data.tags,
+      updatedAt: new Date(),
+    });
 
     // Return result
     return NextResponse.json(result);

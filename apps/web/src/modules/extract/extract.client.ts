@@ -1,9 +1,23 @@
-// modules/documents/extract/extract.client.ts
+// modules/extract/extract.client.ts
 
+import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 import { api } from '@/services/api-client';
 
-export async function startExtraction(formData: FormData): Promise<{ jobId: string }> {
-  const res = await api.post('/api/extract/start', { body: formData });
+export async function startFileExtraction(
+  file: File,
+  extraction_agent_name: ExtractionAgentName,
+): Promise<{ jobId: string }> {
+  if (!extraction_agent_name || !file) throw new Error('Agent name and file are required');
+  // Create form data
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('extraction_agent_name', extraction_agent_name);
+  // Start extraction
+  const res = await api.post('/api/extract/start', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   if (res.status !== 200) throw new Error('Failed to start extraction');
   return res.data;
 }

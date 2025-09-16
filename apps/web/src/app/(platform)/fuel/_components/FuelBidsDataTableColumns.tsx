@@ -16,7 +16,7 @@ import type { Column } from '@/stories/DataTable/DataTable';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { CheckCircle, Eye, Fuel, ListCheck, Trash, XCircle, Zap } from 'lucide-react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../contexts';
 
@@ -75,17 +75,35 @@ const getDecisionBadge = (decision: string | null) => {
 };
 
 export const useFuelBidColumns = (): Column<FuelBid>[] => {
-  const { refreshBids, selectedTender } = useFuelProcurement();
+  const { selectedTender, removeBid, loading } = useFuelProcurement();
 
-  const handleDeleteBid = async (bidId: string) => {
-    try {
-      await fuelBidClient.deleteFuelBid(bidId);
-      toast.success('Bid deleted successfully');
-      refreshBids();
-    } catch (error) {
-      toast.error('Error deleting bid');
-    }
-  };
+  const handleDeleteBid = useCallback(
+    async (bidId: string) => {
+      console.log('handleDeleteBid called with bidId:', bidId);
+      console.log('bidId type:', typeof bidId);
+      console.log('bidId is undefined?', bidId === undefined);
+
+      if (!bidId) {
+        toast.error('Cannot delete bid: No bid ID provided');
+        return;
+      }
+
+      if (loading.bids) {
+        toast.error('Cannot delete bid: Data is still loading');
+        return;
+      }
+
+      try {
+        await fuelBidClient.deleteFuelBid(bidId);
+        removeBid(bidId);
+        toast.success('Bid deleted successfully');
+      } catch (error) {
+        console.error('Delete bid error:', error);
+        toast.error('Error deleting bid');
+      }
+    },
+    [removeBid, loading.bids],
+  );
 
   return useMemo(
     () => [
@@ -341,17 +359,37 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
               trigger={<Button intent="secondary" text="View" icon={Eye} size="sm" />}
             />
             <ConfirmationPopover
-              trigger={<Button intent="secondary" icon={Trash} size="sm" text="Delete" />}
+              trigger={
+                <Button
+                  intent="secondary"
+                  icon={Trash}
+                  size="sm"
+                  text="Delete"
+                  disabled={loading.bids || !bid.id}
+                />
+              }
               popoverIntent="danger"
               title="Delete Bid"
               description="Are you sure you want to delete this bid?"
-              onConfirm={() => handleDeleteBid(bid.id)}
+              onConfirm={() => {
+                console.log('Delete button clicked for bid:', bid);
+                console.log('bid.id:', bid.id);
+                console.log('bid object keys:', Object.keys(bid));
+
+                if (!bid.id) {
+                  console.error('Bid has no ID:', bid);
+                  toast.error('Cannot delete bid: Missing bid ID');
+                  return;
+                }
+
+                handleDeleteBid(bid.id);
+              }}
             />
           </div>
         ),
         align: 'left' as const,
       },
     ],
-    [],
+    [selectedTender, removeBid],
   );
 };

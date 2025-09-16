@@ -13,7 +13,7 @@ export async function getFuelTender(id: FuelTender['id']): Promise<FuelTender> {
 /**
  * Get fuel tenders by tender ID
  */
-export async function listFuelBidsByTender(tenderId: string): Promise<FuelTender[]> {
+export async function listFuelTendersByTender(tenderId: string): Promise<FuelTender[]> {
   const res = await api.get(`/api/fuel-tenders?tenderId=${tenderId}`);
   return res.data;
 }
