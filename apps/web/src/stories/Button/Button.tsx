@@ -13,7 +13,7 @@ const buttonStyles = cva(
     'font-normal text-center',
     'cursor-pointer flex-shrink-0',
     'hover:scale-105 transition-transform duration-200',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'focus:outline-none focus:ring-none',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],
   {

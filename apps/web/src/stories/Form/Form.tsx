@@ -1,8 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -17,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
+import { Button } from '@/stories/Button/Button';
 import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Minus, Plus, Search, Upload, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -159,7 +158,7 @@ export const PasswordInput = ({
         />
         <Button
           type="button"
-          variant="ghost"
+          intent="ghost"
           size="sm"
           className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-slate-100"
           onClick={() => setShowPassword(!showPassword)}
@@ -284,7 +283,7 @@ export const NumberInput = ({
         <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
           <Button
             type="button"
-            variant="ghost"
+            intent="ghost"
             size="sm"
             className="h-8 w-6 p-0 hover:bg-slate-100"
             onPointerDown={startHold(handleDecrementOnce)}
@@ -299,7 +298,7 @@ export const NumberInput = ({
 
           <Button
             type="button"
-            variant="ghost"
+            intent="ghost"
             size="sm"
             className="h-8 w-6 p-0 hover:bg-slate-100"
             onPointerDown={startHold(handleIncrementOnce)}
@@ -383,7 +382,8 @@ export const ModernSelect = ({
       <SelectTrigger
         className={cn(
           formStyles.input,
-          'cursor-pointer h-[20px]',
+          'h-fit py-6',
+          'cursor-pointer',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
         )}
       >
@@ -492,7 +492,7 @@ export const DatePicker = ({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            intent="ghost"
             className={cn(
               formStyles.input,
               'justify-between font-normal hover:bg-slate-50 cursor-pointer',
@@ -610,7 +610,7 @@ export const FileUpload = ({
               <span className="text-sm font-medium text-slate-700 truncate">{file.name}</span>
               <Button
                 type="button"
-                variant="ghost"
+                intent="ghost"
                 size="sm"
                 className="h-6 w-6 p-0 hover:bg-slate-200"
                 onClick={() => removeFile(index)}
@@ -622,31 +622,6 @@ export const FileUpload = ({
         </div>
       )}
 
-      {error && <p className={formStyles.error}>{error}</p>}
-      {helper && !error && <p className={formStyles.helper}>{helper}</p>}
-    </div>
-  );
-};
-
-export const ModernDropDowm = ({
-  label,
-  error,
-  helper,
-  options,
-  value,
-  ...props
-}: {
-  label?: string;
-  error?: string;
-  helper?: string;
-  options: { value: string; label: string }[];
-  [key: string]: unknown;
-}) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="w-fit">
-      {label && <label className={formStyles.label}>{label}</label>}
-      <DropdownMenu open={open} onOpenChange={setOpen} {...props} />
       {error && <p className={formStyles.error}>{error}</p>}
       {helper && !error && <p className={formStyles.helper}>{helper}</p>}
     </div>

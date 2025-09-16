@@ -10,6 +10,7 @@ import {
   date,
   foreignKey,
   integer,
+  json,
   numeric,
   pgTable,
   text,
@@ -33,9 +34,11 @@ export const fuelTendersTable = pgTable(
 
     // Tender Information
     title: text('title').notNull(),
+    tenderType: text('tender_type'), // "spot", "contract", "framework", "emergency"
     description: text('description'),
     fuelType: text('fuel_type'),
     projectedAnnualVolume: integer('projected_annual_volume'),
+    qualitySpecification: text('quality_specification'), // ASTM D1655, DEF STAN 91-91, etc.
 
     // Base Configuration
     baseCurrency: text('base_currency'),
@@ -46,6 +49,9 @@ export const fuelTendersTable = pgTable(
     biddingEnds: date('bidding_ends'),
     deliveryStarts: date('delivery_starts'),
     deliveryEnds: date('delivery_ends'),
+
+    // Flexible Additional Data (LLM-categorized)
+    tenderSpecifications: json('tender_specifications').$type<Record<string, any>>(),
 
     // Workflow Management
     processStatus: ProcessStatusEnum('process_status').default('pending'),

@@ -14,19 +14,19 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { ChevronDown, Home, Plane, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-interface AirportDropdownProps {
+interface AirportsDropdownProps {
   airports: Airport[];
   selectedAirport: Airport | null;
   onAirportSelect: (airport: Airport) => void;
   className?: string;
 }
 
-export default function AirportDropdown({
+export default function AirportsDropdown({
   airports,
   selectedAirport,
   onAirportSelect,
   className,
-}: AirportDropdownProps) {
+}: AirportsDropdownProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const { map: countryMap, isLoading: countryMapLoading } = useCountryMap();
@@ -81,7 +81,11 @@ export default function AirportDropdown({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button intent="glass" size="lg" className="gap-2 hover:scale-100">
+        <Button
+          intent="glass"
+          size="lg"
+          className="gap-2 hover:scale-100 bg-white/60 shadow-none hover:shadow-md"
+        >
           <div className="flex items-center gap-2 truncate">
             {selectedAirport?.isHub ? (
               <Home className="h-4 w-4 text-yellow-600" />

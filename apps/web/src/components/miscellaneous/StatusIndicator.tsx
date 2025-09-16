@@ -93,7 +93,11 @@ export function StatusIndicator({ className }: { className?: string }) {
     <div className={cn('fixed top-4 right-6 z-50 print:hidden', className)}>
       <DropdownMenu modal={false} open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button intent="glass" aria-label="Open system status" className="hover:scale-105">
+          <Button
+            intent="glass"
+            aria-label="Open system status"
+            className={cn('hover:scale-105', isOpen && 'scale-105')}
+          >
             <div className="flex items-center gap-3">
               {icon}
               <div className="flex items-center gap-2">
