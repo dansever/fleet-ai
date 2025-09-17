@@ -282,7 +282,7 @@ export const FileUploadPopover = ({
             'w-80 p-0 rounded-3xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
-          <BaseCard className="pb-0 py-4">
+          <BaseCard>
             {!selectedFile ? (
               <div>
                 <div
@@ -321,7 +321,7 @@ export const FileUploadPopover = ({
                 {typeof children === 'function' ? children({ close }) : children}
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="bg-red-100 flex flex-col gap-2">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <FileText className="w-5 h-5 text-white" />

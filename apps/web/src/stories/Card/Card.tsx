@@ -40,28 +40,34 @@ export const BaseCard = ({
   actions,
   children,
   contentClassName,
-}: CardProps) => (
-  <Card className={cn('w-full rounded-2xl shadow-none overflow-hidden pt-0', className)}>
-    {header
-      ? header
-      : (title || subtitle) && (
-          <CardHeader
-            className={cn(
-              'py-2 flex flex-row items-start justify-between gap-2',
-              'bg-gradient-to-r',
-              headerClassName,
-            )}
-          >
-            <div className="flex flex-col flex-1 w-full items-start justify-between gap-0">
-              <h3>{title}</h3>
-              <div className="leading-tight">{subtitle}</div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 max-w-1/2">{actions}</div>
-          </CardHeader>
-        )}
-    <CardContent className={contentClassName}>{children}</CardContent>
-  </Card>
-);
+}: CardProps) => {
+  const hasHeaderParams = header || title || subtitle || actions;
+  return (
+    <Card
+      className={cn(
+        'w-full rounded-3xl border-slate-200 shadow-none overflow-hidden pt-0',
+        className,
+      )}
+    >
+      {hasHeaderParams ? (
+        <CardHeader className={cn('pt-4 pb-1 bg-gradient-to-r', headerClassName)}>
+          {header
+            ? header
+            : (title || subtitle || actions) && (
+                <div className={cn('flex flex-row items-start justify-between gap-2')}>
+                  <div className="flex flex-col flex-1 w-full items-start justify-between gap-0">
+                    <h2>{title}</h2>
+                    <div className="leading-tight">{subtitle}</div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 max-w-1/2">{actions}</div>
+                </div>
+              )}
+        </CardHeader>
+      ) : null}
+      <CardContent className={contentClassName}>{children}</CardContent>
+    </Card>
+  );
+};
 
 // ==============================================================
 // MetricCard

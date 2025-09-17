@@ -146,12 +146,8 @@ export function ContractDocument() {
 
   return (
     <BaseCard
-      headerClassName={
-        selectedContract
-          ? 'text-white from-blue-500 via-blue-400 to-blue-600 opacity-80'
-          : undefined
-      }
       title="File Details"
+      headerClassName="from-blue-100 via-purple-100 to-orange-100"
       actions={
         <FileUploadPopover
           onSend={handleUploadContractFile}

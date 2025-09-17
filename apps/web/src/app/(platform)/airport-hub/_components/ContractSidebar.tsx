@@ -7,7 +7,7 @@ import { Contract } from '@/drizzle/types';
 import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
-import { ListItemCard } from '@/stories/Card/Card';
+import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -38,30 +38,36 @@ export default function ContractList() {
   }
 
   return (
-    <div className="h-fit flex flex-col rounded-3xl bg-card">
-      {/* Header */}
-      <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2">
-        <div className="text-sm text-muted-foreground">
-          {contracts.length} of {contracts.length} contracts
+    <BaseCard
+      className="h-fit flex flex-col p-0 gap-0"
+      contentClassName="p-0"
+      headerClassName="p-0"
+      header={
+        <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 pt-2">
+          <div className="text-sm text-muted-foreground">
+            {contracts.length} of {contracts.length} contracts
+          </div>
+          <SimpleContractDialog
+            airport={selectedAirport!}
+            trigger={<Button intent="add" icon={PlusIcon} />}
+            onOpenChange={(open) => {
+              if (!open) {
+                // Close popover when dialog closes
+                setIsPopoverOpen(false);
+              }
+            }}
+            onChange={(newContract) => {
+              if (addContract) {
+                addContract(newContract);
+                // Automatically select the newly created contract
+                setSelectedContract(newContract);
+              }
+            }}
+          />{' '}
         </div>
-        <SimpleContractDialog
-          airport={selectedAirport!}
-          trigger={<Button intent="add" icon={PlusIcon} />}
-          onOpenChange={(open) => {
-            if (!open) {
-              // Close popover when dialog closes
-              setIsPopoverOpen(false);
-            }
-          }}
-          onChange={(newContract) => {
-            if (addContract) {
-              addContract(newContract);
-              // Automatically select the newly created contract
-              setSelectedContract(newContract);
-            }
-          }}
-        />{' '}
-      </div>
+      }
+    >
+      {/* Header */}
 
       {/* Contract List */}
       <div className="flex-1 min-h-0">
@@ -130,6 +136,6 @@ export default function ContractList() {
           </div>
         </ScrollArea>
       </div>
-    </div>
+    </BaseCard>
   );
 }
