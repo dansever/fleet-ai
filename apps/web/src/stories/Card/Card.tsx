@@ -41,7 +41,7 @@ export const BaseCard = ({
   children,
   contentClassName,
 }: CardProps) => (
-  <Card className={cn('w-full rounded-3xl border-0 overflow-hidden pt-0', className)}>
+  <Card className={cn('w-full rounded-2xl shadow-none overflow-hidden pt-0', className)}>
     {header
       ? header
       : (title || subtitle) && (
@@ -123,7 +123,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
     return (
       <Card
         ref={ref}
-        className={cn('rounded-3xl border-0 p-4', 'flex flex-col gap-2', className)}
+        className={cn(' rounded-2xl shadow-none p-3', 'flex flex-col gap-2', className)}
         {...rest}
       >
         {(header || title) && (
@@ -158,18 +158,19 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
             )}
           </div>
         )}
-        {(value !== undefined || change !== undefined) && (
-          <div className="flex items-end gap-4">
-            {value !== undefined && (
-              <h2 className="p-0 truncate font-semibold leading-tight tracking-tight">{value}</h2>
-            )}
-            {change !== undefined && (
-              <p className={cn('text-sm p-0', toneToClass[resolvedTone])}>{change}</p>
-            )}
-          </div>
-        )}
-        {children && <div>{children}</div>}
-        {footer && <div className="text-xs text-muted-foreground">{footer}</div>}
+        <div className="flex flex-col gap-1">
+          {(value !== undefined || change !== undefined) && (
+            <div className="flex items-end gap-4">
+              {value !== undefined && (
+                <h2 className="p-0 truncate font-semibold leading-tight tracking-tight">{value}</h2>
+              )}
+              {change !== undefined && (
+                <p className={cn('text-sm p-0', toneToClass[resolvedTone])}>{change}</p>
+              )}
+            </div>
+          )}
+          {footer && <div className="text-xs text-muted-foreground">{footer}</div>}
+        </div>
       </Card>
     );
   },

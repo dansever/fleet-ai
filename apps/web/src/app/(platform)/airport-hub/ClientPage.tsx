@@ -11,7 +11,7 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
-import AirportDropdown from '../_components/AirportsDropdown';
+import AirportsPanel from '../_components/AirportsPanel';
 import { useAirportHub } from './ContextProvider';
 import AirportPage from './subpages/Airport';
 import ContractsPage from './subpages/Contracts';
@@ -105,10 +105,11 @@ export default function AirportHubClientPage() {
           <div className="flex flex-row items-start gap-4 justify-between w-full">
             <div className="flex flex-col flex-1 min-w-0 gap-1">
               <div className="flex flex-row items-center gap-4">
-                <AirportDropdown
+                <AirportsPanel
                   airports={airports}
                   selectedAirport={selectedAirport}
                   onAirportSelect={setSelectedAirport}
+                  onAirportAdd={setSelectedAirport}
                 />
               </div>
               <div className="flex items-center gap-2 text-gray-600 text-sm">

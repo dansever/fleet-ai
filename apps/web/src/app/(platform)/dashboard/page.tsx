@@ -1,8 +1,8 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { server as airportServer } from '@/modules/core/airports';
 import { server as rfqServer } from '@/modules/rfqs';
-import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import DashboardClientPage from './ClientPage';
+import { DashboardContextProvider } from './ContextProvider';
 
 export default async function DashboardPage() {
   const { dbUser, orgId, error } = await getAuthContext();
@@ -17,14 +17,8 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <PageLayout
-      sidebarContent={null}
-      headerContent={<h1>Hello {dbUser?.firstName}</h1>}
-      mainContent={
-        <div>
-          <DashboardClientPage airports={airports} rfqs={rfqs} />
-        </div>
-      }
-    />
+    <DashboardContextProvider user={dbUser} airports={airports} rfqs={rfqs}>
+      <DashboardClientPage />
+    </DashboardContextProvider>
   );
 }

@@ -87,7 +87,6 @@ export default function AirportPage() {
           value={airportStats.activeContracts}
           change={`${airportStats.totalContracts - airportStats.activeContracts} expired`}
           icon={<Plane className="w-6 h-6 text-green-600" />}
-          neutralChange={true}
         />
       </div>
     </div>
