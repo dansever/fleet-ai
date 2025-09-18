@@ -7,7 +7,7 @@ import TenderDialog from '@/features/fuel/tender/TenderDialog';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
-import { client as processDocumentClient } from '@/modules/documents/orchastration';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { client as fuelTenderClient } from '@/modules/fuel/tenders';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
@@ -29,7 +29,7 @@ import {
   TrendingUpDown,
   Users,
 } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { toast } from 'sonner';
 import { useFuelBidColumns } from '../_components/FuelBidsDataTableColumns';
 import { useFuelProcurement } from '../contexts';
@@ -54,7 +54,6 @@ const FuelTendersPage = memo(function TendersPage() {
   } = useFuelProcurement();
   const selectedAirport = airports[0];
   const fuelBidColumns = useFuelBidColumns();
-  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
 
   // Handle tender addition
   const handleTenderAdded = (newTender: FuelTender) => {
@@ -73,7 +72,6 @@ const FuelTendersPage = memo(function TendersPage() {
     try {
       await fuelTenderClient.deleteFuelTender(selectedTender?.id);
       toast.success('Tender deleted successfully');
-      setIsDeletePopoverOpen(false); // Close the popover after successful deletion
       refreshTenders();
     } catch (error) {
       toast.error('Error deleting tender');
@@ -88,20 +86,11 @@ const FuelTendersPage = memo(function TendersPage() {
     }
     setUploadDocument(true);
     try {
-      // Process the new document
-      const result = await processDocumentClient.processDocument(file, {
-        parentId: selectedTender.id,
-        parentType: 'fuel_tender',
-      });
-
+      // Extract the fuel bid
+      await fuelBidClient.ExtractFuelBid(selectedTender.id, file);
       toast.success('Document has been uploaded');
-
-      // Refresh documents to get the newly created document and update both cache and UI
+      // Refresh bids to get the newly created bid and update both cache and UI
       await refreshBids();
-
-      // Refresh contracts as document processing might have updated contract terms
-      // This ensures contract terms are updated in the UI
-      refreshBids();
     } catch (error) {
       toast.error('Failed to process fuel bid file');
       console.error(error);
@@ -200,59 +189,65 @@ const FuelTendersPage = memo(function TendersPage() {
       {loading.tenders && <LoadingComponent size="md" text="Loading fuel tenders..." />}
 
       {/* Tender Details */}
-      <BaseCard
-        title={currentTender?.title}
-        subtitle={currentTender?.description || 'No description available'}
-        headerClassName="from-sky-500 via-sky-500/60 to-sky-400/60 text-white"
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <FileUploadPopover
-              trigger={
-                <Button intent="add" icon={Plus} text="Add Bid" disabled={loading.uploadDocument} />
-              }
-              onSend={handleBidFileUpload}
-              accept=".pdf,.doc,.docx"
-              maxSize={10}
-              onOpenChange={(open) => console.log('Fuel bid upload popover open:', open)}
-            />
-            <TenderDialog
-              trigger={<Button intent="secondary" icon={Eye} text="View" />}
-              tender={currentTender}
-              onChange={handleTenderUpdated}
-              DialogType="view"
-            />
-            <TenderDialog
-              trigger={<Button intent="secondary" icon={Pencil} text="Edit" />}
-              tender={currentTender}
-              onChange={handleTenderUpdated}
-              DialogType="edit"
-            />
-            <ConfirmationPopover
-              trigger={<Button intent="secondary" icon={TrashIcon} text="Delete" />}
-              onConfirm={handleTenderDelete}
-              title="Delete Tender"
-              popoverIntent="danger"
-              description="Are you sure you want to delete this tender?"
-            />
+      <div className="grid grid-cols-3 gap-4">
+        <BaseCard
+          className="col-span-2"
+          title={currentTender?.title}
+          subtitle={currentTender?.description || 'No description available'}
+          headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+          actions={
+            <div className="flex flex-wrap gap-2">
+              <FileUploadPopover
+                trigger={
+                  <Button
+                    intent="add"
+                    icon={Plus}
+                    text="Add Bid"
+                    disabled={loading.uploadDocument}
+                  />
+                }
+                onSend={handleBidFileUpload}
+                accept=".pdf,.doc,.docx"
+                maxSize={10}
+                onOpenChange={(open) => console.log('Fuel bid upload popover open:', open)}
+              />
+              <TenderDialog
+                trigger={<Button intent="secondary" icon={Eye} text="View" />}
+                tender={currentTender}
+                onChange={handleTenderUpdated}
+                DialogType="view"
+              />
+              <TenderDialog
+                trigger={<Button intent="secondary" icon={Pencil} text="Edit" />}
+                tender={currentTender}
+                onChange={handleTenderUpdated}
+                DialogType="edit"
+              />
+              <ConfirmationPopover
+                trigger={<Button intent="secondary" icon={TrashIcon} text="Delete" />}
+                onConfirm={handleTenderDelete}
+                title="Delete Tender"
+                popoverIntent="danger"
+                description="Are you sure you want to delete this tender?"
+              />
+            </div>
+          }
+          contentClassName="grid grid-cols-10 gap-4"
+        >
+          <div className="col-span-10">
+            {currentTender && <TenderDetails currentTender={currentTender} bids={bids} />}
           </div>
-        }
-        contentClassName="grid grid-cols-10 gap-4"
-      >
-        <div className="col-span-3">
-          {currentTender && <TenderDetails currentTender={currentTender} bids={bids} />}
-        </div>
-        <div className="col-span-7">
-          {currentTender &&
-            // Fuel Bids Loading State
-            (loading.bids ? (
-              <LoadingComponent size="md" text="Loading fuel bids..." />
-            ) : (
-              <BaseCard className="shadow-none border-none col-span-7">
-                <DataTable data={bids} columns={fuelBidColumns as Column<FuelBid>[]} />
-              </BaseCard>
-            ))}
-        </div>
-      </BaseCard>
+        </BaseCard>
+        {currentTender &&
+          // Fuel Bids Loading State
+          (loading.bids ? (
+            <LoadingComponent size="md" text="Loading fuel bids..." />
+          ) : (
+            <BaseCard className="col-span-3">
+              <DataTable data={bids} columns={fuelBidColumns as Column<FuelBid>[]} />
+            </BaseCard>
+          ))}
+      </div>
     </div>
   );
 });
@@ -269,7 +264,7 @@ const TenderDetails = memo(function TenderDetails({
   return (
     <BaseCard className="shadow-none border-none">
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2 space-y-1">
+        <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Calendar className="h-4 w-4" />
             Tender Period
@@ -280,7 +275,7 @@ const TenderDetails = memo(function TenderDetails({
               : 'N/A'}
           </div>
         </div>
-        <div className="col-span-2 space-y-1">
+        <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Calendar className="h-4 w-4" />
             Agreement Period

@@ -55,14 +55,14 @@ export async function deleteFuelBid(id: FuelBid['id']): Promise<void> {
 /**
  * Process a fuel bid
  */
-export async function processFuelBid(tenderId: FuelTender['id'], file: File): Promise<FuelBid> {
+export async function ExtractFuelBid(tenderId: FuelTender['id'], file: File): Promise<FuelBid> {
   if (!tenderId || !file) throw new Error('Tender ID and file are required');
   // Create form data
   const formData = new FormData();
   formData.append('file', file);
   formData.append('tenderId', tenderId);
   // Start extraction
-  const res = await api.post('/api/fuel-bids/process', formData, {
+  const res = await api.post('/api/fuel-bids/extract', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

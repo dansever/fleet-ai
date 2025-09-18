@@ -45,7 +45,8 @@ export const BaseCard = ({
   return (
     <Card
       className={cn(
-        'w-full rounded-3xl border-slate-200 shadow-none overflow-hidden pt-0',
+        'w-full rounded-3xl border-slate-200 shadow-none overflow-hidden',
+        hasHeaderParams && 'pt-0',
         className,
       )}
     >

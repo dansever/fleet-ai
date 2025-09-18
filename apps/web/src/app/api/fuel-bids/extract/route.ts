@@ -3,6 +3,8 @@ import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 import { jsonError } from '@/lib/core/errors';
 import { server as extractServer } from '@/modules/extract';
 import { server as fuelBidServer } from '@/modules/fuel/bids';
+import { convertPydanticFuelBidToFuelBid } from '@/modules/fuel/bids/bids.utils';
+import { timed } from '@/utils/timer';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -21,20 +23,22 @@ export async function POST(req: NextRequest) {
     const tenderId = body.get('tenderId') as string;
 
     // 1 - Create bid record
-    const bid = await fuelBidServer.createFuelBid({ orgId, tenderId });
+    const bid = await timed('fuelBidExtract', async () => {
+      return fuelBidServer.createFuelBid({ orgId, tenderId });
+    });
 
     // 2 - Extract bid data
-    const result = await extractServer.fileExtractorOrchestrator(
-      file,
-      ExtractionAgentName.FUEL_BID_EXTRACTOR,
-    );
+    const { result } = await timed('fuelBidExtract', async () => {
+      return extractServer.fileExtractorOrchestrator(file, ExtractionAgentName.FUEL_BID_EXTRACTOR);
+    });
 
-    // 3 - Update bid record
-    await fuelBidServer.updateFuelBid(bid.id, {
-      terms: result.data.terms,
-      aiSummary: result.data.aiSummary,
-      tags: result.data.tags,
-      updatedAt: new Date(),
+    // 3- Update bid record with converted data
+    await timed('fuelBidUpdate', async () => {
+      const convertedData = convertPydanticFuelBidToFuelBid(result.data);
+      return fuelBidServer.updateFuelBid(bid.result.id, {
+        ...convertedData,
+        updatedAt: new Date(),
+      });
     });
 
     // Return result
