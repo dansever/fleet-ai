@@ -21,6 +21,9 @@ const config: Config = {
       fontSize: {
         md: '1rem', // 16px
       },
+      maxWidth: {
+        '7xl': '50rem',
+      },
       screens: {
         xs: '480px', // very small mobile
         sm: '640px', // standard mobile
@@ -30,6 +33,9 @@ const config: Config = {
         '2xl': '1440px', // 24" monitor (or use 1536px which is Tailwind default)
         '3xl': '1600px', // widescreen desktop
         '4xl': '1920px', // ultra-wide monitor
+        '5xl': '2560px', // 4k monitor
+        '6xl': '3840px', // 8k monitor
+        '7xl': '5120px', // 10k monitor
       },
       colors: {
         border: 'var(--border)',

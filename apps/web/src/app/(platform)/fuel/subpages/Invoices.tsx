@@ -23,7 +23,7 @@ export default function InvoicesPage() {
   const [selectedExceptionType, setSelectedExceptionType] = useState<ExceptionType>('all');
   const [selectedSeverity, setSelectedSeverity] = useState<SeverityType>('all');
   const [selectedStatus, setSelectedStatus] = useState<StatusType>('all');
-  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
+  const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
 
   if (!selectedAirport) {
     return (
@@ -89,17 +89,7 @@ export default function InvoicesPage() {
   });
 
   const handleInvoiceSelect = (invoiceId: string) => {
-    setSelectedInvoices((prev) =>
-      prev.includes(invoiceId) ? prev.filter((id) => id !== invoiceId) : [...prev, invoiceId],
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedInvoices.length === filteredInvoices.length) {
-      setSelectedInvoices([]);
-    } else {
-      setSelectedInvoices(filteredInvoices.map((inv) => inv.id));
-    }
+    setSelectedInvoice(selectedInvoice === invoiceId ? null : invoiceId);
   };
 
   const getSeverityColor = (severity: SeverityType) => {
@@ -132,7 +122,7 @@ export default function InvoicesPage() {
     setSelectedExceptionType('all');
     setSelectedSeverity('all');
     setSelectedStatus('all');
-    setSelectedInvoices([]);
+    setSelectedInvoice(null);
   };
 
   const hasActiveFilters =
@@ -163,78 +153,63 @@ export default function InvoicesPage() {
         actions={
           <div className="flex gap-2">
             <Button intent="secondary" text="Export to Excel" icon={Download} size="sm" />
-            {selectedInvoices.length > 0 && (
-              <Button
-                intent="warning"
-                text={`Generate Dispute Pack (${selectedInvoices.length})`}
-                icon={AlertTriangle}
-                size="sm"
-              />
+            {selectedInvoice && (
+              <Button intent="warning" text="Create Dispute" icon={AlertTriangle} size="sm" />
             )}
           </div>
         }
       >
         <div className="flex flex-col gap-4">
           {/* Invoice Filters */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <div className="flex flex-row items-end gap-4 justify-between mb-3">
-              <h4 className="text-sm font-medium text-gray-700">Filter Invoice Exceptions</h4>
-              <Button
-                intent="ghost"
-                text="Reset Filters"
-                icon={RefreshCw}
-                disabled={!hasActiveFilters}
-                onClick={resetFilters}
-                size="sm"
+          <div className="px-4 py-2 bg-gray-50 rounded-lg flex flex-row gap-4 items-end justify-between">
+            <div className="flex flex-row gap-4">
+              <ModernSelect
+                label="Exception Type"
+                value={selectedExceptionType}
+                onValueChange={(value) => setSelectedExceptionType(value as ExceptionType)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                options={[
+                  { value: 'all', label: 'All Types' },
+                  { value: 'price_mismatch', label: 'Price Mismatch' },
+                  { value: 'fee_mismatch', label: 'Fee Mismatch' },
+                  { value: 'quantity_variance', label: 'Quantity Variance' },
+                  { value: 'index_drift', label: 'Index Drift' },
+                ]}
+              />
+
+              <ModernSelect
+                label="Severity"
+                value={selectedSeverity}
+                onValueChange={(value) => setSelectedSeverity(value as SeverityType)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                options={[
+                  { value: 'all', label: 'All Severities' },
+                  { value: 'high', label: 'High' },
+                  { value: 'medium', label: 'Medium' },
+                  { value: 'low', label: 'Low' },
+                ]}
+              />
+
+              <ModernSelect
+                label="Status"
+                value={selectedStatus}
+                onValueChange={(value) => setSelectedStatus(value as StatusType)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'disputed', label: 'Disputed' },
+                  { value: 'resolved', label: 'Resolved' },
+                ]}
               />
             </div>
-            <div className="flex flex-row gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Exception Type</label>
-                <ModernSelect
-                  value={selectedExceptionType}
-                  onValueChange={(value) => setSelectedExceptionType(value as ExceptionType)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  options={[
-                    { value: 'all', label: 'All Types' },
-                    { value: 'price_mismatch', label: 'Price Mismatch' },
-                    { value: 'fee_mismatch', label: 'Fee Mismatch' },
-                    { value: 'quantity_variance', label: 'Quantity Variance' },
-                    { value: 'index_drift', label: 'Index Drift' },
-                  ]}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Severity</label>
-                <ModernSelect
-                  value={selectedSeverity}
-                  onValueChange={(value) => setSelectedSeverity(value as SeverityType)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  options={[
-                    { value: 'all', label: 'All Severities' },
-                    { value: 'high', label: 'High' },
-                    { value: 'medium', label: 'Medium' },
-                    { value: 'low', label: 'Low' },
-                  ]}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Status</label>
-                <ModernSelect
-                  value={selectedStatus}
-                  onValueChange={(value) => setSelectedStatus(value as StatusType)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  options={[
-                    { value: 'all', label: 'All Statuses' },
-                    { value: 'pending', label: 'Pending' },
-                    { value: 'disputed', label: 'Disputed' },
-                    { value: 'resolved', label: 'Resolved' },
-                  ]}
-                />
-              </div>
-            </div>
+            <Button
+              intent="ghost"
+              text="Reset Filters"
+              icon={RefreshCw}
+              disabled={!hasActiveFilters}
+              onClick={resetFilters}
+            />
           </div>
 
           {loading.invoices ? (
@@ -254,18 +229,7 @@ export default function InvoicesPage() {
           ) : (
             <div className="space-y-4">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
-                <div className="col-span-1">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedInvoices.length === filteredInvoices.length &&
-                      filteredInvoices.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    className="rounded border-gray-300"
-                  />
-                </div>
+              <div className="grid grid-cols-11 gap-4 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
                 <div className="col-span-2">Supplier</div>
                 <div className="col-span-2">Invoice #</div>
                 <div className="col-span-1">Date</div>
@@ -280,16 +244,13 @@ export default function InvoicesPage() {
               {filteredInvoices.map((invoice) => (
                 <div
                   key={invoice.id}
-                  className="grid grid-cols-12 gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                  className={`grid grid-cols-11 gap-4 p-3 border rounded-lg cursor-pointer transition-all ${
+                    selectedInvoice === invoice.id
+                      ? 'border-blue-500 bg-blue-50 shadow-md'
+                      : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleInvoiceSelect(invoice.id)}
                 >
-                  <div className="col-span-1 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedInvoices.includes(invoice.id)}
-                      onChange={() => handleInvoiceSelect(invoice.id)}
-                      className="rounded border-gray-300"
-                    />
-                  </div>
                   <div className="col-span-2 flex items-center">
                     <span className="font-medium">{invoice.supplier}</span>
                   </div>
@@ -317,8 +278,22 @@ export default function InvoicesPage() {
                     <span className="text-sm text-gray-600">{invoice.owner}</span>
                   </div>
                   <div className="col-span-1 flex items-center gap-1">
-                    <Button intent="ghost" icon={Eye} size="sm" />
-                    <Button intent="ghost" icon={Mail} size="sm" />
+                    <Button
+                      intent="ghost"
+                      icon={Eye}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle view details
+                      }}
+                    />
+                    <Button
+                      intent="ghost"
+                      icon={Mail}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle email
+                      }}
+                    />
                   </div>
                 </div>
               ))}
@@ -327,58 +302,126 @@ export default function InvoicesPage() {
         </div>
       </BaseCard>
 
-      {/* Invoice Detail Modal Placeholder */}
-      {selectedInvoices.length > 0 && (
-        <BaseCard
-          title="Invoice Detail"
-          subtitle="Validation view with three-column comparison"
-          headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
-        >
-          <CardContent>
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium text-blue-800">
-                    {selectedInvoices.length} invoice(s) selected for detailed review
-                  </span>
-                </div>
-                <div className="text-sm text-blue-700">
-                  Click "View Details" to see the three-column validation view comparing invoice
-                  line items, agreement terms, and uplift logs.
-                </div>
-              </div>
+      {/* Invoice Problem Details */}
+      {selectedInvoice &&
+        (() => {
+          const invoice = filteredInvoices.find((inv) => inv.id === selectedInvoice);
+          if (!invoice) return null;
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-700">Invoice Line Items</h4>
-                  <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600">
-                    Detailed breakdown of invoice charges and calculations.
+          return (
+            <BaseCard
+              title="Invoice Problem Details"
+              subtitle={`Dispute analysis for ${invoice.invoiceNumber}`}
+              headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+            >
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Problem Summary */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="font-medium text-red-800">
+                        {getExceptionTypeLabel(invoice.exceptionType)} Detected
+                      </span>
+                    </div>
+                    <div className="text-sm text-red-700">
+                      Amount at risk:{' '}
+                      <span className="font-semibold">${invoice.amountAtRisk.toFixed(2)}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-700">Agreement Terms</h4>
-                  <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600">
-                    Contract pricing formula and expected terms.
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-700">Uplift Logs</h4>
-                  <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600">
-                    Actual fuel delivery records and calculations.
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex gap-2">
-                <Button intent="primary" text="View Details" icon={Eye} />
-                <Button intent="warning" text="Generate Dispute Pack" icon={AlertTriangle} />
-                <Button intent="success" text="Mark Resolved" icon={CheckCircle} />
-              </div>
-            </div>
-          </CardContent>
-        </BaseCard>
-      )}
+                  {/* Three-Column Comparison */}
+                  <div className="grid grid-cols-3 gap-6">
+                    {/* What Was Billed */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-gray-600" />
+                        <h4 className="font-semibold text-gray-700">What Was Billed</h4>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Fuel Quantity:</div>
+                          <div className="text-gray-600">15,000 gallons</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Unit Price:</div>
+                          <div className="text-gray-600">$3.25/gal</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Service Fee:</div>
+                          <div className="text-gray-600">$125.00</div>
+                        </div>
+                        <div className="text-sm border-t pt-2">
+                          <div className="font-medium text-gray-800">Total Billed:</div>
+                          <div className="text-gray-600 font-semibold">$48,875.00</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contract Terms */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <h4 className="font-semibold text-gray-700">Contract Terms</h4>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg space-y-3">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Expected Quantity:</div>
+                          <div className="text-gray-600">15,000 gallons</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Agreed Price:</div>
+                          <div className="text-gray-600">$3.15/gal</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Service Fee:</div>
+                          <div className="text-gray-600">$100.00</div>
+                        </div>
+                        <div className="text-sm border-t pt-2">
+                          <div className="font-medium text-gray-800">Expected Total:</div>
+                          <div className="text-gray-600 font-semibold">$47,350.00</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Difference Analysis */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-orange-600" />
+                        <h4 className="font-semibold text-gray-700">Difference</h4>
+                      </div>
+                      <div className="bg-orange-50 p-4 rounded-lg space-y-3">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Price Variance:</div>
+                          <div className="text-red-600 font-semibold">+$0.10/gal</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Fee Variance:</div>
+                          <div className="text-red-600 font-semibold">+$25.00</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-800">Quantity Variance:</div>
+                          <div className="text-green-600 font-semibold">$0.00</div>
+                        </div>
+                        <div className="text-sm border-t pt-2">
+                          <div className="font-medium text-gray-800">Total Variance:</div>
+                          <div className="text-red-600 font-semibold text-lg">+$1,525.00</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t">
+                    <Button intent="warning" text="Create Dispute" icon={AlertTriangle} />
+                    <Button intent="success" text="Mark Resolved" icon={CheckCircle} />
+                    <Button intent="secondary" text="Export Details" icon={Download} />
+                  </div>
+                </div>
+              </CardContent>
+            </BaseCard>
+          );
+        })()}
     </div>
   );
 }

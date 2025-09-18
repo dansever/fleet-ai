@@ -1,7 +1,7 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 import { jsonError } from '@/lib/core/errors';
-import { server as extractServer } from '@/modules/extract';
+import { server as extractServer } from '@/modules/ai/extract';
 import { server as fuelBidServer } from '@/modules/fuel/bids';
 import { convertPydanticFuelBidToFuelBid } from '@/modules/fuel/bids/bids.utils';
 import { timed } from '@/utils/timer';
@@ -27,15 +27,23 @@ export async function POST(req: NextRequest) {
       return fuelBidServer.createFuelBid({ orgId, tenderId });
     });
 
+    // 1.1 - Get the extraction agent
+    const agent = await extractServer.getExtractionAgent(ExtractionAgentName.FUEL_BID_EXTRACTOR);
+    console.log('agent', agent);
+
+    // 1.2 - Upload the file
+    const uploadedFile = await extractServer.uploadFileForExtraction(file);
+    console.log('uploadedFile', uploadedFile);
+
     // 2 - Extract bid data
-    const { result } = await timed('fuelBidExtract', async () => {
+    const result = await timed('fuelBidExtract', async () => {
       return extractServer.fileExtractorOrchestrator(file, ExtractionAgentName.FUEL_BID_EXTRACTOR);
     });
 
     // 3- Update bid record with converted data
     await timed('fuelBidUpdate', async () => {
       const convertedData = convertPydanticFuelBidToFuelBid(result.data);
-      return fuelBidServer.updateFuelBid(bid.result.id, {
+      return fuelBidServer.updateFuelBid(bid.id, {
         ...convertedData,
         updatedAt: new Date(),
       });

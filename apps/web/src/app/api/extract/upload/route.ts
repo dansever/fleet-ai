@@ -1,6 +1,6 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as extractServer } from '@/modules/extract';
+import { server as extractServer } from '@/modules/ai/extract';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs'; // Required for streaming file upload

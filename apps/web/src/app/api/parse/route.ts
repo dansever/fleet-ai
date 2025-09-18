@@ -1,6 +1,6 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as parseServer } from '@/modules/documents/parse';
+import { server as parseServer } from '@/modules/ai/parse';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs'; // ensure Node APIs are available

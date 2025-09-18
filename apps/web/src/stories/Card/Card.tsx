@@ -3,7 +3,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { TrendingUp } from 'lucide-react';
 import type React from 'react';
 import { forwardRef } from 'react';
 
@@ -110,19 +109,7 @@ function inferTone(change: React.ReactNode | undefined): MetricTone {
 
 export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
   (
-    {
-      title,
-      subtitle,
-      value,
-      change,
-      tone,
-      icon = <TrendingUp className="h-5 w-5" aria-hidden="true" />,
-      header,
-      footer,
-      className,
-      children,
-      ...rest
-    },
+    { title, subtitle, value, change, tone, icon, header, footer, className, children, ...rest },
     ref,
   ) => {
     const resolvedTone = tone ?? inferTone(change);
@@ -130,7 +117,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
     return (
       <Card
         ref={ref}
-        className={cn(' rounded-2xl shadow-none p-3', 'flex flex-col gap-2', className)}
+        className={cn(' rounded-2xl shadow-none p-4', 'flex flex-col gap-2', className)}
         {...rest}
       >
         {(header || title) && (

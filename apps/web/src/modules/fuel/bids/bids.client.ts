@@ -6,7 +6,7 @@ import { FuelBidCreateInput, FuelBidUpdateInput } from './bids.types';
  * Get a fuel bid by ID
  */
 export async function getFuelBid(id: FuelBid['id']): Promise<FuelBid> {
-  const res = await api.get(`/api/fuel-bids/${id}`);
+  const res = await api.get(`/api/fuel/bids/${id}`);
   return res.data;
 }
 
@@ -14,7 +14,7 @@ export async function getFuelBid(id: FuelBid['id']): Promise<FuelBid> {
  * Get fuel bids by tender ID
  */
 export async function listFuelBidsByTender(tenderId: string): Promise<FuelBid[]> {
-  const res = await api.get(`/api/fuel-bids?tenderId=${tenderId}`);
+  const res = await api.get(`/api/fuel/bids?tenderId=${tenderId}`);
   return res.data;
 }
 
@@ -22,7 +22,7 @@ export async function listFuelBidsByTender(tenderId: string): Promise<FuelBid[]>
  * Get fuel bids by organization
  */
 export async function listFuelBidsByOrg(): Promise<FuelBid[]> {
-  const res = await api.get('/api/fuel-bids');
+  const res = await api.get('/api/fuel/bids');
   return res.data;
 }
 
@@ -33,7 +33,7 @@ export async function createFuelBid(
   tenderId: FuelTender['id'],
   data: FuelBidCreateInput,
 ): Promise<FuelBid> {
-  const res = await api.post(`/api/fuel-bids?tenderId=${tenderId}`, data);
+  const res = await api.post(`/api/fuel/bids?tenderId=${tenderId}`, data);
   return res.data;
 }
 
@@ -41,7 +41,7 @@ export async function createFuelBid(
  * Update an existing fuel bid
  */
 export async function updateFuelBid(id: string, data: FuelBidUpdateInput): Promise<FuelBid> {
-  const res = await api.put(`/api/fuel-bids?id=${id}`, data);
+  const res = await api.put(`/api/fuel/bids?id=${id}`, data);
   return res.data;
 }
 
@@ -49,7 +49,7 @@ export async function updateFuelBid(id: string, data: FuelBidUpdateInput): Promi
  * Delete a fuel bid
  */
 export async function deleteFuelBid(id: FuelBid['id']): Promise<void> {
-  await api.delete(`/api/fuel-bids/${id}`);
+  await api.delete(`/api/fuel/bids/${id}`);
 }
 
 /**
@@ -62,7 +62,7 @@ export async function ExtractFuelBid(tenderId: FuelTender['id'], file: File): Pr
   formData.append('file', file);
   formData.append('tenderId', tenderId);
   // Start extraction
-  const res = await api.post('/api/fuel-bids/extract', formData, {
+  const res = await api.post('/api/fuel/bids/extract', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

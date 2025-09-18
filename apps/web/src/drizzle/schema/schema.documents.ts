@@ -17,7 +17,7 @@ import {
   uuid,
   vector,
 } from 'drizzle-orm/pg-core';
-import { DocumentParentTypeEnum } from '../enums';
+import { DocumentTypeEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
 import { organizationsTable } from './schema.core';
 
@@ -25,7 +25,7 @@ import { organizationsTable } from './schema.core';
  * Documents use a polymorphic relationship pattern with parentId/parentType
  * to support attachment to multiple entity types:
  *
- * Supported parent types (via DocumentParentTypeEnum):
+ * Supported parent types (via DocumentTypeEnum):
  * - contract: Legal contracts and agreements
  * - invoice: Vendor invoices and billing documents
  * - rfq: Request for Quote documents
@@ -45,7 +45,7 @@ export const documentsTable = pgTable(
 
     // Generic parent relationship
     parentId: uuid('parent_id'), // Generic FK to any parent entity
-    parentType: DocumentParentTypeEnum('parent_type'), // contract | invoice | rfq | fuel_tender | fuel_bid | other
+    parentType: DocumentTypeEnum('parent_type'), // contract | invoice | rfq | fuel_tender | fuel_bid | other
 
     // File data
     storageId: text('storage_id'), // file storage id

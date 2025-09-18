@@ -56,7 +56,7 @@ export const PageLayout: FC<PageLayoutProps> = ({
             </header>
           )}
           {/* The only vertical scroller */}
-          <main className="p-4 pt-2 flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full">
+          <main className="p-4 pt-2 flex-1 min-h-0 max-w-7xl mx-auto overflow-y-auto overflow-x-hidden w-full">
             {children}
           </main>
         </div>

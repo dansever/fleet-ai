@@ -6,6 +6,7 @@ import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { client as invoiceClient } from '@/modules/invoices';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { ConversionProgress, convertBidsToTenderBase, ConvertedBid } from '../utils/bidConversion';
 import { CACHE_KEYS, CACHE_TTL, cacheManager, createCacheKey } from '../utils/cacheManager';
 
 // ============================================================================
@@ -17,6 +18,7 @@ interface FuelProcurementState {
   airports: Airport[];
   tenders: FuelTender[];
   bids: FuelBid[];
+  convertedBids: ConvertedBid[];
   contracts: Contract[];
   invoices: Invoice[];
 
@@ -29,6 +31,7 @@ interface FuelProcurementState {
   loadingAirports: boolean;
   loadingTenders: boolean;
   loadingBids: boolean;
+  convertingBids: boolean;
   loadingContracts: boolean;
   loadingInvoices: boolean;
   uploadingDocument: boolean;
@@ -46,6 +49,7 @@ interface FuelProcurementContextType {
   airports: Airport[];
   tenders: FuelTender[];
   bids: FuelBid[];
+  convertedBids: ConvertedBid[];
   contracts: Contract[];
   invoices: Invoice[];
 
@@ -60,6 +64,7 @@ interface FuelProcurementContextType {
     airports: boolean;
     tenders: boolean;
     bids: boolean;
+    convertingBids: boolean;
     contracts: boolean;
     invoices: boolean;
     uploadDocument: boolean;
@@ -76,6 +81,9 @@ interface FuelProcurementContextType {
     invoices: string | null;
     any: boolean;
   };
+
+  // Conversion progress
+  conversionProgress: ConversionProgress | null;
 
   // Actions
   selectAirport: (airport: Airport | null) => void;
@@ -134,6 +142,7 @@ export function FuelProcurementProvider({
       airports: sorted,
       tenders: [],
       bids: [],
+      convertedBids: [],
       contracts: [],
       invoices: [],
       selectedAirport: sorted[0] || null,
@@ -142,6 +151,7 @@ export function FuelProcurementProvider({
       loadingAirports: false,
       loadingTenders: false,
       loadingBids: false,
+      convertingBids: false,
       loadingContracts: false,
       loadingInvoices: false,
       uploadingDocument: false,
@@ -152,6 +162,9 @@ export function FuelProcurementProvider({
       invoicesError: null,
     };
   });
+
+  // Conversion progress state
+  const [conversionProgress, setConversionProgress] = useState<ConversionProgress | null>(null);
 
   // Helper to update state safely
   const updateState = useCallback((updates: Partial<FuelProcurementState>) => {
@@ -200,7 +213,7 @@ export function FuelProcurementProvider({
     [updateState],
   );
 
-  // Load bids for selected tender with caching
+  // Load bids for selected tender with caching and conversion
   const loadBids = useCallback(
     async (tenderId: string, forceRefresh = false) => {
       const cacheKey = createCacheKey(CACHE_KEYS.BIDS, tenderId);
@@ -214,6 +227,12 @@ export function FuelProcurementProvider({
             loadingBids: false,
             bidsError: null,
           });
+
+          // Trigger conversion if we have a selected tender
+          const selectedTender = state.tenders.find((t) => t.id === tenderId);
+          if (selectedTender && cachedBids.length > 0) {
+            triggerBidConversion(cachedBids, selectedTender);
+          }
           return;
         }
       }
@@ -226,12 +245,53 @@ export function FuelProcurementProvider({
         cacheManager.set(cacheKey, bids, CACHE_TTL.BIDS);
 
         updateState({ bids, loadingBids: false });
+
+        // Trigger conversion if we have a selected tender
+        const selectedTender = state.tenders.find((t) => t.id === tenderId);
+        if (selectedTender && bids.length > 0) {
+          triggerBidConversion(bids, selectedTender);
+        }
       } catch (error) {
         updateState({
           bidsError: error instanceof Error ? error.message : 'Failed to load bids',
           loadingBids: false,
           bids: [],
         });
+      }
+    },
+    [updateState, state.tenders],
+  );
+
+  // Trigger bid conversion to tender base currency/UOM
+  const triggerBidConversion = useCallback(
+    async (bids: FuelBid[], tender: FuelTender) => {
+      if (bids.length === 0) return;
+
+      updateState({ convertingBids: true });
+      setConversionProgress({
+        total: bids.length,
+        completed: 0,
+        current: '',
+        errors: [],
+      });
+
+      try {
+        const convertedBids = await convertBidsToTenderBase(bids, tender, (progress) => {
+          setConversionProgress(progress);
+        });
+
+        updateState({
+          convertedBids,
+          convertingBids: false,
+        });
+        setConversionProgress(null);
+      } catch (error) {
+        console.error('Error converting bids:', error);
+        updateState({
+          convertingBids: false,
+          convertedBids: [],
+        });
+        setConversionProgress(null);
       }
     },
     [updateState],
@@ -337,6 +397,7 @@ export function FuelProcurementProvider({
     airports: state.airports,
     tenders: state.tenders,
     bids: state.bids,
+    convertedBids: state.convertedBids,
     contracts: state.contracts,
     invoices: state.invoices,
 
@@ -353,12 +414,14 @@ export function FuelProcurementProvider({
       airports: state.loadingAirports,
       tenders: state.loadingTenders,
       bids: state.loadingBids,
+      convertingBids: state.convertingBids,
       contracts: state.loadingContracts,
       invoices: state.loadingInvoices,
       uploadDocument: state.uploadingDocument,
       any:
         state.loadingTenders ||
         state.loadingBids ||
+        state.convertingBids ||
         state.loadingContracts ||
         state.loadingInvoices ||
         state.uploadingDocument,
@@ -381,6 +444,9 @@ export function FuelProcurementProvider({
       ),
     },
 
+    // Conversion progress
+    conversionProgress,
+
     // Actions
     selectAirport: (airport: Airport | null) => {
       updateState({
@@ -389,6 +455,7 @@ export function FuelProcurementProvider({
         selectedContract: null,
         tenders: [],
         bids: [],
+        convertedBids: [],
         contracts: [],
         invoices: [],
       });
@@ -398,6 +465,7 @@ export function FuelProcurementProvider({
       updateState({
         selectedTender: tender,
         bids: [],
+        convertedBids: [],
       });
     },
 
@@ -497,7 +565,10 @@ export function FuelProcurementProvider({
           const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
           cacheManager.delete(cacheKey);
         }
-        updateState({ bids: [bid, ...state.bids] });
+        updateState({
+          bids: [bid, ...state.bids],
+          convertedBids: [], // Clear converted bids as they need to be recalculated
+        });
       } catch (error) {
         console.error('Error adding bid to context:', error);
         // Could add error state handling here if needed
@@ -513,6 +584,7 @@ export function FuelProcurementProvider({
         }
         updateState({
           bids: state.bids.map((b) => (b.id === bid.id ? bid : b)),
+          convertedBids: [], // Clear converted bids as they need to be recalculated
         });
       } catch (error) {
         console.error('Error updating bid in context:', error);
@@ -530,6 +602,7 @@ export function FuelProcurementProvider({
         }
         updateState({
           bids: state.bids.filter((b) => b.id !== bidId),
+          convertedBids: state.convertedBids.filter((b) => b.id !== bidId),
         });
       } catch (error) {
         console.error('Error removing bid from context:', error);

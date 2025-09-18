@@ -123,6 +123,7 @@ export const fuelBidsTable = pgTable(
     // Inclusions & Exclusions
     includesTaxes: boolean('includes_taxes'),
     includesAirportFees: boolean('includes_airport_fees'),
+    qualitySpecification: text('quality_specification'),
 
     // Calculated Fields
     densityAt15C: numeric('density_at_15c'), // kg/m3 if mass quote present

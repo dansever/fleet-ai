@@ -1,11 +1,11 @@
-import { DocumentParentType } from '@/drizzle/schema';
+import { DocumentType } from '@/drizzle/schema';
 import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 
 /**
- * Map DocumentParentType to the appropriate ExtractionAgentName
+ * Map DocumentType to the appropriate ExtractionAgentName
  */
-export const getExtractionAgentName = (parentType: DocumentParentType): ExtractionAgentName => {
-  switch (parentType) {
+export const getExtractionAgentName = (documentType: DocumentType): ExtractionAgentName => {
+  switch (documentType) {
     case 'contract':
       return ExtractionAgentName.CONTRACT_EXTRACTOR;
     case 'rfq':
@@ -15,6 +15,6 @@ export const getExtractionAgentName = (parentType: DocumentParentType): Extracti
     case 'fuel_bid':
       return ExtractionAgentName.FUEL_BID_EXTRACTOR;
     default:
-      throw new Error(`Unsupported parent type for extraction: ${parentType}`);
+      throw new Error(`Unsupported parent type for extraction: ${documentType}`);
   }
 };

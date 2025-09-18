@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { DocumentParentType } from '../enums';
+import { DocumentType } from '../enums';
 import { documentsTable } from './schema.documents';
 
 // Helper functions for working with document parent relationships
@@ -9,7 +9,7 @@ export class DocumentHelpers {
   /**
    * Get all documents for a specific parent entity
    */
-  async getDocumentsForParent(parentId: string, parentType: DocumentParentType, orgId: string) {
+  async getDocumentsForParent(parentId: string, parentType: DocumentType, orgId: string) {
     return await this.db
       .select()
       .from(documentsTable)

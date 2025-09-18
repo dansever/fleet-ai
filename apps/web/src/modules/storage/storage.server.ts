@@ -1,7 +1,7 @@
 'use server';
 import 'server-only';
 
-import { DocumentParentType, DocumentParentTypeEnum } from '@/drizzle/enums';
+import { DocumentType, DocumentTypeEnum } from '@/drizzle/enums';
 import { createClient } from '@/lib/supabase/server';
 import { server as orgServer } from '@/modules/core/organizations';
 import { utils as storageUtils } from '@/modules/storage';
@@ -13,28 +13,26 @@ import slugify from 'slugify';
  */
 export async function uploadFile(
   file: File,
-  parentType: DocumentParentType,
+  parentType: DocumentType,
   parentId: string,
 ): Promise<{ id: string; path: string; fullPath: string }>;
 export async function uploadFile(file: File, bucket: string, path: string): Promise<any>;
 export async function uploadFile(
   file: File,
-  bucketOrParentType: string | DocumentParentType,
+  bucketOrParentType: string | DocumentType,
   pathOrParentId: string,
 ): Promise<any> {
   const supabase = await createClient();
 
   // Determine if this is the new signature (parentType, parentId) or old signature (bucket, path)
-  const isNewSignature = DocumentParentTypeEnum.enumValues.includes(
-    bucketOrParentType as DocumentParentType,
-  );
+  const isNewSignature = DocumentTypeEnum.enumValues.includes(bucketOrParentType as DocumentType);
 
   let bucket: string;
   let path: string;
 
   if (isNewSignature) {
     // New signature: (file, parentType, parentId)
-    const parentType = bucketOrParentType as DocumentParentType;
+    const parentType = bucketOrParentType as DocumentType;
     const parentId = pathOrParentId;
 
     // Get bucket name from current organization

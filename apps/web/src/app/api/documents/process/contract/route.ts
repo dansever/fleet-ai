@@ -1,15 +1,15 @@
-import { DocumentParentType } from '@/drizzle/enums';
+import { DocumentType } from '@/drizzle/enums';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
+import { server as extractServer, utils as extractUtils } from '@/modules/ai/extract';
+import { server as parseServer } from '@/modules/ai/parse';
 import { server as documentsServer } from '@/modules/documents/documents';
 import { types as documentProcessorTypes } from '@/modules/documents/orchastration';
-import { server as parseServer } from '@/modules/documents/parse';
-import { server as extractServer, utils as extractUtils } from '@/modules/extract';
 import { server as storageServer } from '@/modules/storage';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = {
-  params: Promise<{ parentType: DocumentParentType; parentId: string }>;
+  params: Promise<{ parentType: DocumentType; parentId: string }>;
 };
 
 /**
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Prepare the request
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const parentType = formData.get('parentType') as DocumentParentType;
+    const parentType = formData.get('parentType') as DocumentType;
     const parentId = formData.get('parentId') as string;
     if (!file || !parentType || !parentId)
       return jsonError('No file, parent type, or parent id uploaded', 400);

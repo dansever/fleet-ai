@@ -1,4 +1,4 @@
-import { DocumentParentType } from '@/drizzle/schema';
+import { DocumentType } from '@/drizzle/schema';
 import { Document } from '@/drizzle/types';
 import { DocumentCreateInput } from '../documents/documents.types';
 
@@ -10,7 +10,7 @@ export namespace DocumentProcessorTypes {
 
   export interface DocumentProcessingOptions {
     parentId: string;
-    parentType: DocumentParentType;
+    parentType: DocumentType;
     onProgress?: (step: ProcessingStep, progress: number) => void;
   }
 
