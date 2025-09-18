@@ -1,4 +1,4 @@
-import { convertValue } from '@/agents/tools/uomAgent';
+import { runConversionAgent } from '@/agents/unit-converter/unitConverterAgent';
 import { FuelBid, FuelTender } from '@/drizzle/types';
 import { cacheManager, createCacheKey } from './cacheManager';
 
@@ -73,8 +73,32 @@ function needsConversion(
 /**
  * Creates conversion request text for the AI agent
  */
-function createConversionRequest(value: number, fromUnit: string, toUnit: string): string {
+function createConversionRequest(
+  value: number,
+  fromUnit: string,
+  toUnit: string,
+  isCurrency: boolean = false,
+): string {
+  if (isCurrency) {
+    return `Convert ${value} ${fromUnit} to ${toUnit}`;
+  }
   return `Convert ${value} ${fromUnit} to ${toUnit}`;
+}
+
+/**
+ * Calls the unit converter agent for conversion
+ */
+async function convertValue(conversionRequest: string): Promise<string> {
+  try {
+    const result = await runConversionAgent(conversionRequest);
+    return result;
+  } catch (error) {
+    console.error('Conversion agent failed:', error);
+    return JSON.stringify({
+      error: 'AGENT_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown conversion error',
+    });
+  }
 }
 
 /**
@@ -157,12 +181,13 @@ export async function convertBidsToTenderBase(
     };
 
     try {
-      // Convert base unit price
+      // Convert base unit price (UOM conversion)
       if (needsConversion(bid.baseUnitPrice, bid.uom, tender.baseUom)) {
         const conversionRequest = createConversionRequest(
           Number(bid.baseUnitPrice),
-          bid.uom || 'USD',
+          bid.uom || 'USG',
           tender.baseUom || 'USG',
+          false, // UOM conversion
         );
 
         const result = await convertValue(conversionRequest);
@@ -178,13 +203,19 @@ export async function convertBidsToTenderBase(
       }
 
       // Convert currency-based fields if needed
-      if (needsConversion(bid.currency, tender.baseCurrency, tender.baseUom)) {
-        // Convert into plane fee
-        if (needsConversion(bid.intoPlaneFee, bid.uom, tender.baseUom)) {
+      const needsCurrencyConversion =
+        bid.currency &&
+        tender.baseCurrency &&
+        bid.currency.toUpperCase() !== tender.baseCurrency.toUpperCase();
+
+      if (needsCurrencyConversion) {
+        // Convert into plane fee (currency conversion)
+        if (bid.intoPlaneFee && Number(bid.intoPlaneFee) > 0) {
           const conversionRequest = createConversionRequest(
             Number(bid.intoPlaneFee),
-            `${bid.currency}/${bid.uom}`,
-            `${tender.baseCurrency}/${tender.baseUom}`,
+            bid.currency || 'USD',
+            tender.baseCurrency || 'USD',
+            true, // Currency conversion
           );
 
           const result = await convertValue(conversionRequest);
@@ -199,12 +230,13 @@ export async function convertBidsToTenderBase(
           }
         }
 
-        // Convert handling fee
-        if (needsConversion(bid.handlingFee, bid.uom, tender.baseUom)) {
+        // Convert handling fee (currency conversion)
+        if (bid.handlingFee && Number(bid.handlingFee) > 0) {
           const conversionRequest = createConversionRequest(
             Number(bid.handlingFee),
-            `${bid.currency}/${bid.uom}`,
-            `${tender.baseCurrency}/${tender.baseUom}`,
+            bid.currency || 'USD',
+            tender.baseCurrency || 'USD',
+            true, // Currency conversion
           );
 
           const result = await convertValue(conversionRequest);
@@ -219,12 +251,13 @@ export async function convertBidsToTenderBase(
           }
         }
 
-        // Convert other fee
-        if (needsConversion(bid.otherFee, bid.uom, tender.baseUom)) {
+        // Convert other fee (currency conversion)
+        if (bid.otherFee && Number(bid.otherFee) > 0) {
           const conversionRequest = createConversionRequest(
             Number(bid.otherFee),
-            `${bid.currency}/${bid.uom}`,
-            `${tender.baseCurrency}/${tender.baseUom}`,
+            bid.currency || 'USD',
+            tender.baseCurrency || 'USD',
+            true, // Currency conversion
           );
 
           const result = await convertValue(conversionRequest);
@@ -238,28 +271,29 @@ export async function convertBidsToTenderBase(
             );
           }
         }
+      }
 
-        // Convert differential for index-based pricing
-        if (
-          bid.priceType === 'index_formula' &&
-          needsConversion(bid.differential, bid.differentialUnit, tender.baseUom)
-        ) {
-          const conversionRequest = createConversionRequest(
-            Number(bid.differential),
-            bid.differentialUnit || bid.uom || 'USD',
-            tender.baseUom || 'USG',
+      // Convert differential for index-based pricing (UOM conversion)
+      if (
+        bid.priceType === 'index_formula' &&
+        needsConversion(bid.differential, bid.differentialUnit, tender.baseUom)
+      ) {
+        const conversionRequest = createConversionRequest(
+          Number(bid.differential),
+          bid.differentialUnit || bid.uom || 'USG',
+          tender.baseUom || 'USG',
+          false, // UOM conversion
+        );
+
+        const result = await convertValue(conversionRequest);
+        const converted = parseConversionResult(result);
+
+        if (converted && !converted.error) {
+          convertedBid.convertedDifferential = converted;
+        } else {
+          errors.push(
+            `Failed to convert differential for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
           );
-
-          const result = await convertValue(conversionRequest);
-          const converted = parseConversionResult(result);
-
-          if (converted && !converted.error) {
-            convertedBid.convertedDifferential = converted;
-          } else {
-            errors.push(
-              `Failed to convert differential for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
-            );
-          }
         }
       }
 

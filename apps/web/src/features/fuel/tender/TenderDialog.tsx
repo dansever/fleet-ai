@@ -43,15 +43,15 @@ export default function TenderDialog({
         title: '',
         description: null,
         fuelType: null,
-        projectedAnnualVolume: null,
+        forecastVolume: null,
 
         // Base Configuration (matching schema)
         baseCurrency: null,
         baseUom: null,
 
         // Timeline (matching schema)
-        biddingStarts: null,
-        biddingEnds: null,
+        submissionStarts: null,
+        submissionEnds: null,
         deliveryStarts: null,
         deliveryEnds: null,
 
@@ -65,11 +65,11 @@ export default function TenderDialog({
       title: tender?.title || '',
       description: tender?.description || null,
       fuelType: tender?.fuelType || null,
-      projectedAnnualVolume: tender?.projectedAnnualVolume || null,
+      forecastVolume: tender?.forecastVolume || null,
       baseCurrency: tender?.baseCurrency || null,
       baseUom: tender?.baseUom || null,
-      biddingStarts: tender?.biddingStarts || null,
-      biddingEnds: tender?.biddingEnds || null,
+      submissionStarts: tender?.submissionStarts || null,
+      submissionEnds: tender?.submissionEnds || null,
       deliveryStarts: tender?.deliveryStarts || null,
       deliveryEnds: tender?.deliveryEnds || null,
       processStatus: tender?.processStatus || 'pending',
@@ -99,8 +99,8 @@ export default function TenderDialog({
 
       // Serialize dates to ISO strings before sending
       const serializedFormData = serializeDatesForAPI(formData, [
-        'biddingStarts',
-        'biddingEnds',
+        'submissionStarts',
+        'submissionEnds',
         'deliveryStarts',
         'deliveryEnds',
       ]);
@@ -117,9 +117,9 @@ export default function TenderDialog({
           fuelType: serializedFormData.fuelType,
           baseCurrency: serializedFormData.baseCurrency,
           baseUom: serializedFormData.baseUom,
-          projectedAnnualVolume: serializedFormData.projectedAnnualVolume,
-          biddingStarts: serializedFormData.biddingStarts,
-          biddingEnds: serializedFormData.biddingEnds,
+          forecastVolume: serializedFormData.forecastVolume,
+          submissionStarts: serializedFormData.submissionStarts,
+          submissionEnds: serializedFormData.submissionEnds,
           deliveryStarts: serializedFormData.deliveryStarts,
           deliveryEnds: serializedFormData.deliveryEnds,
         };
@@ -136,10 +136,10 @@ export default function TenderDialog({
           description: serializedFormData.description,
           fuelType: serializedFormData.fuelType,
           baseCurrency: serializedFormData.baseCurrency,
-          projectedAnnualVolume: serializedFormData.projectedAnnualVolume,
+          forecastVolume: serializedFormData.forecastVolume,
           baseUom: serializedFormData.baseUom,
-          biddingStarts: serializedFormData.biddingStarts,
-          biddingEnds: serializedFormData.biddingEnds,
+          submissionStarts: serializedFormData.submissionStarts,
+          submissionEnds: serializedFormData.submissionEnds,
           deliveryStarts: serializedFormData.deliveryStarts,
           deliveryEnds: serializedFormData.deliveryEnds,
           processStatus: serializedFormData.processStatus,
@@ -187,7 +187,7 @@ export default function TenderDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BaseCard title="Tender Information" neutralHeader={true}>
+          <BaseCard title="Tender Information">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
@@ -215,21 +215,21 @@ export default function TenderDialog({
               />
               <KeyValuePair
                 label="Projected Annual Volume"
-                value={formData.projectedAnnualVolume}
+                value={formData.forecastVolume}
                 valueType="number"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('projectedAnnualVolume', value)}
-                name="projectedAnnualVolume"
+                onChange={(value) => handleFieldChange('forecastVolume', value)}
+                name="forecastVolume"
                 step={1000}
                 min={0}
               />
               <KeyValuePair
                 label="Status"
-                value={formData.status}
+                value={formData.processStatus}
                 valueType="select"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('status', value)}
-                name="status"
+                onChange={(value) => handleFieldChange('processStatus', value)}
+                name="processStatus"
                 selectOptions={Object.values(ProcessStatusEnum.enumValues).map((status) => ({
                   value: status,
                   label: getProcessStatusDisplay(status),
@@ -238,11 +238,7 @@ export default function TenderDialog({
             </div>
           </BaseCard>
 
-          <BaseCard
-            title="Configuration & Timeline"
-            neutralHeader={true}
-            headerGradient="from-orange-500 to-orange-400"
-          >
+          <BaseCard title="Configuration & Timeline">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Base Currency"
@@ -270,19 +266,19 @@ export default function TenderDialog({
               />
               <KeyValuePair
                 label="Bidding Starts"
-                value={formData.biddingStarts}
+                value={formData.submissionStarts}
                 valueType="date"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('biddingStarts', value)}
-                name="biddingStarts"
+                onChange={(value) => handleFieldChange('submissionStarts', value)}
+                name="submissionStarts"
               />
               <KeyValuePair
                 label="Bidding Ends"
-                value={formData.biddingEnds}
+                value={formData.submissionEnds}
                 valueType="date"
                 editMode={isEditing}
-                onChange={(value) => handleFieldChange('biddingEnds', value)}
-                name="biddingEnds"
+                onChange={(value) => handleFieldChange('submissionEnds', value)}
+                name="submissionEnds"
               />
               <KeyValuePair
                 label="Delivery Starts"

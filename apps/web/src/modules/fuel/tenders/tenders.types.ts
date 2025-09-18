@@ -14,8 +14,8 @@ export type FuelTenderCreateInput = Omit<
   'id' | 'orgId' | 'createdAt' | 'updatedAt'
 > & {
   // Allow date fields as strings (from forms) or Date objects
-  biddingStarts?: string | Date | null;
-  biddingEnds?: string | Date | null;
+  submissionStarts?: string | Date | null;
+  submissionEnds?: string | Date | null;
   deliveryStarts?: string | Date | null;
   deliveryEnds?: string | Date | null;
 };

@@ -276,9 +276,13 @@ export function FuelProcurementProvider({
       });
 
       try {
-        const convertedBids = await convertBidsToTenderBase(bids, tender, (progress) => {
-          setConversionProgress(progress);
-        });
+        const convertedBids = await convertBidsToTenderBase(
+          bids,
+          tender,
+          (progress: ConversionProgress) => {
+            setConversionProgress(progress);
+          },
+        );
 
         updateState({
           convertedBids,

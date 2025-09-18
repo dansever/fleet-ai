@@ -2,6 +2,7 @@
 
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/stories/Button/Button';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import { downloadTableAsCSV } from '@/utils/download-csv';
 import {
   ChevronDownIcon,
@@ -32,6 +33,7 @@ export interface DataTableProps<T> {
   description?: string;
   searchable?: boolean;
   filterable?: boolean;
+  tabs?: { label: string; icon: ReactNode; value: string }[];
   pagination?: boolean;
   pageSize?: number;
   className?: string;
@@ -51,12 +53,13 @@ export function DataTable<T extends Record<string, unknown>>({
   description,
   searchable = true,
   filterable = false,
+  tabs = [],
   pagination = true,
   pageSize = 10,
-  className = '',
+  className,
   onRowClick,
   rowClassName,
-  showNormalizedRow = true,
+  showNormalizedRow = false,
   csvDownload = true,
   csvFilename,
 }: DataTableProps<T>) {
@@ -199,7 +202,7 @@ export function DataTable<T extends Record<string, unknown>>({
         {(searchable || filterable) && (
           <div className="flex-1 space-y-4">
             {searchable && (
-              <div className="relative max-w-lg">
+              <div className="relative max-w-lg flex flex-col items-start gap-2">
                 <ModernInput
                   placeholder="Search across all columns..."
                   value={searchTerm}
@@ -208,6 +211,9 @@ export function DataTable<T extends Record<string, unknown>>({
                   }
                   icon={<SearchIcon />}
                 />
+                {tabs.length > 0 && (
+                  <Tabs tabs={tabs} defaultTab={tabs[0].value} onTabChange={() => {}}></Tabs>
+                )}
               </div>
             )}
           </div>
@@ -229,11 +235,8 @@ export function DataTable<T extends Record<string, unknown>>({
         </div>
       </div>
 
-      {/* <div
-        className={`bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-3xl ${className}`}
-      > */}
       {/* Table */}
-      <div className="w-full max-w-full overflow-x-auto rounded-xl border border-gray-200/50">
+      <div className=" w-full max-w-full overflow-x-auto rounded-md border-0 border-gray-200/50">
         {/* Empty State */}
         {paginatedData.length === 0 ? (
           <div className="p-12 text-center">
@@ -244,17 +247,15 @@ export function DataTable<T extends Record<string, unknown>>({
             <p className="text-gray-600">Try adjusting your search or filter criteria</p>
           </div>
         ) : (
-          <ScrollArea className="w-full max-w-full">
-            <table className="min-w-full border-collapse">
+          <ScrollArea className="w-full max-w-full rounded-md border-1 border-slate-200">
+            <table className="min-w-full">
               <thead>
                 <tr className="border-b border-gray-400/50">
                   {columns.map((column) => (
                     <th
                       key={String(column.key)}
-                      className={`px-6 py-4 text-left text-sm font-semibold text-gray-800 bg-secondary/5 ${
-                        column.sortable
-                          ? 'cursor-pointer hover:bg-secondary/10 transition-colors duration-200'
-                          : ''
+                      className={`p-4 text-left text-sm font-semibold text-gray-800 bg-secondary/90 hover:bg-secondary transition-colors duration-200 text-white ${
+                        column.sortable ? 'cursor-pointer transition-colors duration-200' : ''
                       } ${column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : ''}`}
                       style={{ width: column.width }}
                       onClick={() => column.sortable && handleSort(String(column.key))}
@@ -272,7 +273,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   <React.Fragment key={index}>
                     {/* Original row */}
                     <tr
-                      className={`border-b border-gray-100/50 hover:bg-gray-50/30 transition-colors duration-200  ${
+                      className={`border-0 border-gray-200 hover:bg-gray-50/30 transition-colors duration-200  ${
                         onRowClick ? 'cursor-pointer' : ''
                       } ${rowClassName ? rowClassName(item) : ''}`}
                       onClick={() => onRowClick?.(item)}
@@ -280,7 +281,7 @@ export function DataTable<T extends Record<string, unknown>>({
                       {columns.map((column) => (
                         <td
                           key={String(column.key)}
-                          className={`px-6 py-4 text-sm text-gray-700 min-w-[120px] align-top ${
+                          className={`p-2 text-sm text-gray-700 min-w-[120px] align-top border border-slate-200/60  ${
                             column.align === 'center'
                               ? 'text-center'
                               : column.align === 'right'
@@ -351,7 +352,7 @@ export function DataTable<T extends Record<string, unknown>>({
               size="sm"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="rounded-xl"
+              className="rounded-md"
               text="Previous"
             />
             <div className="flex items-center gap-1">
@@ -363,7 +364,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     intent={currentPage === page ? 'primary' : 'ghost'}
                     size="sm"
                     onClick={() => setCurrentPage(page)}
-                    className="rounded-xl w-10"
+                    className="rounded-md w-10"
                     text={page.toString()}
                   />
                 );
@@ -374,7 +375,7 @@ export function DataTable<T extends Record<string, unknown>>({
               size="sm"
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
-              className="rounded-xl"
+              className="rounded-md"
               text="Next"
             />
           </div>

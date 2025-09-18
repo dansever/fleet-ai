@@ -47,7 +47,7 @@ export default function OverviewPage() {
 
   const todayData = {
     upcomingDeadlines: tenders.filter((t) => {
-      const deadline = new Date(t.biddingEnds || '');
+      const deadline = new Date(t.submissionEnds || '');
       const today = new Date();
       const diffDays = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 3600 * 24));
       return diffDays <= 7 && diffDays >= 0;

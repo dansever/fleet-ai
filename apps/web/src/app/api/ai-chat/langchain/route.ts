@@ -1,4 +1,4 @@
-import { createSimpleFleetAIChain, handleChainError } from '@/lib/ai/langchain-integration';
+import { createSimpleFleetAIChain, handleChainError } from '@/lib/ai/langchain';
 import { LangChainStreamHandler, extractUserInput } from '@/lib/ai/streaming-utils';
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';

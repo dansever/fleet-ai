@@ -10,5 +10,3 @@ export interface TokenUsage {
   output_tokens: number;
   total_tokens: number;
 }
-
-export const active_openai_model = 'gpt-4.1';

@@ -87,7 +87,7 @@ The database is organized into five main domains:
 ### `fuel_tenders`
 
 **Purpose**: Competitive fuel procurement tenders issued by airlines  
-**Key Fields**: `title`, `fuelType`, `biddingStarts`, `biddingEnds`, `deliveryStarts`, `deliveryEnds`, `winningBidId`  
+**Key Fields**: `title`, `fuelType`, `submissionStarts`, `submissionEnds`, `deliveryStarts`, `deliveryEnds`, `winningBidId`  
 **Cardinality & Relations**: Many fuel tenders belong to one `organization` and one `airport`; one tender has many `fuel_bids`; optional winning `fuel_bid`.  
 **Unique**: none  
 **On delete**: Org/airport → fuel tenders (cascade); tender → bids (cascade)
@@ -235,7 +235,7 @@ The fuel tender/bidding workflow enables competitive fuel procurement:
 ```sql
 -- Fuel Tender
 INSERT INTO fuel_tenders (
-  title, fuelType, biddingStarts, biddingEnds, ...
+  title, fuelType, submissionStarts, submissionEnds, ...
 ) VALUES (
   'LAX Jet A-1 Supply Q1 2024', 'Jet A-1',
   '2024-01-01', '2024-01-15', ...

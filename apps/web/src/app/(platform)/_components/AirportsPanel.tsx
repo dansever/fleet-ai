@@ -32,7 +32,7 @@ export default function AirportsPanel({
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="bg-card gap-0 p-0 [&>button:first-of-type]:hidden flex flex-col h-full"
+        className="bg-card gap-0 p-0 [&>button:first-of-type]:hidden flex flex-col h-full data-[state=closed]:duration-200 data-[state=open]:duration-200"
       >
         <div className="px-4 py-2 flex flex-row justify-between items-center flex-shrink-0">
           <SheetTitle className="">Airport Information</SheetTitle>

@@ -59,7 +59,7 @@ export const BaseCard = ({
                     <h2>{title}</h2>
                     <div className="leading-tight">{subtitle}</div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 max-w-1/2">{actions}</div>
+                  <div className="flex flex-wrap items-center gap-2 max-w-3/5">{actions}</div>
                 </div>
               )}
         </CardHeader>

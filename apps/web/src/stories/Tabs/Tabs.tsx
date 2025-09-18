@@ -12,6 +12,7 @@ export interface TabsProps {
   onTabChange: (tab: string) => void;
   children?: React.ReactNode;
   className?: string;
+  triggerItemClassName?: string;
 }
 
 export const Tabs = ({
@@ -20,6 +21,7 @@ export const Tabs = ({
   onTabChange,
   children,
   className,
+  triggerItemClassName,
 }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const uniqueId = useId();
@@ -64,6 +66,7 @@ export const Tabs = ({
                 'data-[state=active]:before:opacity-0',
                 // feather on Y axis
                 'before:[mask-image:linear-gradient(to_bottom,transparent,_black_18%,_black_82%,_transparent)] before:[mask-repeat:no-repeat] before:[-webkit-mask-image:linear-gradient(to_bottom,transparent,_black_18%,_black_82%,_transparent)]',
+                triggerItemClassName,
               )}
             >
               <motion.div

@@ -115,7 +115,7 @@ export default function ContractList() {
                               ? 'operational'
                               : getIsContractActive(contract) === 'pending'
                                 ? 'pending'
-                                : 'error'
+                                : 'danger'
                           }
                           text={getProcessStatusDisplay(
                             getIsContractActive(contract) as ProcessStatus,
@@ -123,7 +123,7 @@ export default function ContractList() {
                         />
                         {numOfDaysLeft && numOfDaysLeft < 31 && (
                           <StatusBadge
-                            status={numOfDaysLeft < 7 ? 'error' : 'warning'}
+                            status={numOfDaysLeft < 7 ? 'danger' : 'warning'}
                             text={`${numOfDaysLeft} ${numOfDaysLeft === 1 ? 'Day' : 'Days'} Left`}
                           />
                         )}

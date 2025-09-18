@@ -1,10 +1,11 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { getProcessStatusDisplay } from '@/drizzle/enums';
 import type { FuelBid, FuelTender } from '@/drizzle/types';
 import TenderDialog from '@/features/fuel/tender/TenderDialog';
+import { generateRandomFuelBid } from '@/features/generateRandomObjects/fuel-bid';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { formatDate } from '@/lib/core/formatters';
@@ -12,15 +13,16 @@ import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { client as fuelTenderClient } from '@/modules/fuel/tenders';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
+import { DataTable } from '@/stories/DataTable/DataTable';
 import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { ModernTimeline } from '@/stories/Timeline/Timeline';
 import {
   AlertCircle,
-  BarChart3,
   Calendar,
   CheckCircle,
+  Circle,
   Coins,
   Download,
   Eye,
@@ -29,19 +31,20 @@ import {
   Pencil,
   Plus,
   ReceiptText,
+  RefreshCw,
   Ruler,
-  Settings,
   TrashIcon,
   TrendingUpDown,
   Upload,
   Users,
+  WandSparkles,
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import ConversionLoadingOverlay from '../_components/ConversionLoadingOverlay';
 import { useFuelBidColumns } from '../_components/FuelBidsDataTableColumns';
+import { NormalizedBidTable } from '../_components/NormalizedBidTable';
 import { useFuelProcurement } from '../contexts';
-import { getDisplayValue } from '../utils/bidConversion';
 
 const FuelTendersPage = memo(function TendersPage() {
   const {
@@ -113,9 +116,29 @@ const FuelTendersPage = memo(function TendersPage() {
     }
   };
 
-  if (!selectedAirport) return null;
+  const handleGenerateRandomBid = async () => {
+    if (!selectedTender?.id) return;
+    try {
+      const newBid = await generateRandomFuelBid(selectedTender?.id);
+      addBid(newBid as FuelBid);
+      toast.success('Random bid generated successfully');
+    } catch (error) {
+      toast.error('Failed to generate random bid');
+      console.error(error);
+    }
+  };
+
+  const refreshNormalizedBids = async () => {
+    if (!selectedTender?.id) return;
+    try {
+    } catch (error) {
+      toast.error('Failed to refresh normalized bids');
+    }
+  };
 
   const currentTender = selectedTender || (tenders.length > 0 ? tenders[0] : null);
+
+  if (!selectedAirport) return null;
 
   return (
     <div className="space-y-4">
@@ -177,11 +200,11 @@ const FuelTendersPage = memo(function TendersPage() {
             options={tenders.map((tender) => ({
               value: tender.id,
               label: (
-                <div className="flex flex-col text-left whitespace-normal">
+                <div key={tender.id} className="flex flex-col text-left whitespace-normal">
                   <span className="font-bold">{tender.title}</span>
                   <span className="text-xs text-muted-foreground">
-                    {tender.biddingStarts && tender.biddingEnds
-                      ? `${formatDate(tender.biddingStarts)} - ${formatDate(tender.biddingEnds)}`
+                    {tender.submissionStarts && tender.submissionEnds
+                      ? `${formatDate(tender.submissionStarts)} - ${formatDate(tender.submissionEnds)}`
                       : ''}
                   </span>
                 </div>
@@ -204,7 +227,7 @@ const FuelTendersPage = memo(function TendersPage() {
       {currentTender && (
         <BaseCard
           title={currentTender.title}
-          subtitle={`${currentTender.fuelType} • ${currentTender.projectedAnnualVolume?.toLocaleString()} ${currentTender.baseUom} • ${currentTender.baseCurrency}`}
+          subtitle={`${currentTender.fuelType} • ${currentTender.forecastVolume?.toLocaleString()} ${currentTender.baseUom} • ${currentTender.baseCurrency}`}
           headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
           actions={
             <div className="flex flex-wrap gap-2">
@@ -251,9 +274,8 @@ const FuelTendersPage = memo(function TendersPage() {
         <div className="space-y-6">
           {/* Parsed Bids Table */}
           <BaseCard
-            title="Parsed Bids Table"
-            subtitle="Normalized bid comparison with AI confidence scores"
-            headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+            title="Bids Table"
+            subtitle="Bid comparison with AI summary"
             actions={
               <div className="flex flex-wrap gap-2 justify-end">
                 <FileUploadPopover
@@ -263,20 +285,30 @@ const FuelTendersPage = memo(function TendersPage() {
                       icon={Upload}
                       text="Upload Bid"
                       disabled={loading.uploadDocument}
+                      size="sm"
                     />
                   }
                   onSend={handleBidFileUpload}
                   accept=".pdf,.doc,.docx"
                   maxSize={10}
                   onOpenChange={(open) => console.log('Fuel bid upload popover open:', open)}
-                />
-                <Button intent="secondary" text="Email Routing" icon={FileText} disabled>
+                >
+                  <Button
+                    intent="ghost"
+                    text="Or generate a random bid"
+                    icon={WandSparkles}
+                    className="hover:underline"
+                    size="sm"
+                    onClick={handleGenerateRandomBid}
+                  />
+                </FileUploadPopover>
+                <Button intent="secondary" text="Email Routing" icon={FileText} disabled size="sm">
                   <div className="pl-1">
                     <StatusBadge status="warning" text="Soon..." />
                   </div>
                 </Button>
-                <Button intent="secondary" text="Download CSV" icon={Download} />
-                <Button intent="primary" text="Approve Winning Bid" icon={CheckCircle} />
+                <Button intent="secondary" text="Download CSV" icon={Download} size="sm" />
+                <Button intent="primary" text="Approve Winner" icon={CheckCircle} size="sm" />
               </div>
             }
           >
@@ -289,275 +321,40 @@ const FuelTendersPage = memo(function TendersPage() {
                 <p className="text-sm">Upload bid documents to see parsed results here.</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 p-2 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
-                  <div className="col-span-2">Supplier</div>
-                  <div className="col-span-1">Price Type</div>
-                  <div className="col-span-2">Base Price/Index</div>
-                  <div className="col-span-1">Into Plane</div>
-                  <div className="col-span-1">Handling</div>
-                  <div className="col-span-1">Inclusions</div>
-                  <div className="col-span-1">All-in Price</div>
-                  <div className="col-span-1 ">AI Confidence</div>
-                  <div className="col-span-1">Status</div>
-                </div>
-
-                {/* Table Rows */}
-                {bids.map((bid) => {
-                  // Use converted bid if available, otherwise use original
-                  const displayBid = convertedBids.find((cb) => cb.id === bid.id) || bid;
-
-                  // Get display values with conversion status
-                  // Cast to ConvertedBid for type safety - the function handles both types
-                  const basePrice = getDisplayValue(displayBid as any, 'baseUnitPrice');
-                  const intoPlaneFee = getDisplayValue(displayBid as any, 'intoPlaneFee');
-                  const handlingFee = getDisplayValue(displayBid as any, 'handlingFee');
-
-                  return (
-                    <div
-                      key={bid.id}
-                      className="grid grid-cols-12 gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-                    >
-                      <div className="col-span-2 flex items-center">
-                        <span className="font-medium">{bid.vendorName || 'Unknown Supplier'}</span>
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <span className="text-sm">{bid.priceType || 'Fixed'}</span>
-                      </div>
-                      <div className="col-span-2 flex items-center">
-                        <div className="flex flex-col">
-                          <span className="text-sm">
-                            {bid.priceType === 'index_formula' ? (
-                              <div className="flex flex-col">
-                                <div>{bid.indexName}</div>
-                                <div>+{Number(bid.differential)?.toFixed(3) || '0.000'}</div>
-                              </div>
-                            ) : (
-                              `${basePrice.value.toFixed(3)}/${basePrice.unit}`
-                            )}
-                          </span>
-                          {basePrice.isConverted && (
-                            <span className="text-xs text-blue-600">
-                              Converted to {selectedTender?.baseCurrency || 'USD'}/
-                              {selectedTender?.baseUom || 'USG'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <div className="flex flex-col">
-                          <span className="text-sm flex flex-col">
-                            <div>{intoPlaneFee.value.toFixed(3)}</div>
-                            <p className="text-xs text-muted-foreground">{intoPlaneFee.unit}</p>
-                          </span>
-                          {intoPlaneFee.isConverted && (
-                            <span className="text-xs text-blue-600">Converted</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <div className="flex flex-col">
-                          <span className="text-sm flex flex-col">
-                            <div>{handlingFee.value.toFixed(3)}</div>
-                            <p className="text-xs text-muted-foreground">{handlingFee.unit}</p>
-                          </span>
-                          {handlingFee.isConverted && (
-                            <span className="text-xs text-blue-600">Converted</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <div className="flex gap-1">
-                          {bid.includesTaxes && <CheckCircle className="h-4 w-4 text-green-600" />}
-                          {bid.includesAirportFees && (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <span className="font-medium text-blue-600">$0.645/L</span>
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <StatusBadge
-                          status={bid.aiSummary ? 'success' : 'warning'}
-                          text={bid.aiSummary ? '95%' : 'Pending'}
-                        />
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <StatusBadge
-                          status={
-                            bid.decision === 'accepted'
-                              ? 'success'
-                              : bid.decision === 'rejected'
-                                ? 'danger'
-                                : 'secondary'
-                          }
-                          text={bid.decision || 'Pending'}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="grid grid-cols-1">
+                <DataTable
+                  columns={fuelBidColumns}
+                  data={bids}
+                  tabs={[
+                    { label: 'Round 1', icon: <Circle />, value: '1' },
+                    { label: 'Round 2', icon: <Circle />, value: '2' },
+                    { label: 'Round 3', icon: <Circle />, value: '3' },
+                  ]}
+                />
               </div>
             )}
           </BaseCard>
 
-          {/* Comparator Matrix */}
           <BaseCard
-            title="Comparator Matrix"
-            subtitle="Advanced bid comparison with normalization toggles"
-            headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+            title="Normalized Bids"
+            subtitle="Normalized bid comparison with AI confidence scores"
             actions={
-              <div className="flex gap-2">
-                <Button intent="secondary" text="Export Comparison" icon={Download} />
-                <Button intent="primary" text="Shortlist Suppliers" icon={CheckCircle} />
+              <div className="flex flex-wrap gap-2 justify-end">
+                <Button
+                  intent="secondary"
+                  text="Refresh"
+                  icon={RefreshCw}
+                  size="sm"
+                  onClick={refreshNormalizedBids}
+                />
               </div>
             }
           >
-            <div className="space-y-4">
-              {/* Toggle Controls */}
-              <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 bg-green-100 border border-green-300 rounded-sm flex items-center justify-center">
-                    <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-                  </div>
-                  <label className="text-sm font-medium text-green-700">
-                    Normalized to ({currentTender?.baseCurrency})
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 bg-green-100 border border-green-300 rounded-sm flex items-center justify-center">
-                    <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-                  </div>
-                  <label className="text-sm font-medium text-green-700">
-                    Normalized to ({currentTender?.baseUom})
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox id="include-taxes" disabled />
-                  <label htmlFor="include-taxes" className="text-sm font-medium">
-                    Include taxes
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox id="include-fees" disabled />
-                  <label htmlFor="include-fees" className="text-sm font-medium">
-                    Include airport fees
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox id="market-reference" disabled />
-                  <label htmlFor="market-reference" className="text-sm font-medium">
-                    Overlay market reference
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox id="anomaly-flag" disabled />
-                  <label htmlFor="anomaly-flag" className="text-sm font-medium">
-                    Z-score anomaly flag
-                  </label>
-                </div>
-              </div>
-
-              {/* Comparison Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border border-gray-200 p-3 text-left font-medium">Supplier</th>
-                      <th className="border border-gray-200 p-3 text-center font-medium">
-                        Normalized Price
-                      </th>
-                      <th className="border border-gray-200 p-3 text-center font-medium">
-                        vs Market
-                      </th>
-                      <th className="border border-gray-200 p-3 text-center font-medium">
-                        Z-Score
-                      </th>
-                      <th className="border border-gray-200 p-3 text-center font-medium">
-                        Anomaly
-                      </th>
-                      <th className="border border-gray-200 p-3 text-center font-medium">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bids.map((bid) => {
-                      // Use converted bid if available, otherwise use original
-                      const displayBid = convertedBids.find((cb) => cb.id === bid.id) || bid;
-
-                      // Get normalized price (converted if available)
-                      const normalizedPrice = getDisplayValue(displayBid as any, 'baseUnitPrice');
-                      const intoPlaneFee = getDisplayValue(displayBid as any, 'intoPlaneFee');
-                      const handlingFee = getDisplayValue(displayBid as any, 'handlingFee');
-
-                      // Calculate total normalized price including fees
-                      const totalNormalizedPrice =
-                        normalizedPrice.value + intoPlaneFee.value + handlingFee.value;
-
-                      return (
-                        <tr key={bid.id} className="hover:bg-gray-50">
-                          <td className="border border-gray-200 p-3 font-medium">
-                            <div className="flex flex-col">
-                              <span>{bid.vendorName || 'Unknown'}</span>
-                              {normalizedPrice.isConverted && (
-                                <span className="text-xs text-blue-600">Normalized</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="border border-gray-200 p-3 text-center">
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {totalNormalizedPrice.toFixed(3)}/{normalizedPrice.unit}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                Base: {normalizedPrice.value.toFixed(3)} | Fees:{' '}
-                                {(intoPlaneFee.value + handlingFee.value).toFixed(3)}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="border border-gray-200 p-3 text-center">
-                            <span className="text-green-600">-2.3%</span>
-                          </td>
-                          <td className="border border-gray-200 p-3 text-center">-0.8</td>
-                          <td className="border border-gray-200 p-3 text-center">
-                            <StatusBadge status="success" text="Normal" />
-                          </td>
-                          <td className="border border-gray-200 p-3 text-center">
-                            <div className="flex justify-center gap-1">
-                              <Button intent="ghost" icon={Eye} />
-                              <Button intent="ghost" icon={Settings} />
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Market Reference Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-blue-800">Market Reference</span>
-                </div>
-                <p className="text-sm font-medium text-blue-700">
-                  Current market price:{' '}
-                  <span className="font-bold">$0.661/{currentTender?.baseUom} </span>(Platts Jet A-1
-                  Med) • Last updated: Jan 20, 2024
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  All prices normalized to{' '}
-                  <span className="font-medium">
-                    {currentTender?.baseCurrency || 'USD'}/{currentTender?.baseUom}
-                  </span>{' '}
-                  {currentTender?.baseUom} for comparison
-                </p>
-              </div>
-            </div>
+            <NormalizedBidTable
+              currentTender={currentTender}
+              bids={bids}
+              convertedBids={convertedBids}
+            />
           </BaseCard>
         </div>
       )}
@@ -574,6 +371,15 @@ const TenderDetails = memo(function TenderDetails({
   currentTender: FuelTender;
   bids: FuelBid[];
 }) {
+  const biddingPhase =
+    currentTender?.submissionStarts && currentTender?.submissionEnds
+      ? new Date(currentTender.submissionStarts) > new Date()
+        ? 'Active'
+        : 'Inactive'
+      : 'Inactive';
+
+  const baseUom = BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom);
+
   return (
     <div className="space-y-2 flex flex-col gap-2 w-full">
       <div className="flex flex-row w-full gap-4 grid grid-cols-2">
@@ -588,13 +394,13 @@ const TenderDetails = memo(function TenderDetails({
               {
                 id: '1',
                 title: 'RFQ Sent',
-                timestamp: formatDate(currentTender.biddingStarts),
+                timestamp: formatDate(currentTender.submissionStarts),
                 status: 'current',
               },
               {
                 id: '2',
                 title: 'Bids Due',
-                timestamp: formatDate(currentTender.biddingEnds),
+                timestamp: formatDate(currentTender.submissionEnds),
                 status: 'current',
               },
               {
@@ -625,13 +431,13 @@ const TenderDetails = memo(function TenderDetails({
               {
                 id: '1',
                 title: 'Starts',
-                timestamp: formatDate(currentTender.biddingStarts),
+                timestamp: formatDate(currentTender.submissionStarts),
                 status: 'pending',
               },
               {
                 id: '2',
                 title: 'Ends',
-                timestamp: formatDate(currentTender.biddingEnds),
+                timestamp: formatDate(currentTender.submissionEnds),
                 status: 'current',
               },
             ]}
@@ -641,7 +447,6 @@ const TenderDetails = memo(function TenderDetails({
       {/* Left Column - Static/Dry Facts */}
       <div className="space-y-2 col-span-4">
         {/* Tender Timeline */}
-
         {/* Static Details Grid */}
         <div className="px-4 py-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1">
@@ -658,31 +463,9 @@ const TenderDetails = memo(function TenderDetails({
               Volume Forecast
             </div>
             <div className="text-sm font-medium">
-              {currentTender.projectedAnnualVolume
-                ? currentTender.projectedAnnualVolume?.toLocaleString() +
-                    ' ' +
-                    BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label || ''
+              {currentTender.forecastVolume
+                ? currentTender.forecastVolume?.toLocaleString() + ' ' + baseUom?.value || ''
                 : 'N/A'}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Coins className="h-4 w-4" />
-              Base Currency
-            </div>
-            <div className="text-sm font-medium">
-              {CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Ruler className="h-4 w-4" />
-              Base Unit of Measure
-            </div>
-            <div className="text-sm font-medium">
-              {BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label || ''}
             </div>
           </div>
 
@@ -693,6 +476,26 @@ const TenderDetails = memo(function TenderDetails({
             </div>
             <div className="text-sm font-medium">
               {currentTender.qualitySpecification || 'ASTM D1655'}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Coins className="h-4 w-4" />
+              Base Currency
+            </div>
+            <div className="text-sm font-medium">
+              <Badge>{CURRENCY_MAP[currentTender.baseCurrency || '']?.display}</Badge>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Ruler className="h-4 w-4" />
+              Base Unit of Measure
+            </div>
+            <div className="text-sm font-medium">
+              <Badge>{baseUom?.label || ''}</Badge>
             </div>
           </div>
         </div>
@@ -716,7 +519,7 @@ const TenderDetails = memo(function TenderDetails({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-blue-700">Bidding Phase</span>
-              <span className="text-sm font-medium text-blue-800">Active</span>
+              <span className="text-sm font-medium text-blue-800">{biddingPhase}</span>
             </div>
           </div>
         </div>

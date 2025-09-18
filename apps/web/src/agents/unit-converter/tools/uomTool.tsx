@@ -35,6 +35,9 @@ const UNIT_ALIASES: Record<string, string> = {
   millilitres: 'ml',
   gallon: 'gal',
   gallons: 'gal',
+  usg: 'gal',
+  us_gallon: 'gal',
+  us_gallons: 'gal',
   quart: 'qt',
   quarts: 'qt',
   'm^3': 'm3',
@@ -140,6 +143,9 @@ const UomSchema = z.object({
   value: z.number(),
   fromUnit: z.string(),
   toUnit: z.string(),
+  // Optional fields for rate conversions
+  fromRateUnit: z.string().optional(),
+  toRateUnit: z.string().optional(),
 });
 
 export type UomInput = z.infer<typeof UomSchema>;
@@ -147,11 +153,11 @@ export type UomInput = z.infer<typeof UomSchema>;
 export class UomConvertTool extends StructuredTool<typeof UomSchema> {
   name = 'uom_convert';
   description =
-    'Convert numeric values between physical units (length, weight, volume, temperature, speed, etc.). For speed: use km/h for kph, mph for miles per hour, m/s for meters per second.';
+    'Convert numeric values between physical units (length, weight, volume, temperature, speed, etc.) and rate conversions (e.g., USD/USG to USD/L). For speed: use km/h for kph, mph for miles per hour, m/s for meters per second. For rate conversions, use fromRateUnit and toRateUnit fields.';
   schema = UomSchema;
 
   async _call(input: UomInput): Promise<string> {
-    const { value, fromUnit, toUnit } = input;
+    const { value, fromUnit, toUnit, fromRateUnit, toRateUnit } = input;
     const from = normalizeUnit(fromUnit);
     const to = normalizeUnit(toUnit);
 
@@ -160,11 +166,17 @@ export class UomConvertTool extends StructuredTool<typeof UomSchema> {
       value,
       fromUnit,
       toUnit,
+      fromRateUnit,
+      toRateUnit,
       normalizedFrom: from,
       normalizedTo: to,
     });
 
     try {
+      // Handle rate conversions (e.g., USD/USG to USD/L)
+      if (fromRateUnit && toRateUnit) {
+        return this.handleRateConversion(value, fromRateUnit, toRateUnit, from, to);
+      }
       // Special case: Convert kph to mi/min via mph
       if (from === 'km/h' && to === 'mi/min') {
         // First convert km/h to mph
@@ -207,6 +219,67 @@ export class UomConvertTool extends StructuredTool<typeof UomSchema> {
           fromUnit: from,
           toUnit: to,
           suggestion: getConversionSuggestion(from, to),
+        },
+      });
+    }
+  }
+
+  private handleRateConversion(
+    value: number,
+    fromRateUnit: string,
+    toRateUnit: string,
+    fromUnit: string,
+    toUnit: string,
+  ): string {
+    // Parse rate units to extract currency and unit parts
+    const fromRateParts = fromRateUnit.split('/');
+    const toRateParts = toRateUnit.split('/');
+
+    if (fromRateParts.length !== 2 || toRateParts.length !== 2) {
+      return JSON.stringify({
+        error: 'INVALID_RATE_FORMAT',
+        message: 'Rate units must be in format CURRENCY/UNIT (e.g., USD/USG, USD/L)',
+        details: { fromRateUnit, toRateUnit },
+      });
+    }
+
+    const [, fromDenominatorUnit] = fromRateParts;
+    const [, toDenominatorUnit] = toRateParts;
+
+    try {
+      // Convert the denominator units (e.g., USG to L)
+      const conversionFactor = convert(1)
+        .from(fromDenominatorUnit.toLowerCase())
+        .to(toDenominatorUnit.toLowerCase());
+
+      // The rate conversion: if we have USD/USG and want USD/L
+      // We need to multiply by the conversion factor from USG to L
+      // Because: USD/USG * (USG/L) = USD/L
+      const convertedRate = value * conversionFactor;
+
+      return JSON.stringify({
+        value: Number(convertedRate.toFixed(12)),
+        unit: toRateUnit,
+        explanation: `Converted ${value} ${fromRateUnit} to ${convertedRate.toFixed(6)} ${toRateUnit} using conversion factor ${conversionFactor} from ${fromDenominatorUnit} to ${toDenominatorUnit}`,
+        meta: {
+          fromRateUnit,
+          toRateUnit,
+          conversionFactor,
+          precision: 12,
+          conversionType: 'rate_conversion',
+        },
+      });
+    } catch (error: any) {
+      return JSON.stringify({
+        error: 'RATE_CONVERSION_ERROR',
+        message: error?.message ?? 'Rate conversion failed',
+        details: {
+          value,
+          fromRateUnit,
+          toRateUnit,
+          fromDenominatorUnit,
+          toDenominatorUnit,
+          suggestion: 'Ensure the denominator units are compatible (e.g., volume to volume)',
         },
       });
     }

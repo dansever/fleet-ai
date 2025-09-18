@@ -37,21 +37,29 @@ export const fuelTendersTable = pgTable(
     tenderType: text('tender_type'), // "spot", "contract", "framework", "emergency"
     description: text('description'),
     fuelType: text('fuel_type'),
-    projectedAnnualVolume: integer('projected_annual_volume'),
+    forecastVolume: integer('forecast_volume'),
     qualitySpecification: text('quality_specification'), // ASTM D1655, DEF STAN 91-91, etc.
 
     // Base Configuration
     baseCurrency: text('base_currency'),
     baseUom: text('base_uom'),
 
+    // Benchmarking
+    benchmarkIndex: text('benchmark_index'), // e.g. Platts Jet A-1
+    benchmarkLocation: text('benchmark_location'), // e.g. Med, NWE
+
     // Timeline
-    biddingStarts: date('bidding_starts'),
-    biddingEnds: date('bidding_ends'),
+    submissionStarts: date('submission_starts'),
+    submissionEnds: date('submission_ends'),
     deliveryStarts: date('delivery_starts'),
     deliveryEnds: date('delivery_ends'),
 
     // Flexible Additional Data (LLM-categorized)
     tenderSpecifications: json('tender_specifications').$type<Record<string, any>>(),
+
+    // AI Processing
+    aiSummary: text('ai_summary'),
+    terms: json('terms').$type<Record<string, any>>(),
 
     // Workflow Management
     processStatus: ProcessStatusEnum('process_status').default('pending'),

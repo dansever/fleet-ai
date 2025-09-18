@@ -3,12 +3,11 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { ChatOpenAI } from '@langchain/openai';
-import { active_openai_model } from './utils';
 
 // Initialize the LangChain OpenAI model with optimal settings
-export const createLangChainModel = () => {
+export const createOpenAIChatModel = () => {
   return new ChatOpenAI({
-    model: active_openai_model, // Use the GPT-4o model
+    model: process.env.ACTIVE_OPENAI_MODEL, // Use the GPT-4o model
     temperature: 0.7, // Adjust temperature for desired creativity
     maxTokens: 500, // Increased for more detailed responses
     streaming: true, // Enable streaming mode
@@ -55,7 +54,7 @@ export const createFleetAIPrompt = () => {
 
 // Create the main FleetAI chain with conversation memory
 export const createFleetAIChain = () => {
-  const model = createLangChainModel();
+  const model = createOpenAIChatModel();
   const prompt = createFleetAIPrompt();
   const outputParser = new StringOutputParser();
 
@@ -72,7 +71,7 @@ export const createFleetAIChain = () => {
 
 // Simple chain for single queries (current implementation)
 export const createSimpleFleetAIChain = () => {
-  const model = createLangChainModel();
+  const model = createOpenAIChatModel();
   const prompt = ChatPromptTemplate.fromMessages([
     ['system', FLEET_AI_SYSTEM_PROMPT],
     ['human', '{input}'],
@@ -111,7 +110,7 @@ export const convertUIMessagesToLangChain = (messages: any[]) => {
 export const createRAGFleetAIChain = () => {
   // TODO: Implement when adding RAG capabilities
   // Will include vector store retrieval, document processing, etc.
-  const model = createLangChainModel();
+  const model = createOpenAIChatModel();
   return model;
 };
 
@@ -119,7 +118,7 @@ export const createRAGFleetAIChain = () => {
 export const createAgentFleetAIChain = () => {
   // TODO: Implement when adding agent capabilities
   // Will include tool calling, multi-step reasoning, etc.
-  const model = createLangChainModel();
+  const model = createOpenAIChatModel();
   return model;
 };
 

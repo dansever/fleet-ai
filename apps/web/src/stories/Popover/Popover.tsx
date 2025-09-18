@@ -282,9 +282,9 @@ export const FileUploadPopover = ({
             'w-80 p-0 rounded-3xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
-          <BaseCard className="py-4">
+          <BaseCard>
             {!selectedFile ? (
-              <div>
+              <div className="space-y-2">
                 <div
                   className={cn(
                     'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
@@ -309,7 +309,6 @@ export const FileUploadPopover = ({
                     </div>
                   </div>
                 </div>
-
                 <input
                   ref={fileInputRef}
                   type="file"

@@ -7,9 +7,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { getDecisionDisplay } from '@/drizzle/enums';
 import type { FuelBid } from '@/drizzle/types';
 import FuelBidDialog from '@/features/fuel/bid/FuelBidDialog';
-import { formatCurrency, formatDate } from '@/lib/core/formatters';
+import { formatDate } from '@/lib/core/formatters';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { Button } from '@/stories/Button/Button';
 import type { Column } from '@/stories/DataTable/DataTable';
@@ -19,6 +20,26 @@ import { CheckCircle, Eye, Fuel, ListCheck, Trash, XCircle, Zap } from 'lucide-r
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useFuelProcurement } from '../contexts';
+
+// Enhanced currency formatter for fuel prices with proper precision
+const formatFuelPrice = (
+  amount?: number | string | null,
+  currency: string | null = 'USD',
+): string | null => {
+  if (amount == null) return null;
+
+  const parsedAmount = typeof amount === 'number' ? amount : parseFloat(amount.toString());
+  if (isNaN(parsedAmount)) return null;
+
+  const resolvedCurrency = currency?.toUpperCase() || 'USD';
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: resolvedCurrency,
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  }).format(parsedAmount);
+};
 
 // Normalize function for converting values to tender's base currency and UOM
 const normalize = (
@@ -30,18 +51,47 @@ const normalize = (
   // For now, just return the numeric value
   // Later this will be a real function that converts currencies and units
   const numValue = typeof value === 'string' ? parseFloat(value) : value || 0;
-  return formatCurrency(numValue, baseCurrency) || '';
+  return formatFuelPrice(numValue, baseCurrency) || '';
 };
 
 const getDecisionBadge = (decision: string | null) => {
+  const decisionText = getDecisionDisplay(decision);
+  const isOpen = !decision || decision === 'open';
+
+  const getBadgeVariant = (decision: string | null) => {
+    switch (decision) {
+      case 'accepted':
+        return 'default';
+      case 'shortlisted':
+        return 'secondary';
+      case 'rejected':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getBadgeColor = (decision: string | null) => {
+    switch (decision) {
+      case 'accepted':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'shortlisted':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'rejected':
+        return 'bg-red-50 text-red-700 border-red-200';
+      default:
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Badge
-          variant="secondary"
-          className="shadow-md hover:shadow-lg text-base hover:cursor-pointer hover:scale-105 transition-all duration-300 bg-amber-50 text-amber-500 border-amber-500"
+          variant={getBadgeVariant(decision)}
+          className={`shadow-md hover:shadow-lg text-sm hover:cursor-pointer hover:scale-105 transition-all duration-300 ${getBadgeColor(decision)}`}
         >
-          Pending
+          {decisionText}
         </Badge>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="bg-white rounded-xl flex flex-col gap-2">
@@ -108,26 +158,24 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
   return useMemo(
     () => [
       {
-        id: 'decision',
-        key: 'decision',
-        header: <span className="whitespace-nowrap">Status</span>,
+        id: 'vendor',
+        key: 'vendor',
+        header: <span className="whitespace-nowrap">Vendor</span>,
         accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5">
-            {getDecisionBadge(bid.decision)}
-            {bid.decisionAt && (
-              <p className="text-xs text-slate-500 font-medium">{formatDate(bid.decisionAt)}</p>
-            )}
-          </div>
-        ),
-        sortable: true,
-        align: 'left' as const,
-      },
-      {
-        id: 'round',
-        key: 'round',
-        header: <span className="whitespace-nowrap">Round</span>,
-        accessor: (bid: FuelBid) => (
-          <div className="flex items-center">
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm text-slate-900 leading-tight">
+                {bid.vendorName || 'Unknown Vendor'}
+              </h3>
+              {bid.vendorContactName && (
+                <p className="text-xs text-slate-600 font-medium">{bid.vendorContactName}</p>
+              )}
+              {bid.vendorContactEmail && (
+                <div className="text-xs">
+                  <CopyableText value={bid.vendorContactEmail} />
+                </div>
+              )}
+            </div>
             <StatusBadge
               status="default"
               text={bid.round ? `Round ${bid.round}` : 'Initial'}
@@ -136,25 +184,20 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
           </div>
         ),
         sortable: true,
-        filterableText: true,
         align: 'left' as const,
       },
       {
-        id: 'vendor',
-        key: 'vendor',
-        header: <span className="whitespace-nowrap">Vendor</span>,
+        id: 'decision',
+        key: 'decision',
+        header: <span className="whitespace-nowrap ">Decision</span>,
         accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5">
-            <h3 className="font-semibold text-sm text-slate-900 leading-tight">
-              {bid.vendorName || 'Unknown Vendor'}
-            </h3>
-            {bid.vendorContactName && (
-              <p className="text-xs text-slate-600 font-medium">{bid.vendorContactName}</p>
+          <div className="space-y-1.5 min-w-[160px]">
+            {getDecisionBadge(bid.decision)}
+            {bid.decisionAt && (
+              <p className="text-xs text-slate-500 font-medium">{formatDate(bid.decisionAt)}</p>
             )}
-            {bid.vendorContactEmail && (
-              <div className="text-xs">
-                <CopyableText value={bid.vendorContactEmail} />
-              </div>
+            {bid.decisionNotes && (
+              <p className="text-xs text-slate-400 italic whitespace-normal">{bid.decisionNotes}</p>
             )}
           </div>
         ),
@@ -167,10 +210,10 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         header: <span className="whitespace-nowrap">Price</span>,
         accessor: (bid: FuelBid) => {
           return (
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-[200px]">
               {/* headline */}
               <h3 className="text-green-600 font-semibold text-sm">
-                {formatCurrency(bid.baseUnitPrice, bid.currency) || (
+                {formatFuelPrice(bid.baseUnitPrice, bid.currency) || (
                   <span className="text-slate-400 font-normal">No price</span>
                 )}
               </h3>
@@ -183,12 +226,26 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
                 )}
               </p>
 
-              {/* differential (inline, only if index formula) */}
-              {bid.priceType === 'index_formula' && bid.differential && (
-                <p className="text-xs text-slate-500">
-                  {bid.indexName || 'Index'} {Number.parseFloat(bid.differential) >= 0 ? '+' : ''}
-                  {formatCurrency(bid.differential, bid.currency)}
-                </p>
+              {/* index details (only if index formula) */}
+              {bid.priceType === 'index_formula' && (
+                <div className="space-y-0.5">
+                  {bid.indexName && (
+                    <p className="text-xs text-slate-500 font-medium">
+                      {bid.indexName}
+                      {bid.indexLocation && ` (${bid.indexLocation})`}
+                    </p>
+                  )}
+                  {bid.differential && (
+                    <p className="text-xs text-slate-500">
+                      {Number.parseFloat(bid.differential) >= 0 ? '+' : ''}
+                      {formatFuelPrice(bid.differential, bid.currency)}
+                      {bid.differentialUnit && ` ${bid.differentialUnit}`}
+                    </p>
+                  )}
+                  {bid.formulaNotes && (
+                    <p className="text-xs text-slate-400 italic">{bid.formulaNotes}</p>
+                  )}
+                </div>
               )}
             </div>
           );
@@ -214,11 +271,6 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
               {bid.bidSubmittedAt ? formatDate(bid.bidSubmittedAt) : 'Not submitted'}
             </p>
             <div className="flex gap-1 flex-wrap">
-              {bid.round && (
-                <Badge variant="outline" className="text-xs">
-                  Round {bid.round}
-                </Badge>
-              )}
               {bid.uom && (
                 <Badge variant="outline" className="text-xs">
                   <Fuel className="w-3 h-3 mr-1" />
@@ -241,28 +293,37 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
             Number.parseFloat(bid.handlingFee || '0') +
             Number.parseFloat(bid.otherFee || '0');
 
+          const hasAnyFees = bid.intoPlaneFee || bid.handlingFee || bid.otherFee;
+
           return (
             <div className="space-y-1.5">
-              <h4 className="font-semibold text-sm text-slate-900">
-                {formatCurrency(totalFees, bid.currency)}
-              </h4>
-              <div className="space-y-0.5">
-                {bid.intoPlaneFee && (
-                  <p className="text-xs text-slate-600">
-                    Into-plane: {formatCurrency(bid.intoPlaneFee, bid.currency)}
-                  </p>
-                )}
-                {bid.handlingFee && (
-                  <p className="text-xs text-slate-600">
-                    Handling: {formatCurrency(bid.handlingFee, bid.currency)}
-                  </p>
-                )}
-                {bid.otherFee && (
-                  <p className="text-xs text-slate-600">
-                    Other: {formatCurrency(bid.otherFee, bid.currency)}
-                  </p>
-                )}
-              </div>
+              {hasAnyFees ? (
+                <>
+                  <h4 className="font-semibold text-sm text-slate-900">
+                    {formatFuelPrice(totalFees, bid.currency)}
+                  </h4>
+                  <div className="space-y-0.5">
+                    {bid.intoPlaneFee && (
+                      <p className="text-xs text-slate-600">
+                        Into-plane: {formatFuelPrice(bid.intoPlaneFee, bid.currency)}
+                      </p>
+                    )}
+                    {bid.handlingFee && (
+                      <p className="text-xs text-slate-600">
+                        Handling: {formatFuelPrice(bid.handlingFee, bid.currency)}
+                      </p>
+                    )}
+                    {bid.otherFee && (
+                      <p className="text-xs text-slate-600">
+                        {bid.otherFeeDescription || 'Other'}:{' '}
+                        {formatFuelPrice(bid.otherFee, bid.currency)}
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <span className="text-xs text-slate-400">No additional costs</span>
+              )}
             </div>
           );
         },
@@ -282,36 +343,68 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         id: 'terms',
         key: 'terms',
         header: <span className="whitespace-nowrap">Terms & Specs</span>,
-        accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5">
-            {bid.paymentTerms && (
-              <p className="text-xs text-slate-600 font-medium">{bid.paymentTerms}</p>
-            )}
-            <div className="space-y-1">
-              {bid.densityAt15C && (
-                <p className="text-xs text-slate-600">
-                  Density: {Number(bid.densityAt15C).toFixed(2)} kg/m³
-                </p>
-              )}
-              <div className="flex gap-1 flex-wrap">
-                {bid.includesTaxes && (
-                  <Badge variant="outline" className="text-xs">
-                    Tax Incl.
-                  </Badge>
-                )}
-                {bid.includesAirportFees && (
-                  <Badge variant="outline" className="text-xs">
-                    Airport Fees
-                  </Badge>
-                )}
-              </div>
-            </div>
-            {!bid.paymentTerms &&
-              !bid.densityAt15C &&
-              !bid.includesTaxes &&
-              !bid.includesAirportFees && (
+        accessor: (bid: FuelBid) => {
+          const hasTerms =
+            bid.paymentTerms ||
+            bid.densityAt15C ||
+            bid.includesTaxes ||
+            bid.includesAirportFees ||
+            bid.qualitySpecification;
+
+          return (
+            <div className="space-y-1.5">
+              {hasTerms ? (
+                <>
+                  {bid.paymentTerms && (
+                    <p className="text-xs text-slate-600 font-medium">{bid.paymentTerms}</p>
+                  )}
+                  {bid.qualitySpecification && (
+                    <p className="text-xs text-slate-600">Spec: {bid.qualitySpecification}</p>
+                  )}
+                  <div className="space-y-1">
+                    {bid.densityAt15C && (
+                      <p className="text-xs text-slate-600">
+                        Density: {Number(bid.densityAt15C).toFixed(2)} kg/m³
+                      </p>
+                    )}
+                    <div className="flex gap-1 flex-wrap">
+                      {bid.includesTaxes && (
+                        <Badge variant="outline" className="text-xs">
+                          Tax Incl.
+                        </Badge>
+                      )}
+                      {bid.includesAirportFees && (
+                        <Badge variant="outline" className="text-xs">
+                          Airport Fees
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
                 <span className="text-xs text-slate-400">Standard terms</span>
               )}
+            </div>
+          );
+        },
+        sortable: true,
+        align: 'left' as const,
+      },
+      {
+        id: 'vendorComments',
+        key: 'vendorComments',
+        header: <span className="whitespace-nowrap">Vendor Notes</span>,
+        accessor: (bid: FuelBid) => (
+          <div className="space-y-1.5 min-w-[200px]">
+            {bid.vendorComments ? (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="text-xs leading-relaxed text-slate-700 font-medium">
+                  {bid.vendorComments}
+                </div>
+              </div>
+            ) : (
+              <span className="text-xs text-slate-400">No vendor notes</span>
+            )}
           </div>
         ),
         sortable: true,
