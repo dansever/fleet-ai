@@ -10,8 +10,9 @@ export type StatusType =
   | 'operational'
   | 'pending'
   | 'warning'
-  | 'error'
-  | 'processing';
+  | 'danger'
+  | 'processing'
+  | 'success';
 
 export interface StatusBadgeProps {
   status: StatusType;
@@ -53,15 +54,20 @@ const statusConfig = {
     text: 'Warning',
     className: 'bg-orange-100 text-orange-700 border-orange-200',
   },
-  error: {
+  danger: {
     icon: XCircle,
-    text: 'Error',
+    text: 'danger',
     className: 'bg-red-100 text-red-700 border-red-200',
   },
   processing: {
     icon: Zap,
     text: 'Processing',
     className: 'bg-blue-100 text-blue-700 border-blue-200',
+  },
+  success: {
+    icon: CheckCircle,
+    text: 'Success',
+    className: 'bg-green-100 text-green-700 border-green-200',
   },
 };
 

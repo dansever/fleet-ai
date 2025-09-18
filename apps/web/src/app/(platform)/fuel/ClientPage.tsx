@@ -9,16 +9,36 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { ChartBar, Eye, FileText, MapPin, RefreshCw, Star, TrendingUpDown } from 'lucide-react';
+import {
+  AlertTriangle,
+  BarChart3,
+  ChartBar,
+  Eye,
+  FileText,
+  MapPin,
+  RefreshCw,
+  Star,
+  TrendingUpDown,
+  Users,
+} from 'lucide-react';
 import { useState } from 'react';
 import AirportsDropdown from '../_components/AirportsDropdown';
 import AirportsPanel from '../_components/AirportsPanel';
 import { useFuelProcurement } from './contexts';
 import AgreementsPage from './subpages/Agreements';
 import HistoricalDataPage from './subpages/HistoricalData';
+import InvoicesPage from './subpages/Invoices';
+import OverviewPage from './subpages/Overview';
+import SuppliersPage from './subpages/Suppliers';
 import TendersPage from './subpages/Tenders';
 
-type TabValue = 'fuel-tenders' | 'fuel-agreements' | 'historical-data';
+type TabValue =
+  | 'overview'
+  | 'fuel-tenders'
+  | 'fuel-agreements'
+  | 'invoices'
+  | 'historical-data'
+  | 'suppliers';
 
 export default function FuelProcurementClientPage() {
   const { airports, selectedAirport, loading, errors, setSelectedAirport, refreshAll } =
@@ -135,7 +155,7 @@ export default function FuelProcurementClientPage() {
 }
 
 function MainContentSection() {
-  const [selectedTab, setSelectedTab] = useState<TabValue>('fuel-tenders');
+  const [selectedTab, setSelectedTab] = useState<TabValue>('overview');
   const { selectedAirport, loading } = useFuelProcurement();
 
   if (!selectedAirport) {
@@ -159,21 +179,33 @@ function MainContentSection() {
   return (
     <Tabs
       tabs={[
+        { label: 'Overview', value: 'overview', icon: <BarChart3 /> },
         { label: 'Tenders', value: 'fuel-tenders', icon: <TrendingUpDown /> },
         { label: 'Agreements', value: 'fuel-agreements', icon: <FileText /> },
+        { label: 'Invoices', value: 'invoices', icon: <AlertTriangle /> },
         { label: 'Historical Data', value: 'historical-data', icon: <ChartBar /> },
+        { label: 'Suppliers', value: 'suppliers', icon: <Users /> },
       ]}
-      defaultTab="fuel-tenders"
+      defaultTab="overview"
       onTabChange={(tab) => setSelectedTab(tab as TabValue)}
     >
+      <TabsContent value="overview">
+        <OverviewPage />
+      </TabsContent>
       <TabsContent value="fuel-tenders">
         <TendersPage />
       </TabsContent>
       <TabsContent value="fuel-agreements">
         <AgreementsPage />
       </TabsContent>
+      <TabsContent value="invoices">
+        <InvoicesPage />
+      </TabsContent>
       <TabsContent value="historical-data">
         <HistoricalDataPage />
+      </TabsContent>
+      <TabsContent value="suppliers">
+        <SuppliersPage />
       </TabsContent>
     </Tabs>
   );
