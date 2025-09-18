@@ -3,8 +3,9 @@
 import { CardContent } from '@/components/ui/card';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
+import { ModernSelect } from '@/stories/Form/Form';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { AlertTriangle, CheckCircle, Download, Eye, FileText, Mail } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Download, Eye, FileText, Mail, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { useFuelProcurement } from '../contexts';
 
@@ -127,6 +128,16 @@ export default function InvoicesPage() {
     }
   };
 
+  const resetFilters = () => {
+    setSelectedExceptionType('all');
+    setSelectedSeverity('all');
+    setSelectedStatus('all');
+    setSelectedInvoices([]);
+  };
+
+  const hasActiveFilters =
+    selectedExceptionType !== 'all' || selectedSeverity !== 'all' || selectedStatus !== 'all';
+
   const getExceptionTypeLabel = (type: ExceptionType) => {
     switch (type) {
       case 'price_mismatch':
@@ -144,60 +155,6 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Exception Filters */}
-      <BaseCard
-        title="Exception Filters"
-        subtitle="Filter invoices by exception type, severity, and status"
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
-      >
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Exception Type</label>
-              <select
-                value={selectedExceptionType}
-                onChange={(e) => setSelectedExceptionType(e.target.value as ExceptionType)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Types</option>
-                <option value="price_mismatch">Price Mismatch</option>
-                <option value="fee_mismatch">Fee Mismatch</option>
-                <option value="quantity_variance">Quantity Variance</option>
-                <option value="index_drift">Index Drift</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Severity</label>
-              <select
-                value={selectedSeverity}
-                onChange={(e) => setSelectedSeverity(e.target.value as SeverityType)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Severities</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Status</label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value as StatusType)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="disputed">Disputed</option>
-                <option value="resolved">Resolved</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </BaseCard>
-
       {/* Invoices Table */}
       <BaseCard
         title="Invoice Exceptions"
@@ -217,7 +174,69 @@ export default function InvoicesPage() {
           </div>
         }
       >
-        <CardContent>
+        <div className="flex flex-col gap-4">
+          {/* Invoice Filters */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex flex-row items-end gap-4 justify-between mb-3">
+              <h4 className="text-sm font-medium text-gray-700">Filter Invoice Exceptions</h4>
+              <Button
+                intent="ghost"
+                text="Reset Filters"
+                icon={RefreshCw}
+                disabled={!hasActiveFilters}
+                onClick={resetFilters}
+                size="sm"
+              />
+            </div>
+            <div className="flex flex-row gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Exception Type</label>
+                <ModernSelect
+                  value={selectedExceptionType}
+                  onValueChange={(value) => setSelectedExceptionType(value as ExceptionType)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  options={[
+                    { value: 'all', label: 'All Types' },
+                    { value: 'price_mismatch', label: 'Price Mismatch' },
+                    { value: 'fee_mismatch', label: 'Fee Mismatch' },
+                    { value: 'quantity_variance', label: 'Quantity Variance' },
+                    { value: 'index_drift', label: 'Index Drift' },
+                  ]}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Severity</label>
+                <ModernSelect
+                  value={selectedSeverity}
+                  onValueChange={(value) => setSelectedSeverity(value as SeverityType)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  options={[
+                    { value: 'all', label: 'All Severities' },
+                    { value: 'high', label: 'High' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'low', label: 'Low' },
+                  ]}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Status</label>
+                <ModernSelect
+                  value={selectedStatus}
+                  onValueChange={(value) => setSelectedStatus(value as StatusType)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  options={[
+                    { value: 'all', label: 'All Statuses' },
+                    { value: 'pending', label: 'Pending' },
+                    { value: 'disputed', label: 'Disputed' },
+                    { value: 'resolved', label: 'Resolved' },
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+
           {loading.invoices ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-gray-500">Loading invoices...</div>
@@ -305,7 +324,7 @@ export default function InvoicesPage() {
               ))}
             </div>
           )}
-        </CardContent>
+        </div>
       </BaseCard>
 
       {/* Invoice Detail Modal Placeholder */}

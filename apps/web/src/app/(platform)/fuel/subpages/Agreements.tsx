@@ -3,6 +3,7 @@
 import { CardContent } from '@/components/ui/card';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
+import { ModernSelect } from '@/stories/Form/Form';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Calendar, Download, Edit, Eye, FileText, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
@@ -85,6 +86,58 @@ export default function AgreementsPage() {
       linkedInvoices: 12,
       currentIssues: 0,
     },
+    {
+      id: 'AGR-2024-EXX-003',
+      name: 'Exxon Aviation Legacy Contract',
+      supplier: 'Exxon Aviation',
+      period: 'Jan 2023 - Dec 2023',
+      pricingType: 'fixed' as const,
+      renewalDate: '2023-12-31',
+      coveragePercent: 25,
+      openDisputes: 1,
+      status: 'expired' as const,
+      linkedTender: 'TND-2023-003',
+      winningBid: 'BID-2023-EXX-003',
+      basePrice: 0.648,
+      indexName: null,
+      differential: null,
+      totalExpectedPrice: 0.648,
+      kpis: {
+        responseTime: '2.1 hours',
+        deliveryAccuracy: '97.8%',
+        invoiceAccuracy: '95.4%',
+      },
+      insuranceExpiry: '2023-12-31',
+      requiredDocs: ['Insurance Certificate'],
+      linkedInvoices: 8,
+      currentIssues: 1,
+    },
+    {
+      id: 'AGR-2024-TOT-004',
+      name: 'Total Aviation Pending Contract',
+      supplier: 'Total Aviation',
+      period: 'Apr 2024 - Mar 2025',
+      pricingType: 'index' as const,
+      renewalDate: '2025-03-31',
+      coveragePercent: 20,
+      openDisputes: 0,
+      status: 'pending' as const,
+      linkedTender: 'TND-2024-004',
+      winningBid: 'BID-2024-TOT-004',
+      basePrice: 0.651,
+      indexName: 'Platts Jet A-1 Med',
+      differential: '+0.018',
+      totalExpectedPrice: 0.669,
+      kpis: {
+        responseTime: '1.9 hours',
+        deliveryAccuracy: '98.9%',
+        invoiceAccuracy: '97.1%',
+      },
+      insuranceExpiry: '2025-03-31',
+      requiredDocs: ['Insurance Certificate', 'Quality Certificate'],
+      linkedInvoices: 0,
+      currentIssues: 0,
+    },
   ];
 
   // Filter agreements based on selected filters
@@ -125,44 +178,6 @@ export default function AgreementsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Agreement Filters */}
-      <BaseCard
-        title="Agreement Filters"
-        subtitle="Filter agreements by status and pricing type"
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
-      >
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Status</label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value as AgreementStatus)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Pricing Type</label>
-              <select
-                value={selectedPricingType}
-                onChange={(e) => setSelectedPricingType(e.target.value as PricingType)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Types</option>
-                <option value="fixed">Fixed</option>
-                <option value="index">Index</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </BaseCard>
-
       {/* Agreements List View */}
       <BaseCard
         title="Fuel Agreements"
@@ -170,12 +185,61 @@ export default function AgreementsPage() {
         headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
         actions={
           <div className="flex gap-2">
-            <Button intent="secondary" text="Export to Excel" icon={Download} size="sm" />
-            <Button intent="primary" text="Draft New RFQ" icon={FileText} size="sm" />
+            <Button intent="secondary" text="Export to Excel" icon={Download} />
+            <Button intent="primary" text="Draft New RFQ" icon={FileText} />
           </div>
         }
       >
-        <CardContent>
+        <div className="flex flex-col gap-4">
+          {/* Agreement Filters */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Filter Agreements</h4>
+            <div className="flex flex-row gap-4">
+              <div className="space-y-2">
+                <ModernSelect
+                  label="Status"
+                  value={selectedStatus}
+                  onValueChange={(value) => setSelectedStatus(value as AgreementStatus)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  options={[
+                    { value: 'all', label: `All (${mockAgreements.length})` },
+                    {
+                      value: 'active',
+                      label: `Active (${mockAgreements.filter((agreement) => agreement.status === 'active').length})`,
+                    },
+                    {
+                      value: 'expired',
+                      label: `Expired (${mockAgreements.filter((agreement) => agreement.status === 'expired').length})`,
+                    },
+                    {
+                      value: 'pending',
+                      label: `Pending (${mockAgreements.filter((agreement) => agreement.status === 'pending').length})`,
+                    },
+                  ]}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <ModernSelect
+                  label="Pricing Type"
+                  value={selectedPricingType}
+                  onValueChange={(value) => setSelectedPricingType(value as PricingType)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  options={[
+                    { value: 'all', label: `All (${mockAgreements.length})` },
+                    {
+                      value: 'fixed',
+                      label: `Fixed (${mockAgreements.filter((agreement) => agreement.pricingType === 'fixed').length})`,
+                    },
+                    {
+                      value: 'index',
+                      label: `Index (${mockAgreements.filter((agreement) => agreement.pricingType === 'index').length})`,
+                    },
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
           {loading.contracts ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-gray-500">Loading agreements...</div>
@@ -241,16 +305,15 @@ export default function AgreementsPage() {
                     <Button
                       intent="ghost"
                       icon={Eye}
-                      size="sm"
                       onClick={() => setSelectedAgreement(agreement.id)}
                     />
-                    <Button intent="ghost" icon={Edit} size="sm" />
+                    <Button intent="ghost" icon={Edit} />
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
+        </div>
       </BaseCard>
 
       {/* Agreement Detail */}

@@ -120,48 +120,6 @@ export default function HistoricalDataPage() {
 
   return (
     <div className="space-y-6">
-      {/* Time Range and Chart Type Filters */}
-      <BaseCard
-        title="Historical Data Filters"
-        subtitle="Select time range and chart type for analysis"
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
-      >
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Time Range</label>
-              <ModernSelect
-                value={selectedTimeRange}
-                onValueChange={(value) => setSelectedTimeRange(value as TimeRange)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                options={[
-                  { value: '6months', label: '6 Months' },
-                  { value: '1year', label: '1 Year' },
-                  { value: '2years', label: '2 Years' },
-                  { value: 'all', label: 'All Time' },
-                ]}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Chart Type</label>
-              <ModernSelect
-                value={selectedChartType}
-                onValueChange={(value) => setSelectedChartType(value as ChartType)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                options={[
-                  { value: 'spend', label: 'Spend Trends' },
-                  { value: 'volume', label: 'Volume Analytics' },
-                  { value: 'price', label: 'Price Trends' },
-                  { value: 'savings', label: 'Savings Tracker' },
-                  { value: 'exceptions', label: 'Exception Analytics' },
-                ]}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </BaseCard>
-
       {/* Key Metrics Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <BaseCard className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
@@ -231,6 +189,43 @@ export default function HistoricalDataPage() {
       >
         <CardContent>
           <div className="space-y-6">
+            {/* Historical Data Filters */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Filter Historical Data</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Time Range</label>
+                  <ModernSelect
+                    value={selectedTimeRange}
+                    onValueChange={(value) => setSelectedTimeRange(value as TimeRange)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    options={[
+                      { value: '6months', label: '6 Months' },
+                      { value: '1year', label: '1 Year' },
+                      { value: '2years', label: '2 Years' },
+                      { value: 'all', label: 'All Time' },
+                    ]}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Chart Type</label>
+                  <ModernSelect
+                    value={selectedChartType}
+                    onValueChange={(value) => setSelectedChartType(value as ChartType)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    options={[
+                      { value: 'spend', label: 'Spend Trends' },
+                      { value: 'volume', label: 'Volume Analytics' },
+                      { value: 'price', label: 'Price Trends' },
+                      { value: 'savings', label: 'Savings Tracker' },
+                      { value: 'exceptions', label: 'Exception Analytics' },
+                    ]}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Chart Placeholder */}
             <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
               <div className="text-center">

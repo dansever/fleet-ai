@@ -151,17 +151,24 @@ export default function SuppliersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Supplier Filters */}
+      {/* Suppliers Table */}
       <BaseCard
-        title="Supplier Filters"
-        subtitle="Filter suppliers by compliance status and agreement status"
+        title="Supplier Intelligence"
+        subtitle={`${filteredSuppliers.length} suppliers found`}
         headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
+        actions={
+          <div className="flex gap-2">
+            <Button intent="secondary" text="Export to Excel" icon={Download} size="sm" />
+            <Button intent="primary" text="Invite to Tender" icon={Mail} size="sm" />
+          </div>
+        }
       >
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
+          {/* Supplier Filters */}
+          <div className="flex flex-row gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Compliance Status</label>
               <ModernSelect
+                label="Compliance Status"
                 value={selectedCompliance}
                 onValueChange={(value) => setSelectedCompliance(value as ComplianceStatus)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -175,8 +182,8 @@ export default function SuppliersPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Agreement Status</label>
               <ModernSelect
+                label="Agreement Status"
                 value={selectedAgreementStatus}
                 onValueChange={(value) => setSelectedAgreementStatus(value as AgreementStatus)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -189,22 +196,6 @@ export default function SuppliersPage() {
               />
             </div>
           </div>
-        </CardContent>
-      </BaseCard>
-
-      {/* Suppliers Table */}
-      <BaseCard
-        title="Supplier Intelligence"
-        subtitle={`${filteredSuppliers.length} suppliers found`}
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
-        actions={
-          <div className="flex gap-2">
-            <Button intent="secondary" text="Export to Excel" icon={Download} size="sm" />
-            <Button intent="primary" text="Invite to Tender" icon={Mail} size="sm" />
-          </div>
-        }
-      >
-        <CardContent>
           {loading.contracts ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-gray-500">Loading suppliers...</div>
@@ -291,7 +282,7 @@ export default function SuppliersPage() {
               ))}
             </div>
           )}
-        </CardContent>
+        </div>
       </BaseCard>
 
       {/* Supplier Profile Detail */}

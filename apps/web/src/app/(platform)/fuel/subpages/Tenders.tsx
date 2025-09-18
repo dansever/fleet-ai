@@ -14,6 +14,7 @@ import { BaseCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
+import { ModernTimeline } from '@/stories/Timeline/Timeline';
 import {
   AlertCircle,
   AlertTriangle,
@@ -27,6 +28,7 @@ import {
   Fuel,
   Pencil,
   Plus,
+  ReceiptText,
   Ruler,
   Settings,
   TrashIcon,
@@ -227,58 +229,6 @@ const FuelTendersPage = memo(function TendersPage() {
         </BaseCard>
       )}
 
-      {/* Tender Timeline */}
-      {currentTender && (
-        <BaseCard title="Tender Timeline" subtitle="RFQ sent, bids due, evaluation, award">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-sm font-medium">RFQ Sent</span>
-              <span className="text-xs text-gray-500">Jan 15, 2024</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium">Bids Due</span>
-              <span className="text-xs text-gray-500">Feb 15, 2024</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-              <span className="text-sm font-medium">Evaluation</span>
-              <span className="text-xs text-gray-500">Feb 20, 2024</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-              <span className="text-sm font-medium">Award</span>
-              <span className="text-xs text-gray-500">Mar 1, 2024</span>
-            </div>
-          </div>
-        </BaseCard>
-      )}
-
-      {/* Specs and Attachments */}
-      {currentTender && (
-        <BaseCard
-          title="Specifications & Attachments"
-          subtitle="Tender specifications and supporting documents"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-700">Quality Specification</h4>
-              <p className="text-sm text-gray-600">
-                {currentTender.qualitySpecification || 'ASTM D1655'}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-700">Attachments</h4>
-              <div className="flex gap-2">
-                <Button intent="ghost" text="RFQ Document" icon={FileText} size="sm" />
-                <Button intent="ghost" text="Specifications" icon={FileText} size="sm" />
-              </div>
-            </div>
-          </div>
-        </BaseCard>
-      )}
-
       {/* Bids Section */}
       {currentTender && (
         <div className="space-y-6">
@@ -384,15 +334,19 @@ const FuelTendersPage = memo(function TendersPage() {
                     <div className="col-span-2 flex items-center">
                       <span className="text-sm">
                         {bid.priceType === 'index_formula'
-                          ? `${bid.indexName} ${bid.differential || ''}`
-                          : `$${bid.baseUnitPrice || '0.000'}/L`}
+                          ? `${bid.indexName} ${Number(bid.differential)?.toFixed(3) || '0.000'}`
+                          : `$${Number(bid.baseUnitPrice)?.toFixed(3) || '0.000'}/L`}
                       </span>
                     </div>
                     <div className="col-span-1 flex items-center">
-                      <span className="text-sm">${bid.intoPlaneFee || '0.000'}</span>
+                      <span className="text-sm">
+                        ${Number(bid.intoPlaneFee)?.toFixed(3) || '0.000'}
+                      </span>
                     </div>
                     <div className="col-span-1 flex items-center">
-                      <span className="text-sm">${bid.handlingFee || '0.000'}</span>
+                      <span className="text-sm">
+                        ${Number(bid.handlingFee)?.toFixed(3) || '0.000'}
+                      </span>
                     </div>
                     <div className="col-span-1 flex items-center">
                       <div className="flex gap-1">
@@ -526,8 +480,8 @@ const FuelTendersPage = memo(function TendersPage() {
                         </td>
                         <td className="border border-gray-200 p-3 text-center">
                           <div className="flex justify-center gap-1">
-                            <Button intent="ghost" icon={Eye} size="sm" />
-                            <Button intent="ghost" icon={Settings} size="sm" />
+                            <Button intent="ghost" icon={Eye} />
+                            <Button intent="ghost" icon={Settings} />
                           </div>
                         </td>
                       </tr>
@@ -564,89 +518,195 @@ const TenderDetails = memo(function TenderDetails({
   bids: FuelBid[];
 }) {
   return (
-    <BaseCard className="shadow-none border-none">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Calendar className="h-4 w-4" />
-            Tender Period
-          </div>
-          <div className="text-sm font-medium">
-            {currentTender.biddingStarts && currentTender.biddingEnds
-              ? `${formatDate(currentTender.biddingStarts)} - ${formatDate(currentTender.biddingEnds)}`
-              : 'N/A'}
-          </div>
-        </div>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Calendar className="h-4 w-4" />
-            Agreement Period
-          </div>
-          <div className="text-sm font-medium">
-            {currentTender.deliveryStarts && currentTender.deliveryEnds
-              ? `${formatDate(currentTender.deliveryStarts)} - ${formatDate(currentTender.deliveryEnds)}`
-              : 'N/A'}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Fuel className="h-4 w-4" />
-            Fuel Type
-          </div>
-          <div className="text-sm font-medium">{currentTender.fuelType}</div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <TrendingUpDown className="h-4 w-4" />
-            Volume Forecast
-          </div>
-          <div className="text-sm font-medium">
-            {currentTender.projectedAnnualVolume
-              ? currentTender.projectedAnnualVolume?.toLocaleString() +
-                  ' ' +
-                  BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label || ''
-              : 'N/A'}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Coins className="h-4 w-4" />
-            Base Currency
-          </div>
-          <div className="text-sm font-medium">
-            {CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Ruler className="h-4 w-4" />
-            Base Unit of Measure
-          </div>
-          <div className="text-sm font-medium">
-            {BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label || ''}
-          </div>
-        </div>
-
-        <div className=" col-span-2 grid grid-cols-2 gap-4 bg-slate-100 rounded-lg p-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <FileText className="h-4 w-4" />
-              Status
+    <BaseCard className="shadow-none border-none p-0">
+      {/* Responsive Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column - Static/Dry Facts */}
+        <div className="space-y-6">
+          {/* Tender Timeline */}
+          <div className="bg-slate-50 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-4 w-4" />
+              <p className="font-semibold">Tender Timeline</p>
             </div>
-            <StatusBadge
-              status="operational"
-              text={getProcessStatusDisplay(currentTender.processStatus)}
+            <ModernTimeline
+              orientation="horizontal"
+              items={[
+                {
+                  id: '1',
+                  title: 'RFQ Sent',
+                  timestamp: formatDate(currentTender.biddingStarts),
+                  status: 'current',
+                },
+                {
+                  id: '2',
+                  title: 'Bids Due',
+                  timestamp: formatDate(currentTender.biddingEnds),
+                  status: 'current',
+                },
+                {
+                  id: '3',
+                  title: 'Evaluation',
+                  timestamp: 'TBA',
+                  status: 'current',
+                },
+                {
+                  id: '4',
+                  title: 'Award',
+                  timestamp: 'TBA',
+                  status: 'current',
+                },
+              ]}
             />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Users className="h-4 w-4" />
-              Suppliers
+          {/* Agreement Period */}
+          <div className="bg-slate-50 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-4 w-4" />
+              <p className="font-semibold">Agreement Period</p>
             </div>
-            <div className="text-sm font-medium">{bids.length} responded</div>
+            <ModernTimeline
+              orientation="horizontal"
+              items={[
+                {
+                  id: '1',
+                  title: 'Starts',
+                  timestamp: formatDate(currentTender.biddingStarts),
+                  status: 'pending',
+                },
+                {
+                  id: '2',
+                  title: 'Ends',
+                  timestamp: formatDate(currentTender.biddingEnds),
+                  status: 'current',
+                },
+              ]}
+            />
+          </div>
+
+          {/* Static Details Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Fuel className="h-4 w-4" />
+                Fuel Type
+              </div>
+              <div className="text-sm font-medium">{currentTender.fuelType}</div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <TrendingUpDown className="h-4 w-4" />
+                Volume Forecast
+              </div>
+              <div className="text-sm font-medium">
+                {currentTender.projectedAnnualVolume
+                  ? currentTender.projectedAnnualVolume?.toLocaleString() +
+                      ' ' +
+                      BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label ||
+                    ''
+                  : 'N/A'}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Coins className="h-4 w-4" />
+                Base Currency
+              </div>
+              <div className="text-sm font-medium">
+                {CURRENCY_MAP[currentTender.baseCurrency || '']?.display}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Ruler className="h-4 w-4" />
+                Base Unit of Measure
+              </div>
+              <div className="text-sm font-medium">
+                {BASE_UOM_OPTIONS.find((uom) => uom.value === currentTender.baseUom)?.label || ''}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <ReceiptText className="h-4 w-4" />
+                Quality Specification
+              </div>
+              <p className="text-sm text-gray-600">
+                {currentTender.qualitySpecification || 'ASTM D1655'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Dynamic Data */}
+        <div className="space-y-6">
+          {/* Status and Activity */}
+          <div className="bg-blue-50 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="h-4 w-4 text-blue-600" />
+              <p className="font-semibold text-blue-800">Current Status</p>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-blue-700">Process Status</span>
+                <StatusBadge
+                  status="operational"
+                  text={getProcessStatusDisplay(currentTender.processStatus)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-blue-700">Bidding Phase</span>
+                <span className="text-sm font-medium text-blue-800">Active</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bids and Responses */}
+          <div className="bg-green-50 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="h-4 w-4 text-green-600" />
+              <p className="font-semibold text-green-800">Bid Responses</p>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-700">Total Responses</span>
+                <span className="text-lg font-bold text-green-800">{bids.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-700">Valid Bids</span>
+                <span className="text-sm font-medium text-green-800">
+                  {bids.filter((bid) => bid.aiSummary).length}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-700">Pending Review</span>
+                <span className="text-sm font-medium text-green-800">
+                  {bids.filter((bid) => !bid.aiSummary).length}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Documents and Attachments */}
+          <div className="bg-purple-50 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="h-4 w-4 text-purple-600" />
+              <p className="font-semibold text-purple-800">Documents</p>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-purple-700">RFQ Document</span>
+                <Button intent="ghost" text="View" icon={Eye} size="sm" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-purple-700">Specifications</span>
+                <Button intent="ghost" text="View" icon={Eye} size="sm" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
