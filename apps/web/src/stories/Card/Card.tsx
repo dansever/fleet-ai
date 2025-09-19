@@ -156,10 +156,12 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
           {(value !== undefined || change !== undefined) && (
             <div className="flex items-end gap-4">
               {value !== undefined && (
-                <h2 className="p-0 truncate font-semibold leading-tight tracking-tight">{value}</h2>
+                <h2 className="p-0 truncate font-semibold leading-tight tracking-tight flex-shrink-0">
+                  {value}
+                </h2>
               )}
               {change !== undefined && (
-                <p className={cn('text-sm p-0', toneToClass[resolvedTone])}>{change}</p>
+                <p className={cn('text-sm p-0 flex-1', toneToClass[resolvedTone])}>{change}</p>
               )}
             </div>
           )}

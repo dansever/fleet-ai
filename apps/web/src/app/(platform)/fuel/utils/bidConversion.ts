@@ -6,6 +6,23 @@ import { cacheManager, createCacheKey } from './cacheManager';
 // Types
 // ============================================================================
 
+export interface BidForConversion {
+  id: FuelBid['id'];
+  vendorName: FuelBid['vendorName'];
+  // Money fields
+  baseUnitPrice: FuelBid['baseUnitPrice'];
+  intoPlaneFee: FuelBid['intoPlaneFee'];
+  handlingFee: FuelBid['handlingFee'];
+  otherFee: FuelBid['otherFee'];
+  currency: FuelBid['currency'];
+  // UOM fields
+  uom: FuelBid['uom'];
+  // Index fields
+  differentialValue: FuelBid['differentialValue'];
+  differentialUnit: FuelBid['differentialUnit'];
+  differentialCurrency: FuelBid['differentialCurrency'];
+}
+
 export interface ConvertedBidField {
   originalValue: number;
   originalUnit: string;
@@ -91,7 +108,10 @@ function createConversionRequest(
 async function convertValue(conversionRequest: string): Promise<string> {
   try {
     const result = await runConversionAgent(conversionRequest);
-    return result;
+    if (!result) {
+      return '{}';
+    }
+    return JSON.stringify(result);
   } catch (error) {
     console.error('Conversion agent failed:', error);
     return JSON.stringify({
@@ -276,10 +296,10 @@ export async function convertBidsToTenderBase(
       // Convert differential for index-based pricing (UOM conversion)
       if (
         bid.priceType === 'index_formula' &&
-        needsConversion(bid.differential, bid.differentialUnit, tender.baseUom)
+        needsConversion(bid.differentialValue, bid.differentialUnit, tender.baseUom)
       ) {
         const conversionRequest = createConversionRequest(
-          Number(bid.differential),
+          Number(bid.differentialValue),
           bid.differentialUnit || bid.uom || 'USG',
           tender.baseUom || 'USG',
           false, // UOM conversion
@@ -344,7 +364,7 @@ export function clearConvertedBidsCache(tenderId: string): void {
  */
 export function getDisplayValue(
   bid: ConvertedBid,
-  field: 'baseUnitPrice' | 'intoPlaneFee' | 'handlingFee' | 'otherFee' | 'differential',
+  field: 'baseUnitPrice' | 'intoPlaneFee' | 'handlingFee' | 'otherFee' | 'differentialValue',
 ): { value: number; unit: string; isConverted: boolean } {
   const convertedField =
     `converted${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ConvertedBid;
@@ -363,7 +383,7 @@ export function getDisplayValue(
   const unit =
     field === 'baseUnitPrice'
       ? bid.uom || 'USD'
-      : field === 'differential'
+      : field === 'differentialValue'
         ? bid.differentialUnit || bid.uom || 'USD'
         : `${bid.currency || 'USD'}/${bid.uom || 'USG'}`;
 

@@ -162,7 +162,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         key: 'vendor',
         header: <span className="whitespace-nowrap">Vendor</span>,
         accessor: (bid: FuelBid) => (
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-[200px]">
             <div className="space-y-1">
               <h3 className="font-semibold text-sm text-slate-900 leading-tight">
                 {bid.vendorName || 'Unknown Vendor'}
@@ -175,12 +175,10 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
                   <CopyableText value={bid.vendorContactEmail} />
                 </div>
               )}
+              {bid.vendorContactPhone && (
+                <div className="text-xs text-slate-600 font-medium">{bid.vendorContactPhone}</div>
+              )}
             </div>
-            <StatusBadge
-              status="default"
-              text={bid.round ? `Round ${bid.round}` : 'Initial'}
-              className="text-xs font-medium"
-            />
           </div>
         ),
         sortable: true,
@@ -207,43 +205,70 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
       {
         id: 'pricing',
         key: 'pricing',
-        header: <span className="whitespace-nowrap">Price</span>,
+        header: <span className="whitespace-nowrap">Pricing Structure</span>,
         accessor: (bid: FuelBid) => {
+          const isFixedPricing = bid.priceType === 'fixed';
+          const isIndexPricing = bid.priceType === 'index_formula';
+
           return (
-            <div className="space-y-1.5 min-w-[200px]">
-              {/* headline */}
-              <h3 className="text-green-600 font-semibold text-sm">
-                {formatFuelPrice(bid.baseUnitPrice, bid.currency) || (
-                  <span className="text-slate-400 font-normal">No price</span>
-                )}
-              </h3>
+            <div className="space-y-2 min-w-[240px]">
+              {/* Pricing Type Badge */}
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={`text-xs font-medium ${
+                    isFixedPricing
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : isIndexPricing
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-gray-50 text-gray-700 border-gray-200'
+                  }`}
+                >
+                  {isFixedPricing
+                    ? 'Fixed Price'
+                    : isIndexPricing
+                      ? 'Index Formula'
+                      : 'Unknown Type'}
+                </Badge>
+              </div>
 
-              {/* single meta-line */}
-              <p className="text-xs text-slate-600 font-medium">
-                {`${bid.currency}/${bid.uom}`}
-                {bid.priceType && (
-                  <span className="ml-1">· {bid.priceType === 'fixed' ? 'Fixed' : 'Index'}</span>
-                )}
-              </p>
+              {/* Base Price */}
+              <div className="space-y-1">
+                <h3 className="text-green-600 font-semibold text-sm">
+                  {formatFuelPrice(bid.baseUnitPrice, bid.currency) || (
+                    <span className="text-slate-400 font-normal">No base price</span>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-600 font-medium">
+                  {bid.currency}/{bid.uom}
+                </p>
+              </div>
 
-              {/* index details (only if index formula) */}
-              {bid.priceType === 'index_formula' && (
-                <div className="space-y-0.5">
+              {/* Index Formula Details */}
+              {isIndexPricing && (
+                <div className="space-y-1.5 bg-blue-50 border border-blue-200 rounded-lg p-2">
+                  <p className="text-xs font-semibold text-blue-800">Index Formula:</p>
                   {bid.indexName && (
-                    <p className="text-xs text-slate-500 font-medium">
+                    <p className="text-xs text-blue-700 font-medium">
                       {bid.indexName}
                       {bid.indexLocation && ` (${bid.indexLocation})`}
                     </p>
                   )}
-                  {bid.differential && (
-                    <p className="text-xs text-slate-500">
-                      {Number.parseFloat(bid.differential) >= 0 ? '+' : ''}
-                      {formatFuelPrice(bid.differential, bid.currency)}
-                      {bid.differentialUnit && ` ${bid.differentialUnit}`}
-                    </p>
+                  {bid.differentialValue && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-blue-700">Differential:</span>
+                      <span className="text-xs font-medium text-blue-800">
+                        {Number.parseFloat(bid.differentialValue) >= 0 ? '+' : ''}
+                        {formatFuelPrice(bid.differentialValue, bid.currency)}
+                        {bid.differentialUnit && ` ${bid.differentialUnit}`}
+                      </span>
+                    </div>
+                  )}
+                  {bid.quoteLagDays && (
+                    <p className="text-xs text-blue-600">Lag: {bid.quoteLagDays} days</p>
                   )}
                   {bid.formulaNotes && (
-                    <p className="text-xs text-slate-400 italic">{bid.formulaNotes}</p>
+                    <p className="text-xs text-blue-600 italic">{bid.formulaNotes}</p>
                   )}
                 </div>
               )}
@@ -259,34 +284,121 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
-        id: 'bidDetails',
-        key: 'bidDetails',
-        header: <span className="whitespace-nowrap">Bid Details</span>,
-        accessor: (bid: FuelBid) => (
-          <div className="space-y-1.5 min-w-[200px]">
-            <h4 className="font-semibold text-sm text-slate-900 leading-tight">
-              {bid.title || `Bid ${bid.id?.slice(0, 8) || 'Unknown'}`}
-            </h4>
-            <p className="text-xs text-slate-600 font-medium">
-              {bid.bidSubmittedAt ? formatDate(bid.bidSubmittedAt) : 'Not submitted'}
-            </p>
-            <div className="flex gap-1 flex-wrap">
-              {bid.uom && (
-                <Badge variant="outline" className="text-xs">
-                  <Fuel className="w-3 h-3 mr-1" />
-                  {bid.uom}
-                </Badge>
+        id: 'productSpecs',
+        key: 'productSpecs',
+        header: <span className="whitespace-nowrap">Product & Specifications</span>,
+        accessor: (bid: FuelBid) => {
+          const hasProductInfo =
+            bid.productGrade ||
+            bid.uom ||
+            bid.densityAt15C ||
+            bid.temperatureBasisC ||
+            bid.qualitySpecification;
+
+          return (
+            <div className="space-y-2 min-w-[200px]">
+              {hasProductInfo ? (
+                <>
+                  {/* Product Grade */}
+                  {bid.productGrade && (
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-blue-50 text-blue-700 border-blue-200 text-xs"
+                      >
+                        <Fuel className="w-3 h-3 mr-1" />
+                        {bid.productGrade}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Unit of Measure */}
+                  {bid.uom && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-slate-800">Unit of Measure:</p>
+                      <Badge variant="outline" className="text-sm font-medium text-slate-700">
+                        {bid.uom}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Quality & Physical Properties */}
+                  <div className="space-y-1.5">
+                    {bid.qualitySpecification && (
+                      <div>
+                        <p className="text-xs font-semibold text-slate-800">Quality Spec:</p>
+                        <p className="text-xs text-slate-600 font-medium">
+                          {bid.qualitySpecification}
+                        </p>
+                      </div>
+                    )}
+
+                    {(bid.densityAt15C || bid.temperatureBasisC) && (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 space-y-1">
+                        <p className="text-xs font-semibold text-slate-800">Physical Properties:</p>
+                        {bid.densityAt15C && (
+                          <p className="text-xs text-slate-600">
+                            Density @ 15°C:{' '}
+                            <span className="font-medium">
+                              {Number(bid.densityAt15C).toFixed(2)} kg/m³
+                            </span>
+                          </p>
+                        )}
+                        {bid.temperatureBasisC && (
+                          <p className="text-xs text-slate-600">
+                            Temperature Basis:{' '}
+                            <span className="font-medium">{bid.temperatureBasisC}°C</span>
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <span className="text-xs text-slate-500">No product specifications</span>
+                </div>
               )}
             </div>
+          );
+        },
+        sortable: true,
+        align: 'left' as const,
+      },
+      {
+        id: 'bidDetails',
+        key: 'bidDetails',
+        header: <span className="whitespace-nowrap">Bid Information</span>,
+        accessor: (bid: FuelBid) => (
+          <div className="space-y-2 min-w-[180px]">
+            <div className="space-y-1">
+              <h4 className="font-semibold text-sm text-slate-900 leading-tight">
+                {bid.title || `Bid ${bid.id?.slice(0, 8) || 'Unknown'}`}
+              </h4>
+              <p className="text-xs text-slate-600 font-medium">
+                {bid.bidSubmittedAt ? formatDate(bid.bidSubmittedAt) : 'Not submitted'}
+              </p>
+            </div>
+
+            {/* Bid Round Information */}
+            {bid.round && (
+              <div className="flex items-center gap-1">
+                <StatusBadge
+                  status="default"
+                  text={`Round ${bid.round}`}
+                  className="text-xs font-medium"
+                />
+              </div>
+            )}
           </div>
         ),
         sortable: true,
         align: 'left' as const,
       },
       {
-        id: 'additionalCosts',
-        key: 'additionalCosts',
-        header: <span className="whitespace-nowrap">Additional Costs</span>,
+        id: 'feesCharges',
+        key: 'feesCharges',
+        header: <span className="whitespace-nowrap">Fees & Charges</span>,
         accessor: (bid: FuelBid) => {
           const totalFees =
             Number.parseFloat(bid.intoPlaneFee || '0') +
@@ -296,33 +408,65 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
           const hasAnyFees = bid.intoPlaneFee || bid.handlingFee || bid.otherFee;
 
           return (
-            <div className="space-y-1.5">
+            <div className="space-y-2 min-w-[200px]">
               {hasAnyFees ? (
                 <>
-                  <h4 className="font-semibold text-sm text-slate-900">
-                    {formatFuelPrice(totalFees, bid.currency)}
-                  </h4>
-                  <div className="space-y-0.5">
+                  {/* Total Fees Summary */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-orange-700 border-0 text-xs">
+                        Total Fees
+                      </Badge>
+                      <h4 className="font-semibold text-sm text-orange-800">
+                        {formatFuelPrice(totalFees, bid.currency)}
+                      </h4>
+                    </div>
+                  </div>
+
+                  {/* Individual Fee Breakdown */}
+                  <div className="space-y-1.5">
                     {bid.intoPlaneFee && (
-                      <p className="text-xs text-slate-600">
-                        Into-plane: {formatFuelPrice(bid.intoPlaneFee, bid.currency)}
-                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-slate-600 font-medium">Into-plane:</span>
+                        <span className="text-xs text-slate-800 font-semibold">
+                          {formatFuelPrice(bid.intoPlaneFee, bid.currency)}
+                        </span>
+                      </div>
                     )}
                     {bid.handlingFee && (
-                      <p className="text-xs text-slate-600">
-                        Handling: {formatFuelPrice(bid.handlingFee, bid.currency)}
-                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-slate-600 font-medium">Handling:</span>
+                        <span className="text-xs text-slate-800 font-semibold">
+                          {formatFuelPrice(bid.handlingFee, bid.currency)}
+                        </span>
+                      </div>
                     )}
                     {bid.otherFee && (
-                      <p className="text-xs text-slate-600">
-                        {bid.otherFeeDescription || 'Other'}:{' '}
-                        {formatFuelPrice(bid.otherFee, bid.currency)}
-                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-slate-600 font-medium">
+                          {bid.otherFeeDescription || 'Other'}:
+                        </span>
+                        <span className="text-xs text-slate-800 font-semibold">
+                          {formatFuelPrice(bid.otherFee, bid.currency)}
+                        </span>
+                      </div>
                     )}
                   </div>
+
+                  {/* Fee Basis Information */}
+                  {(bid.intoPlaneFeeUnit || bid.handlingFeeBasis || bid.otherFeeBasis) && (
+                    <div className="text-xs text-slate-500 space-y-0.5">
+                      <p className="font-medium">Basis:</p>
+                      {bid.intoPlaneFeeUnit && <p>Into-plane: {bid.intoPlaneFeeUnit}</p>}
+                      {bid.handlingFeeBasis && <p>Handling: {bid.handlingFeeBasis}</p>}
+                      {bid.otherFeeBasis && <p>Other: {bid.otherFeeBasis}</p>}
+                    </div>
+                  )}
                 </>
               ) : (
-                <span className="text-xs text-slate-400">No additional costs</span>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <span className="text-xs text-slate-500">No additional fees</span>
+                </div>
               )}
             </div>
           );
@@ -340,49 +484,96 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
       {
-        id: 'terms',
-        key: 'terms',
-        header: <span className="whitespace-nowrap">Terms & Specs</span>,
+        id: 'commercialTerms',
+        key: 'commercialTerms',
+        header: <span className="whitespace-nowrap">Commercial Terms</span>,
         accessor: (bid: FuelBid) => {
-          const hasTerms =
-            bid.paymentTerms ||
-            bid.densityAt15C ||
-            bid.includesTaxes ||
-            bid.includesAirportFees ||
-            bid.qualitySpecification;
+          const hasCommercialTerms = bid.paymentTerms || bid.creditDays;
 
           return (
-            <div className="space-y-1.5">
-              {hasTerms ? (
+            <div className="space-y-2 min-w-[180px]">
+              {hasCommercialTerms ? (
                 <>
                   {bid.paymentTerms && (
-                    <p className="text-xs text-slate-600 font-medium">{bid.paymentTerms}</p>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-slate-800">Payment Terms:</p>
+                      <p className="text-xs text-slate-600 font-medium">{bid.paymentTerms}</p>
+                    </div>
                   )}
-                  {bid.qualitySpecification && (
-                    <p className="text-xs text-slate-600">Spec: {bid.qualitySpecification}</p>
+                  {bid.creditDays && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-slate-800">Credit Terms:</p>
+                      <Badge
+                        variant="outline"
+                        className="bg-green-50 text-green-700 border-green-200 text-xs"
+                      >
+                        {bid.creditDays} days
+                      </Badge>
+                    </div>
                   )}
-                  <div className="space-y-1">
-                    {bid.densityAt15C && (
-                      <p className="text-xs text-slate-600">
-                        Density: {Number(bid.densityAt15C).toFixed(2)} kg/m³
-                      </p>
-                    )}
+                </>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <span className="text-xs text-slate-500">Standard terms</span>
+                </div>
+              )}
+            </div>
+          );
+        },
+        sortable: true,
+        align: 'left' as const,
+      },
+      {
+        id: 'inclusionsExclusions',
+        key: 'inclusionsExclusions',
+        header: <span className="whitespace-nowrap">Inclusions & Exclusions</span>,
+        accessor: (bid: FuelBid) => {
+          const hasInclusions = bid.includesTaxes || bid.includesAirportFees || bid.taxDetails;
+
+          return (
+            <div className="space-y-2 min-w-[180px]">
+              {hasInclusions ? (
+                <>
+                  {/* Tax Information */}
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-semibold text-slate-800">Taxes & Fees:</p>
                     <div className="flex gap-1 flex-wrap">
                       {bid.includesTaxes && (
-                        <Badge variant="outline" className="text-xs">
-                          Tax Incl.
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200 text-xs"
+                        >
+                          ✓ Taxes Included
                         </Badge>
                       )}
                       {bid.includesAirportFees && (
-                        <Badge variant="outline" className="text-xs">
-                          Airport Fees
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200 text-xs"
+                        >
+                          ✓ Airport Fees
                         </Badge>
                       )}
                     </div>
                   </div>
+
+                  {/* Tax Details */}
+                  {bid.taxDetails && typeof bid.taxDetails === 'object' && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 space-y-1">
+                      <p className="text-xs font-semibold text-slate-800">Tax Breakdown:</p>
+                      {Object.entries(bid.taxDetails).map(([key, value]) => (
+                        <p key={key} className="text-xs text-slate-600">
+                          {key}:{' '}
+                          {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </>
               ) : (
-                <span className="text-xs text-slate-400">Standard terms</span>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <span className="text-xs text-slate-500">No inclusions specified</span>
+                </div>
               )}
             </div>
           );

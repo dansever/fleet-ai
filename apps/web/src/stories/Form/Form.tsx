@@ -387,7 +387,7 @@ export const ModernSelect = ({
       <SelectTrigger
         className={cn(
           formStyles.input,
-          'h-fit py-6',
+          'h-fit pl-4 pr-2 py-5',
           'cursor-pointer',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
         )}

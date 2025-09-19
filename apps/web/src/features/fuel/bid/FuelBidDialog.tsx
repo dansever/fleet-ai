@@ -6,7 +6,6 @@ import type { FuelBid, UpdateFuelBid } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { client as fuelBidClient } from '@/modules/fuel/bids';
-import { CreateFuelBidData } from '@/modules/fuel/bids/bids.client';
 import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
@@ -57,7 +56,7 @@ export default function FuelBidDialog({
     // Index-Linked Pricing (matching schema)
     indexName: bid?.indexName || null,
     indexLocation: bid?.indexLocation || null,
-    differential: bid?.differential || null,
+    differentialValue: bid?.differentialValue || null,
     differentialUnit: bid?.differentialUnit || null,
     formulaNotes: bid?.formulaNotes || null,
 
@@ -106,7 +105,7 @@ export default function FuelBidDialog({
       baseUnitPrice: bid?.baseUnitPrice || null,
       indexName: bid?.indexName || null,
       indexLocation: bid?.indexLocation || null,
-      differential: bid?.differential || null,
+      differentialValue: bid?.differentialValue || null,
       differentialUnit: bid?.differentialUnit || null,
       formulaNotes: bid?.formulaNotes || null,
       intoPlaneFee: bid?.intoPlaneFee || null,
@@ -142,7 +141,7 @@ export default function FuelBidDialog({
           vendorId: null, // Will be handled by backend if needed
           ...formData,
         };
-        savedBid = await fuelBidClient.createFuelBid(tenderId, createData as CreateFuelBidData);
+        savedBid = await fuelBidClient.createFuelBid(tenderId, createData as FuelBidCreateInput);
         toast.success('Fuel bid created successfully');
       } else {
         // Update existing bid
@@ -183,7 +182,7 @@ export default function FuelBidDialog({
         baseUnitPrice: null,
         indexName: null,
         indexLocation: null,
-        differential: null,
+        differentialValue: null,
         differentialUnit: null,
         formulaNotes: null,
         intoPlaneFee: null,
@@ -220,7 +219,7 @@ export default function FuelBidDialog({
       baseUnitPrice: null,
       indexName: null,
       indexLocation: null,
-      differential: null,
+      differentialValue: null,
       differentialUnit: null,
       formulaNotes: null,
       intoPlaneFee: null,
@@ -449,7 +448,7 @@ export default function FuelBidDialog({
               />
               <KeyValuePair
                 label="Differential"
-                value={formData.differential}
+                value={formData.differentialValue}
                 valueType="number"
                 editMode={isEditing}
                 onChange={(value) => handleFieldChange('differential', value)}

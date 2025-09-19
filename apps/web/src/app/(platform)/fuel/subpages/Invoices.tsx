@@ -162,7 +162,7 @@ export default function InvoicesPage() {
         <div className="flex flex-col gap-4">
           {/* Invoice Filters */}
           <div className="px-4 py-2 bg-gray-50 rounded-lg flex flex-row gap-4 items-end justify-between">
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row gap-4 flex-1 grid grid-cols-4">
               <ModernSelect
                 label="Exception Type"
                 value={selectedExceptionType}
@@ -229,11 +229,11 @@ export default function InvoicesPage() {
           ) : (
             <div className="space-y-4">
               {/* Table Header */}
-              <div className="grid grid-cols-11 gap-4 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
+              <div className="grid grid-cols-10 gap-2 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
                 <div className="col-span-2">Supplier</div>
                 <div className="col-span-2">Invoice #</div>
                 <div className="col-span-1">Date</div>
-                <div className="col-span-2">Exception</div>
+                <div className="col-span-1">Exception</div>
                 <div className="col-span-1">Severity</div>
                 <div className="col-span-1">Amount</div>
                 <div className="col-span-1">Owner</div>
@@ -244,7 +244,7 @@ export default function InvoicesPage() {
               {filteredInvoices.map((invoice) => (
                 <div
                   key={invoice.id}
-                  className={`grid grid-cols-11 gap-4 p-3 border rounded-lg cursor-pointer transition-all ${
+                  className={`grid grid-cols-10 gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
                     selectedInvoice === invoice.id
                       ? 'border-blue-500 bg-blue-50 shadow-md'
                       : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
@@ -260,7 +260,7 @@ export default function InvoicesPage() {
                   <div className="col-span-1 flex items-center">
                     <span className="text-sm text-gray-600">{invoice.date}</span>
                   </div>
-                  <div className="col-span-2 flex items-center">
+                  <div className="col-span-1 flex items-center">
                     <span className="text-sm">{getExceptionTypeLabel(invoice.exceptionType)}</span>
                   </div>
                   <div className="col-span-1 flex items-center">

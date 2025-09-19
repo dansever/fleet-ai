@@ -1,6 +1,7 @@
 'use client';
 
 import { CardContent } from '@/components/ui/card';
+import { formatDate } from '@/lib/core/formatters';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
@@ -192,52 +193,47 @@ export default function AgreementsPage() {
       >
         <div className="flex flex-col gap-4">
           {/* Agreement Filters */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Filter Agreements</h4>
-            <div className="flex flex-row gap-4">
-              <div className="space-y-2">
-                <ModernSelect
-                  label="Status"
-                  value={selectedStatus}
-                  onValueChange={(value) => setSelectedStatus(value as AgreementStatus)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  options={[
-                    { value: 'all', label: `All (${mockAgreements.length})` },
-                    {
-                      value: 'active',
-                      label: `Active (${mockAgreements.filter((agreement) => agreement.status === 'active').length})`,
-                    },
-                    {
-                      value: 'expired',
-                      label: `Expired (${mockAgreements.filter((agreement) => agreement.status === 'expired').length})`,
-                    },
-                    {
-                      value: 'pending',
-                      label: `Pending (${mockAgreements.filter((agreement) => agreement.status === 'pending').length})`,
-                    },
-                  ]}
-                />
-              </div>
+          <div className="p-2 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-5 gap-2">
+              <ModernSelect
+                label="Status"
+                value={selectedStatus}
+                onValueChange={(value) => setSelectedStatus(value as AgreementStatus)}
+                className="cols-span-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                options={[
+                  { value: 'all', label: `All (${mockAgreements.length})` },
+                  {
+                    value: 'active',
+                    label: `Active (${mockAgreements.filter((agreement) => agreement.status === 'active').length})`,
+                  },
+                  {
+                    value: 'expired',
+                    label: `Expired (${mockAgreements.filter((agreement) => agreement.status === 'expired').length})`,
+                  },
+                  {
+                    value: 'pending',
+                    label: `Pending (${mockAgreements.filter((agreement) => agreement.status === 'pending').length})`,
+                  },
+                ]}
+              />
 
-              <div className="space-y-2">
-                <ModernSelect
-                  label="Pricing Type"
-                  value={selectedPricingType}
-                  onValueChange={(value) => setSelectedPricingType(value as PricingType)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  options={[
-                    { value: 'all', label: `All (${mockAgreements.length})` },
-                    {
-                      value: 'fixed',
-                      label: `Fixed (${mockAgreements.filter((agreement) => agreement.pricingType === 'fixed').length})`,
-                    },
-                    {
-                      value: 'index',
-                      label: `Index (${mockAgreements.filter((agreement) => agreement.pricingType === 'index').length})`,
-                    },
-                  ]}
-                />
-              </div>
+              <ModernSelect
+                label="Pricing Type"
+                value={selectedPricingType}
+                onValueChange={(value) => setSelectedPricingType(value as PricingType)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                options={[
+                  { value: 'all', label: `All (${mockAgreements.length})` },
+                  {
+                    value: 'fixed',
+                    label: `Fixed (${mockAgreements.filter((agreement) => agreement.pricingType === 'fixed').length})`,
+                  },
+                  {
+                    value: 'index',
+                    label: `Index (${mockAgreements.filter((agreement) => agreement.pricingType === 'index').length})`,
+                  },
+                ]}
+              />
             </div>
           </div>
           {loading.contracts ? (
@@ -257,10 +253,10 @@ export default function AgreementsPage() {
           ) : (
             <div className="space-y-4">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
-                <div className="col-span-3">Agreement Name</div>
+              <div className="grid grid-cols-10 gap-2 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
+                <div className="col-span-2">Agreement Name</div>
                 <div className="col-span-2">Supplier</div>
-                <div className="col-span-2">Period</div>
+                <div className="col-span-1">Period</div>
                 <div className="col-span-1">Pricing</div>
                 <div className="col-span-1">Renewal</div>
                 <div className="col-span-1">Coverage</div>
@@ -272,15 +268,15 @@ export default function AgreementsPage() {
               {filteredAgreements.map((agreement) => (
                 <div
                   key={agreement.id}
-                  className="grid grid-cols-12 gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                  className="grid grid-cols-10 gap-2 p-2 overflow-hidden border border-gray-200 rounded-lg hover:bg-gray-50"
                 >
-                  <div className="col-span-3 flex items-center">
-                    <span className="font-medium">{agreement.name}</span>
+                  <div className="col-span-2 flex items-center">
+                    <span className="text-sm font-semibold">{agreement.name}</span>
                   </div>
                   <div className="col-span-2 flex items-center">
                     <span className="text-sm">{agreement.supplier}</span>
                   </div>
-                  <div className="col-span-2 flex items-center">
+                  <div className="col-span-1 flex items-center">
                     <span className="text-sm">{agreement.period}</span>
                   </div>
                   <div className="col-span-1 flex items-center">
@@ -290,7 +286,7 @@ export default function AgreementsPage() {
                     />
                   </div>
                   <div className="col-span-1 flex items-center">
-                    <span className="text-sm">{agreement.renewalDate}</span>
+                    <span className="text-sm">{formatDate(agreement.renewalDate)}</span>
                   </div>
                   <div className="col-span-1 flex items-center">
                     <span className="text-sm">{agreement.coveragePercent}%</span>
@@ -301,7 +297,7 @@ export default function AgreementsPage() {
                       text={agreement.openDisputes.toString()}
                     />
                   </div>
-                  <div className="col-span-1 flex items-center gap-1">
+                  <div className="col-span-1 flex items-center gap-0">
                     <Button
                       intent="ghost"
                       icon={Eye}

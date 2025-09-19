@@ -2,7 +2,7 @@
 
 import { CardContent } from '@/components/ui/card';
 import { Button } from '@/stories/Button/Button';
-import { BaseCard } from '@/stories/Card/Card';
+import { BaseCard, MetricCard } from '@/stories/Card/Card';
 import { ModernSelect } from '@/stories/Form/Form';
 import {
   Activity,
@@ -122,57 +122,45 @@ export default function HistoricalDataPage() {
     <div className="space-y-6">
       {/* Key Metrics Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <BaseCard className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-600 font-medium">Total Spend</p>
-                <p className="text-2xl font-bold text-blue-800">$1.8M</p>
-                <p className="text-xs text-blue-600">Last 12 months</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </BaseCard>
+        <MetricCard
+          className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
+          title="Total Spend"
+          value="$1.8M"
+          change="+12.5% vs last year"
+          tone="positive"
+          icon={<DollarSign className="h-6 w-6 text-blue-600" />}
+          footer="Last 12 months"
+        />
 
-        <BaseCard className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-green-600 font-medium">Total Volume</p>
-                <p className="text-2xl font-bold text-green-800">2.4M L</p>
-                <p className="text-xs text-green-600">Last 12 months</p>
-              </div>
-              <BarChart className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </BaseCard>
+        <MetricCard
+          className="bg-gradient-to-br from-yellow-50/50 to-yellow-100/60 border-yellow-300"
+          title="Total Volume"
+          value="2.4M L"
+          change="+8.3% vs last year"
+          tone="positive"
+          icon={<BarChart className="h-6 w-6 text-green-600" />}
+          footer="Last 12 months"
+        />
 
-        <BaseCard className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-600 font-medium">Avg Price</p>
-                <p className="text-2xl font-bold text-purple-800">$0.712/L</p>
-                <p className="text-xs text-purple-600">vs $0.720 benchmark</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </BaseCard>
+        <MetricCard
+          className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200"
+          title="Avg Price"
+          value="$0.712/L"
+          change="-1.1% vs benchmark"
+          tone="positive"
+          icon={<TrendingUp className="h-6 w-6 text-purple-600" />}
+          footer="vs $0.720 benchmark"
+        />
 
-        <BaseCard className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-emerald-600 font-medium">Total Savings</p>
-                <p className="text-2xl font-bold text-emerald-800">$57K</p>
-                <p className="text-xs text-emerald-600">3.2% savings rate</p>
-              </div>
-              <Target className="h-8 w-8 text-emerald-600" />
-            </div>
-          </CardContent>
-        </BaseCard>
+        <MetricCard
+          className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200"
+          title="Total Savings"
+          value="$57K"
+          change="+3.2% savings rate"
+          tone="positive"
+          icon={<Target className="h-6 w-6 text-emerald-600" />}
+          footer="3.2% savings rate"
+        />
       </div>
 
       {/* Main Chart Section */}
@@ -190,8 +178,7 @@ export default function HistoricalDataPage() {
         <CardContent>
           <div className="space-y-6">
             {/* Historical Data Filters */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">Filter Historical Data</h4>
+            <div className="p-4 bg-gray-50 rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Time Range</label>
@@ -243,21 +230,30 @@ export default function HistoricalDataPage() {
             {/* Chart Data Summary */}
             {selectedChartType === 'spend' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center space-y-2 p-4 bg-blue-50 rounded-lg">
-                  <div className="text-sm text-blue-600 font-medium">Peak Month</div>
-                  <div className="text-lg font-bold text-blue-800">Nov 2023</div>
-                  <div className="text-xs text-blue-600">$162,000</div>
-                </div>
-                <div className="text-center space-y-2 p-4 bg-green-50 rounded-lg">
-                  <div className="text-sm text-green-600 font-medium">Lowest Month</div>
-                  <div className="text-lg font-bold text-green-800">Jan 2023</div>
-                  <div className="text-xs text-green-600">$125,000</div>
-                </div>
-                <div className="text-center space-y-2 p-4 bg-purple-50 rounded-lg">
-                  <div className="text-sm text-purple-600 font-medium">Average</div>
-                  <div className="text-lg font-bold text-purple-800">$142,000</div>
-                  <div className="text-xs text-purple-600">Monthly spend</div>
-                </div>
+                <MetricCard
+                  title="Peak Month"
+                  value="Nov 2023"
+                  change="$162,000"
+                  tone="neutral"
+                  icon={<TrendingUp className="h-6 w-6 text-blue-600" />}
+                  footer="Highest spend month"
+                />
+                <MetricCard
+                  title="Lowest Month"
+                  value="Jan 2023"
+                  change="$125,000"
+                  tone="neutral"
+                  icon={<BarChart className="h-6 w-6 text-green-600" />}
+                  footer="Lowest spend month"
+                />
+                <MetricCard
+                  title="Average"
+                  value="$142,000"
+                  change="Monthly spend"
+                  tone="neutral"
+                  icon={<DollarSign className="h-6 w-6 text-purple-600" />}
+                  footer="12-month average"
+                />
               </div>
             )}
           </div>
@@ -268,7 +264,6 @@ export default function HistoricalDataPage() {
       <BaseCard
         title="Supplier Share Analysis"
         subtitle="Market distribution and performance by supplier"
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
       >
         <CardContent>
           <div className="space-y-4">
@@ -299,41 +294,41 @@ export default function HistoricalDataPage() {
       </BaseCard>
 
       {/* Savings Tracker */}
-      <BaseCard
-        title="Savings Tracker"
-        subtitle="Auction savings and recovered credits analysis"
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
-      >
+      <BaseCard title="Savings Tracker" subtitle="Auction savings and recovered credits analysis">
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center space-y-2 p-4 bg-green-50 rounded-lg border border-green-200">
-              <div className="text-sm text-green-600 font-medium">Auction Savings</div>
-              <div className="text-xl font-bold text-green-800">
-                ${historicalData.savingsTracker.auctionSavings.toLocaleString()}
-              </div>
-              <div className="text-xs text-green-600">Competitive bidding</div>
-            </div>
-            <div className="text-center space-y-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-600 font-medium">Recovered Credits</div>
-              <div className="text-xl font-bold text-blue-800">
-                ${historicalData.savingsTracker.recoveredCredits.toLocaleString()}
-              </div>
-              <div className="text-xs text-blue-600">Invoice disputes</div>
-            </div>
-            <div className="text-center space-y-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="text-sm text-purple-600 font-medium">Total Savings</div>
-              <div className="text-xl font-bold text-purple-800">
-                ${historicalData.savingsTracker.totalSavings.toLocaleString()}
-              </div>
-              <div className="text-xs text-purple-600">Combined impact</div>
-            </div>
-            <div className="text-center space-y-2 p-4 bg-orange-50 rounded-lg border border-orange-200">
-              <div className="text-sm text-orange-600 font-medium">Savings Rate</div>
-              <div className="text-xl font-bold text-orange-800">
-                {historicalData.savingsTracker.savingsRate}%
-              </div>
-              <div className="text-xs text-orange-600">vs baseline</div>
-            </div>
+            <MetricCard
+              title="Auction Savings"
+              value={`$${historicalData.savingsTracker.auctionSavings.toLocaleString()}`}
+              change="+15.2% vs last quarter"
+              tone="positive"
+              icon={<Target className="h-6 w-6 text-green-600" />}
+              footer="Competitive bidding"
+            />
+            <MetricCard
+              title="Recovered Credits"
+              value={`$${historicalData.savingsTracker.recoveredCredits.toLocaleString()}`}
+              change="+8.7% vs last quarter"
+              tone="positive"
+              icon={<DollarSign className="h-6 w-6 text-blue-600" />}
+              footer="Invoice disputes"
+            />
+            <MetricCard
+              title="Total Savings"
+              value={`$${historicalData.savingsTracker.totalSavings.toLocaleString()}`}
+              change="+12.1% vs last quarter"
+              tone="positive"
+              icon={<TrendingUp className="h-6 w-6 text-purple-600" />}
+              footer="Combined impact"
+            />
+            <MetricCard
+              title="Savings Rate"
+              value={`${historicalData.savingsTracker.savingsRate}%`}
+              change="+0.8% vs baseline"
+              tone="positive"
+              icon={<BarChart className="h-6 w-6 text-orange-600" />}
+              footer="vs baseline"
+            />
           </div>
         </CardContent>
       </BaseCard>
@@ -342,7 +337,6 @@ export default function HistoricalDataPage() {
       <BaseCard
         title="AI Forecasting & Recommendations"
         subtitle="Demand forecast with confidence bands and next tender recommendations"
-        headerClassName="from-[#7f7fd5] via-[#86a8e7] to-[#91eae4] opacity-80 text-white"
         actions={
           <div className="flex gap-2">
             <Button intent="primary" text="Build Next Tender" icon={Zap} />
@@ -353,33 +347,34 @@ export default function HistoricalDataPage() {
         <CardContent className="space-y-6">
           {/* Forecast Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center space-y-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-600 font-medium">Next Month Volume</div>
-              <div className="text-xl font-bold text-blue-800">
-                {(historicalData.forecastData.nextMonthVolume / 1000).toFixed(0)}K L
-              </div>
-              <div className="text-xs text-blue-600">
-                {historicalData.forecastData.trendDirection === 'up' ? (
-                  <span className="text-green-600">↗ +5.2% vs current</span>
-                ) : (
-                  <span className="text-red-600">↘ -2.1% vs current</span>
-                )}
-              </div>
-            </div>
-            <div className="text-center space-y-2 p-4 bg-green-50 rounded-lg border border-green-200">
-              <div className="text-sm text-green-600 font-medium">Next Month Price</div>
-              <div className="text-xl font-bold text-green-800">
-                ${historicalData.forecastData.nextMonthPrice.toFixed(3)}/L
-              </div>
-              <div className="text-xs text-green-600">
-                Confidence: {(historicalData.forecastData.confidenceBand * 100).toFixed(0)}%
-              </div>
-            </div>
-            <div className="text-center space-y-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="text-sm text-purple-600 font-medium">Recommended Suppliers</div>
-              <div className="text-xl font-bold text-purple-800">3</div>
-              <div className="text-xs text-purple-600">Based on performance</div>
-            </div>
+            <MetricCard
+              title="Next Month Volume"
+              value={`${(historicalData.forecastData.nextMonthVolume / 1000).toFixed(0)}K L`}
+              change={
+                historicalData.forecastData.trendDirection === 'up'
+                  ? '+5.2% vs current'
+                  : '-2.1% vs current'
+              }
+              tone={historicalData.forecastData.trendDirection === 'up' ? 'positive' : 'negative'}
+              icon={<BarChart className="h-6 w-6 text-blue-600" />}
+              footer="Forecasted demand"
+            />
+            <MetricCard
+              title="Next Month Price"
+              value={`$${historicalData.forecastData.nextMonthPrice.toFixed(3)}/L`}
+              change={`Confidence: ${(historicalData.forecastData.confidenceBand * 100).toFixed(0)}%`}
+              tone="neutral"
+              icon={<TrendingUp className="h-6 w-6 text-green-600" />}
+              footer="Price forecast"
+            />
+            <MetricCard
+              title="Recommended Suppliers"
+              value="3"
+              change="Based on performance"
+              tone="neutral"
+              icon={<Target className="h-6 w-6 text-purple-600" />}
+              footer="Optimized selection"
+            />
           </div>
 
           {/* Key Drivers */}

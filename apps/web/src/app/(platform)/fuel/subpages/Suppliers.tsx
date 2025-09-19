@@ -13,6 +13,7 @@ import {
   Download,
   Eye,
   Mail,
+  RefreshCw,
   Star,
   TrendingUp,
   Users,
@@ -145,6 +146,14 @@ export default function SuppliersPage() {
     return 'danger';
   };
 
+  const resetFilters = () => {
+    setSelectedCompliance('all');
+    setSelectedAgreementStatus('all');
+    setSelectedSupplier(null);
+  };
+
+  const hasActiveFilters = selectedCompliance !== 'all' || selectedAgreementStatus !== 'all';
+
   const selectedSupplierData = selectedSupplier
     ? mockSuppliers.find((s) => s.id === selectedSupplier)
     : null;
@@ -165,8 +174,8 @@ export default function SuppliersPage() {
       >
         <div className="flex flex-col gap-4">
           {/* Supplier Filters */}
-          <div className="flex flex-row gap-4">
-            <div className="space-y-2">
+          <div className="flex flex-row gap-4 items-end">
+            <div className="grid grid-cols-4 gap-2 w-full">
               <ModernSelect
                 label="Compliance Status"
                 value={selectedCompliance}
@@ -179,9 +188,7 @@ export default function SuppliersPage() {
                   { value: 'pending', label: 'Pending' },
                 ]}
               />
-            </div>
 
-            <div className="space-y-2">
               <ModernSelect
                 label="Agreement Status"
                 value={selectedAgreementStatus}
@@ -195,6 +202,14 @@ export default function SuppliersPage() {
                 ]}
               />
             </div>
+            <Button
+              intent="ghost"
+              text="Reset Filters"
+              disabled={!hasActiveFilters}
+              onClick={resetFilters}
+              icon={RefreshCw}
+              size="sm"
+            />
           </div>
           {loading.contracts ? (
             <div className="flex items-center justify-center py-8">
@@ -214,15 +229,15 @@ export default function SuppliersPage() {
             <div className="space-y-4">
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 rounded-lg font-medium text-sm text-gray-700">
-                <div className="col-span-3">Supplier</div>
+                <div className="col-span-2">Supplier</div>
                 <div className="col-span-1">Response Rate</div>
                 <div className="col-span-1">Win Rate</div>
                 <div className="col-span-1">Issue Rate</div>
                 <div className="col-span-1">Score</div>
-                <div className="col-span-1">Compliance</div>
-                <div className="col-span-1">Agreements</div>
-                <div className="col-span-1">Risk</div>
-                <div className="col-span-2">Actions</div>
+                <div className="col-span-2 break-words">Compliance</div>
+                <div className="col-span-1 break-words">Agreements</div>
+                <div className="col-span-1 break-words">Risk</div>
+                <div className="col-span-1">Actions</div>
               </div>
 
               {/* Table Rows */}
@@ -231,7 +246,7 @@ export default function SuppliersPage() {
                   key={supplier.id}
                   className="grid grid-cols-12 gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
                 >
-                  <div className="col-span-3 flex items-center">
+                  <div className="col-span-2 flex items-center">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{supplier.name}</span>
                       {supplier.performanceScore >= 8 && (
@@ -254,7 +269,7 @@ export default function SuppliersPage() {
                       text={supplier.performanceScore.toFixed(1)}
                     />
                   </div>
-                  <div className="col-span-1 flex items-center">
+                  <div className="col-span-2 flex items-center">
                     <StatusBadge
                       status={getComplianceColor(supplier.complianceStatus)}
                       text={supplier.complianceStatus.replace('_', ' ').toUpperCase()}
