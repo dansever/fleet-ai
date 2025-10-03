@@ -12,7 +12,7 @@ const buttonStyles = cva(
     'transition-colors duration-200',
     'font-normal text-center',
     'cursor-pointer flex-shrink-0',
-    'hover:scale-105 transition-transform duration-200',
+    'hover:scale-102 transition-transform duration-200',
     'focus:outline-none focus:ring-none',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],

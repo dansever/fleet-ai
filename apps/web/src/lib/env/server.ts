@@ -31,6 +31,9 @@ export const serverEnv = createEnv({
     LLAMA_CLOUD_API_KEY: z.string().min(1),
     LLAMA_EXTRACT_PROJECT_ID: z.string().min(1),
     LLAMA_ORGANIZATION_ID: z.string().min(1),
+
+    // CopilotKit API Key
+    COPILOTKIT_API_KEY: z.string().min(1),
   },
   experimental__runtimeEnv: process.env,
 });

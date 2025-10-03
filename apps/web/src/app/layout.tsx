@@ -1,6 +1,5 @@
 // src/app/layout.tsx
 
-import { StatusIndicator } from '@/components/miscellaneous/StatusIndicator';
 import RuntimeDbCheck from '@/components/runtime-db-check';
 import { Toaster } from '@/components/ui/sonner';
 import { ClerkProvider } from '@clerk/nextjs';
@@ -38,8 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <RuntimeDbCheck />
           {/* Children - Main App */}
           {children}
-          {/* Status Indicator */}
-          <StatusIndicator />
           {/* Toaster */}
           <Toaster richColors position="bottom-right" />
         </ClerkProvider>

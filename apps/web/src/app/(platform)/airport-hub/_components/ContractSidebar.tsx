@@ -97,8 +97,8 @@ export default function ContractList() {
                     onClick={() => setSelectedContract(contract)}
                     className={cn(
                       isSelected
-                        ? 'border-sky-100 from-sky-200/40 via-sky-200 to-sky-200/60 opacity-100'
-                        : 'bg-gradient-to-br from-sky-50/40 via-sky-50 to-sky-50/60 opacity-80 hover:bg-gradient-to-br hover:from-sky-100 hover:via-sky-100 hover:to-sky-100',
+                        ? 'border-sky-100 from-sky-100/40 via-sky-100 to-sky-100/40 opacity-100'
+                        : 'hover:border-sky-200 hover:bg-none',
                     )}
                   >
                     <div className="flex flex-col gap-1 items-start">
