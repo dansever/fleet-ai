@@ -14,3 +14,7 @@ export type ContractTerm = {
 };
 
 export type ContractTerms = ContractTerm[];
+
+export type ExtractedContractData = {
+  terms: ContractTerm[];
+};

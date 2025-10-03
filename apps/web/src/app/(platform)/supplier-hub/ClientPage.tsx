@@ -210,7 +210,7 @@ export default function TechnicalProcurementClientPage() {
           >
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
               {/* Tender Information */}
-              <BaseCard neutralHeader={true} title="Details">
+              <BaseCard title="Details">
                 <KeyValuePair
                   label="Part Number"
                   value={selectedRfq.partNumber || ''}
@@ -234,7 +234,7 @@ export default function TechnicalProcurementClientPage() {
                 />
               </BaseCard>
               {/* Timeline */}
-              <BaseCard title="Vendor Information" neutralHeader={true}>
+              <BaseCard title="Vendor Information">
                 <KeyValuePair
                   label="Name"
                   value={selectedRfq.vendorName || ''}
@@ -264,7 +264,7 @@ export default function TechnicalProcurementClientPage() {
               </BaseCard>
 
               {/* Quick Stats */}
-              <BaseCard title="General" neutralHeader={true}>
+              <BaseCard title="General">
                 <KeyValuePair
                   label="Status"
                   value={processStatusDisplayMap[selectedRfq.processStatus as ProcessStatus] || ''}

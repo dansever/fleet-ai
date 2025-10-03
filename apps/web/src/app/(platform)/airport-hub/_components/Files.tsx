@@ -6,13 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { client as parseClient } from '@/modules/ai/parse';
 import { client as documentsClient } from '@/modules/documents/documents';
-import { client as processDocumentClient } from '@/modules/documents/orchastration/';
+import { client as filesClient } from '@/modules/files';
 import { client as storageClient } from '@/modules/storage';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
-import { ContractTerm } from '@/types/contracts';
+import { ContractTerm, ExtractedContractData } from '@/types/contracts';
 import { ChevronDown, ChevronUp, Copy, Eye, File, Trash, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -47,11 +47,15 @@ export function ContractDocument() {
     }
     setUploadLoading(true);
     try {
-      // Process the new document
-      const result = await processDocumentClient.processDocument(file, {
+      // Process the new document using unified files module
+      const result = await filesClient.uploadAndProcessFile(file, {
+        documentType: 'contract',
         parentId: selectedContract.id,
-        parentType: 'contract',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Upload failed');
+      }
 
       toast.success('Document has been uploaded');
 
@@ -135,8 +139,9 @@ export function ContractDocument() {
     toast.info('Copied to clipboard');
   };
 
-  const filteredTerms = Array.isArray(selectedDocument?.extractedData)
-    ? selectedDocument.extractedData.filter((term: ContractTerm) => {
+  const extractedData = selectedDocument?.extractedData as ExtractedContractData | undefined;
+  const filteredTerms = Array.isArray(extractedData?.terms)
+    ? extractedData.terms.filter((term: ContractTerm) => {
         const searchLower = searchTerms.toLowerCase();
         const keyMatch = term.key.toLowerCase().includes(searchLower);
         const contentMatch = term.value?.value?.toString().toLowerCase().includes(searchLower);

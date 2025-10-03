@@ -1,4 +1,4 @@
-import { logger } from '../core/logger';
+import { clientLogger } from '../core/clientLogger';
 
 export const LLAMA_BASE = 'https://api.cloud.llamaindex.ai';
 
@@ -10,7 +10,7 @@ export function authHeaders() {
   }
 
   // Log first few characters for debugging (but not the full key for security)
-  logger.info(`🔑 Using LlamaCloud API key: ${apiKey.slice(0, 4)}...`);
+  clientLogger.info(`🔑 Using LlamaCloud API key: ${apiKey.slice(0, 4)}...`);
 
   return {
     Authorization: `Bearer ${apiKey}`,
@@ -45,6 +45,6 @@ export function withCtx(path: string) {
   p.searchParams.set('project_id', projectId);
   p.searchParams.set('organization_id', organizationId);
 
-  logger.info(`🌐 LlamaCloud API URL: ${p.toString()}`);
+  clientLogger.info(`🌐 LlamaCloud API URL: ${p.toString()}`);
   return p.toString();
 }

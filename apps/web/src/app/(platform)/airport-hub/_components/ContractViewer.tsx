@@ -4,11 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getContractTypeDisplay, getProcessStatusDisplay } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
+import { formatDate } from '@/lib/core/formatters';
+import { client as contractsClient } from '@/modules/contracts';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
-import { calculateProgress, safeDate } from '@/utils/date-helpers';
-import { Building2, CalendarDays, Eye, Sparkles, Tag, Trash } from 'lucide-react';
+import { calculateProgress } from '@/utils/date-helpers';
+import {
+  Building2,
+  CalendarDays,
+  Eye,
+  MapPin,
+  Quote,
+  Sparkles,
+  Tag,
+  Trash,
+  User,
+} from 'lucide-react';
+import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
 
 export function ContractViewer({ contract }: { contract: Contract }) {
@@ -22,18 +35,6 @@ export function ContractViewer({ contract }: { contract: Contract }) {
     const diffTime = end.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
-  };
-
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return 'Not specified';
-    const date = safeDate(dateString);
-    return date
-      ? date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
-      : 'Invalid date';
   };
 
   const daysRemaining = calculateDaysRemaining(contract.effectiveTo || undefined);
@@ -62,6 +63,18 @@ export function ContractViewer({ contract }: { contract: Contract }) {
         return 'outline';
       default:
         return 'secondary';
+    }
+  };
+
+  const deleteContract = async (contractId: string) => {
+    try {
+      await contractsClient.deleteContract(contractId);
+      removeContract(contractId);
+      setSelectedContract(null);
+      toast.success('Contract has been deleted');
+    } catch (error) {
+      console.error('Failed to delete contract:', error);
+      toast.error('Failed to delete contract');
     }
   };
 
@@ -100,7 +113,7 @@ export function ContractViewer({ contract }: { contract: Contract }) {
             />
 
             <ConfirmationPopover
-              onConfirm={() => removeContract(contract.id)}
+              onConfirm={() => deleteContract(contract.id)}
               trigger={<Button intent="secondary" icon={Trash} />}
               popoverIntent="danger"
               title="Delete Contract"
@@ -160,28 +173,38 @@ export function ContractViewer({ contract }: { contract: Contract }) {
               Vendor Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <CardContent className="space-y-4 py-2 rounded-lg bg-slate-50">
-              <div className="space-y-2">
-                <div className="font-medium text-gray-900">{contract.vendorName}</div>
-                <div className="text-sm text-gray-600">{contract.vendorAddress}</div>
+          <CardContent className="space-y-2">
+            <CardContent className="p-2 rounded-lg bg-slate-50">
+              <div className="space-y-2 text-sm">
+                <div className="font-medium text-gray-900 font-semibold">{contract.vendorName}</div>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <div className="text-gray-600">{contract.vendorAddress}</div>
+                </div>
               </div>
             </CardContent>
-            <CardContent className="space-y-4 py-2 rounded-lg bg-slate-50">
+            <CardContent className="p-2 rounded-lg bg-slate-50 text-sm">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-600">Contact Details:</div>
-                <div className="text-sm">{contract.vendorContactName}</div>
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-gray-400" />
+                  <div className="font-medium text-gray-600 underline">Contact Details</div>
+                </div>
+                <div>{contract.vendorContactName}</div>
                 {contract.vendorContactEmail && (
                   <CopyableText className="text-sm" value={contract.vendorContactEmail} />
                 )}
-                <div className="text-sm">{contract.vendorContactPhone}</div>
+                <div>{contract.vendorContactPhone}</div>
               </div>
             </CardContent>
-            <div className="space-y-2">
-              <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md italic">
-                {contract.vendorComments && `Comments: ${contract.vendorComments}`}
+            <CardContent className="p-2 rounded-lg bg-slate-50 text-sm">
+              <div className="flex items-center space-x-2">
+                <Quote className="h-4 w-4 text-gray-400" />
+                <div className="text-gray-600 font-medium underline">Comments</div>
               </div>
-            </div>
+              {contract.vendorComments && (
+                <span className="italic">{`"${contract.vendorComments}"`}</span>
+              )}
+            </CardContent>
           </CardContent>
         </Card>
 

@@ -53,20 +53,24 @@ export async function deleteFuelBid(id: FuelBid['id']): Promise<void> {
 }
 
 /**
- * Process a fuel bid
+ * Process a fuel bid using the unified file processing API
  */
 export async function ExtractFuelBid(tenderId: FuelTender['id'], file: File): Promise<FuelBid> {
   if (!tenderId || !file) throw new Error('Tender ID and file are required');
-  // Create form data
+
+  // Create form data for unified API
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('tenderId', tenderId);
-  // Start extraction
-  const res = await api.post('/api/fuel/bids/extract', formData, {
+  formData.append('documentType', 'fuel_bid');
+  formData.append('parentId', tenderId);
+
+  // Use unified file processing endpoint
+  const res = await api.post('/api/files/process', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
+
   if (res.status !== 200) throw new Error('Failed to process fuel bid');
   return res.data;
 }

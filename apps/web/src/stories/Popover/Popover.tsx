@@ -4,6 +4,7 @@ import type React from 'react';
 
 import FileUpload from '@/components/miscellaneous/FileUpload';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { formatFileSize } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
 import { type ReactNode, useCallback, useRef, useState } from 'react';
@@ -262,14 +263,6 @@ export const FileUploadPopover = ({
 
   const handleCancel = () => {
     setSelectedFile(null);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (

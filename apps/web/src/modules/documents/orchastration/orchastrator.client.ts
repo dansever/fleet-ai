@@ -1,7 +1,8 @@
 import { api } from '@/services/api-client';
 import { DocumentProcessorTypes } from './orchastrator.types';
+
 /**
- * Complete document processing orchestrator
+ * Complete document processing orchestrator using unified file processing API
  * Handles: Upload → Extract → Save (Document) → Chunk → Embed -> Save (Chunks)
  */
 export async function processDocument(
@@ -12,10 +13,11 @@ export async function processDocument(
 
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('documentType', parentType);
   formData.append('parentId', parentId);
-  formData.append('parentType', parentType);
-  formData.append('onProgress', JSON.stringify(onProgress));
-  const result = await api.post('/api/documents/process', formData, {
+
+  // Use unified file processing endpoint
+  const result = await api.post('/api/files/process', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return result.data;
