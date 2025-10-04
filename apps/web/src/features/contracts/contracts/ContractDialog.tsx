@@ -2,7 +2,7 @@
 'use client';
 
 import { CardContent } from '@/components/ui/card';
-import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
+import { ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
 import type { Airport, Contract } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
 import { client as contractClient } from '@/modules/contracts';
@@ -219,7 +219,7 @@ export default function ContractDialog({
                 name="contractType"
                 selectOptions={ContractTypeEnum.enumValues.map((value) => ({
                   value,
-                  label: getContractTypeDisplay(value),
+                  label: getContractTypeDisplayName(value),
                 }))}
               />
               <KeyValuePair

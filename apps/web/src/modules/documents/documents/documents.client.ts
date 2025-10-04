@@ -1,5 +1,4 @@
 import { Contract, Document } from '@/drizzle/types';
-import { client as storageClient } from '@/modules/storage';
 import { api } from '@/services/api-client';
 import { DocumentCreateInput, DocumentUpdateInput } from './documents.types';
 
@@ -48,9 +47,6 @@ export async function deleteDocument(
   id: Document['id'],
   path: Document['storagePath'],
 ): Promise<void> {
-  if (!path) return;
-  // delete the file from the storage
-  await storageClient.deleteFile(path);
-  // delete the document from the database
+  // Prefer canonical documents delete endpoint (server-side cascade)
   await api.delete(`/api/documents/${id}`);
 }

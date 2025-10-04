@@ -1,8 +1,9 @@
+'use client';
+
 import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getContractTypeDisplay, getProcessStatusDisplay } from '@/drizzle/enums';
-import { Contract } from '@/drizzle/types';
+import { CardContent } from '@/components/ui/card';
+import { getContractTypeDisplayName, getProcessStatusDisplay } from '@/drizzle/enums';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
 import { formatDate } from '@/lib/core/formatters';
 import { client as contractsClient } from '@/modules/contracts';
@@ -10,23 +11,29 @@ import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { calculateProgress } from '@/utils/date-helpers';
-import {
-  Building2,
-  CalendarDays,
-  Eye,
-  MapPin,
-  Quote,
-  Sparkles,
-  Tag,
-  Trash,
-  User,
-} from 'lucide-react';
+import { Eye, MapPin, Quote, Sparkles, Trash, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
 
-export function ContractViewer({ contract }: { contract: Contract }) {
+export function ContractOverview() {
   const { selectedContract, refreshContracts, removeContract, setSelectedContract } =
     useAirportHub();
+
+  if (!selectedContract) {
+    return (
+      <BaseCard title="Please select a contract to view its details">
+        <CardContent>
+          <div className="text-center py-8 text-gray-500 flex flex-col gap-4">
+            <p className="text-sm">
+              Select a contract from the list to view its details, edit it, or delete it.
+            </p>
+          </div>
+        </CardContent>
+      </BaseCard>
+    );
+  }
+
+  const contract = selectedContract;
 
   const calculateDaysRemaining = (endDate?: string) => {
     if (!endDate) return null;
@@ -87,7 +94,7 @@ export function ContractViewer({ contract }: { contract: Contract }) {
           <div className="flex flex-col gap-2">
             <h2>{contract.title}</h2>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{getContractTypeDisplay(contract.contractType)}</Badge>
+              <Badge variant="outline">{getContractTypeDisplayName(contract.contractType)}</Badge>
               <Badge variant={getStatusBadgeVariant(contract.processStatus || 'pending')}>
                 {getProcessStatusDisplay(contract.processStatus)}
               </Badge>
@@ -125,14 +132,8 @@ export function ContractViewer({ contract }: { contract: Contract }) {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contract Period Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CalendarDays className="h-5 w-5" />
-              Contract Period
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <BaseCard title="Contract Period">
+          <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-600">Effective From:</span>
@@ -162,19 +163,13 @@ export function ContractViewer({ contract }: { contract: Contract }) {
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </BaseCard>
 
         {/* Vendor Information Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Building2 className="h-5 w-5" />
-              Vendor Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <CardContent className="p-2 rounded-lg bg-slate-50">
+        <BaseCard title="Vendor Information">
+          <div className="space-y-2">
+            <div className="p-2 rounded-lg bg-slate-50">
               <div className="space-y-2 text-sm">
                 <div className="font-medium text-gray-900 font-semibold">{contract.vendorName}</div>
                 <div className="flex items-center space-x-2">
@@ -182,8 +177,8 @@ export function ContractViewer({ contract }: { contract: Contract }) {
                   <div className="text-gray-600">{contract.vendorAddress}</div>
                 </div>
               </div>
-            </CardContent>
-            <CardContent className="p-2 rounded-lg bg-slate-50 text-sm">
+            </div>
+            <div className="p-2 rounded-lg bg-slate-50 text-sm">
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-gray-400" />
@@ -195,8 +190,8 @@ export function ContractViewer({ contract }: { contract: Contract }) {
                 )}
                 <div>{contract.vendorContactPhone}</div>
               </div>
-            </CardContent>
-            <CardContent className="p-2 rounded-lg bg-slate-50 text-sm">
+            </div>
+            <div className="p-2 rounded-lg bg-slate-50 text-sm">
               <div className="flex items-center space-x-2">
                 <Quote className="h-4 w-4 text-gray-400" />
                 <div className="text-gray-600 font-medium underline">Comments</div>
@@ -204,47 +199,20 @@ export function ContractViewer({ contract }: { contract: Contract }) {
               {contract.vendorComments && (
                 <span className="italic">{`"${contract.vendorComments}"`}</span>
               )}
-            </CardContent>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </BaseCard>
 
         {/* Summary Section */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="h-5 w-5" />
-              Contract Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-gray-700 leading-relaxed">{contract.summary}</div>
-          </CardContent>
-        </Card>
-
-        {/* Key Terms Section */}
-        {/* {Object.keys(keyTerms).length > 0 && ( */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Tag className="h-5 w-5" />
-              Key Terms
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(keyTerms).map(([key, value]) => (
-                <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm font-medium text-gray-600 mb-1">
-                    {key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
-                  </div>
-                  <div className="text-sm text-gray-900">
-                    {typeof value === 'string' ? value : JSON.stringify(value)}
-                  </div>
-                </div>
-              ))}
+        <BaseCard title="Contract Summary" icon={<Sparkles />} className="lg:col-span-2">
+          {contract.summary ? (
+            <div>
+              <div className="text-gray-700 leading-relaxed">{contract.summary}</div>
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <div className="text-gray-500">No summary available</div>
+          )}
+        </BaseCard>
       </div>
     </BaseCard>
   );

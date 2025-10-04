@@ -2,7 +2,7 @@
 
 import { CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabsContent } from '@/components/ui/tabs';
 import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { client as parseClient } from '@/modules/ai/parse';
 import { client as documentsClient } from '@/modules/documents/documents';
@@ -12,8 +12,9 @@ import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { Tabs } from '@/stories/Tabs/Tabs';
 import { ContractTerm, ExtractedContractData } from '@/types/contracts';
-import { ChevronDown, ChevronUp, Copy, Eye, File, Trash, Upload } from 'lucide-react';
+import { Copy, Eye, File, FileText, Trash, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../ContextProvider';
@@ -36,7 +37,6 @@ export function ContractDocument() {
   const [downloadFileLoading, setDownloadFileLoading] = useState(false);
   const [viewDocumentLoading, setViewDocumentLoading] = useState(false);
   const [deleteDocumentLoading, setDeleteDocumentLoading] = useState(false);
-  const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [searchTerms, setSearchTerms] = useState('');
 
   // Handle file upload for contract extraction
@@ -169,6 +169,8 @@ export function ContractDocument() {
                 name: document.fileName ?? '',
                 size: document.fileSize ?? 0,
                 type: document.fileType ?? '',
+                updatedAt: document.updatedAt,
+                createdAt: document.createdAt,
                 action: () => setSelectedDocument(document),
                 isSelected: selectedDocument?.id === document.id,
               }))}
@@ -254,17 +256,21 @@ export function ContractDocument() {
             {/* Document Content */}
             <Separator />
 
-            <Tabs>
-              <TabsList className="flex flex-row gap-2">
-                <TabsTrigger value="summary">Summary</TabsTrigger>
-                <TabsTrigger value="extractedData">Extracted Data</TabsTrigger>
-                <TabsTrigger value="content">Content</TabsTrigger>
-              </TabsList>
+            <Tabs
+              tabs={[
+                { label: 'Summary', value: 'summary', icon: <FileText /> },
+                { label: 'Extracted Data', value: 'extractedData', icon: <FileText /> },
+                { label: 'Content', value: 'content', icon: <FileText /> },
+              ]}
+              defaultTab="summary"
+              onTabChange={() => {}}
+            >
               <TabsContent value="summary">
                 <p className="text-base rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 p-4 whitespace-pre-wrap leading-relaxed">
                   {selectedDocument.summary}
                 </p>
               </TabsContent>
+
               <TabsContent value="extractedData">
                 <div className="flex flex-col gap-2">
                   <ModernInput
@@ -278,19 +284,17 @@ export function ContractDocument() {
                     filteredTerms.map((term: ContractTerm, idx: number) => (
                       <div
                         key={idx}
-                        className="border-1 rounded-2xl p-3 bg-muted/40 flex flex-col gap-1"
+                        className="border-1 rounded-2xl p-3 bg-muted/20 flex flex-col gap-1"
                       >
                         <div className="flex flex-row items-center gap-1">
-                          <div className="font-bold flex-1">{term.key}</div>
+                          <div className="font-semibold flex-1">{term.key}</div>
                           <Copy
                             className="w-4 h-4 stroke-gray-400 hover:stroke-gray-600 hover:scale-105 transition-all cursor-pointer"
                             onClick={() => copyMessage(term.value?.value)}
                           />
                         </div>
                         <div className="text-sm">{term.value?.value}</div>
-                        {term.section && (
-                          <div className="text-xs italic">Section: {term.section}</div>
-                        )}
+
                         {term.source?.snippet && (
                           <div className="text-xs text-muted-foreground border-l-2 pl-2 border-primary/40 mt-1">
                             "{term.source.snippet}"
@@ -309,24 +313,9 @@ export function ContractDocument() {
                 </div>
               </TabsContent>
               <TabsContent value="content">
-                <div className="col-span-full flex justify-end items-center gap-2 p-2">
-                  <Button
-                    intent="ghost"
-                    icon={isContentExpanded ? ChevronUp : ChevronDown}
-                    text={isContentExpanded ? 'Show Less' : 'Show Full Content'}
-                    onClick={() => setIsContentExpanded(!isContentExpanded)}
-                  />
-                </div>
-
-                <div
-                  className={`col-span-full rounded-xl ${!isContentExpanded ? 'max-h-96' : 'max-h-none'} overflow-y-auto`}
-                >
+                <div className={`col-span-full rounded-xl max-h-96 overflow-y-auto`}>
                   <pre className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
-                    {selectedDocument.content?.length &&
-                    selectedDocument.content?.length > 2000 &&
-                    !isContentExpanded
-                      ? `${selectedDocument.content?.substring(0, 2000)}...\n\n[Content truncated - showing first 2000 characters. Click "Show Full Content" to view all ${selectedDocument.content?.length.toLocaleString()} characters]`
-                      : selectedDocument.content}
+                    {selectedDocument.content}
                   </pre>
                 </div>
               </TabsContent>

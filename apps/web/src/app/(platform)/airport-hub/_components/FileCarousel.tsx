@@ -1,6 +1,6 @@
 'use client';
 
-import { formatFileSize } from '@/lib/core/formatters';
+import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, File } from 'lucide-react';
 import type React from 'react';
@@ -21,6 +21,8 @@ interface FileCarouselProps {
     name: string;
     size: number;
     type: string;
+    updatedAt: Date;
+    createdAt: Date;
     action: () => void;
     isSelected?: boolean;
   }>;
@@ -63,7 +65,7 @@ export const FileCarousel: React.FC<FileCarouselProps> = ({ files }) => {
       <div className="relative w-full rounded-3xl backdrop-blur-xl">
         <motion.div
           ref={carouselRef}
-          className="flex space-x-6 overflow-x-auto scrollbar-hide p-4 no-scrollbar"
+          className="flex space-x-6 overflow-x-auto scrollbar-hide py-4 no-scrollbar"
           style={{ scrollSnapType: 'x mandatory', msOverflowStyle: 'none', scrollbarWidth: 'none' }}
         >
           {files.map((file, index) => (
@@ -73,6 +75,8 @@ export const FileCarousel: React.FC<FileCarouselProps> = ({ files }) => {
                   name={file.name}
                   size={file.size}
                   type={file.type.toLowerCase()}
+                  updatedAt={file.updatedAt}
+                  createdAt={file.createdAt}
                   onClick={file.action}
                   isSelected={file.isSelected}
                 />
@@ -115,15 +119,25 @@ interface FileCardProps {
   name: string;
   size: number;
   type: string;
+  updatedAt: Date;
+  createdAt: Date;
   onClick: () => void;
   isSelected?: boolean;
 }
 
-const FileCard: React.FC<FileCardProps> = ({ name, size, type, onClick, isSelected }) => {
+const FileCard: React.FC<FileCardProps> = ({
+  name,
+  size,
+  type,
+  updatedAt,
+  createdAt,
+  onClick,
+  isSelected,
+}) => {
   return (
     <motion.div
       whileHover={{ y: -2, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.98 }}
       className={`rounded-2xl p-2 shadow-md cursor-pointer flex flex-col justify-between transition-colors duration-300 hover:bg-gray-50 ${
         isSelected ? 'bg-blue-50 border-2 border-blue-500 shadow-lg' : 'bg-white'
       }`}
@@ -139,6 +153,12 @@ const FileCard: React.FC<FileCardProps> = ({ name, size, type, onClick, isSelect
           </p>
           <p className="text-gray-600 text-sm font-figtree font-light">{type}</p>
           <p className="text-gray-600 text-sm font-figtree font-light">{formatFileSize(size)}</p>
+          <p className="text-gray-600 text-sm font-figtree font-light">
+            Updated: {formatDate(updatedAt)}
+          </p>
+          <p className="text-gray-600 text-sm font-figtree font-light">
+            Created: {formatDate(createdAt)}
+          </p>
         </div>
       </div>
     </motion.div>

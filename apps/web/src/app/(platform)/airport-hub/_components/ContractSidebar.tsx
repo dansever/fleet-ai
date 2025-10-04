@@ -1,8 +1,14 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '@/drizzle/enums';
+import {
+  getContractTypeColor,
+  getContractTypeDisplayName,
+  getProcessStatusDisplay,
+  ProcessStatus,
+} from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
 import { cn } from '@/lib/utils';
@@ -102,10 +108,9 @@ export default function ContractList() {
                     )}
                   >
                     <div className="flex flex-col gap-1 items-start">
-                      <StatusBadge
-                        status={'default'}
-                        text={getContractTypeDisplay(contract.contractType || '')}
-                      />
+                      <Badge className={getContractTypeColor(contract.contractType)}>
+                        {getContractTypeDisplayName(contract.contractType)}
+                      </Badge>
                       <span className="text-sm font-bold">{contract.title}</span>
                       <span className="text-xs">{contract.vendorName}</span>
                       <div className="flex flex-row gap-2">

@@ -34,6 +34,7 @@ export const BaseCard = ({
   className,
   headerClassName,
   header,
+  icon,
   title,
   subtitle,
   actions,
@@ -56,8 +57,13 @@ export const BaseCard = ({
             : (title || subtitle || actions) && (
                 <div className={cn('flex flex-row items-start justify-between gap-2')}>
                   <div className="flex flex-col flex-1 w-full items-start justify-between gap-0">
-                    <h2>{title}</h2>
-                    <div className="leading-tight">{subtitle}</div>
+                    <div className="flex flex-row items-center gap-2">
+                      {icon && icon}
+                      <div className="flex flex-col gap-1">
+                        <h2>{title}</h2>
+                        <div className="leading-tight">{subtitle}</div>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 max-w-3/5">{actions}</div>
                 </div>

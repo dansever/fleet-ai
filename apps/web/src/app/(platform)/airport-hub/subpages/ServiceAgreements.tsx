@@ -1,18 +1,18 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { TabsContent } from '@/components/ui/tabs';
-import { ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
+import { ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import { Button } from '@/stories/Button/Button';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { Banknote, BarChart, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AskAI from '../_components/AskAI';
+import { ContractOverview } from '../_components/ContractOverview';
 import ContractList from '../_components/ContractSidebar';
 import { ContractDocument } from '../_components/Files';
-import { ContractOverview } from '../_components/Overview';
 
-export default function ContractsPage() {
+export default function ServiceAgreementsPage() {
   const {
     addContract,
     selectedAirport,
@@ -61,7 +61,7 @@ export default function ContractsPage() {
       .map((type) => ({
         type,
         count: groupedContracts[type]?.length || 0,
-        display: getContractTypeDisplay(type),
+        display: getContractTypeDisplayName(type),
       }))
       .filter((item) => item.count > 0);
 

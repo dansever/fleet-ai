@@ -4,6 +4,7 @@ import 'server-only';
 import { db } from '@/drizzle';
 import { documentsTable } from '@/drizzle/schema/schema.documents';
 import { Contract, Document, NewDocument } from '@/drizzle/types';
+import { server as storageServer } from '@/modules/storage';
 import { and, eq } from 'drizzle-orm';
 import { DocumentUpdateInput } from './documents.types';
 /**
@@ -62,4 +63,28 @@ export async function updateDocument(
  */
 export async function deleteDocument(id: Document['id']): Promise<void> {
   await db.delete(documentsTable).where(eq(documentsTable.id, id));
+}
+
+/**
+ * Delete a document and its associated storage file (if any)
+ * This is the canonical cascade deletion for documents.
+ */
+export async function deleteDocumentCascade(
+  id: Document['id'],
+): Promise<{ storageDeleted: boolean }> {
+  const doc = await getDocumentById(id);
+
+  let storageDeleted = false;
+  if (doc.storagePath) {
+    try {
+      await storageServer.deleteFile(doc.storagePath);
+      storageDeleted = true;
+    } catch (err) {
+      // Non-fatal: proceed with DB deletion even if storage removal fails
+      console.warn('Warning: failed to delete storage file for document', id, err);
+    }
+  }
+
+  await deleteDocument(id);
+  return { storageDeleted };
 }

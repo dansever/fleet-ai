@@ -14,7 +14,7 @@ import { useState } from 'react';
 import AirportsPanel from '../_components/AirportsPanel';
 import { useAirportHub } from './ContextProvider';
 import AirportPage from './subpages/Airport';
-import ContractsPage from './subpages/Contracts';
+import ContractsPage from './subpages/ServiceAgreements';
 import VendorsPage from './subpages/Vendors';
 
 type TabValue = 'manage-contracts' | 'contacts-and-providers' | 'manage-airport';

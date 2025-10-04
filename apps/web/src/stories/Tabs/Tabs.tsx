@@ -12,8 +12,9 @@ export interface TabsProps {
   onTabChange: (tab: string) => void;
   children?: React.ReactNode;
   className?: string;
-  triggerItemClassName?: string;
 }
+
+const defaultTabBackground = 'bg-gradient-to-r from-blue-500/10 to-purple-500/10';
 
 export const Tabs = ({
   tabs,
@@ -21,7 +22,6 @@ export const Tabs = ({
   onTabChange,
   children,
   className,
-  triggerItemClassName,
 }: TabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const uniqueId = useId();
@@ -66,7 +66,6 @@ export const Tabs = ({
                 'data-[state=active]:before:opacity-0',
                 // feather on Y axis
                 'before:[mask-image:linear-gradient(to_bottom,transparent,_black_18%,_black_82%,_transparent)] before:[mask-repeat:no-repeat] before:[-webkit-mask-image:linear-gradient(to_bottom,transparent,_black_18%,_black_82%,_transparent)]',
-                triggerItemClassName,
               )}
             >
               <motion.div
@@ -89,7 +88,7 @@ export const Tabs = ({
                 {activeTab === tab.value && (
                   <motion.div
                     layoutId={`activeTab-${uniqueId}`}
-                    className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border-0"
+                    className={cn('rounded-xl border-0 absolute inset-0', defaultTabBackground)}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}

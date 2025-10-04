@@ -1,7 +1,6 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as documentsServer } from '@/modules/documents/documents';
-import { server as storageServer } from '@/modules/storage';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -76,12 +75,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!document) return jsonError('Document not found', 404);
     if (document.orgId !== orgId) return jsonError('Unauthorized', 401);
 
-    // Delete file from storage
-    const result = await storageServer.deleteFile(document.storagePath ?? '');
-    if (result.data.length === 0) return jsonError('Failed to delete file', 500);
-    // Delete document
-    await documentsServer.deleteDocument(id);
-    return NextResponse.json({ success: true, result });
+    // Canonical cascade deletion
+    const result = await documentsServer.deleteDocumentCascade(id);
+    return NextResponse.json({ success: true, ...result });
   } catch (err) {
     console.error('Error deleting document:', err);
     return jsonError('Failed to delete document', 500);
