@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type React from 'react';
 import { forwardRef } from 'react';
@@ -12,6 +12,7 @@ import { forwardRef } from 'react';
 
 export interface CardProps extends React.ComponentPropsWithoutRef<typeof Card> {
   className?: string;
+  cardType?: 'main' | 'inner';
   // Header options (either simple or custom)
   header?: React.ReactNode; // Takes precedence over title/subtitle
   headerClassName?: string;
@@ -32,6 +33,7 @@ export interface CardProps extends React.ComponentPropsWithoutRef<typeof Card> {
 
 export const BaseCard = ({
   className,
+  cardType = 'main',
   headerClassName,
   header,
   icon,
@@ -40,6 +42,7 @@ export const BaseCard = ({
   actions,
   children,
   contentClassName,
+  footer,
 }: CardProps) => {
   const hasHeaderParams = header || title || subtitle || actions;
   return (
@@ -47,6 +50,7 @@ export const BaseCard = ({
       className={cn(
         'w-full rounded-3xl border-slate-200 shadow-none overflow-hidden',
         hasHeaderParams && 'pt-0',
+        { 'gap-2': cardType === 'inner' },
         className,
       )}
     >
@@ -60,7 +64,7 @@ export const BaseCard = ({
                     <div className="flex flex-row items-center gap-2">
                       {icon && icon}
                       <div className="flex flex-col gap-1">
-                        <h2>{title}</h2>
+                        {cardType === 'main' ? <h2>{title}</h2> : <h3>{title}</h3>}
                         <div className="leading-tight">{subtitle}</div>
                       </div>
                     </div>
@@ -71,6 +75,7 @@ export const BaseCard = ({
         </CardHeader>
       ) : null}
       <CardContent className={contentClassName}>{children}</CardContent>
+      {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );
 };

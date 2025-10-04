@@ -33,9 +33,9 @@ export const contractsTable = pgTable(
     effectiveTo: date('effective_to'),
     processStatus: ProcessStatusEnum('process_status').default('pending'),
 
-    // LLM narratives
-    summary: text('summary'), // Aggregated summary from all documents
-    keyTerms: jsonb('key_terms').default([]), // Key terms across all documents
+    // Summary & Details
+    summary: text('summary'),
+    details: jsonb('details'),
 
     // Timestamps
     createdAt,

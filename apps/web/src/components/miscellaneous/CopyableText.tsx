@@ -58,7 +58,7 @@ export const CopyableText = React.forwardRef<HTMLButtonElement, CopyableTextProp
         aria-label={title ?? 'Copy to clipboard'}
         data-state={copied ? 'copied' : 'idle'}
         className={cn(
-          'w-full cursor-pointer flex flex-row items-center text-left gap-1 hover:scale-101 transition-all',
+          'w-full cursor-pointer flex flex-row items-center text-left gap-1 opacity-90 hover:opacity-100 hover:scale-102 transition-all',
           className,
         )}
         {...buttonProps}

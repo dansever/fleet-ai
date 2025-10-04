@@ -238,7 +238,7 @@ export function MainSidebar({
   }, [user?.organizationMemberships?.[0]?.organization?.imageUrl]);
 
   return (
-    <Sidebar collapsible="icon" variant={variant} className="border-transparent">
+    <Sidebar collapsible="icon" variant={variant}>
       <SidebarHeader
         className={cn(
           'flex flex-row items-center w-full h-16 min-h-16 px-2',

@@ -1,4 +1,4 @@
-import { useAirportHub } from '@/app/(platform)/airport-hub/ContextProvider';
+import { useAirportHub } from '@/app/(platform)/airport-hub/context';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { TabsContent } from '@/components/ui/tabs';
 import { ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
@@ -8,9 +8,9 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { Banknote, BarChart, Brain, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AskAI from '../_components/AskAI';
+import { ContractDocument } from '../_components/ContractFiles';
 import { ContractOverview } from '../_components/ContractOverview';
 import ContractList from '../_components/ContractSidebar';
-import { ContractDocument } from '../_components/Files';
 
 export default function ServiceAgreementsPage() {
   const {

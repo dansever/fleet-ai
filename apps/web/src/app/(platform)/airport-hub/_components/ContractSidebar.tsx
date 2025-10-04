@@ -17,7 +17,7 @@ import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
-import { useAirportHub } from '../ContextProvider';
+import { useAirportHub } from '../context';
 
 export default function ContractList() {
   const {

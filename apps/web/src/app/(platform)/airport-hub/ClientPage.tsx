@@ -12,7 +12,7 @@ import { Tabs } from '@/stories/Tabs/Tabs';
 import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
 import AirportsPanel from '../_components/AirportsPanel';
-import { useAirportHub } from './ContextProvider';
+import { useAirportHub } from './context';
 import AirportPage from './subpages/Airport';
 import ContractsPage from './subpages/ServiceAgreements';
 import VendorsPage from './subpages/Vendors';

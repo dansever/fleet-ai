@@ -6,7 +6,7 @@ import { BaseCard, MetricCard } from '@/stories/Card/Card';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Building2, Plane, Trash } from 'lucide-react';
-import { useAirportHub } from '../ContextProvider';
+import { useAirportHub } from '../context';
 
 export default function AirportPage() {
   const { selectedAirport, updateAirport, contracts, deleteAirport, setSelectedAirport } =

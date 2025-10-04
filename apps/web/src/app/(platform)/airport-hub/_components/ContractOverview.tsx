@@ -3,17 +3,23 @@
 import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { Badge } from '@/components/ui/badge';
 import { CardContent } from '@/components/ui/card';
-import { getContractTypeDisplayName, getProcessStatusDisplay } from '@/drizzle/enums';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import {
+  getContractTypeColor,
+  getContractTypeDisplayName,
+  getProcessStatusDisplay,
+} from '@/drizzle/enums';
 import ContractDialog from '@/features/contracts/contracts/ContractDialog';
-import { formatDate } from '@/lib/core/formatters';
+import { formatDate, formatSnakeCaseToTitle } from '@/lib/core/formatters';
 import { client as contractsClient } from '@/modules/contracts';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard } from '@/stories/Card/Card';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { calculateProgress } from '@/utils/date-helpers';
-import { Eye, MapPin, Quote, Sparkles, Trash, User } from 'lucide-react';
+import { Building2, Calendar, Eye, Mail, MapPin, Phone, Trash, User } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAirportHub } from '../ContextProvider';
+import { useAirportHub } from '../context';
 
 export function ContractOverview() {
   const { selectedContract, refreshContracts, removeContract, setSelectedContract } =
@@ -55,9 +61,9 @@ export function ContractOverview() {
       : null;
 
   // Parse key terms JSON
-  const keyTerms =
-    contract.keyTerms && typeof contract.keyTerms === 'object'
-      ? (contract.keyTerms as Record<string, unknown>)
+  const contractDetails =
+    contract.details && typeof contract.details === 'object'
+      ? (contract.details as Record<string, unknown>)
       : {};
 
   const getStatusBadgeVariant = (status: string) => {
@@ -94,8 +100,10 @@ export function ContractOverview() {
           <div className="flex flex-col gap-2">
             <h2>{contract.title}</h2>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{getContractTypeDisplayName(contract.contractType)}</Badge>
-              <Badge variant={getStatusBadgeVariant(contract.processStatus || 'pending')}>
+              <Badge className={getContractTypeColor(contract.contractType)}>
+                {getContractTypeDisplayName(contract.contractType)}
+              </Badge>
+              <Badge variant={getStatusBadgeVariant(contract.processStatus || 'unassigned')}>
                 {getProcessStatusDisplay(contract.processStatus)}
               </Badge>
               {isExpired && (
@@ -129,10 +137,21 @@ export function ContractOverview() {
           </div>
         </div>
       }
+      footer={
+        <div className="w-full flex flex-row gap-2 justify-between items-center text-sm text-gray-500">
+          <p>Contract Created: {formatDate(contract.createdAt)}</p>
+          <p>Last Updated: {formatDate(contract.updatedAt)}</p>
+        </div>
+      }
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Contract Period Section */}
-        <BaseCard title="Contract Period">
+        <BaseCard
+          cardType="inner"
+          className="col-span-2"
+          icon={<Calendar />}
+          title="Contract Period"
+        >
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -167,51 +186,82 @@ export function ContractOverview() {
         </BaseCard>
 
         {/* Vendor Information Section */}
-        <BaseCard title="Vendor Information">
+        <BaseCard cardType="inner" icon={<Building2 />} title="Vendor Information">
           <div className="space-y-2">
-            <div className="p-2 rounded-lg bg-slate-50">
-              <div className="space-y-2 text-sm">
-                <div className="font-medium text-gray-900 font-semibold">{contract.vendorName}</div>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4 text-gray-400" />
-                  <div className="text-gray-600">{contract.vendorAddress}</div>
-                </div>
+            <div>
+              <p>Company Name</p>
+              <h3>{contract.vendorName}</h3>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <div>
+                <p>Address</p>
+                <p className="font-semibold">{contract.vendorAddress}</p>
               </div>
             </div>
-            <div className="p-2 rounded-lg bg-slate-50 text-sm">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-gray-400" />
-                  <div className="font-medium text-gray-600 underline">Contact Details</div>
-                </div>
-                <div>{contract.vendorContactName}</div>
+            <div className="flex flex-row gap-2 items-center">
+              <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <div>
+                <p>Contact Person</p>
+                <p className="font-semibold">{contract.vendorContactName}</p>
+              </div>
+            </div>
+            <div className="flex flex-row gap-2 justify-start">
+              <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p>Email</p>
                 {contract.vendorContactEmail && (
-                  <CopyableText className="text-sm" value={contract.vendorContactEmail} />
+                  <CopyableText
+                    className="text-sm font-semibold"
+                    value={contract.vendorContactEmail}
+                  />
                 )}
-                <div>{contract.vendorContactPhone}</div>
               </div>
             </div>
-            <div className="p-2 rounded-lg bg-slate-50 text-sm">
-              <div className="flex items-center space-x-2">
-                <Quote className="h-4 w-4 text-gray-400" />
-                <div className="text-gray-600 font-medium underline">Comments</div>
+            <div className="flex flex-row gap-2 items-center">
+              <Phone className="h-4 w-4 text-gray-400" />
+              <div>
+                <p>Phone</p>
+                <p className="font-semibold">{contract.vendorContactPhone}</p>
               </div>
-              {contract.vendorComments && (
-                <span className="italic">{`"${contract.vendorComments}"`}</span>
-              )}
             </div>
           </div>
         </BaseCard>
 
         {/* Summary Section */}
-        <BaseCard title="Contract Summary" icon={<Sparkles />} className="lg:col-span-2">
-          {contract.summary ? (
-            <div>
-              <div className="text-gray-700 leading-relaxed">{contract.summary}</div>
-            </div>
-          ) : (
-            <div className="text-gray-500">No summary available</div>
-          )}
+        <BaseCard cardType="inner" className="col-span-full">
+          <div className="space-y-6">
+            {contract.summary && (
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold">Contract Summary</h3>
+                <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-gray-700 leading-relaxed">
+                  {contract.summary}
+                </div>
+              </div>
+            )}
+
+            <Separator />
+
+            {contractDetails && (
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold">Key Details & Conditions</h3>
+                <Table>
+                  <TableBody>
+                    {Object.entries(contractDetails).map(([key, value]) => (
+                      <TableRow key={key}>
+                        <TableCell className="font-bold">{formatSnakeCaseToTitle(key)}</TableCell>
+                        <TableCell className="whitespace-pre-wrap">
+                          {typeof value === 'object'
+                            ? JSON.stringify(value, null, 2)
+                            : String(value)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
         </BaseCard>
       </div>
     </BaseCard>
