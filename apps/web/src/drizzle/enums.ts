@@ -155,7 +155,6 @@ export function getContractTypeColor(
 ): string {
   if (!contractType) return 'bg-gray-200';
   const entry = contractTypeDisplayMap[contractType as ContractType];
-  console.log(entry?.color);
   return entry?.color;
 }
 

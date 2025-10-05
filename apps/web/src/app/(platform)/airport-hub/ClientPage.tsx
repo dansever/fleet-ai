@@ -83,15 +83,6 @@ export default function AirportHubClientPage() {
 
   return (
     <PageLayout
-      // sidebarContent={
-      //   <AirportList
-      //     airports={airports}
-      //     onAirportSelect={setSelectedAirport}
-      //     selectedAirport={selectedAirport}
-      //     InsertAddAirportButton={true}
-      //     onAirportAdd={addAirport}
-      //   />
-      // }
       headerContent={
         loading.airports ? (
           <div className="flex items-center space-x-4">
