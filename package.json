@@ -10,13 +10,9 @@
     "clean": "rimraf \"**/.next\" \"**/.turbo\"",
     "rebuild": "pnpm run clean && pnpm install && pnpm run build"
   },
-  "dependencies": {
-    "@clerk/nextjs": "^6.31.3",
-    "@t3-oss/env-nextjs": "^0.13.8",
-    "drizzle-kit": "^0.31.4"
-  },
   "devDependencies": {
     "dotenv-cli": "^10.0.0",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1"
   }
 }

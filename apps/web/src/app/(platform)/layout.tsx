@@ -10,11 +10,9 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
       <MainSidebar variant="sidebar" />
-      <CopilotKit publicApiKey={copilotKitApiKey} agent="fleet-ai-assistant">
+      <CopilotKit publicApiKey={copilotKitApiKey}>
         <main className="flex-1 min-w-0  h-screen overflow-hidden">
-          {/* Pages Content */}
           {children}
-          {/* Status Indicator */}
           <StatusIndicator />
         </main>
       </CopilotKit>

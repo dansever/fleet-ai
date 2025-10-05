@@ -9,7 +9,7 @@ import { MessagesAnnotation, StateGraph } from '@langchain/langgraph';
 
 // Create the model using framework utilities
 const model = createChatModel({
-  model: process.env.ACTIVE_OPENAI_MODEL || 'gpt-4o-mini',
+  model: process.env.ACTIVE_OPENAI_MODEL,
 });
 
 // Assistant node: processes messages with FleetAI context
