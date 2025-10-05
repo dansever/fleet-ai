@@ -1,234 +1,243 @@
-# Unified File Processing System
+# Files Module
 
-This module provides a unified, scalable approach to file upload and extraction processing for all document types in the FleetAI application.
+**Purpose:** Unified module for all file-related operations in FleetAI - handles both Supabase storage operations and document processing (extraction, parsing, embeddings).
 
-## Overview
+---
 
-The unified file processing system consolidates multiple scattered endpoints and processing flows into a single, configuration-driven pipeline that handles all document types (contracts, fuel bids, quotes, RFQs) through a consistent interface.
+## 📁 Folder Structure
 
-## Architecture
-
-### Core Components
-
-1. **Base Processor** (`processors/base.processor.ts`)
-   - Abstract base class that defines the standard processing pipeline
-   - Handles common operations: validation, storage, parsing, extraction, and document updates
-
-2. **Document-Specific Processors** (`processors/`)
-   - `ContractProcessor` - Handles contract documents with chunking and embeddings
-   - `FuelBidProcessor` - Handles fuel bid documents with specialized data transformation
-   - `QuoteProcessor` - Handles quote documents
-   - `RfqProcessor` - Handles RFQ documents
-
-3. **Unified API Endpoint** (`/api/files/process`)
-   - Single endpoint that replaces multiple scattered endpoints
-   - Configuration-driven processing based on document type
-   - Consistent request/response format
-
-4. **Client Utilities** (`files.client.ts`)
-   - Client-side validation and upload utilities
-   - Progress tracking and error handling
-   - Type-safe API interactions
-
-## Usage
-
-### Backend (Server-side)
-
-```typescript
-import { server as filesServer } from '@/modules/files';
-
-// Process any document type
-const result = await filesServer.processFile({
-  file: uploadedFile,
-  documentType: 'contract', // 'contract' | 'fuel_bid' | 'quote' | 'rfq'
-  parentId: contractId,
-  orgId: userOrgId,
-  userId: userId,
-});
+```
+files/
+├── storage/                      # Supabase storage operations
+│   ├── storage.server.ts         # Server-side: upload, download, delete, sign URLs
+│   ├── storage.client.ts         # Client-side: API calls to storage routes
+│   ├── storage.utils.ts          # Utilities: bucket naming, path generation
+│   └── index.ts                  # Storage exports
+│
+├── processors/                   # Document type-specific processing logic
+│   ├── base.processor.ts         # Abstract base class for all processors
+│   ├── contract.processor.ts     # Contract processing (with chunking/embeddings)
+│   ├── fuel-bid.processor.ts     # Fuel bid processing
+│   ├── quote.processor.ts        # Quote processing
+│   └── rfq.processor.ts          # RFQ processing
+│
+├── files.server.ts               # Processing orchestration (server-side)
+├── files.client.ts               # Processing client utilities
+├── files.types.ts                # TypeScript type definitions
+├── index.ts                      # Main module exports
+└── README.md                     # This file
 ```
 
-### Frontend (Client-side)
+---
+
+## 🎯 Component Overview
+
+### Storage Sub-module (`storage/`)
+
+**What it does:** Low-level Supabase file storage operations
+
+**Key functions:**
+
+- `uploadFile()` - Upload files to org-specific Supabase bucket
+- `downloadFile()` - Download file blobs from storage
+- `deleteFile()` - Remove files from storage
+- `createSignedUrl()` - Generate temporary secure URLs for file access
+- `listFiles()` - List files by document type
+- `getBucketName()` - Get organization bucket name
+- `generateStoragePath()` - Create unique file paths
+
+**Files:**
+
+- `storage.server.ts` - Server-side functions (direct Supabase calls)
+- `storage.client.ts` - Client-side functions (API route wrappers)
+- `storage.utils.ts` - Helper functions for bucket/path management
+
+---
+
+### Processors (`processors/`)
+
+**What it does:** Document-specific processing pipelines
+
+**Base Processor** (`base.processor.ts`):
+
+- Abstract class defining standard processing pipeline
+- Steps: validate → create DB record → upload to storage → parse & extract → transform → update DB → chunk & embed
+- Shared logic for all document types
+
+**Document Processors:**
+
+- `ContractProcessor` - Contracts with full-text search (chunking + embeddings)
+- `FuelBidProcessor` - Fuel bids with specialized data transformation
+- `QuoteProcessor` - Vendor quotes
+- `RfqProcessor` - Request for quotes
+
+Each processor:
+
+- Extends `BaseFileProcessor`
+- Defines extraction agent to use
+- Configures chunking/embedding requirements
+- Implements custom data transformation
+
+---
+
+### Processing Orchestration (`files.server.ts`)
+
+**What it does:** Coordinates file processing across all document types
+
+**Key functions:**
+
+- `processFile()` - Main entry point: validates, gets processor, executes pipeline
+- `validateFile()` - Pre-upload validation
+- `getProcessor()` - Returns processor for specific document type
+- `getSupportedDocumentTypes()` - Lists all registered document types
+
+**How it works:**
+
+1. Registry pattern stores document type → processor mappings
+2. Single function handles all document types
+3. Processors execute their specific logic
+
+---
+
+### Client Utilities (`files.client.ts`)
+
+**What it does:** Client-side helpers for file uploads and processing
+
+**Key functions:**
+
+- `uploadAndProcessFile()` - Upload file and trigger processing via API
+- `validateFileClient()` - Client-side validation (size, type)
+- `getSupportedFileTypes()` - Returns allowed file extensions
+
+---
+
+### Types (`files.types.ts`)
+
+**What it does:** TypeScript type definitions
+
+**Categories:**
+
+- **File Processing Types** - `FileProcessingRequest`, `FileProcessingResult`, `ProcessingContext`
+- **Processor Types** - `FileProcessor`, `ProcessorConfig`, `ProcessorRegistry`
+- **Client Types** - `FileUploadOptions`, `FileUploadResponse`
+- **Progress Types** - `ProcessingStep`, `ProcessingProgressCallback`
+
+---
+
+## 💻 Usage Examples
+
+### Storage Operations
 
 ```typescript
-import { client as filesClient } from '@/modules/files';
+import { storage } from '@/modules/files';
 
-// Upload and process a file
+// Server-side
+const result = await storage.server.uploadFile(file, 'contract', contractId);
+await storage.server.deleteFile('contracts/example.pdf');
+const { signedUrl } = await storage.server.createSignedUrl(orgId, path, 3600);
+
+// Client-side
+await storage.client.uploadFile(file, 'contract');
+const url = await storage.client.getSignedUrl(path);
+```
+
+### Document Processing
+
+```typescript
+import { server as filesServer, client as filesClient } from '@/modules/files';
+
+// Server-side
+const result = await filesServer.processFile({
+  file,
+  documentType: 'contract',
+  parentId: contractId,
+  orgId,
+  userId,
+});
+
+// Client-side
 const result = await filesClient.uploadAndProcessFile(file, {
   documentType: 'contract',
   parentId: contractId,
-  onProgress: (progress) => console.log(`Progress: ${progress}%`),
+  onProgress: (progress) => console.log(`${progress}%`),
 });
 ```
 
-### React Component
-
-```tsx
-import { UnifiedFileUpload } from '@/components/file-upload/UnifiedFileUpload';
-
-<UnifiedFileUpload
-  documentType="contract"
-  parentId={contractId}
-  onSuccess={(result) => console.log('Upload successful:', result)}
-  onError={(error) => console.error('Upload failed:', error)}
-/>;
-```
-
-## Processing Pipeline
-
-The unified processing pipeline follows these steps for all document types:
-
-1. **Validation** - File type, size, and custom validation checks
-2. **Document Creation** - Create document record in database
-3. **Storage Upload** - Upload file to storage service
-4. **Parsing & Extraction** - Simultaneous document parsing and data extraction
-5. **Data Transformation** - Document-specific data transformation
-6. **Database Update** - Update document record with extracted data
-7. **Chunking & Embeddings** - Create text chunks and embeddings (if configured)
-
-## Configuration
-
-Each document type has its own processor configuration:
+### Type Imports
 
 ```typescript
-interface ProcessorConfig {
-  extractionAgent: ExtractionAgentName; // LlamaCloud extraction agent
-  requiresChunking: boolean; // Whether to create text chunks
-  requiresEmbeddings: boolean; // Whether to create embeddings
-  customValidation?: (file: File) => Promise<boolean>;
-  dataTransformer?: (extractedData: any) => any;
-}
+import type { FileUploadOptions, FileProcessingRequest, ProcessorConfig } from '@/modules/files';
 ```
 
-## Migration from Legacy Endpoints
+---
 
-### Removed Endpoints
+## 🔄 Processing Pipeline
 
-The following endpoints have been removed and replaced with the unified API:
+Standard flow for all document types:
 
-- `/api/extract/start` → **REMOVED** - Use `/api/files/process`
-- `/api/extract/upload` → **REMOVED** - Use `/api/files/process`
-- `/api/documents/process/contract` → **REMOVED** - Use `/api/files/process`
-- `/api/documents/process/fuel_bid` → **REMOVED** - Use `/api/files/process`
-- `/api/fuel/bids/extract` → **REMOVED** - Use `/api/files/process`
+1. **Validate** → Check file type, size, custom rules
+2. **Create Document** → Insert DB record with pending status
+3. **Upload to Storage** → Save file to Supabase bucket
+4. **Parse & Extract** → Run parser + extraction agent (parallel)
+5. **Transform** → Document-specific data transformation
+6. **Update Document** → Save extracted data to DB
+7. **Chunk & Embed** → Create searchable chunks (if configured)
 
-### Migration Guide
+Each processor can customize steps 5-7.
 
-#### 1. Update API Calls
+---
 
-**Before:**
+## 🔑 Key Concepts
 
-```typescript
-// Old contract processing
-const formData = new FormData();
-formData.append('file', file);
-formData.append('parentType', 'contract');
-formData.append('parentId', contractId);
+**Naming Conventions:**
 
-const response = await fetch('/api/documents/process/contract', {
-  method: 'POST',
-  body: formData,
-});
-```
+- `storage` → Supabase file storage (binary files)
+- `documents` → PostgreSQL records (metadata + extracted data)
+- `processors` → Document type-specific business logic
 
-**After:**
+**API Routes:**
 
-```typescript
-// New unified processing
-const formData = new FormData();
-formData.append('file', file);
-formData.append('documentType', 'contract');
-formData.append('parentId', contractId);
+- `/api/storage/*` → Storage operations (upload, download, delete, list, sign)
+- `/api/files/process` → Unified document processing endpoint
 
-const response = await fetch('/api/files/process', {
-  method: 'POST',
-  body: formData,
-});
-```
+**Configuration:**
+Each processor defines:
 
-#### 2. Update Client Code
+- Which extraction agent to use
+- Whether to create chunks (for search)
+- Whether to generate embeddings (for semantic search)
+- Custom validation rules
+- Data transformation logic
 
-**Before:**
+---
 
-```typescript
-// Legacy approach - multiple different client imports and functions
-import { client as processDocumentClient } from '@/modules/documents/orchastration';
-import { ExtractFuelBid } from '@/modules/fuel/bids/bids.client';
+## ➕ Adding New Document Types
 
-await processDocumentClient.processDocument(file, options);
-await ExtractFuelBid(tenderId, file);
-```
+1. Add enum value to `DocumentType` in `@/drizzle/enums`
+2. Create extraction agent in `@/lib/constants/extractionAgents`
+3. Create new processor extending `BaseFileProcessor`:
+   ```typescript
+   export class InvoiceProcessor extends BaseFileProcessor {
+     readonly documentType: DocumentType = 'invoice';
+     readonly config: ProcessorConfig = {
+       extractionAgent: ExtractionAgentName.INVOICE_EXTRACTOR,
+       requiresChunking: false,
+       requiresEmbeddings: false,
+     };
+     transform(extractedData: any) {
+       return transformInvoiceData(extractedData);
+     }
+   }
+   ```
+4. Register processor in `files.server.ts` registry
 
-**After:**
+---
 
-```typescript
-import { client as filesClient } from '@/modules/files';
+## ✅ Benefits
 
-// Single unified client function
-await filesClient.uploadAndProcessFile(file, {
-  documentType: 'contract',
-  parentId: contractId,
-});
-```
-
-## Benefits
-
-1. **Consistency** - All document types follow the same processing pipeline
-2. **Maintainability** - Single codebase to maintain instead of multiple scattered implementations
-3. **Scalability** - Easy to add new document types by creating new processors
-4. **Type Safety** - Strong TypeScript typing throughout the system
-5. **Error Handling** - Consistent error handling and reporting
-6. **Performance** - Optimized processing with parallel operations where possible
-
-## Adding New Document Types
-
-To add a new document type:
-
-1. **Add to DocumentType enum** in `@/drizzle/enums`
-2. **Add extraction agent** in `@/lib/constants/extractionAgents`
-3. **Create processor class** extending `BaseFileProcessor`
-4. **Register processor** in `files.server.ts`
-5. **Update type mappings** as needed
-
-Example:
-
-```typescript
-// processors/invoice.processor.ts
-export class InvoiceProcessor extends BaseFileProcessor {
-  readonly documentType: DocumentType = 'invoice';
-  readonly config: ProcessorConfig = {
-    extractionAgent: ExtractionAgentName.INVOICE_EXTRACTOR,
-    requiresChunking: false,
-    requiresEmbeddings: false,
-  };
-
-  transform(extractedData: any): any {
-    // Invoice-specific transformation logic
-    return transformInvoiceData(extractedData);
-  }
-}
-```
-
-## Error Handling
-
-The system provides comprehensive error handling at multiple levels:
-
-- **Client-side validation** - File type, size, format validation
-- **Server-side validation** - Business logic validation
-- **Processing errors** - Extraction, parsing, storage errors
-- **Graceful degradation** - Partial success handling
-
-## Performance Considerations
-
-- **Parallel processing** - Parsing and extraction run simultaneously
-- **Streaming uploads** - Large file support with progress tracking
-- **Caching** - Processor instances are cached for performance
-- **Resource management** - Proper cleanup and memory management
-
-## Testing
-
-The system includes comprehensive testing:
-
-- **Unit tests** - Individual processor testing
-- **Integration tests** - End-to-end processing pipeline
-- **Performance tests** - Load and stress testing
-- **Error scenario tests** - Failure mode testing
+- **Single Module** - All file operations in one place
+- **Consistent API** - Same pattern for all document types
+- **Type-Safe** - Full TypeScript support
+- **Scalable** - Easy to add new document types
+- **Maintainable** - DRY principle, shared base logic
+- **Performant** - Optimized with parallel operations

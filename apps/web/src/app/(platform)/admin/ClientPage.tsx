@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
 import { updateExtractors } from '@/modules/admin/admin.client';
-import { client as storageClient } from '@/modules/storage';
+import { storage } from '@/modules/files';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Tabs } from '@/stories/Tabs/Tabs';
@@ -26,6 +26,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const storageClient = storage.client;
 
 interface ExtractionAgent {
   name: string;

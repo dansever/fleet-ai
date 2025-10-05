@@ -2,7 +2,6 @@ import { DocumentType } from '@/drizzle/enums';
 import { server as extractServer } from '@/modules/ai/extract';
 import { server as parseServer } from '@/modules/ai/parse';
 import { server as documentsServer } from '@/modules/documents/documents';
-import { server as storageServer } from '@/modules/storage';
 import {
   FileProcessingRequest,
   FileProcessingResult,
@@ -11,6 +10,7 @@ import {
   ProcessingProgressCallback,
   ProcessorConfig,
 } from '../files.types';
+import { server as storageServer } from '../storage';
 
 export abstract class BaseFileProcessor implements FileProcessor {
   abstract readonly documentType: DocumentType;

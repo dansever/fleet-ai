@@ -45,8 +45,7 @@ export async function updateDocument(
  */
 export async function deleteDocument(
   id: Document['id'],
-  path: Document['storagePath'],
+  storagePath: Document['storagePath'],
 ): Promise<void> {
-  // Prefer canonical documents delete endpoint (server-side cascade)
-  await api.delete(`/api/documents/${id}`);
+  await api.delete(`/api/documents/${id}`, { data: { storagePath } });
 }

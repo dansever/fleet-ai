@@ -1,7 +1,9 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as storageServer } from '@/modules/storage';
+import { storage } from '@/modules/files';
 import { NextResponse } from 'next/server';
+
+const storageServer = storage.server;
 
 export const runtime = 'nodejs'; // Needed to avoid edge body limits
 

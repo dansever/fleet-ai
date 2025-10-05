@@ -1,7 +1,10 @@
 import { DocumentType } from '@/drizzle/enums';
 import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 
-// Base types for file processing
+// ============================================================================
+// File Processing Types (Server)
+// ============================================================================
+
 export interface FileProcessingRequest {
   file: File;
   documentType: DocumentType;
@@ -65,3 +68,26 @@ export interface ProcessingContext {
 
 // Registry for document type processors
 export type ProcessorRegistry = Map<DocumentType, FileProcessor>;
+
+// ============================================================================
+// Client Types (Upload & Processing)
+// ============================================================================
+
+export interface FileUploadOptions {
+  documentType: DocumentType;
+  parentId: string;
+  onProgress?: (progress: number) => void;
+}
+
+export interface FileUploadResponse {
+  success: boolean;
+  documentId?: string;
+  extractedData?: Record<string, any>;
+  error?: string;
+  metadata?: {
+    fileSize: number;
+    fileName: string;
+    processingTime: number;
+    extractionAgent: string;
+  };
+}

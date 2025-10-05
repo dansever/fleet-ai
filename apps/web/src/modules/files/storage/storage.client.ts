@@ -1,4 +1,4 @@
-// src/modules/storage/storage.client.ts
+// src/modules/files/storage/storage.client.ts
 
 /**
  * Contains the following functions:
@@ -50,10 +50,8 @@ export async function getSignedUrl(path: string, expiresIn = 60) {
 /**
  * Delete a file from the storage
  * @param path - the path to the file
- * @returns the file
  */
 export async function deleteFile(path: string) {
-  // TODO: implement server route that validates org prefix then calls storage.remove
   await api.delete('/api/storage/delete', { data: { path } });
 }
 

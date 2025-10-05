@@ -5,9 +5,8 @@ import { ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import { Button } from '@/stories/Button/Button';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { Banknote, BarChart, Brain, ChartBar, FileText } from 'lucide-react';
+import { Banknote, BarChart, ChartBar, FileText } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import AskAI from '../_components/AskAI';
 import { ContractDocument } from '../_components/ContractFiles';
 import { ContractOverview } from '../_components/ContractOverview';
 import ContractList from '../_components/ContractSidebar';
@@ -108,7 +107,6 @@ export default function ServiceAgreementsPage() {
         tabs={[
           { label: 'Overview', value: 'overview', icon: <BarChart /> },
           { label: 'Files', value: 'files', icon: <FileText /> },
-          { label: 'ChatBot', value: 'chatbot', icon: <Brain /> },
           { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
           { label: 'Financials', value: 'financials', icon: <ChartBar /> },
         ]}
@@ -121,9 +119,6 @@ export default function ServiceAgreementsPage() {
         </TabsContent>
         <TabsContent value="files">
           <ContractDocument />
-        </TabsContent>
-        <TabsContent value="chatbot">
-          <AskAI />
         </TabsContent>
         <TabsContent value="invoices">
           <div>Invoices</div>

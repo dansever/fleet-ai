@@ -3,10 +3,8 @@ import 'server-only';
 
 import { DocumentType, DocumentTypeEnum } from '@/drizzle/enums';
 import { createClient } from '@/lib/supabase/server';
-import { server as orgServer } from '@/modules/core/organizations';
-import { utils as storageUtils } from '@/modules/storage';
 import crypto from 'crypto';
-import slugify from 'slugify';
+import * as storageUtils from './storage.utils';
 
 /**
  * Upload a file to storage - overloaded function
@@ -38,12 +36,8 @@ export async function uploadFile(
     // Get bucket name from current organization
     bucket = await storageUtils.getBucketName();
 
-    // Generate path: parentType/filename-uuid.ext
-    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
-    const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-    const fileNameSlug = slugify(base, { lower: true });
-    const unique = crypto.randomUUID();
-    path = `${parentType}/${fileNameSlug}-${unique}.${ext}`;
+    // Generate path using utility function
+    path = await storageUtils.generateStoragePath(file.name, parentType + 's');
 
     console.log(`📁 Uploading to bucket: ${bucket}, path: ${path}`);
   } else {
@@ -80,12 +74,6 @@ export async function uploadFile(
  */
 export async function createSignedUrl(orgId: string, path: string, expiresIn: number = 60) {
   const supabase = await createClient();
-
-  // Get organization for bucket
-  const org = await orgServer.getOrgById(orgId);
-  if (!org) {
-    throw new Error('Organization not found');
-  }
   const bucket = await storageUtils.getBucketName();
 
   // Sign the file
@@ -107,12 +95,6 @@ export async function createSignedUrl(orgId: string, path: string, expiresIn: nu
  */
 export async function listFiles(orgId: string, documentType: string) {
   const supabase = await createClient();
-
-  // Get organization for bucket
-  const org = await orgServer.getOrgById(orgId);
-  if (!org) {
-    throw new Error('Organization not found');
-  }
   const bucket = await storageUtils.getBucketName();
 
   // List files from storage

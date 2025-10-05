@@ -1,25 +1,6 @@
 // Client-side utilities for file processing
 
-import { DocumentType } from '@/drizzle/enums';
-
-export interface FileUploadOptions {
-  documentType: DocumentType;
-  parentId: string;
-  onProgress?: (progress: number) => void;
-}
-
-export interface FileUploadResponse {
-  success: boolean;
-  documentId?: string;
-  extractedData?: Record<string, any>;
-  error?: string;
-  metadata?: {
-    fileSize: number;
-    fileName: string;
-    processingTime: number;
-    extractionAgent: string;
-  };
-}
+import { FileUploadOptions, FileUploadResponse } from './files.types';
 
 /**
  * Upload and process a file using the unified API

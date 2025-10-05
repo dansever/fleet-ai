@@ -275,12 +275,12 @@ export const FileUploadPopover = ({
             'w-80 p-0 rounded-3xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
-          <BaseCard>
+          <BaseCard className="pb-2 pt-4 px-0" contentClassName="px-4">
             {!selectedFile ? (
-              <div className="space-y-2">
+              <div className="space-y-2 ">
                 <div
                   className={cn(
-                    'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+                    'border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer',
                     isDragOver
                       ? 'border-blue-400 bg-blue-50'
                       : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
@@ -313,7 +313,7 @@ export const FileUploadPopover = ({
                 {typeof children === 'function' ? children({ close }) : children}
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 p-2">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <FileText className="w-5 h-5 text-white" />

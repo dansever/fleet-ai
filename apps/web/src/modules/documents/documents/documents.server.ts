@@ -4,9 +4,11 @@ import 'server-only';
 import { db } from '@/drizzle';
 import { documentsTable } from '@/drizzle/schema/schema.documents';
 import { Contract, Document, NewDocument } from '@/drizzle/types';
-import { server as storageServer } from '@/modules/storage';
+import { storage } from '@/modules/files';
 import { and, eq } from 'drizzle-orm';
 import { DocumentUpdateInput } from './documents.types';
+
+const storageServer = storage.server;
 /**
  * Get a document by ID
  */
@@ -71,20 +73,15 @@ export async function deleteDocument(id: Document['id']): Promise<void> {
  */
 export async function deleteDocumentCascade(
   id: Document['id'],
-): Promise<{ storageDeleted: boolean }> {
-  const doc = await getDocumentById(id);
-
-  let storageDeleted = false;
-  if (doc.storagePath) {
+  storagePath: Document['storagePath'],
+): Promise<void> {
+  if (storagePath) {
     try {
-      await storageServer.deleteFile(doc.storagePath);
-      storageDeleted = true;
+      await storageServer.deleteFile(storagePath);
     } catch (err) {
       // Non-fatal: proceed with DB deletion even if storage removal fails
       console.warn('Warning: failed to delete storage file for document', id, err);
     }
   }
-
   await deleteDocument(id);
-  return { storageDeleted };
 }

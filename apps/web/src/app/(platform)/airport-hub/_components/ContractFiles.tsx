@@ -8,8 +8,7 @@ import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { client as parseClient } from '@/modules/ai/parse';
 import { client as documentsClient } from '@/modules/documents/documents';
-import { client as filesClient } from '@/modules/files';
-import { client as storageClient } from '@/modules/storage';
+import { client as filesClient, storage } from '@/modules/files';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
@@ -35,6 +34,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../context';
 import { AIAssistant } from './AIAssistant';
+
+const storageClient = storage.client;
 
 interface Term {
   key: string;
@@ -182,17 +183,15 @@ export function ContractDocument() {
   };
 
   const handleDeleteDocument = async (documentId: string) => {
-    const documentToDelete = documents.find((doc) => doc.id === documentId);
-    if (!documentToDelete) return;
+    const document = documents.find((doc) => doc.id === documentId);
+    if (!document) return;
 
     try {
       setDeleteDocumentLoading(true);
-      // Cascade logic already implemented in the client
-      await documentsClient.deleteDocument(documentToDelete.id, documentToDelete.storagePath ?? '');
+      await documentsClient.deleteDocument(document.id, document.storagePath);
 
       // Immediately update local state to reflect deletion
-      removeDocument(documentToDelete.id);
-
+      removeDocument(document.id);
       toast.success('Document has been deleted');
 
       // Note: No need to call refreshDocuments() since we've already updated local state

@@ -1,7 +1,9 @@
 import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
-import { server as storageServer } from '@/modules/storage';
+import { storage } from '@/modules/files';
 import { NextRequest, NextResponse } from 'next/server';
+
+const storageServer = storage.server;
 
 /**
  * GET /api/storage/download

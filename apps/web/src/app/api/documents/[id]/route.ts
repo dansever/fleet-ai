@@ -71,13 +71,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Get document by id and authorize
     const { id } = await params;
-    const document = await documentsServer.getDocumentById(id);
-    if (!document) return jsonError('Document not found', 404);
-    if (document.orgId !== orgId) return jsonError('Unauthorized', 401);
+    if (!id) return jsonError('Document ID is required', 400);
+    const storagePath = await request.json();
 
-    // Canonical cascade deletion
-    const result = await documentsServer.deleteDocumentCascade(id);
-    return NextResponse.json({ success: true, ...result });
+    // Delete document and storage file
+    await documentsServer.deleteDocumentCascade(id, storagePath);
+    return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Error deleting document:', err);
     return jsonError('Failed to delete document', 500);
