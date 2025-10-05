@@ -1,16 +1,13 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { authenticateUser } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
 import FuelProcurementClientPage from './ClientPage';
 import { FuelProcurementProvider } from './contexts';
 
 export default async function FuelProcurementPage() {
-  const { dbUser, error } = await getAuthContext();
-  if (error || !dbUser) {
+  const { dbUser, orgId, error } = await authenticateUser();
+  if (error || !dbUser || !orgId) {
     return jsonError('Unauthorized', 401);
-  }
-  if (!dbUser.orgId) {
-    return jsonError('Organization not found', 404);
   }
 
   try {

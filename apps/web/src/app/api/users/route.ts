@@ -1,5 +1,5 @@
 import { NewUser } from '@/drizzle/types';
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as userServer } from '@/modules/core/users';
 import { NextRequest, NextResponse } from 'next/server';

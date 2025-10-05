@@ -1,6 +1,6 @@
 import { createSimpleFleetAIChain, handleChainError } from '@/lib/ai/langchain';
 import { LangChainStreamHandler, extractUserInput } from '@/lib/ai/streaming-utils';
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { recordAiTokenUsageAsync } from '@/services/record-usage';
 import { UIMessage } from 'ai';

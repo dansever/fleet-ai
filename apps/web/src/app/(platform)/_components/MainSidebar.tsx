@@ -359,18 +359,18 @@ export function MainSidebar({
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        <ClientUserButton showName={!isCollapsed} dbUser={dbUser} clerkUser={clerkUser} />
+        <ClientUserButton isCollapsed={isCollapsed} dbUser={dbUser} clerkUser={clerkUser} />
       </SidebarFooter>
     </Sidebar>
   );
 }
 
 function ClientUserButton({
-  showName,
+  isCollapsed,
   dbUser,
   clerkUser,
 }: {
-  showName: boolean;
+  isCollapsed: boolean;
   dbUser: DbUser;
   clerkUser: ReturnType<typeof useUser>['user'];
 }) {
@@ -398,12 +398,12 @@ function ClientUserButton({
   };
 
   return (
-    <div className="flex items-center gap-2 cursor-pointer p-2" onClick={handleRowClick}>
+    <div className="flex items-center gap-2 cursor-pointer p-2 pl-0" onClick={handleRowClick}>
       <div ref={buttonRef} className="z-50">
         <UserButton showName={false} appearance={appearance} afterSignOutUrl="/" />
       </div>
 
-      {showName && (
+      {!isCollapsed && (
         <div className="flex flex-col gap-1 select-none">
           <span className="text-sm font-medium">{fullName}</span>
           {dbUser?.position && <StatusBadge status="secondary" text={dbUser.position} size="xs" />}

@@ -1,4 +1,4 @@
-import { getActiveClerkOrg } from '@/lib/authorization/get-auth-context';
+import { getActiveClerkOrg } from '@/lib/authorization/authenticate-user';
 import slugify from 'slugify';
 
 /**

@@ -1,13 +1,14 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { authenticateUser } from '@/lib/authorization/authenticate-user';
+import { jsonError } from '@/lib/core/errors';
 import { server as orgServer } from '@/modules/core/organizations';
 import { server as userServer } from '@/modules/core/users';
 import SettingsClientPage from './ClientPage';
 import { SettingsProvider } from './ContextProvider';
 
 export default async function SettingsPage() {
-  const { dbUser, orgId, error } = await getAuthContext();
+  const { dbUser, orgId, error } = await authenticateUser();
   if (error || !dbUser || !orgId) {
-    return <div>Error: {error}</div>;
+    return jsonError('Unauthorized', 401);
   }
 
   const user = await userServer.getUserById(dbUser.id);

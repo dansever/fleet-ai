@@ -1,5 +1,5 @@
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { authorizeResource } from '@/lib/authorization/authorize-resource';
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
 import { jsonError } from '@/lib/core/errors';
 import { server as contactServer } from '@/modules/vendors/vendor-contacts';
 import { VendorContactUpdateInput } from '@/modules/vendors/vendor-contacts/vendor-contacts.types';

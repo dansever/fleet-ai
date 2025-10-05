@@ -1,7 +1,7 @@
 // apps/web/src/app/api/files/process/route.ts
 
 import { DocumentType } from '@/drizzle/enums';
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { extraction } from '@/modules/file-manager';
 import { NextRequest, NextResponse } from 'next/server';

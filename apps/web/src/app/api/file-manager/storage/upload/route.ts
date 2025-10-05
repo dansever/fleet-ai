@@ -1,6 +1,6 @@
 // src/app/api/storage/upload/route.ts
 
-import { getActiveClerkOrg, getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getActiveClerkOrg, getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { createClient } from '@/lib/supabase/client';
 import { NextRequest, NextResponse } from 'next/server';

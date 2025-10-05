@@ -1,5 +1,5 @@
 // app/api/storage/buckets/route.ts
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';

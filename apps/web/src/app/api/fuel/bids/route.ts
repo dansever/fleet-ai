@@ -1,4 +1,4 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as fuelBidServer } from '@/modules/fuel/bids';
 import { server as fuelTenderServer } from '@/modules/fuel/tenders';

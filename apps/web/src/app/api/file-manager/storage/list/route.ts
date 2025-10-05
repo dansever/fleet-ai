@@ -1,6 +1,6 @@
 // src/app/api/storage/list/route.ts
 
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { storage } from '@/modules/file-manager';
 import { NextRequest, NextResponse } from 'next/server';

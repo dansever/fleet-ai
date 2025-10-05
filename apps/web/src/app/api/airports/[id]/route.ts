@@ -1,5 +1,5 @@
 import { UpdateAirport } from '@/drizzle/types';
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
 import { NextRequest, NextResponse } from 'next/server';

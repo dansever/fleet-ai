@@ -1,4 +1,4 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as orgServer } from '@/modules/core/organizations';
 import { NextRequest, NextResponse } from 'next/server';
