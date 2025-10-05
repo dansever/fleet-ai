@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 from app.shared.schemas import ResponseEnvelope
 from app.utils import get_logger
-from app.llama_extractor import update_extractor_agents
+from app.llama import update_extractor_agents
 
 logger = get_logger(__name__)
 

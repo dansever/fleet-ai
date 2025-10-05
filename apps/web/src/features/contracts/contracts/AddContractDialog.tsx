@@ -1,9 +1,9 @@
 'use client';
 
-import { ContractType, ContractTypeEnum, getContractTypeDisplay } from '@/drizzle/enums';
+import { ContractType, ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
 import type { Airport, Contract, NewContract } from '@/drizzle/types';
 import { client as contractClient } from '@/modules/contracts';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { useEffect, useState } from 'react';
@@ -110,7 +110,7 @@ export default function SimpleContractDialog({
     >
       {(isEditing: boolean) => (
         <div className="mx-auto">
-          <MainCard title="Contract Information" neutralHeader={true}>
+          <BaseCard title="Contract Information">
             <div>
               <KeyValuePair
                 label="Title"
@@ -131,7 +131,7 @@ export default function SimpleContractDialog({
                 name="contractType"
                 selectOptions={ContractTypeEnum.enumValues.map((value) => ({
                   value,
-                  label: getContractTypeDisplay(value),
+                  label: getContractTypeDisplayName(value),
                 }))}
                 placeholder="Select contract type"
               />
@@ -145,7 +145,7 @@ export default function SimpleContractDialog({
                 name="airport"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-700">

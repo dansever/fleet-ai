@@ -10,6 +10,7 @@ import {
   date,
   foreignKey,
   integer,
+  json,
   numeric,
   pgTable,
   text,
@@ -33,19 +34,32 @@ export const fuelTendersTable = pgTable(
 
     // Tender Information
     title: text('title').notNull(),
+    tenderType: text('tender_type'), // "spot", "contract", "framework", "emergency"
     description: text('description'),
     fuelType: text('fuel_type'),
-    projectedAnnualVolume: integer('projected_annual_volume'),
+    forecastVolume: integer('forecast_volume'),
+    qualitySpecification: text('quality_specification'), // ASTM D1655, DEF STAN 91-91, etc.
 
     // Base Configuration
     baseCurrency: text('base_currency'),
     baseUom: text('base_uom'),
 
+    // Benchmarking
+    benchmarkIndex: text('benchmark_index'), // e.g. Platts Jet A-1
+    benchmarkLocation: text('benchmark_location'), // e.g. Med, NWE
+
     // Timeline
-    biddingStarts: date('bidding_starts'),
-    biddingEnds: date('bidding_ends'),
+    submissionStarts: date('submission_starts'),
+    submissionEnds: date('submission_ends'),
     deliveryStarts: date('delivery_starts'),
     deliveryEnds: date('delivery_ends'),
+
+    // Flexible Additional Data (LLM-categorized)
+    tenderSpecifications: json('tender_specifications').$type<Record<string, any>>(),
+
+    // AI Processing
+    aiSummary: text('ai_summary'),
+    terms: json('terms').$type<Record<string, any>>(),
 
     // Workflow Management
     processStatus: ProcessStatusEnum('process_status').default('pending'),
@@ -92,38 +106,51 @@ export const fuelBidsTable = pgTable(
     vendorContactPhone: text('vendor_contact_phone'),
     vendorComments: text('vendor_comments'),
 
-    // Pricing Structure
-    priceType: text('price_type'), // fixed, index_formula
-    uom: text('uom').default('USG'), // USG, L, m3, MT
+    // Commercial terms
     currency: text('currency').default('USD'),
     paymentTerms: text('payment_terms'),
+    creditDays: integer('credit_days'),
 
-    // Fixed Pricing
-    baseUnitPrice: numeric('base_unit_price'), // numeric only, no currency symbol
+    // Product and measurement
+    productGrade: text('product_grade'), // Jet A-1, Jet A, Jet B, Jet C, etc.
+    uom: text('uom').default('USG'), // USG, L, m3, MT
+    temperatureBasisC: numeric('temperature_basis_c'), // 15C, 20C, 25C, etc.
+    densityAt15C: numeric('density_at_15c'), // kg/m3 if mass quote present
 
+    // Pricing Structure
+    priceType: text('price_type'), // fixed, index_formula
+    // --- Fixed Pricing ---
+    baseUnitPrice: numeric('base_unit_price'), // numeric only, currency is in currency field
     // Index-Linked Pricing
     indexName: text('index_name'), // Platts Jet A-1 Med, Argus, etc.
     indexLocation: text('index_location'), // region or marker
-    differential: numeric('differential'), // +/− per unit in currency or in cents
-    differentialUnit: text('differential_unit'),
+    indexCurrency: text('index_currency'), // currency of the index
+    quoteAveragingMethod: numeric('quote_averaging_method'), // daily, weekly, M-1 averaging
+    quoteLagDays: integer('quote_lag_days'), // days to lag behind the index
     formulaNotes: text('formula_notes'),
+    differentialValue: numeric('differential_value'), // +/− per unit in currency or in cents
+    differentialUnit: text('differential_unit'), // currency_per_uom, cents_per_uom, percent
+    differentialCurrency: text('differential_currency'), // index, index_plus_fees
 
     // Fees & Charges
     intoPlaneFee: numeric('into_plane_fee'), // per unit
+    intoPlaneFeeUnit: text('into_plane_fee_unit'), // per_uom, per_uplift, per_delivery
     handlingFee: numeric('handling_fee'), // per unit or per uplift
+    handlingFeeBasis: text('handling_fee_basis'), // per_uom, per_uplift, per_delivery
     otherFee: numeric('other_fee'),
+    otherFeeBasis: text('other_fee_basis'), // per_uom, per_uplift, per_delivery
     otherFeeDescription: text('other_fee_description'),
 
     // Inclusions & Exclusions
     includesTaxes: boolean('includes_taxes'),
     includesAirportFees: boolean('includes_airport_fees'),
-
-    // Calculated Fields
-    densityAt15C: numeric('density_at_15c'), // kg/m3 if mass quote present
-    normalizedUnitPriceUsdPerUsg: numeric('norm_usd_per_usg'), // computed and stored
+    qualitySpecification: text('quality_specification'),
+    taxDetails: json('tax_details').$type<Record<string, any>>(), // VAT, excise, carbon, rate, included flag
 
     // AI Processing
     aiSummary: text('ai_summary'),
+    terms: json('terms').$type<Record<string, any>>(),
+    tags: json('tags').$type<Record<string, any>>(),
 
     // Decision Tracking
     decision: decisionEnum('decision'),

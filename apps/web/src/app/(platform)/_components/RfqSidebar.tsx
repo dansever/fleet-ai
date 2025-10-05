@@ -70,7 +70,7 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
     {
       title: 'Fuel',
       description: 'Fuel Tenders & Contracts',
-      url: '/fuel-procurement',
+      url: '/fuel',
       icon: Fuel,
       isReady: true,
     },

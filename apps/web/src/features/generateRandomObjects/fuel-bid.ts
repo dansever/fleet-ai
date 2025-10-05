@@ -3,9 +3,10 @@ import type { FuelTender } from '@/drizzle/types';
 import { CURRENCY_MAP } from '@/lib/constants/currencies';
 import { BASE_UOM_OPTIONS } from '@/lib/constants/units';
 import { getRandomFloat, getRandomInt, pickOne } from '@/lib/utils';
+import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { FuelBidCreateInput } from '@/modules/fuel/bids/bids.types';
 
-export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number) {
+export async function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number) {
   const VENDOR_NAMES = [
     'Global Fuel Services',
     'AeroJet Supply',
@@ -194,9 +195,9 @@ export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number
 
   // Pricing
   const basePrice = getRandomFloat(1.2, 4.2, 4);
-  const intoPlane = Math.random() < 0.75 ? getRandomFloat(0.015, 0.18, 4) : null;
-  const handling = Math.random() < 0.4 ? getRandomFloat(0.01, 0.15, 4) : null;
-  const otherFee = Math.random() < 0.25 ? getRandomFloat(0.005, 0.1, 4) : null;
+  const intoPlane = getRandomFloat(0.015, 0.18, 4);
+  const handling = getRandomFloat(0.01, 0.15, 4);
+  const otherFee = getRandomFloat(0.005, 0.1, 4);
   const differential = useIndexPricing ? getRandomFloat(-0.35, 0.35, 4) : null;
 
   const fuelBid: FuelBidCreateInput = {
@@ -210,8 +211,8 @@ export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number
       Math.random() > 0.1
         ? `${vendorName} R${round || getRandomInt(1, 4)} ${pickOne(['Offer', 'Proposal', 'Bid', 'Quote'])}`
         : null,
-    round: Math.random() > 0.1 ? round || getRandomInt(1, 4) : null,
-    bidSubmittedAt: Math.random() > 0.2 ? randomDateBetween() : null,
+    round: round || getRandomInt(1, 4),
+    bidSubmittedAt: randomDateBetween(),
 
     // Vendor Information
     vendorName: Math.random() > 0.05 ? vendorName : null,
@@ -219,53 +220,49 @@ export function generateRandomFuelBid(tenderId: FuelTender['id'], round?: number
       Math.random() > 0.2
         ? `${getRandomInt(100, 9999)} ${pickOne(STREET_NAMES)}, Suite ${getRandomInt(100, 999)}, ${pickOne(CITY_NAMES)}`
         : null,
-    vendorContactName: Math.random() > 0.2 ? contactName : null,
-    vendorContactEmail: Math.random() > 0.3 ? randomEmailFromName(contactName) : null,
-    vendorContactPhone: Math.random() > 0.4 ? randomPhone() : null,
-    vendorComments: Math.random() > 0.4 ? pickOne(VENDOR_COMMENTS) : null,
+    vendorContactName: contactName,
+    vendorContactEmail: randomEmailFromName(contactName),
+    vendorContactPhone: randomPhone(),
+    vendorComments: pickOne(VENDOR_COMMENTS),
 
     // Pricing Structure
-    priceType: Math.random() > 0.1 ? (useIndexPricing ? 'index_formula' : 'fixed') : null,
-    uom: Math.random() > 0.05 ? uom : null,
-    currency: Math.random() > 0.05 ? currencyKey : null,
-    paymentTerms: Math.random() > 0.3 ? pickOne(PAYMENT_TERMS) : null,
+    priceType: useIndexPricing ? 'index_formula' : 'fixed',
+    uom: uom,
+    currency: currencyKey,
+    paymentTerms: pickOne(PAYMENT_TERMS),
 
     // Fixed Pricing
-    baseUnitPrice: useIndexPricing ? null : Math.random() > 0.1 ? basePrice.toString() : null,
+    baseUnitPrice: useIndexPricing ? null : basePrice.toString(),
 
     // Index-Linked Pricing
-    indexName: useIndexPricing ? (Math.random() > 0.1 ? pickOne(INDEX_NAMES) : null) : null,
-    indexLocation: useIndexPricing ? (Math.random() > 0.2 ? pickOne(INDEX_LOCATIONS) : null) : null,
-    differential: useIndexPricing ? (Math.random() > 0.2 ? differential?.toString() : null) : null,
-    differentialUnit: useIndexPricing
-      ? Math.random() > 0.3
-        ? pickOne(DIFFERENTIAL_UNITS)
-        : null
-      : null,
-    formulaNotes: useIndexPricing ? (Math.random() > 0.4 ? pickOne(FORMULA_NOTES) : null) : null,
+    indexName: useIndexPricing ? pickOne(INDEX_NAMES) : null,
+    indexLocation: useIndexPricing ? pickOne(INDEX_LOCATIONS) : null,
+    differential: useIndexPricing ? differential?.toString() : null,
+    differentialUnit: useIndexPricing ? pickOne(DIFFERENTIAL_UNITS) : null,
+    formulaNotes: useIndexPricing ? pickOne(FORMULA_NOTES) : null,
 
     // Fees & Charges
-    intoPlaneFee: Math.random() > 0.3 ? intoPlane?.toString() || null : null,
-    handlingFee: Math.random() > 0.6 ? handling?.toString() || null : null,
-    otherFee: Math.random() > 0.8 ? otherFee?.toString() || null : null,
+    intoPlaneFee: intoPlane?.toString(),
+    handlingFee: handling?.toString(),
+    otherFee: otherFee?.toString(),
     otherFeeDescription: otherFee && Math.random() > 0.2 ? pickOne(OTHER_FEE_DESCRIPTIONS) : null,
 
     // Inclusions & Exclusions
-    includesTaxes: Math.random() < 0.35,
     includesAirportFees: Math.random() < 0.3,
 
     // Calculated Fields
-    densityAt15C: Math.random() < 0.4 ? getRandomFloat(775, 825, 1).toString() : null,
-    normalizedUnitPriceUsdPerUsg: null, // calculated server-side
+    densityAt15C: getRandomFloat(775, 825, 1).toString(),
 
     // AI Processing
-    aiSummary: Math.random() > 0.2 ? pickOne(AI_SUMMARIES) : null,
+    aiSummary: pickOne(AI_SUMMARIES),
 
     // Decision Tracking
-    decision: Math.random() < 0.3 ? pickOne(decisionEnum.enumValues) : null,
+    decision: pickOne(decisionEnum.enumValues),
     decisionByUserId: null,
-    decisionNotes: Math.random() < 0.2 ? pickOne(DECISION_NOTES) : null,
+    decisionNotes: pickOne(DECISION_NOTES),
   };
+
+  await fuelBidClient.createFuelBid(tenderId, fuelBid);
 
   return fuelBid;
 }

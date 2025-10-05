@@ -3,7 +3,7 @@ import { generateRandomQuote } from '@/features/generateRandomObjects/quote';
 import QuoteDialog from '@/features/quotes/quoteDialog';
 import { client as quoteClient } from '@/modules/quotes';
 import { Button } from '@/stories/Button/Button';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { FileUploadPopover } from '@/stories/Popover/Popover';
 import { Package, Plus, RefreshCw, Upload } from 'lucide-react';
 import { useState } from 'react';
@@ -64,7 +64,7 @@ export default function QuoteComparison() {
   };
 
   return (
-    <MainCard
+    <BaseCard
       title="Technical Quotes Comparison"
       subtitle={`Compare and evaluate quotes for ${selectedRfq?.rfqNumber}`}
       icon={
@@ -113,6 +113,6 @@ export default function QuoteComparison() {
       <CardContent>
         <QuotesDataTable />
       </CardContent>
-    </MainCard>
+    </BaseCard>
   );
 }

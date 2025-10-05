@@ -10,13 +10,14 @@ export type StatusType =
   | 'operational'
   | 'pending'
   | 'warning'
-  | 'error'
-  | 'processing';
+  | 'danger'
+  | 'processing'
+  | 'success';
 
 export interface StatusBadgeProps {
   status: StatusType;
   text?: string | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
   className?: string | null;
   children?: React.ReactNode;
@@ -53,9 +54,9 @@ const statusConfig = {
     text: 'Warning',
     className: 'bg-orange-100 text-orange-700 border-orange-200',
   },
-  error: {
+  danger: {
     icon: XCircle,
-    text: 'Error',
+    text: 'danger',
     className: 'bg-red-100 text-red-700 border-red-200',
   },
   processing: {
@@ -63,15 +64,22 @@ const statusConfig = {
     text: 'Processing',
     className: 'bg-blue-100 text-blue-700 border-blue-200',
   },
+  success: {
+    icon: CheckCircle,
+    text: 'Success',
+    className: 'bg-green-100 text-green-700 border-green-200',
+  },
 };
 
 const sizeConfig = {
+  xs: 'text-xs px-1 py-0 gap-1',
   sm: 'text-xs px-1.5 py-0.5 gap-1',
   md: 'text-sm px-2 py-1 gap-1.5',
   lg: 'text-base px-3 py-1.5 gap-2',
 };
 
 const iconSizeConfig = {
+  xs: 'h-2 w-2',
   sm: 'h-2.5 w-2.5',
   md: 'h-3 w-3',
   lg: 'h-3.5 w-3.5',

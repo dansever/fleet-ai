@@ -1,11 +1,11 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { authenticateUser } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as airportServer } from '@/modules/core/airports';
 import AirportHubClientPage from './ClientPage';
-import AirportHubProvider from './ContextProvider';
+import { AirportHubProvider } from './context';
 
 export default async function AirportHubPage() {
-  const { dbUser, orgId, error } = await getAuthContext();
+  const { dbUser, orgId, error } = await authenticateUser();
   if (error || !dbUser || !orgId) {
     return jsonError('Unauthorized', 401);
   }

@@ -1,7 +1,9 @@
 'use client';
 
+import { CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
+import { BaseCard } from '@/stories/Card/Card';
 import { ModernTextarea } from '@/stories/Form/Form';
 import { Bot, Copy, Loader2, Maximize2, Minimize2, User } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -36,7 +38,7 @@ export interface ChatBotConfig {
   autoFocus?: boolean;
 
   // Styling Configuration
-  variant?: 'full-page' | 'component' | 'sidebar' | 'compact';
+  variant?: 'full' | 'component';
   theme?: 'default' | 'minimal' | 'rounded';
   accentColor?: string;
 
@@ -229,8 +231,12 @@ export default function ChatBot({
         setError(errorMessage);
         config.onError?.(errorMessage);
 
-        // Remove the failed assistant message if it was added
-        setMessages((prev) => prev.filter((msg) => msg.role === 'user' || msg.content.length > 0));
+        // Remove the failed assistant message if it was added but has no content
+        setMessages((prev) =>
+          prev.filter(
+            (msg) => msg.role === 'user' || (msg.role === 'assistant' && msg.content.length > 0),
+          ),
+        );
       } finally {
         setIsLoading(false);
         setIsStreaming(false);
@@ -274,62 +280,36 @@ export default function ChatBot({
 
   // Variant-specific styling helpers
   const getContainerClasses = () => {
-    const base = 'flex flex-col bg-white';
+    const base = 'flex flex-col h-full';
 
     switch (config.variant) {
-      case 'full-page':
-        return cn(base, 'h-full min-h-screen');
-      case 'sidebar':
-        return cn(base, 'h-full max-h-screen border-l');
-      case 'compact':
-        return cn(base, 'h-64 border rounded-2xl');
+      case 'full':
+        return cn(base, 'min-h-screen');
       case 'component':
       default:
-        return cn(base, 'h-120 border rounded-2xl');
+        return cn(base, 'h-96');
     }
   };
 
   const getMessagesClasses = () => {
-    const base = 'flex-1 overflow-y-auto';
+    const base = 'flex-1 overflow-y-auto px-4';
 
     switch (config.variant) {
-      case 'full-page':
-        return cn(base);
-      case 'sidebar':
-        return cn(base, 'px-2');
-      case 'compact':
-        return cn(base, 'px-3');
+      case 'full':
+        return cn(base, 'max-w-4xl mx-auto');
       case 'component':
       default:
-        return cn(base, 'px-4');
+        return cn(base);
     }
   };
 
   const getInputAreaClasses = () => {
     switch (config.variant) {
-      case 'full-page':
-        return 'absolute bottom-8 left-0 right-0';
-      case 'sidebar':
-        return 'border-t p-2';
-      case 'compact':
-        return 'border-t p-2';
+      case 'full':
+        return 'px-4 pb-4 max-w-4xl mx-auto w-full';
       case 'component':
       default:
-        return 'px-2 pb-2';
-    }
-  };
-
-  const getMaxWidth = () => {
-    switch (config.variant) {
-      case 'full-page':
-        return 'max-w-4xl mx-auto';
-      case 'sidebar':
-        return 'w-full';
-      case 'compact':
-        return 'w-full';
-      case 'component':
-      default:
-        return 'w-full';
+        return 'px-4 pb-4';
     }
   };
 
@@ -340,17 +320,19 @@ export default function ChatBot({
         <Bot
           className={cn(
             'mx-auto text-muted-foreground',
-            config.variant === 'compact' ? 'h-8 w-8' : 'h-16 w-16',
+            config.variant === 'component' ? 'h-12 w-12' : 'h-16 w-16',
           )}
         />
         <div className="space-y-2">
-          <h3 className={cn('font-semibold', config.variant === 'compact' ? 'text-sm' : 'text-xl')}>
+          <h3
+            className={cn('font-semibold', config.variant === 'component' ? 'text-lg' : 'text-xl')}
+          >
             {config.title}
           </h3>
           <p
             className={cn(
               'text-muted-foreground',
-              config.variant === 'compact' ? 'text-xs' : 'text-sm',
+              config.variant === 'component' ? 'text-sm' : 'text-base',
             )}
           >
             {config.subtitle}
@@ -360,128 +342,127 @@ export default function ChatBot({
     </div>
   );
 
-  // Message component
-  const MessageBubble = ({ message }: { message: ChatMessage }) => (
-    <div
-      className={cn(
-        'flex gap-3',
-        config.variant === 'full-page' ? 'max-w-4xl mx-auto' : 'w-full',
-        message.role === 'user' ? 'flex-row-reverse' : 'flex-row',
-      )}
-    >
-      {/* Avatar */}
+  // Message component (memoized for performance)
+  const MessageBubble = useCallback(
+    ({ message }: { message: ChatMessage }) => (
       <div
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-          message.role === 'user' ? 'bg-primary' : 'bg-muted',
+          'flex gap-3 w-full',
+          message.role === 'user' ? 'flex-row-reverse' : 'flex-row',
         )}
       >
-        {message.role === 'user' ? (
-          <User className="h-4 w-4 text-primary-foreground" />
-        ) : (
-          <Bot className="h-4 w-4 text-muted-foreground" />
-        )}
-      </div>
-
-      {/* Message content */}
-      <div
-        className={cn(
-          'flex-1 space-y-2 rounded-2xl px-4 py-3',
-          message.role === 'user'
-            ? 'max-w-[70%] bg-primary text-primary-foreground ml-8'
-            : 'bg-muted text-foreground mr-8',
-          config.theme === 'minimal' && 'rounded-lg',
-          config.theme === 'rounded' && 'rounded-3xl',
-        )}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span
-              className={cn('font-medium', config.variant === 'compact' ? 'text-xs' : 'text-sm')}
-            >
-              {message.role === 'user' ? config.userLabel : config.assistantName}
-            </span>
-            <span
-              className={cn('opacity-70', config.variant === 'compact' ? 'text-xs' : 'text-xs')}
-            >
-              {message.timestamp.toLocaleTimeString()}
-            </span>
-          </div>
-          {config.enableCopy && (
-            <Copy
-              className={cn(
-                'h-4 w-4 hover:cursor-pointer hover:scale-105 transition-all opacity-70 hover:opacity-100',
-                config.variant === 'compact' && 'h-3 w-3',
-              )}
-              onClick={() => copyMessage(message.content)}
-            />
-          )}
-        </div>
-
-        {/* Content */}
+        {/* Avatar */}
         <div
           className={cn(
-            'leading-relaxed whitespace-pre-wrap',
-            config.variant === 'compact' ? 'text-xs' : 'text-sm',
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+            message.role === 'user' ? 'bg-primary' : 'bg-white',
           )}
         >
-          {message.content}
+          {message.role === 'user' ? (
+            <User className="h-4 w-4 text-primary-foreground" />
+          ) : (
+            <Bot className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+
+        {/* Message content */}
+        <div
+          className={cn(
+            'flex-1 space-y-2 rounded-2xl px-4 py-3',
+            message.role === 'user'
+              ? 'max-w-[70%] bg-primary text-primary-foreground ml-8'
+              : 'bg-white border border-green-500 text-foreground mr-8',
+            config.theme === 'minimal' && 'rounded-lg',
+            config.theme === 'rounded' && 'rounded-3xl',
+          )}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  'font-medium',
+                  config.variant === 'component' ? 'text-sm' : 'text-base',
+                )}
+              >
+                {message.role === 'user' ? config.userLabel : config.assistantName}
+              </span>
+              <span className={cn('opacity-70 text-xs')}>
+                {message.timestamp.toLocaleTimeString()}
+              </span>
+            </div>
+            {config.enableCopy && (
+              <Copy
+                className="h-4 w-4 hover:cursor-pointer hover:scale-105 transition-all opacity-70 hover:opacity-100"
+                onClick={() => copyMessage(message.content)}
+              />
+            )}
+          </div>
+
+          {/* Content */}
+          <div
+            className={cn(
+              'leading-relaxed whitespace-pre-wrap',
+              config.variant === 'component' ? 'text-sm' : 'text-base',
+            )}
+          >
+            {message.content}
+          </div>
         </div>
       </div>
-    </div>
+    ),
+    [
+      config.variant,
+      config.theme,
+      config.enableCopy,
+      config.userLabel,
+      config.assistantName,
+      copyMessage,
+    ],
   );
 
-  return (
-    <div
-      className={cn(getContainerClasses(), className)}
+  // Prepare BaseCard props
+  const cardTitle = config.variant === 'full' ? undefined : config.title;
+  const cardSubtitle = config.variant === 'full' ? undefined : config.subtitle;
+  const cardActions =
+    config.variant === 'full' ? undefined : (
+      <div className="flex items-center gap-2">
+        {config.enableClear && messages.length > 0 && (
+          <Button intent="ghost" size="sm" text="Clear" onClick={clearChat} />
+        )}
+        {config.variant === 'component' && (
+          <Button
+            intent="ghost"
+            size="sm"
+            icon={isExpanded ? Minimize2 : Maximize2}
+            onClick={() => setIsExpanded(!isExpanded)}
+          />
+        )}
+      </div>
+    );
+
+  const chatContent = (
+    <CardContent
+      className={cn(getContainerClasses())}
       style={{
         height: height,
         width: width,
         ...(config.accentColor && ({ '--accent': config.accentColor } as any)),
       }}
     >
-      {/* Header (for non-full-page variants) */}
-      {config.variant !== 'full-page' && (
-        <div className="flex items-center justify-between p-2 border-b">
-          <div>
-            <h3 className="font-semibold">{config.title}</h3>
-            {config.subtitle && <p className="text-sm text-muted-foreground">{config.subtitle}</p>}
-          </div>
-          <div className="flex items-center gap-2">
-            {config.enableClear && messages.length > 0 && (
-              <Button intent="ghost" size="sm" text="Clear" onClick={clearChat} />
-            )}
-            {config.variant === 'component' && (
-              <Button
-                intent="ghost"
-                size="sm"
-                icon={isExpanded ? Minimize2 : Maximize2}
-                onClick={() => setIsExpanded(!isExpanded)}
-              />
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Messages Area */}
       <div className={getMessagesClasses()}>
         {messages.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className={cn('space-y-6 py-4', config.variant === 'compact' && 'space-y-3 py-2')}>
+          <div className="space-y-6 py-4">
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
 
             {/* Loading indicator */}
             {isLoading && !isStreaming && (
-              <div
-                className={cn(
-                  'flex gap-3',
-                  config.variant === 'full-page' ? 'max-w-4xl mx-auto' : 'w-full',
-                )}
-              >
+              <div className="flex gap-3 w-full">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
                   <Bot className="h-4 w-4 text-muted-foreground" />
                 </div>
@@ -489,7 +470,7 @@ export default function ChatBot({
                   <div
                     className={cn(
                       'font-medium',
-                      config.variant === 'compact' ? 'text-xs' : 'text-sm',
+                      config.variant === 'component' ? 'text-sm' : 'text-base',
                     )}
                   >
                     {config.assistantName}
@@ -499,7 +480,7 @@ export default function ChatBot({
                     <span
                       className={cn(
                         'text-muted-foreground',
-                        config.variant === 'compact' ? 'text-xs' : 'text-sm',
+                        config.variant === 'component' ? 'text-sm' : 'text-base',
                       )}
                     >
                       Thinking...
@@ -526,7 +507,7 @@ export default function ChatBot({
       )}
 
       {/* Input Area */}
-      <div className={cn(getInputAreaClasses(), config.variant === 'full-page' && getMaxWidth())}>
+      <div className={getInputAreaClasses()}>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <div className="flex-1">
             <ModernTextarea
@@ -536,7 +517,9 @@ export default function ChatBot({
               onKeyDown={handleKeyDown}
               disabled={isLoading || isStreaming || disabled}
               placeholder={config.placeholder}
-              className={config.variant === 'compact' ? 'text-sm' : ''}
+              className={config.variant === 'component' ? 'text-sm' : ''}
+              aria-label="Chat message input"
+              rows={3}
             />
           </div>
           <Button
@@ -544,10 +527,44 @@ export default function ChatBot({
             intent="primary"
             text={isLoading || isStreaming ? 'Sending...' : 'Send'}
             onClick={handleSubmit}
-            size={config.variant === 'compact' ? 'sm' : 'md'}
+            size={config.variant === 'component' ? 'sm' : 'md'}
           />
         </form>
       </div>
-    </div>
+    </CardContent>
+  );
+
+  // Return BaseCard wrapper for component variant, direct content for full variant
+  if (config.variant === 'full') {
+    return (
+      <div className={cn('h-full min-h-screen bg-background', className)}>
+        {/* Full page header */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">{config.title}</h1>
+                {config.subtitle && <p className="text-muted-foreground">{config.subtitle}</p>}
+              </div>
+              {config.enableClear && messages.length > 0 && (
+                <Button intent="ghost" size="sm" text="Clear Chat" onClick={clearChat} />
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 relative">{chatContent}</div>
+      </div>
+    );
+  }
+
+  return (
+    <BaseCard
+      className={cn(isExpanded ? 'h-[600px]' : 'h-120', className)}
+      title={cardTitle}
+      subtitle={cardSubtitle}
+      actions={cardActions}
+    >
+      {chatContent}
+    </BaseCard>
   );
 }

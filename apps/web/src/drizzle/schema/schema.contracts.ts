@@ -33,38 +33,33 @@ export const contractsTable = pgTable(
     effectiveTo: date('effective_to'),
     processStatus: ProcessStatusEnum('process_status').default('pending'),
 
-    // LLM narratives
+    // Summary & Details
     summary: text('summary'),
-    commercialTerms: text('commercial_terms'),
-    slas: text('slas'),
-    edgeCases: text('edge_cases'),
-    riskLiability: text('risk_liability'),
-    terminationLaw: text('termination_law'),
-    operationalBaselines: text('operational_baselines'),
-
-    // Lightweight tags
-    tags: jsonb('tags').default({}),
+    details: jsonb('details'),
 
     // Timestamps
     createdAt,
     updatedAt,
   },
   (t) => [
+    // If the organization is deleted, delete the contract
     foreignKey({
       columns: [t.orgId],
       foreignColumns: [organizationsTable.id],
       name: 'fk_contracts_org_id',
     }).onDelete('cascade'),
+    // If the airport is deleted, delete the contract
     foreignKey({
       columns: [t.airportId],
       foreignColumns: [airportsTable.id],
       name: 'fk_contracts_airport_id',
     }).onDelete('cascade'),
+    // If the vendor is deleted, set the vendorId to null
     foreignKey({
       columns: [t.vendorId],
       foreignColumns: [vendorsTable.id],
       name: 'fk_contracts_vendor_id',
-    }).onDelete('cascade'),
+    }).onDelete('set null'),
 
     index('contracts_org_id_idx').on(t.orgId),
     index('contracts_airport_id_idx').on(t.airportId),

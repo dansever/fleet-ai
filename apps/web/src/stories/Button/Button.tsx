@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { LucideIcon } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -7,11 +8,12 @@ import { twMerge } from 'tailwind-merge';
 const buttonStyles = cva(
   [
     'border border-transparent inline-flex items-center justify-center',
-    'rounded-2xl shadow-sm hover:shadow-md ',
+    'rounded-xl shadow-sm hover:shadow-md ',
     'transition-colors duration-200',
     'font-normal text-center',
     'cursor-pointer flex-shrink-0',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'hover:scale-102 transition-transform duration-200',
+    'focus:outline-none focus:ring-none',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],
   {
@@ -37,12 +39,15 @@ const buttonStyles = cva(
         danger:
           'bg-gradient-to-r from-red-500 to-red-500 opacity-80 hover:from-red-600 hover:to-red-700 text-white',
         // Ghost action - minimal prominence, tertiary actions, icon buttons
-        ghost: 'bg-transparent hover:bg-muted/80 text-primary/70 shadow-none hover:shadow-none',
+        ghost: 'bg-transparent hover:bg-muted/20 text-primary/70 shadow-none hover:shadow-none',
+        // Glass
+        glass:
+          'bg-white/20 hover:bg-white/50 backdrop-blur-md shadow-sm hover:shadow-md transition-all',
       },
       size: {
-        sm: 'h-8 p-3 text-sm',
-        md: 'h-10 px-4 text-base',
-        lg: 'h-12 px-4 text-lg',
+        sm: 'h-8 p-2 rounded-lg text-sm',
+        md: 'h-10 p-3 text-base',
+        lg: 'h-12 p-4 text-lg',
       },
     },
     defaultVariants: {
@@ -61,7 +66,8 @@ type ButtonIntent =
   | 'success'
   | 'warning'
   | 'danger'
-  | 'ghost';
+  | 'ghost'
+  | 'glass';
 type ButtonSize = 'sm' | 'md' | 'lg';
 type ButtonType = 'button' | 'submit' | 'reset';
 type ButtonIconPosition = 'left' | 'right';
@@ -76,8 +82,10 @@ export interface ButtonProps
   icon?: LucideIcon; // Optional icon to display before the text
   iconPosition?: ButtonIconPosition; // Position of the icon relative to text
   isLoading?: boolean; // Show loading state
+  loadingIcon?: LucideIcon; // Custom loading icon (defaults to Loader2, or RefreshCw if original icon is RefreshCw)
   href?: string; // Link to navigate to (renders as Link instead of button)
   external?: boolean; // Open link in new tab
+  children?: React.ReactNode; // Children to display in the button
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -90,9 +98,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: Icon = null,
       iconPosition = 'left',
       isLoading = false,
+      loadingIcon,
       href,
       external = false,
       className,
+      children,
       ...props
     },
     ref,
@@ -112,18 +122,40 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const iconSize = getIconSize();
     const baseClassName = twMerge(buttonStyles({ intent, size }), className);
 
+    // Determine which icon to show during loading
+    const getLoadingIcon = () => {
+      if (loadingIcon) return loadingIcon;
+      // If the original icon is RefreshCw, use it for loading (it will spin)
+      if (Icon === RefreshCw) return RefreshCw;
+      // Default to Loader2 for other cases
+      return Loader2;
+    };
+
+    // Determine the actual icon to render
+    const CurrentIcon = isLoading ? getLoadingIcon() : Icon;
+
+    // Add spinning animation class when loading
+    const getIconClassName = (baseIconSize: string) => {
+      const spinClass = isLoading ? 'animate-spin' : '';
+      return `${baseIconSize} ${spinClass}`.trim();
+    };
+
     // Content to render (same for both button and link)
     const content = (
       <>
         {/* Icon only mode */}
-        {text === null && Icon && <Icon className={iconSize} />}
+        {text === null && CurrentIcon && <CurrentIcon className={getIconClassName(iconSize)} />}
 
         {/* Icon + Text mode */}
         {text !== null && (
           <>
-            {Icon && iconPosition === 'left' && <Icon className={`${iconSize} mr-2`} />}
+            {CurrentIcon && iconPosition === 'left' && (
+              <CurrentIcon className={getIconClassName(`${iconSize} mr-2`)} />
+            )}
             {text}
-            {Icon && iconPosition === 'right' && <Icon className={`${iconSize} ml-2`} />}
+            {CurrentIcon && iconPosition === 'right' && (
+              <CurrentIcon className={getIconClassName(`${iconSize} ml-2`)} />
+            )}
           </>
         )}
       </>
@@ -156,6 +188,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {content}
+        {children}
       </button>
     );
   },

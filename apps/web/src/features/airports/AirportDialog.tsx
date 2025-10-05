@@ -1,10 +1,11 @@
 'use client';
 
+import { CardContent } from '@/components/ui/card';
 import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { client as airportClient } from '@/modules/core/airports';
 import { AirportCreateInput } from '@/modules/core/airports/airports.types';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { useEffect, useState } from 'react';
@@ -155,12 +156,12 @@ export default function AirportDialog({
       DialogType={DialogType}
       open={open}
       onOpenChange={onOpenChange}
-      className="min-w-[35vw] sm:min-w-[40vw] md:min-w-[45vw] lg:min-w-[50vw]"
+      className="min-w-[40vw] sm:min-w-[45vw] md:min-w-[50vw] lg:min-w-[55vw]"
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <MainCard title="Airport Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between ">
+          <BaseCard title="Airport Information">
+            <CardContent>
               {isEditing && isAdd ? (
                 <AirportAutocomplete
                   label="Search Airport"
@@ -204,11 +205,11 @@ export default function AirportDialog({
                 name="isHub"
                 value={formData.isHub}
               />
-            </div>
-          </MainCard>
+            </CardContent>
+          </BaseCard>
 
-          <MainCard title="Location Information" neutralHeader={true}>
-            <div className="flex flex-col justify-between">
+          <BaseCard title="Location Information">
+            <CardContent>
               <KeyValuePair
                 label="City"
                 value={formData.city}
@@ -233,8 +234,8 @@ export default function AirportDialog({
                 onChange={(value) => handleFieldChange('country', value)}
                 name="country"
               />
-            </div>
-          </MainCard>
+            </CardContent>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

@@ -2,12 +2,13 @@
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { VendorContact } from '@/drizzle/types';
-import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { Column, DataTable } from '@/stories/DataTable/DataTable';
 import { Building2, Mail, Phone, RefreshCw, User, UserPlus } from 'lucide-react';
-import { useAirportHub } from '../ContextProvider';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useAirportHub } from '../context';
 
 export default function ContactsAndProviders() {
   const {
@@ -17,7 +18,45 @@ export default function ContactsAndProviders() {
     errors,
     refreshVendorContacts,
     addVendorContact,
+    updateVendorContact,
+    removeVendorContact,
   } = useAirportHub();
+  const [isAddingContact, setIsAddingContact] = useState(false);
+
+  // Placeholder function for adding a new vendor contact
+  // TODO: Implement proper dialog/form for adding vendor contacts
+  const handleAddContact = async () => {
+    if (!selectedAirport) {
+      toast.error('No airport selected');
+      return;
+    }
+
+    setIsAddingContact(true);
+    try {
+      // This is a placeholder - replace with actual vendor contact creation logic
+      const newContact: Partial<VendorContact> = {
+        name: 'New Contact',
+        email: 'contact@example.com',
+        phone: '+1-555-0123',
+        role: 'Contact Person',
+        department: 'Operations',
+        // Add other required fields based on your VendorContact schema
+      };
+
+      // For now, just show a message that this needs to be implemented
+      toast.info('Add contact functionality needs to be implemented with proper form dialog');
+      console.log('Would add contact:', newContact);
+
+      // When implemented, this should call:
+      // const createdContact = await vendorContactClient.createVendorContact(newContact);
+      // addVendorContact(createdContact);
+    } catch (error) {
+      toast.error('Failed to add contact');
+      console.error(error);
+    } finally {
+      setIsAddingContact(false);
+    }
+  };
 
   const contactColumns: Column<VendorContact>[] = [
     {
@@ -125,27 +164,17 @@ export default function ContactsAndProviders() {
 
   return (
     <div className="flex flex-col gap-6">
-      <MainCard
+      <BaseCard
         title="Airport Contacts"
         subtitle={`All contacts associated with ${selectedAirport?.name || 'this airport'} including direct airport contacts and vendor contacts.`}
-        neutralHeader={true}
         actions={
           <div className="flex gap-2">
-            <Button
-              intent="ghost"
-              icon={RefreshCw}
-              className={cn(loading.vendorContacts && loading.isRefreshing && 'animate-spin')}
-              disabled={loading.vendorContacts && loading.isRefreshing}
-              onClick={refreshVendorContacts}
-            />
-
             <Button
               intent="primary"
               text="Add Contact"
               icon={UserPlus}
-              onClick={() => {
-                console.log('Add contact clicked');
-              }}
+              onClick={handleAddContact}
+              disabled={isAddingContact}
             />
           </div>
         }
@@ -165,10 +194,8 @@ export default function ContactsAndProviders() {
                 intent="primary"
                 text="Add First Contact"
                 icon={UserPlus}
-                onClick={() => {
-                  // TODO: Implement add contact functionality
-                  console.log('Add first contact clicked');
-                }}
+                onClick={handleAddContact}
+                disabled={isAddingContact}
               />
             </div>
           ) : (
@@ -179,7 +206,7 @@ export default function ContactsAndProviders() {
               filterable={false}
               pagination={true}
               pageSize={10}
-              onRowClick={(vendorContact) => {
+              onRowClick={(vendorContact: VendorContact) => {
                 // TODO: Implement contact details view
                 console.log('Contact clicked:', vendorContact);
               }}
@@ -188,7 +215,7 @@ export default function ContactsAndProviders() {
             />
           )}
         </div>
-      </MainCard>
+      </BaseCard>
     </div>
   );
 }

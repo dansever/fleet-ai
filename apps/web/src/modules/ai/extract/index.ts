@@ -1,11 +1,4 @@
-// Document extraction module exports
-
-export * from './extract.client';
-export * from './extract.types';
-
-// Server-side functions (only available in server context)
-export * from './extract.server';
-
-// Re-export commonly used items
-export { extractDocumentData } from './extract.client';
-export type { ExtractionResult, ExtractionState } from './extract.types';
+export * as client from './extract.client';
+export * as server from './extract.server';
+export * as types from './extract.types';
+export * as utils from './extract.utils';

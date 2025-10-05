@@ -14,7 +14,7 @@ import {
 import type { Rfq } from '@/drizzle/types';
 import { client as rfqClient } from '@/modules/rfqs';
 import { RfqCreateInput, RfqUpdateInput } from '@/modules/rfqs/rfqs.types';
-import { MainCard } from '@/stories/Card/Card';
+import { BaseCard } from '@/stories/Card/Card';
 import { DetailDialog } from '@/stories/Dialog/Dialog';
 import { KeyValuePair } from '@/stories/KeyValuePair/KeyValuePair';
 import { serializeDatesForAPI } from '@/utils/date-helpers';
@@ -247,7 +247,7 @@ export default function RfqDialog({
     >
       {(isEditing) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <MainCard title="RFQ Information" neutralHeader={true}>
+          <BaseCard title="RFQ Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Direction"
@@ -304,9 +304,9 @@ export default function RfqDialog({
                 name="sentAt"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Vendor Information" neutralHeader={true}>
+          <BaseCard title="Vendor Information" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
@@ -349,9 +349,9 @@ export default function RfqDialog({
                 name="vendorContactPhone"
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Part Specifications" neutralHeader={true}>
+          <BaseCard title="Part Specifications" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Part Number"
@@ -403,9 +403,9 @@ export default function RfqDialog({
                 min={1}
               />
             </div>
-          </MainCard>
+          </BaseCard>
 
-          <MainCard title="Commercial Terms" neutralHeader={true}>
+          <BaseCard title="Commercial Terms" neutralHeader={true}>
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Pricing Type"
@@ -432,7 +432,7 @@ export default function RfqDialog({
                 name="buyerComments"
               />
             </div>
-          </MainCard>
+          </BaseCard>
         </div>
       )}
     </DetailDialog>

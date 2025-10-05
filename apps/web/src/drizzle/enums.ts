@@ -80,41 +80,82 @@ export function getDecisionDisplay(decision: Decision | string | null | undefine
 // --------------------  Contract Type Enum --------------------
 export const ContractTypeEnum = pgEnum('contract_type', [
   'fuel', // fuel supply, into-plane, SAF
-  'ground_handling', // ramp, GPU, pushback, cleaning, deicing ops
-  'catering', // catering, onboard services, waste removal
-  'technical_mro_parts', // line maintenance, components, tooling
-  'airport_and_nav_charges', // airport fees, ANSP route/overflight charges
-  'security_compliance', // screening, regulated agent, audits
-  'it_data_comms', // SITA, nav data, SaaS, connectivity
-  'logistics_freight', // AOG courier, freight forwarding, customs broker
-  'training_and_crew', // simulator hours, crew training, licensing
-  'insurance_and_finance', // liability, hull insurance, leasing fees
-  'other',
+  'ground_handling', // ground handling, baggage handling, ramp, GPU, pushback, deicing
+  'catering', // catering services, onboard services, waste removal
+  'technical_mro', // technical services, MRO, parts, line maintenance, components
+  'airport_services', // airport fees, nav charges, parking management
+  'security', // security services, compliance, screening, regulated agent
+  'it_infrastructure', // IT infrastructure, SITA, data, communications, SaaS
+  'cargo_logistics', // cargo operations, logistics, freight forwarding, AOG courier
+  'training_crew', // training services, crew training, simulator hours, licensing
+  'cleaning_facilities', // cleaning services, facilities maintenance
+  'insurance_finance', // insurance, finance, liability, hull insurance, leasing
+  'other', // other contract types
 ]);
 
 export type ContractType = (typeof ContractTypeEnum.enumValues)[number];
-export const contractTypeDisplayMap: Record<ContractType, string> = {
-  fuel: 'Fuel',
-  ground_handling: 'Ground Handling',
-  catering: 'Catering',
-  technical_mro_parts: 'Technical MRO Parts',
-  airport_and_nav_charges: 'Airport & Nav Charges',
-  security_compliance: 'Security and Compliance',
-  it_data_comms: 'IT Data Comms',
-  logistics_freight: 'Logistics Freight',
-  training_and_crew: 'Training and Crew',
-  insurance_and_finance: 'Insurance & Finance',
-  other: 'Other',
+export const contractTypeDisplayMap: Record<ContractType, { display: string; color: string }> = {
+  fuel: {
+    display: 'Fuel Supply',
+    color: 'border-0 bg-gradient-to-r from-purple-500/80 to-blue-400 text-white',
+  },
+  ground_handling: {
+    display: 'Ground Handling',
+    color: 'border-0 bg-gradient-to-r from-green-500/80 to-teal-400 text-white',
+  },
+  catering: {
+    display: 'Catering Services',
+    color: 'border-0 bg-gradient-to-r from-orange-500 to-amber-500 text-white',
+  },
+  technical_mro: {
+    display: 'Technical & MRO',
+    color: 'border-0 bg-gradient-to-r from-blue-500/80 to-indigo-400 text-white',
+  },
+  airport_services: {
+    display: 'Airport Services',
+    color: 'border-0 bg-gradient-to-r from-slate-500/80 to-gray-400 text-white',
+  },
+  security: {
+    display: 'Security Services',
+    color: 'border-0 bg-gradient-to-r from-red-500/80 to-rose-400 text-white',
+  },
+  it_infrastructure: {
+    display: 'IT Infrastructure',
+    color: 'border-0 bg-gradient-to-r from-cyan-500/80 to-sky-400 text-white',
+  },
+  cargo_logistics: {
+    display: 'Cargo & Logistics',
+    color: 'border-0 bg-gradient-to-r from-yellow-500/80 to-orange-400 text-white',
+  },
+  training_crew: {
+    display: 'Training & Crew',
+    color: 'border-0 bg-gradient-to-r from-violet-500/80 to-purple-400 text-white',
+  },
+  cleaning_facilities: {
+    display: 'Cleaning & Facilities',
+    color: 'border-0 bg-gradient-to-r from-emerald-500/80 to-green-400 text-white',
+  },
+  insurance_finance: {
+    display: 'Insurance & Finance',
+    color: 'border-0 bg-gradient-to-r from-indigo-500/80 to-blue-400 text-white',
+  },
+  other: { display: 'Other', color: 'bg-gradient-to-r from-gray-500/80 to-slate-400 text-white' },
 };
 
-export function getContractTypeDisplay(
+export function getContractTypeDisplayName(
   contractType: ContractType | string | null | undefined,
 ): string {
   if (!contractType) return 'Unknown';
-  return (
-    contractTypeDisplayMap[contractType as ContractType] ||
-    contractType.charAt(0).toUpperCase() + contractType.slice(1)
-  );
+  const entry = contractTypeDisplayMap[contractType as ContractType];
+  return entry?.display;
+}
+
+export function getContractTypeColor(
+  contractType: ContractType | string | null | undefined,
+): string {
+  if (!contractType) return 'bg-gray-200';
+  const entry = contractTypeDisplayMap[contractType as ContractType];
+  return entry?.color;
 }
 
 // --------------------  Urgency Level Enum --------------------
@@ -136,29 +177,31 @@ export function getUrgencyLevelDisplay(
 }
 
 // --------------------  Document Parent Type Enum --------------------
-export const DocumentParentTypeEnum = pgEnum('document_parent_type', [
+export const DocumentTypeEnum = pgEnum('document_type', [
   'contract',
   'invoice',
   'rfq',
+  'quote',
   'fuel_tender',
   'fuel_bid',
   'other',
 ]);
-export type DocumentParentType = (typeof DocumentParentTypeEnum.enumValues)[number];
-export const documentParentTypeDisplayMap: Record<DocumentParentType, string> = {
+export type DocumentType = (typeof DocumentTypeEnum.enumValues)[number];
+export const documentTypeDisplayMap: Record<DocumentType, string> = {
   contract: 'Contract',
   invoice: 'Invoice',
   rfq: 'RFQ',
+  quote: 'Quote',
   fuel_tender: 'Fuel Tender',
   fuel_bid: 'Fuel Bid',
   other: 'Other',
 };
-export function getDocumentParentTypeDisplay(
-  documentParentType: DocumentParentType | string | null | undefined,
+export function getDocumentTypeDisplay(
+  documentType: DocumentType | string | null | undefined,
 ): string {
-  if (!documentParentType) return 'Unknown';
+  if (!documentType) return 'Unknown';
   return (
-    documentParentTypeDisplayMap[documentParentType as DocumentParentType] ||
-    documentParentType.charAt(0).toUpperCase() + documentParentType.slice(1)
+    documentTypeDisplayMap[documentType as DocumentType] ||
+    documentType.charAt(0).toUpperCase() + documentType.slice(1)
   );
 }

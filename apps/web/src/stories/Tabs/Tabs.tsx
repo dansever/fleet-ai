@@ -14,6 +14,8 @@ export interface TabsProps {
   className?: string;
 }
 
+const defaultTabBackground = 'bg-gradient-to-r from-blue-500/10 to-purple-500/10';
+
 export const Tabs = ({
   tabs,
   defaultTab = tabs ? tabs[0].value : '',
@@ -49,7 +51,7 @@ export const Tabs = ({
               className={cn(
                 // base
                 'relative isolate cursor-pointer rounded-xl transition-all duration-300 py-2 px-4',
-                'text-base text-muted-foreground/50 hover:text-secondary/80',
+                'text-base text-secondary/50 hover:text-secondary/80',
                 'data-[state=active]:text-secondary',
                 'data-[state=active]:bg-transparent data-[state=active]:shadow-none',
                 // glow layer - before pseudo element
@@ -72,12 +74,13 @@ export const Tabs = ({
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
-                {tab.icon}
                 <motion.span
                   initial={{ opacity: 0.7 }}
-                  animate={{ opacity: activeTab === tab.value ? 1 : 0.7 }}
+                  animate={{ opacity: activeTab === tab.value ? 1 : 0.8 }}
                   transition={{ duration: 0.8 }}
+                  className="flex items-center gap-2"
                 >
+                  {tab.icon}
                   {tab.label}
                 </motion.span>
               </motion.div>
@@ -86,7 +89,7 @@ export const Tabs = ({
                 {activeTab === tab.value && (
                   <motion.div
                     layoutId={`activeTab-${uniqueId}`}
-                    className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border-0"
+                    className={cn('rounded-xl border-0 absolute inset-0', defaultTabBackground)}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}

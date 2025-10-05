@@ -1,17 +1,23 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getContractTypeDisplay, getProcessStatusDisplay, ProcessStatus } from '@/drizzle/enums';
+import {
+  getContractTypeColor,
+  getContractTypeDisplayName,
+  getProcessStatusDisplay,
+  ProcessStatus,
+} from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
 import SimpleContractDialog from '@/features/contracts/contracts/AddContractDialog';
 import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
-import { ListItemCard } from '@/stories/Card/Card';
+import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { PlusIcon, RefreshCw } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
-import { useAirportHub } from '../ContextProvider';
+import { useAirportHub } from '../context';
 
 export default function ContractList() {
   const {
@@ -38,37 +44,38 @@ export default function ContractList() {
   }
 
   return (
-    <div className="h-fit flex flex-col rounded-3xl bg-card">
-      {/* Header */}
-      <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 py-2">
-        <div className="text-sm text-muted-foreground">
-          {contracts.length} of {contracts.length} contracts
+    <BaseCard
+      className="h-fit flex flex-col p-0 gap-0"
+      contentClassName="p-0"
+      headerClassName="p-0"
+      title={`Contacts at ${selectedAirport?.name}`}
+      header={
+        <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 pt-2 gap-2">
+          <div className="text-sm text-muted-foreground">
+            {contracts.length}/{contracts.length} contracts at{' '}
+            <span className="font-semibold italic">{selectedAirport?.name}</span>
+          </div>
+          <SimpleContractDialog
+            airport={selectedAirport!}
+            trigger={<Button intent="add" icon={PlusIcon} />}
+            onOpenChange={(open) => {
+              if (!open) {
+                // Close popover when dialog closes
+                setIsPopoverOpen(false);
+              }
+            }}
+            onChange={(newContract) => {
+              if (addContract) {
+                addContract(newContract);
+                // Automatically select the newly created contract
+                setSelectedContract(newContract);
+              }
+            }}
+          />{' '}
         </div>
-        <Button
-          intent="ghost"
-          disabled={loading.contracts && loading.isRefreshing}
-          icon={RefreshCw}
-          size="sm"
-          onClick={refreshContracts}
-        />
-        <SimpleContractDialog
-          airport={selectedAirport!}
-          trigger={<Button intent="add" icon={PlusIcon} />}
-          onOpenChange={(open) => {
-            if (!open) {
-              // Close popover when dialog closes
-              setIsPopoverOpen(false);
-            }
-          }}
-          onChange={(newContract) => {
-            if (addContract) {
-              addContract(newContract);
-              // Automatically select the newly created contract
-              setSelectedContract(newContract);
-            }
-          }}
-        />{' '}
-      </div>
+      }
+    >
+      {/* Header */}
 
       {/* Contract List */}
       <div className="flex-1 min-h-0">
@@ -98,15 +105,14 @@ export default function ContractList() {
                     onClick={() => setSelectedContract(contract)}
                     className={cn(
                       isSelected
-                        ? 'border-sky-100 from-sky-200/20 via-sky-200 to-sky-200/40 opacity-100'
-                        : 'bg-gradient-to-br from-sky-50/80 via-sky-50 to-sky-50/60 opacity-80 hover:bg-gradient-to-br hover:from-sky-100 hover:via-sky-100 hover:to-sky-100',
+                        ? 'border-sky-100 from-sky-100/40 via-sky-100 to-sky-100/40 opacity-100'
+                        : 'hover:border-sky-200 hover:bg-none',
                     )}
                   >
                     <div className="flex flex-col gap-1 items-start">
-                      <StatusBadge
-                        status={'default'}
-                        text={getContractTypeDisplay(contract.contractType || '')}
-                      />
+                      <Badge className={getContractTypeColor(contract.contractType)}>
+                        {getContractTypeDisplayName(contract.contractType)}
+                      </Badge>
                       <span className="text-sm font-bold">{contract.title}</span>
                       <span className="text-xs">{contract.vendorName}</span>
                       <div className="flex flex-row gap-2">
@@ -116,7 +122,7 @@ export default function ContractList() {
                               ? 'operational'
                               : getIsContractActive(contract) === 'pending'
                                 ? 'pending'
-                                : 'error'
+                                : 'danger'
                           }
                           text={getProcessStatusDisplay(
                             getIsContractActive(contract) as ProcessStatus,
@@ -124,7 +130,7 @@ export default function ContractList() {
                         />
                         {numOfDaysLeft && numOfDaysLeft < 31 && (
                           <StatusBadge
-                            status={numOfDaysLeft < 7 ? 'error' : 'warning'}
+                            status={numOfDaysLeft < 7 ? 'danger' : 'warning'}
                             text={`${numOfDaysLeft} ${numOfDaysLeft === 1 ? 'Day' : 'Days'} Left`}
                           />
                         )}
@@ -137,6 +143,6 @@ export default function ContractList() {
           </div>
         </ScrollArea>
       </div>
-    </div>
+    </BaseCard>
   );
 }

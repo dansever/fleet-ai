@@ -13,20 +13,20 @@ A highly customizable ChatBot component that can be used throughout the applicat
 
 ## Features
 
-- **Multiple Variants**: Full-page, component, sidebar, and compact layouts
+- **Two Main Variants**: Full-page and component layouts optimized for different use cases
+- **BaseCard Integration**: Uses the standardized BaseCard component for consistent styling
 - **Customizable API**: Support for custom endpoints, system prompts, and additional context
 - **Rich Configuration**: Extensive styling and behavior options
 - **Event Callbacks**: Hook into message events for custom logic
 - **Responsive Design**: Adapts to different screen sizes and containers
 - **Streaming Support**: Real-time message streaming with loading states
 - **Error Handling**: Built-in retry and error display functionality
+- **Performance Optimized**: Memoized components and efficient re-rendering
 
 ## Variants
 
-- **full-page**: Takes up the entire screen, ideal for dedicated chat pages
-- **component**: Standard component size (384px height), perfect for embedded chat
-- **sidebar**: Optimized for sidebar layouts with minimal padding
-- **compact**: Small height (256px), great for quick interactions
+- **full**: Full-page layout with sticky header, ideal for dedicated chat pages
+- **component**: Standard component size with BaseCard wrapper, perfect for embedded chat with expand/collapse functionality
 
 ## Themes
 
@@ -192,11 +192,11 @@ export const AirportOperations: Story = {
 };
 
 // Variant Stories
-export const FullPageVariant: Story = {
+export const FullVariant: Story = {
   args: {
     config: {
       ...defaultConfig,
-      variant: 'full-page',
+      variant: 'full',
     },
     initialMessages: sampleMessages,
   },
@@ -215,28 +215,15 @@ export const ComponentVariant: Story = {
   },
 };
 
-export const SidebarVariant: Story = {
+export const ComponentExpanded: Story = {
   args: {
     config: {
       ...defaultConfig,
-      variant: 'sidebar',
-      title: 'AI Assistant',
-      subtitle: 'Quick help',
+      variant: 'component',
+      title: 'Expandable Chat',
+      subtitle: 'Click expand to see more space',
     },
-    initialMessages: sampleMessages.slice(0, 2),
-    width: '320px',
-    height: '600px',
-  },
-};
-
-export const CompactVariant: Story = {
-  args: {
-    config: {
-      ...defaultConfig,
-      variant: 'compact',
-      title: 'Quick Chat',
-      subtitle: 'Ask a quick question',
-    },
+    initialMessages: sampleMessages,
   },
 };
 

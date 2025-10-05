@@ -2,12 +2,14 @@
 
 import type React from 'react';
 
+import FileUpload from '@/components/miscellaneous/FileUpload';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { formatFileSize } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { FileText, Send, Upload, X } from 'lucide-react';
 import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '../Button/Button';
-import { MainCard } from '../Card/Card';
+import { BaseCard } from '../Card/Card';
 
 interface BasePopoverProps {
   trigger: ReactNode;
@@ -202,6 +204,7 @@ export const FileUploadPopover = ({
     if (isControlled) onOpenChange?.(v);
     else setInternalOpen(v);
   };
+  const [loading, setLoading] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -250,22 +253,16 @@ export const FileUploadPopover = ({
 
   const handleSend = async () => {
     if (selectedFile && onSend) {
+      setLoading(true);
       await onSend(selectedFile);
       setSelectedFile(null);
+      setLoading(false);
       close();
     }
   };
 
   const handleCancel = () => {
     setSelectedFile(null);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (
@@ -275,19 +272,15 @@ export const FileUploadPopover = ({
         <PopoverContent
           align={popoverContentAlign}
           className={cn(
-            'w-80 p-0 rounded-2xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
+            'w-80 p-0 rounded-3xl overflow-hidden border-0 bg-white/95 backdrop-blur-sm',
           )}
         >
-          <MainCard
-            title={selectedFile ? selectedFile.name : 'Upload Document'}
-            subtitle={!selectedFile ? 'Drag and drop or click to select' : undefined}
-            neutralHeader={false}
-          >
+          <BaseCard className="pb-2 pt-4 px-0" contentClassName="px-4">
             {!selectedFile ? (
-              <div className="space-y-2">
+              <div className="space-y-2 ">
                 <div
                   className={cn(
-                    'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+                    'border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer',
                     isDragOver
                       ? 'border-blue-400 bg-blue-50'
                       : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50',
@@ -298,7 +291,7 @@ export const FileUploadPopover = ({
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="space-y-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center mx-auto">
                       <Upload className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -309,7 +302,6 @@ export const FileUploadPopover = ({
                     </div>
                   </div>
                 </div>
-
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -321,53 +313,99 @@ export const FileUploadPopover = ({
                 {typeof children === 'function' ? children({ close }) : children}
               </div>
             ) : (
-              <div className="flex flex-col p-0 bg-white gap-4">
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex flex-col gap-2 flex-1">
-                      <p className="text-sm font-medium text-gray-900 whitespace-break-spaces">
-                        {selectedFile.name}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex flex-col space-y-0">
-                          <span className="text-zinc-500 dark:text-zinc-400">Size</span>
-                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                            {formatFileSize(selectedFile.size)}
-                          </span>
-                        </div>
-                        <div className="flex flex-col space-y-0">
-                          <span className="text-zinc-500 dark:text-zinc-400">Type</span>
-                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                            {selectedFile.type.split('/')[1].toUpperCase() || 'Unknown'}
-                          </span>
-                        </div>
-                        <div className="flex flex-col space-y-0">
-                          <span className="text-zinc-500 dark:text-zinc-400">Modified</span>
-                          <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                            {new Date(selectedFile.lastModified).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="flex flex-col space-y-0">
-                          <span className="text-zinc-500 dark:text-zinc-400">Status</span>
-                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                            Ready
-                          </span>
-                        </div>
+              <div className="flex flex-col gap-2 p-2">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <p className="text-sm font-medium text-gray-900 break-words max-w-[200px]">
+                      {selectedFile?.name}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex flex-col space-y-0">
+                        <span className="text-zinc-500 dark:text-zinc-400">Size</span>
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                          {formatFileSize(selectedFile.size)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col space-y-0">
+                        <span className="text-zinc-500 dark:text-zinc-400">Type</span>
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                          {selectedFile.type.split('/')[1].toUpperCase() || 'Unknown'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col space-y-0">
+                        <span className="text-zinc-500 dark:text-zinc-400">Modified</span>
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                          {new Date(selectedFile.lastModified).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex flex-col space-y-0">
+                        <span className="text-zinc-500 dark:text-zinc-400">Status</span>
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                          Ready
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button intent="secondary" onClick={handleCancel} text="Cancel" icon={X} />
-                  <Button intent="success" onClick={handleSend} text="Upload" icon={Send} />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    intent="secondary"
+                    onClick={handleCancel}
+                    text="Cancel"
+                    icon={X}
+                    isLoading={loading}
+                  />
+                  <Button
+                    intent="success"
+                    onClick={handleSend}
+                    text="Upload"
+                    icon={Send}
+                    isLoading={loading}
+                  />
                 </div>
               </div>
             )}
-          </MainCard>
+          </BaseCard>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+export const FileUploadPopoverNew = ({
+  trigger,
+  onSend,
+  accept = '*/*',
+  maxSize = 10,
+  className,
+  popoverContentAlign = 'end',
+  open,
+  onOpenChange,
+  children,
+}: FileUploadPopoverProps) => {
+  const isControlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isControlled ? open! : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
+  return (
+    <div className={cn('space-y-3 flex flex-row gap-2', className)}>
+      <Popover open={isOpen} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverContent
+          align={popoverContentAlign}
+          className={cn(
+            'w-full p-0 bg-transparent shadow-none rounded-3xl overflow-hidden border-0',
+          )}
+        >
+          <FileUpload />
         </PopoverContent>
       </Popover>
     </div>

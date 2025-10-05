@@ -6,17 +6,12 @@ export interface ExtractionUsage {
   num_output_tokens: number;
 }
 
-export interface ExtractionMetadata {
-  field_metadata: Record<string, any>;
-  usage: ExtractionUsage;
-}
-
-export interface ExtractionResult {
+export type ExtractionResult = {
   run_id: string;
   extraction_agent_id: string;
   data: Record<string, any>;
-  extraction_metadata: ExtractionMetadata;
-}
+  extraction_metadata: { field_metadata: Record<string, any>; usage: ExtractionUsage };
+};
 
 export interface ExtractionState {
   status: 'idle' | 'uploading' | 'processing' | 'completed' | 'error';

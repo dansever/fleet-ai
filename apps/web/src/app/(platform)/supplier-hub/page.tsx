@@ -1,4 +1,4 @@
-import { getAuthContext } from '@/lib/authorization/get-auth-context';
+import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { server as rfqServer } from '@/modules/rfqs';
 import TechnicalProcurementClientPage from './ClientPage';
 import { TechnicalProcurementContextProvider } from './ContextProvider';

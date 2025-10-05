@@ -6,15 +6,15 @@ import { FuelTenderCreateInput, FuelTenderUpdateInput } from './tenders.types';
  * Get a fuel tender by ID
  */
 export async function getFuelTender(id: FuelTender['id']): Promise<FuelTender> {
-  const res = await api.get(`/api/fuel-tenders/${id}`);
+  const res = await api.get(`/api/fuel/tenders/${id}`);
   return res.data;
 }
 
 /**
  * Get fuel tenders by tender ID
  */
-export async function listFuelBidsByTender(tenderId: string): Promise<FuelTender[]> {
-  const res = await api.get(`/api/fuel-tenders?tenderId=${tenderId}`);
+export async function listFuelTendersByTender(tenderId: string): Promise<FuelTender[]> {
+  const res = await api.get(`/api/fuel/tenders?tenderId=${tenderId}`);
   return res.data;
 }
 
@@ -22,7 +22,7 @@ export async function listFuelBidsByTender(tenderId: string): Promise<FuelTender
  * Get fuel tenders by organization
  */
 export async function listFuelTendersByOrg(): Promise<FuelTender[]> {
-  const res = await api.get('/api/fuel-tenders');
+  const res = await api.get('/api/fuel/tenders');
   return res.data;
 }
 
@@ -33,7 +33,7 @@ export async function createFuelTender(
   tenderId: FuelTender['id'],
   data: FuelTenderCreateInput,
 ): Promise<FuelTender> {
-  const res = await api.post(`/api/fuel-tenders?tenderId=${tenderId}`, data);
+  const res = await api.post(`/api/fuel/tenders?tenderId=${tenderId}`, data);
   return res.data;
 }
 
@@ -44,7 +44,7 @@ export async function updateFuelTender(
   id: string,
   data: FuelTenderUpdateInput,
 ): Promise<FuelTender> {
-  const res = await api.put(`/api/fuel-tenders?id=${id}`, data);
+  const res = await api.put(`/api/fuel/tenders?id=${id}`, data);
   return res.data;
 }
 
@@ -52,7 +52,7 @@ export async function updateFuelTender(
  * Delete a fuel tender
  */
 export async function deleteFuelTender(id: FuelTender['id']): Promise<void> {
-  await api.delete(`/api/fuel-tenders/${id}`);
+  await api.delete(`/api/fuel/tenders/${id}`);
 }
 
 // Type for the extracted fuel bid data from backend

@@ -50,14 +50,29 @@ case "$1" in
     # Save project tree structure into a file
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+    echo "🌳 Saving project tree structure to $SCRIPT_DIR/project-structure.txt..."
     cd "$REPO_ROOT"
     echo "alias tree='/c/Windows/System32/tree.com'" >> ~/.bashrc
     tree -I "node_modules|.git|.next|dist|build|coverage|.turbo|.pnpm-store" . > "$SCRIPT_DIR/project-structure.txt"
     echo "✅ Project tree saved to $SCRIPT_DIR/project-structure.txt"
     ;;
 
-  *)
-    echo "Usage: ./commands.sh {dev|build|studio:local|studio:remote|migrate:local|migrate:remote|db:generate}"
+  clean:web)
+    # Clean Next.js cache inside apps/web
+    echo "🧹 Cleaning Next.js cache (apps/web/.next)..."
+    cd apps/web
+    rm -rf .next
+    rm -rf node_modules/.cache
+    echo "✅ Cache cleaned"
+    ;;
+
+  clean:all)
+    # Clean Next.js cache inside apps/web
+    cd apps/web && rm -rf .next && rm -rf node_modules/.cache
+    ;;
+
+    *)
+    echo "Usage: ./commands.sh {dev|build|studio:local|studio:remote|migrate:local|migrate:remote|db:generate|tree|clean:web|clean:all}"
     exit 1
     ;;
 esac

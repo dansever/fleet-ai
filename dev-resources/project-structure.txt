@@ -321,7 +321,7 @@
 |       |   |   |   |   |-- ContextProvider.tsx
 |       |   |   |   |   |-- _components
 |       |   |   |   |   |   |-- AskAI.tsx
-|       |   |   |   |   |   |-- ContractFiles.tsx
+|       |   |   |   |   |   |-- ContractDocuments.tsx
 |       |   |   |   |   |   |-- ContractOverview.tsx
 |       |   |   |   |   |   `-- ContractSidebar.tsx
 |       |   |   |   |   |-- page.tsx
@@ -346,16 +346,6 @@
 |       |   |   |   |   |   `-- RiskAndCompliance.tsx
 |       |   |   |   |   `-- page.tsx
 |       |   |   |   |-- error.tsx
-|       |   |   |   |-- file-upload
-|       |   |   |   |   |-- ClientPage.tsx
-|       |   |   |   |   |-- hooks
-|       |   |   |   |   |   |-- README.md
-|       |   |   |   |   |   |-- index.ts
-|       |   |   |   |   |   |-- useDocumentExtraction.ts
-|       |   |   |   |   |   |-- useFileProcessing.ts
-|       |   |   |   |   |   |-- useFileUpload.ts
-|       |   |   |   |   |   `-- useProgressAnimation.ts
-|       |   |   |   |   `-- page.tsx
 |       |   |   |   |-- fuel-procurement
 |       |   |   |   |   |-- ClientPage.tsx
 |       |   |   |   |   |-- README.md
@@ -466,6 +456,8 @@
 |       |   |   |   |   `-- route.ts
 |       |   |   |   |-- storage
 |       |   |   |   |   |-- buckets
+|       |   |   |   |   |   |-- [bucketName]
+|       |   |   |   |   |   |   `-- route.ts
 |       |   |   |   |   |   `-- route.ts
 |       |   |   |   |   |-- delete
 |       |   |   |   |   |   `-- route.ts
@@ -573,26 +565,27 @@
 |       |   |   |-- contracts
 |       |   |   |   |-- contracts
 |       |   |   |   |   |-- AddContractDialog.tsx
-|       |   |   |   |   |-- ContractDialog.tsx
-|       |   |   |   |   `-- createRandomContract.ts
+|       |   |   |   |   `-- ContractDialog.tsx
 |       |   |   |   `-- invoices
-|       |   |   |       `-- createRandomInvoice.tsx
 |       |   |   |-- fuel
 |       |   |   |   |-- bid
 |       |   |   |   |   |-- FuelBidDialog.tsx
-|       |   |   |   |   |-- createRandomBid.ts
 |       |   |   |   |   `-- pydanticConverter.ts
 |       |   |   |   `-- tender
 |       |   |   |       `-- TenderDialog.tsx
+|       |   |   |-- generateRandomObjects
+|       |   |   |   |-- contract.ts
+|       |   |   |   |-- fuel-bid.ts
+|       |   |   |   |-- invoice.ts
+|       |   |   |   |-- quote.ts
+|       |   |   |   `-- rfq.ts
 |       |   |   |-- pydantic-models
 |       |   |   |   `-- shared-pydantic-models.ts
 |       |   |   |-- quotes
-|       |   |   |   |-- createRandomQuote.ts
 |       |   |   |   |-- pydanticConverter.ts
 |       |   |   |   `-- quoteDialog.tsx
 |       |   |   |-- rfqs
 |       |   |   |   |-- RfqDialog.tsx
-|       |   |   |   |-- createRandomRfq.ts
 |       |   |   |   `-- pydanticConverter.ts
 |       |   |   `-- vendors
 |       |   |-- hooks
@@ -707,6 +700,7 @@
 |       |   |   |   |-- rfqs.server.ts
 |       |   |   |   `-- rfqs.types.ts
 |       |   |   |-- storage
+|       |   |   |   |-- README.md
 |       |   |   |   |-- index.ts
 |       |   |   |   |-- storage.client.ts
 |       |   |   |   |-- storage.server.ts
@@ -794,4 +788,4 @@
 |-- pnpm-lock.yaml
 `-- pnpm-workspace.yaml
 
-218 directories, 576 files
+218 directories, 570 files

@@ -1,6 +1,9 @@
-// Server-side document extraction functions using LlamaExtract API
-// These functions can be used in API routes or server components
+'use server';
+import 'server-only';
 
+import { authHeaders, withCtx } from '@/lib/ai/llamaCloud';
+import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
+import { api } from '@/services/api-client';
 import { recordAiTokenUsage } from '@/services/record-usage';
 import type {
   ExtractionAgent,
@@ -9,119 +12,156 @@ import type {
   UploadedFile,
 } from './extract.types';
 
-const LLAMA_BASE = 'https://api.cloud.llamaindex.ai';
+/**
+ * Server-side orchestrator for the extraction process
+ * @param file - the file to extract
+ * @param agentName - the name of the extraction agent
+ * @returns the extraction result
+ */
+export async function fileExtractorOrchestrator(
+  file: File,
+  agentName: ExtractionAgentName,
+): Promise<ExtractionResult> {
+  try {
+    console.log(
+      `📍 Starting file Extractor Orchestrator for: ${file.name}`,
+      `with agent: ${agentName}`,
+    );
+    // Phase 1: Prepare file and agent
+    // 1.1: Get the extraction agent
+    const agent = await getExtractionAgent(agentName);
+    // 1.2: Upload the file
+    const uploadedFile = await uploadFileForExtraction(file);
 
-function authHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.LLAMA_CLOUD_API_KEY!}`,
-    Accept: 'application/json',
-  };
-}
+    // Phase 2: Start extraction job
+    const job = await startExtractionJob(uploadedFile.id, agent.id);
 
-function withCtx(path: string) {
-  const p = new URL(path, LLAMA_BASE);
-  p.searchParams.set('project_id', process.env.LLAMA_EXTRACT_PROJECT_ID!);
-  p.searchParams.set('organization_id', process.env.LLAMA_ORGANIZATION_ID!);
-  return p.toString();
+    // Phase 3: Poll for completion and get results
+    const result = await pollExtractionJob(job.id, 30, 2000);
+
+    // Phase 4: Record usage
+    await recordExtractionUsage(result, uploadedFile.id, agent.id);
+
+    // Return result
+    return result;
+  } catch (error) {
+    throw error instanceof Error ? error : new Error('Unknown extraction error');
+  }
 }
 
 /**
- * Server-side function to get extraction agent by name
+ * Get extraction agent by name
  */
-export async function getExtractionAgentServer(
-  agentName: string = 'fleet-ai-contract-extractor',
-): Promise<ExtractionAgent> {
-  const response = await fetch(
+export async function getExtractionAgent(agentName: string): Promise<ExtractionAgent> {
+  const res = await api.get(
     withCtx(`/api/v1/extraction/extraction-agents/by-name/${encodeURIComponent(agentName)}`),
-    {
-      headers: authHeaders(),
-    },
+    { headers: authHeaders() },
   );
-
-  if (!response.ok) {
-    throw new Error(`Failed to get extraction agent: ${response.statusText}`);
+  if (res.status !== 200) {
+    throw new Error(`Failed to get extraction agent: ${res.data}`);
   }
-
-  return response.json();
+  return res.data;
 }
 
 /**
- * Server-side function to upload file for extraction
+ * Upload a file for extraction processing
  */
-export async function uploadFileForExtractionServer(
-  file: Blob,
-  fileName: string,
-): Promise<UploadedFile> {
+export async function uploadFileForExtraction(file: File): Promise<UploadedFile> {
+  // Prepare form data for LlamaCloud API
   const formData = new FormData();
-  formData.append('upload_file', file, fileName);
-
-  const response = await fetch(withCtx('/api/v1/files'), {
-    method: 'POST',
-    headers: authHeaders(),
-    body: formData,
+  formData.append('upload_file', file, file.name ?? 'upload.bin');
+  const res = await api.post(withCtx('/api/v1/files'), formData, {
+    headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' },
   });
-
-  if (!response.ok) {
-    throw new Error(`File upload failed: ${response.statusText}`);
+  if (res.status !== 200) {
+    throw new Error(`Failed to upload file: ${res.data}`);
   }
-
-  return response.json();
+  return res.data;
 }
 
 /**
- * Server-side function to start extraction job
+ * Start an extraction job for a file using an extraction agent
  */
-export async function startExtractionJobServer(
+export async function startExtractionJob(
   fileId: string,
-  agentId: string,
+  extractionAgentId: string,
 ): Promise<ExtractionJob> {
-  const response = await fetch(withCtx('/api/v1/extraction/jobs'), {
-    method: 'POST',
-    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ file_id: fileId, extraction_agent_id: agentId }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Extraction job failed: ${response.statusText}`);
+  if (!fileId || !extractionAgentId) {
+    throw new Error('Both file_id and extraction_agent_id are required');
   }
-
-  return response.json();
+  const res = await api.post(
+    withCtx('/api/v1/extraction/jobs'),
+    { file_id: fileId, extraction_agent_id: extractionAgentId },
+    { headers: { ...authHeaders(), 'Content-Type': 'application/json' } },
+  );
+  if (res.status !== 200) {
+    throw new Error(`Failed to start extraction job: ${res.data}`);
+  }
+  return res.data;
 }
 
 /**
- * Server-side function to get extraction job status
+ * Get extraction job status
  */
-export async function getExtractionJobStatusServer(jobId: string): Promise<ExtractionJob> {
-  const response = await fetch(withCtx(`/api/v1/extraction/jobs/${jobId}`), {
+export async function getExtractionJobStatus(jobId: string): Promise<ExtractionJob> {
+  const res = await api.get(withCtx(`/api/v1/extraction/jobs/${jobId}`), {
     headers: authHeaders(),
   });
-
-  if (!response.ok) {
-    throw new Error(`Status check failed: ${response.statusText}`);
+  if (res.status !== 200) {
+    throw new Error(`Failed to get job status: ${res.data}`);
   }
-
-  return response.json();
+  return res.data;
 }
 
 /**
- * Server-side function to get extraction results
+ * Get extraction job result
  */
-export async function getExtractionResultServer(jobId: string): Promise<ExtractionResult> {
-  const response = await fetch(withCtx(`/api/v1/extraction/jobs/${jobId}/result`), {
+export async function getExtractionJobResult(jobId: string): Promise<ExtractionResult> {
+  const res = await api.get(withCtx(`/api/v1/extraction/jobs/${jobId}/result`), {
     headers: authHeaders(),
   });
-
-  if (!response.ok) {
-    throw new Error(`Result fetch failed: ${response.statusText}`);
+  if (res.status !== 200) {
+    throw new Error(`Failed to get job result: ${res.data}`);
   }
-
-  return response.json();
+  return res.data;
 }
 
 /**
- * Server-side function to record extraction usage
+ * Poll for extraction job completion and return results (server-side)
  */
-export async function recordExtractionUsageServer(
+export async function pollExtractionJob(
+  jobId: string,
+  maxAttempts: number = 30,
+  intervalMs: number = 2000, // 2 seconds
+): Promise<ExtractionResult> {
+  console.log(
+    `📍 Server: Entering Poll Extraction Job for jobId: ${jobId}`,
+    `with maxAttempts = ${maxAttempts}`,
+    `and intervalMs = ${intervalMs}`,
+  );
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    const jobStatus = await getExtractionJobStatus(jobId);
+    if (jobStatus.status === 'SUCCESS') {
+      console.log('[jobStatus=SUCCESS after ', attempts, 'polling attempts]');
+      return await getExtractionJobResult(jobId);
+    } else if (jobStatus.status === 'FAILED') {
+      console.log('[jobStatus = FAILED after ', attempts, 'polling attempts]');
+      throw new Error('Extraction job failed');
+    }
+    // Job is still processing, wait and retry
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    attempts++;
+  }
+  throw new Error('Extraction job timed out');
+}
+
+/**
+ * Record extraction usage for billing/analytics
+ * This can be called from server components or API routes
+ */
+export async function recordExtractionUsage(
   result: ExtractionResult,
   userId: string,
   orgId: string,
@@ -130,14 +170,8 @@ export async function recordExtractionUsageServer(
     console.warn('No usage metadata found in extraction result');
     return;
   }
-
   const totalTokens =
     result.extraction_metadata.usage.num_document_tokens +
     result.extraction_metadata.usage.num_output_tokens;
-
-  await recordAiTokenUsage({
-    userId,
-    orgId,
-    totalTokens,
-  });
+  await recordAiTokenUsage({ userId, orgId, totalTokens });
 }

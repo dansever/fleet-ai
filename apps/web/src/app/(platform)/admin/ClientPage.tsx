@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
 import { updateExtractors } from '@/modules/admin/admin.client';
-import { getBucketFolderCounts } from '@/modules/storage/storage.client';
+import { storage } from '@/modules/file-manager';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Tabs } from '@/stories/Tabs/Tabs';
@@ -26,6 +26,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const storageClient = storage.client;
 
 interface ExtractionAgent {
   name: string;
@@ -138,7 +140,7 @@ export default function AdminClientPage() {
     try {
       const folderCountsPromises = bucketsToLoad.map(async (bucket) => {
         try {
-          const counts = await getBucketFolderCounts(bucket.name);
+          const counts = await storageClient.getBucketFolderCounts(bucket.name);
           return { bucketName: bucket.name, counts: counts.data };
         } catch (error) {
           console.error(`Failed to load folder counts for bucket ${bucket.name}:`, error);

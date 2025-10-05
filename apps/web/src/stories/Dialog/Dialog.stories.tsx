@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Edit, Eye, Plane, Plus, Users, Wrench } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../Button/Button';
-import { BadgeGroup, MainCard } from '../Card/Card';
+import { BadgeGroup, BaseCard } from '../Card/Card';
 import { DatePicker, ModernInput, ModernSelect } from '../Form/Form';
 import { KeyValuePair } from '../KeyValuePair/KeyValuePair';
 import { DetailDialog } from './Dialog';
@@ -83,7 +83,7 @@ export const AllDialogVariants: Story = {
               >
                 {(isEditing) => (
                   <div className="space-y-6 p-4">
-                    <MainCard
+                    <BaseCard
                       title="Basic Information"
                       headerGradient="from-violet-500 to-blue-500"
                     >
@@ -138,9 +138,9 @@ export const AllDialogVariants: Story = {
                           />
                         </div>
                       )}
-                    </MainCard>
+                    </BaseCard>
 
-                    <MainCard
+                    <BaseCard
                       title="Operational Details"
                       headerGradient="from-green-500 to-emerald-600"
                     >
@@ -158,7 +158,7 @@ export const AllDialogVariants: Story = {
                           valueType="string"
                         />
                       </div>
-                    </MainCard>
+                    </BaseCard>
                   </div>
                 )}
               </DetailDialog>
@@ -185,7 +185,7 @@ export const AllDialogVariants: Story = {
                 }}
               >
                 <div className="space-y-6 p-4">
-                  <MainCard title="Flight Information" headerGradient="from-blue-500 to-purple-600">
+                  <BaseCard title="Flight Information" headerGradient="from-blue-500 to-purple-600">
                     <div className="space-y-4">
                       <ModernInput
                         label="Flight Number"
@@ -203,9 +203,9 @@ export const AllDialogVariants: Story = {
                         toYear={2025}
                       />
                     </div>
-                  </MainCard>
+                  </BaseCard>
 
-                  <MainCard title="Aircraft Assignment" headerGradient="from-green-500 to-teal-600">
+                  <BaseCard title="Aircraft Assignment" headerGradient="from-green-500 to-teal-600">
                     <div className="space-y-4">
                       <ModernSelect
                         label="Assigned Aircraft"
@@ -226,7 +226,7 @@ export const AllDialogVariants: Story = {
                         ]}
                       />
                     </div>
-                  </MainCard>
+                  </BaseCard>
                 </div>
               </DetailDialog>
               <p className="text-xs text-muted-foreground">
@@ -259,7 +259,7 @@ export const AllDialogVariants: Story = {
                 }}
               >
                 <div className="space-y-6 p-4">
-                  <MainCard title="Aircraft Details" headerGradient="from-purple-500 to-pink-600">
+                  <BaseCard title="Aircraft Details" headerGradient="from-purple-500 to-pink-600">
                     <div className="space-y-4">
                       <ModernInput
                         label="Registration Number"
@@ -291,9 +291,9 @@ export const AllDialogVariants: Story = {
                         max="2024"
                       />
                     </div>
-                  </MainCard>
+                  </BaseCard>
 
-                  <MainCard
+                  <BaseCard
                     title="Operational Information"
                     headerGradient="from-blue-500 to-cyan-600"
                   >
@@ -321,7 +321,7 @@ export const AllDialogVariants: Story = {
                         max="850"
                       />
                     </div>
-                  </MainCard>
+                  </BaseCard>
                 </div>
               </DetailDialog>
               <p className="text-xs text-muted-foreground">
@@ -356,7 +356,7 @@ export const AllDialogVariants: Story = {
             >
               {(isEditing) => (
                 <div className="space-y-6 p-4">
-                  <MainCard
+                  <BaseCard
                     title="Current Maintenance Status"
                     headerGradient="from-red-500 to-pink-600"
                   >
@@ -367,9 +367,9 @@ export const AllDialogVariants: Story = {
                       <KeyValuePair label="Cycles Since Last" value={187} valueType="number" />
                       <KeyValuePair label="Maintenance Status" value="Current" valueType="string" />
                     </div>
-                  </MainCard>
+                  </BaseCard>
 
-                  <MainCard title="Upcoming Tasks" headerGradient="from-blue-500 to-indigo-600">
+                  <BaseCard title="Upcoming Tasks" headerGradient="from-blue-500 to-indigo-600">
                     <BadgeGroup
                       tags={[
                         'Engine Inspection',
@@ -378,9 +378,9 @@ export const AllDialogVariants: Story = {
                         'Safety Equipment Check',
                       ]}
                     />
-                  </MainCard>
+                  </BaseCard>
 
-                  <MainCard title="Maintenance Team" headerGradient="from-green-500 to-emerald-600">
+                  <BaseCard title="Maintenance Team" headerGradient="from-green-500 to-emerald-600">
                     <div className="space-y-0">
                       <KeyValuePair
                         label="Lead Technician"
@@ -391,7 +391,7 @@ export const AllDialogVariants: Story = {
                       <KeyValuePair label="Estimated Duration" value="8 hours" valueType="string" />
                       <KeyValuePair label="Hangar Assignment" value="Hangar 3" valueType="string" />
                     </div>
-                  </MainCard>
+                  </BaseCard>
                 </div>
               )}
             </DetailDialog>
@@ -405,32 +405,32 @@ export const AllDialogVariants: Story = {
               headerGradient="from-blue-500 to-purple-600"
             >
               <div className="space-y-6 p-4">
-                <MainCard title="Active Flights" headerGradient="from-green-500 to-teal-600">
+                <BaseCard title="Active Flights" headerGradient="from-green-500 to-teal-600">
                   <div className="space-y-0">
                     <KeyValuePair label="FA-1247 (JFK→LAX)" value="In Flight" valueType="string" />
                     <KeyValuePair label="FA-2156 (ORD→MIA)" value="Boarding" valueType="string" />
                     <KeyValuePair label="FA-3389 (DEN→SEA)" value="Delayed" valueType="string" />
                     <KeyValuePair label="FA-4492 (ATL→BOS)" value="Scheduled" valueType="string" />
                   </div>
-                </MainCard>
+                </BaseCard>
 
-                <MainCard title="Fleet Status" headerGradient="from-purple-500 to-pink-600">
+                <BaseCard title="Fleet Status" headerGradient="from-purple-500 to-pink-600">
                   <div className="space-y-0">
                     <KeyValuePair label="Aircraft Available" value={42} valueType="number" />
                     <KeyValuePair label="In Maintenance" value={3} valueType="number" />
                     <KeyValuePair label="In Flight" value={18} valueType="number" />
                     <KeyValuePair label="Ground Operations" value={21} valueType="number" />
                   </div>
-                </MainCard>
+                </BaseCard>
 
-                <MainCard title="Performance Metrics" headerGradient="from-orange-500 to-red-600">
+                <BaseCard title="Performance Metrics" headerGradient="from-orange-500 to-red-600">
                   <div className="space-y-0">
                     <KeyValuePair label="On-Time Performance" value="94.2%" valueType="string" />
                     <KeyValuePair label="Average Load Factor" value="87.5%" valueType="string" />
                     <KeyValuePair label="Daily Revenue" value="$2.4M" valueType="string" />
                     <KeyValuePair label="Fuel Efficiency" value="98.1%" valueType="string" />
                   </div>
-                </MainCard>
+                </BaseCard>
               </div>
             </DetailDialog>
 
@@ -446,7 +446,7 @@ export const AllDialogVariants: Story = {
               }}
             >
               <div className="space-y-6 p-4">
-                <MainCard title="Flight Crew Assignment" headerGradient="from-blue-500 to-cyan-600">
+                <BaseCard title="Flight Crew Assignment" headerGradient="from-blue-500 to-cyan-600">
                   <div className="space-y-4">
                     <ModernSelect
                       label="Captain"
@@ -468,9 +468,9 @@ export const AllDialogVariants: Story = {
                     />
                     <ModernInput label="Senior Flight Attendant" defaultValue="Lisa Brown" />
                   </div>
-                </MainCard>
+                </BaseCard>
 
-                <MainCard
+                <BaseCard
                   title="Schedule Information"
                   headerGradient="from-green-500 to-emerald-600"
                 >
@@ -489,9 +489,9 @@ export const AllDialogVariants: Story = {
                       valueType="string"
                     />
                   </div>
-                </MainCard>
+                </BaseCard>
 
-                <MainCard title="Certifications" headerGradient="from-orange-500 to-yellow-600">
+                <BaseCard title="Certifications" headerGradient="from-orange-500 to-yellow-600">
                   <BadgeGroup
                     tags={[
                       'Type Rating Current',
@@ -500,7 +500,7 @@ export const AllDialogVariants: Story = {
                       'Emergency Procedures Current',
                     ]}
                   />
-                </MainCard>
+                </BaseCard>
               </div>
             </DetailDialog>
           </div>

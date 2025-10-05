@@ -9,12 +9,13 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { Eye, FileText, MapPin, Star, Users } from 'lucide-react';
+import { CopilotPopup } from '@copilotkit/react-ui';
+import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
-import AirportList from '../_components/AirportSidebar';
-import { useAirportHub } from './ContextProvider';
+import AirportsPanel from '../_components/AirportsPanel';
+import { useAirportHub } from './context';
 import AirportPage from './subpages/Airport';
-import ContractsPage from './subpages/Contracts';
+import ContractsPage from './subpages/ServiceAgreements';
 import VendorsPage from './subpages/Vendors';
 
 type TabValue = 'manage-contracts' | 'contacts-and-providers' | 'manage-airport';
@@ -24,9 +25,13 @@ export default function AirportHubClientPage() {
     airports,
     setAirports,
     selectedAirport,
+    refreshAirports,
     setSelectedAirport,
     addAirport,
     updateAirport,
+    refreshContracts,
+    refreshDocuments,
+    refreshVendorContacts,
     loading,
     errors,
     clearError,
@@ -37,6 +42,15 @@ export default function AirportHubClientPage() {
   if (loading.airports) {
     return <LoadingComponent size="lg" text="Loading airports..." />;
   }
+
+  /**
+   * Refresh all except airports
+   */
+  const handleRefresh = () => {
+    refreshContracts();
+    refreshDocuments();
+    refreshVendorContacts();
+  };
 
   if (errors.airports) {
     return (
@@ -70,15 +84,6 @@ export default function AirportHubClientPage() {
 
   return (
     <PageLayout
-      sidebarContent={
-        <AirportList
-          airports={airports}
-          onAirportSelect={setSelectedAirport}
-          selectedAirport={selectedAirport}
-          InsertAddAirportButton={true}
-          onAirportAdd={addAirport}
-        />
-      }
       headerContent={
         loading.airports ? (
           <div className="flex items-center space-x-4">
@@ -90,17 +95,24 @@ export default function AirportHubClientPage() {
           </div>
         ) : selectedAirport ? (
           <div className="flex flex-row items-start gap-4 justify-between w-full">
-            <div className="flex flex-col">
+            <div className="flex flex-col flex-1 min-w-0 gap-1">
               <div className="flex flex-row items-center gap-4">
-                <h1>{selectedAirport.name}</h1>
+                <AirportsPanel
+                  airports={airports}
+                  selectedAirport={selectedAirport}
+                  onAirportSelect={setSelectedAirport}
+                  onAirportAdd={setSelectedAirport}
+                />
               </div>
               <div className="flex items-center gap-2 text-gray-600 text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>
-                  {selectedAirport.city}
-                  {selectedAirport.state && ', ' + selectedAirport.state}
-                  {selectedAirport.country && ', ' + selectedAirport.country}
-                </span>
+                <div className="flex flex-row items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>
+                    {selectedAirport.city}
+                    {selectedAirport.state && ', ' + selectedAirport.state}
+                    {selectedAirport.country && ', ' + selectedAirport.country}
+                  </span>
+                </div>
                 <div className="flex flex-row items-center gap-1">
                   {selectedAirport.icao && (
                     <StatusBadge status="secondary" text={selectedAirport.icao} />
@@ -115,14 +127,21 @@ export default function AirportHubClientPage() {
                     </div>
                   )}
                 </div>
+                <AirportDialog
+                  trigger={<Button intent="ghost" icon={Eye} text="View" size="sm" />}
+                  airport={selectedAirport}
+                  onChange={updateAirport}
+                  DialogType="view"
+                />
               </div>
             </div>
-            <div className="flex gap-2">
-              <AirportDialog
-                trigger={<Button intent="secondary" text="View Airport" icon={Eye} />}
-                airport={selectedAirport}
-                onChange={updateAirport}
-                DialogType="view"
+            <div className="fixed top-2 right-36">
+              <Button
+                intent="glass"
+                text="Refresh"
+                icon={RefreshCw}
+                onClick={handleRefresh}
+                isLoading={loading.contracts || loading.documents || loading.vendorContacts}
               />
             </div>
           </div>
@@ -137,9 +156,25 @@ export default function AirportHubClientPage() {
           </div>
         )
       }
-      mainContent={<MainContentSection />}
       sidebarWidth={isCollapsed ? '18rem' : '18rem'}
-    />
+    >
+      <MainContentSection />
+      <CopilotPopup
+        onThumbsUp={() => {
+          console.log('Thumbs up');
+        }}
+        onThumbsDown={() => {
+          console.log('Thumbs down');
+        }}
+        instructions={
+          'You are assisting the user as best as you can. Answer in the best way possible given the data you have.'
+        }
+        labels={{
+          title: 'Your Assistant',
+          initial: 'Hi! 👋 How can I assist you today?',
+        }}
+      />
+    </PageLayout>
   );
 }
 

@@ -1,380 +1,198 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { TrendingUp } from 'lucide-react';
-import Image from 'next/image';
 import type React from 'react';
-import { useMemo } from 'react';
+import { forwardRef } from 'react';
 
-// Gradient palettes for FeatureCard
-export enum GradientPalette {
-  PinkPurpleBlue = 'PinkPurpleBlue',
-  RoseFuchsiaIndigo = 'RoseFuchsiaIndigo',
-  SkyIndigoViolet = 'SkyIndigoViolet',
-  VioletPinkRose = 'VioletPinkRose',
-  CyanBluePurple = 'CyanBluePurple',
-}
+// ==============================================================
+// CardProps
+// ==============================================================
 
-export const paletteToClasses: Record<GradientPalette, string> = {
-  [GradientPalette.PinkPurpleBlue]: 'from-pink-500/90 via-purple-600/90 to-blue-700/90',
-  [GradientPalette.RoseFuchsiaIndigo]: 'from-rose-500/90 via-fuchsia-600/90 to-indigo-700/90',
-  [GradientPalette.SkyIndigoViolet]: 'from-sky-600/90 via-indigo-700/90 to-violet-800/90',
-  [GradientPalette.VioletPinkRose]: 'from-violet-600/90 via-pink-600/90 to-rose-700/90',
-  [GradientPalette.CyanBluePurple]: 'from-cyan-500/90 via-blue-600/90 to-purple-700/90',
-};
-
-export interface BaseCardProps {
+export interface CardProps extends React.ComponentPropsWithoutRef<typeof Card> {
   className?: string;
-  children?: React.ReactNode;
-}
-
-// Surface Card - Minimal base surface for custom layouts
-export const BaseCard = ({ className, children }: BaseCardProps) => (
-  <Card className={cn('rounded-3xl shadow-none border-0 overflow-hidden', className)}>
-    {children}
-  </Card>
-);
-
-// Common standardized props for all cards
-export interface StandardCardProps {
-  className?: string;
+  cardType?: 'main' | 'inner';
   // Header options (either simple or custom)
-  icon?: React.ReactNode;
-  title?: string;
-  subtitle?: string;
   header?: React.ReactNode; // Takes precedence over title/subtitle
-  // Actions (consistent naming)
+  headerClassName?: string;
+  title?: string;
+  subtitle?: string | React.ReactNode;
+  icon?: React.ReactNode;
   actions?: React.ReactNode;
-  // Content
-  children?: React.ReactNode;
-  // Optional footer
+  // footer
   footer?: React.ReactNode;
+  // children
+  children?: React.ReactNode;
+  contentClassName?: string;
 }
 
-// Main Card - For displaying main content with header and actions
-export const MainCard = ({
-  title,
-  subtitle,
-  icon,
-  header, // Custom header option
-  headerGradient = 'from-violet-600 via-blue-600 to-indigo-700',
-  neutralHeader = false,
-  actions,
-  children,
-  footer,
+// ==============================================================
+// BaseCard
+// ==============================================================
+
+export const BaseCard = ({
   className,
-  cardContentClassName,
-}: StandardCardProps & {
-  headerGradient?: string;
-  neutralHeader?: boolean;
-  cardContentClassName?: string;
-}) => (
-  <Card
-    className={cn('rounded-3xl pt-0 pb-4 gap-2 border-0 shadow-none overflow-hidden', className)}
-  >
-    {(header || title) && (
-      <CardHeader className="px-0">
-        {header ? (
-          header
-        ) : (
-          <div
-            className={cn(
-              'px-6 py-2 relative overflow-hidden',
-              neutralHeader
-                ? 'bg-white text-gray-900'
-                : `bg-gradient-to-r text-white ${headerGradient}`,
-            )}
-          >
-            {!neutralHeader && (
-              <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
-            )}
-
-            <div className="relative z-10 flex items-start justify-between gap-2">
-              <div className="flex flex-col gap-1">
-                <div className="flex flex-row items-center gap-3">
-                  {icon && icon}
-                  <div className="flex flex-col gap-1">
-                    <h3>{title}</h3>
-                    {subtitle && (
-                      <p className={cn(neutralHeader ? 'text-gray-600' : 'text-white/80')}>
-                        {subtitle}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-            </div>
-          </div>
-        )}
-      </CardHeader>
-    )}
-
-    {/* Content area */}
-    <CardContent className={cardContentClassName}>{children}</CardContent>
-    {footer && <CardContent>{footer}</CardContent>}
-  </Card>
-);
-
-// Feature Card - For showcasing features or services
-export const FeatureCard = ({
-  title,
-  subtitle, // Add for consistency
+  cardType = 'main',
+  headerClassName,
   header,
   icon,
-  palette = GradientPalette.VioletPinkRose,
+  title,
+  subtitle,
   actions,
   children,
+  contentClassName,
   footer,
-  className,
-}: StandardCardProps & {
-  palette?: GradientPalette;
-}) => {
-  // Choose classes based on enum or manual override; no randomization
-  const chosenGradient = useMemo(() => {
-    return paletteToClasses[palette] ?? paletteToClasses[GradientPalette.VioletPinkRose];
-  }, [palette]);
-
+}: CardProps) => {
+  const hasHeaderParams = header || title || subtitle || actions;
   return (
-    <Card className={cn('!rounded-4xl border-0 overflow-hidden p-0 relative group', className)}>
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className={cn(
-            'absolute -inset-24 blur-3xl opacity-70 bg-gradient-to-br transition-all duration-500 group-hover:opacity-80',
-            chosenGradient,
-          )}
-        />
-        <div className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20" />
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/5" />
-      </div>
-
-      {/* Foreground content */}
-      <div className="relative z-10 p-6 text-white">
-        {header ? (
-          header
-        ) : (
-          <div className="flex items-center gap-3 mb-4 justify-between">
-            <div className="flex flex-row gap-2 items-center">
-              {icon && (
-                <div className="p-2 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20">
-                  {icon}
+    <Card
+      className={cn(
+        'w-full rounded-3xl border-slate-200 shadow-none overflow-hidden',
+        hasHeaderParams && 'pt-0',
+        { 'gap-2': cardType === 'inner' },
+        className,
+      )}
+    >
+      {hasHeaderParams ? (
+        <CardHeader className={cn('pt-4 pb-1 bg-gradient-to-r', headerClassName)}>
+          {header
+            ? header
+            : (title || subtitle || actions) && (
+                <div className={cn('flex flex-row items-start justify-between gap-2')}>
+                  <div className="flex flex-col flex-1 w-full items-start justify-between gap-0">
+                    <div className="flex flex-row items-center gap-2">
+                      {icon && icon}
+                      <div className="flex flex-col gap-1">
+                        {cardType === 'main' ? <h2>{title}</h2> : <h3>{title}</h3>}
+                        {typeof subtitle === 'string' ? (
+                          <div className="leading-tight">{subtitle}</div>
+                        ) : (
+                          subtitle
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 max-w-3/5">{actions}</div>
                 </div>
               )}
-              <div>
-                <h3 className="font-semibold">{title}</h3>
-                {subtitle && <p className="text-white/70 text-sm">{subtitle}</p>}
-              </div>
-            </div>
-            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-          </div>
-        )}
-        <div className="text-white/85">{children}</div>
-        {footer && <div className="text-white/75 mt-3">{footer}</div>}
-      </div>
+        </CardHeader>
+      ) : null}
+      <CardContent className={contentClassName}>{children}</CardContent>
+      {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );
 };
 
-// Project Card - For displaying projects or portfolio items
-export const ProjectCard = ({
-  title,
-  subtitle, // Use instead of description for consistency
-  header,
-  imagePath,
-  progress,
-  badgeText,
-  badgeColor,
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  imagePath?: string;
-  progress?: number;
-  badgeText?: string | null;
-  badgeColor?: string;
-}) => (
-  <Card
-    className={cn(
-      'rounded-3xl overflow-hidden shadow-none border-0 gap-2',
-      imagePath && 'pt-0',
-      className,
-    )}
-  >
-    {imagePath && (
-      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative">
-        <Image
-          src={imagePath ?? '/placeholder.svg'}
-          alt={title || 'Project Image'}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority
-        />
-        {badgeText && (
-          <Badge
-            className={cn(
-              'absolute top-3 right-3 text-white rounded-xl',
-              badgeColor ?? 'bg-gradient-to-r from-pink-500 to-red-500',
-            )}
-          >
-            {badgeText}
-          </Badge>
-        )}
-      </div>
-    )}
-    {(header || title) && (
-      <CardHeader className="px-4">
-        {header ? (
-          header
-        ) : (
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <CardTitle className="text-lg font-bold">{title}</CardTitle>
-              {subtitle && <CardDescription className="mt-1">{subtitle}</CardDescription>}
-            </div>
-          </div>
-        )}
-      </CardHeader>
-    )}
-    <CardContent className="px-4">
-      {children}
-      {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-    </CardContent>
-    {footer && <CardContent>{footer}</CardContent>}
-    {progress !== undefined && (
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{progress}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
-      </CardContent>
-    )}
-  </Card>
-);
+// ==============================================================
+// MetricCard
+// ==============================================================
 
-// Stats Card - For displaying metrics and statistics
-export const MetricCard = ({
-  title,
-  subtitle,
-  header,
-  value,
-  change,
-  icon = <TrendingUp className="w-6 h-6 text-violet-600" />,
-  trend = 'up',
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  value?: string | number;
-  change?: string;
+export type MetricTone = 'positive' | 'negative' | 'neutral';
+
+export type MetricCardProps = React.HTMLAttributes<HTMLDivElement> & {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  /** Main KPI value. Accepts text or React node for formatting. */
+  value?: React.ReactNode;
+  /** Delta text, e.g. "+12% MoM" or "-3.1". */
+  change?: React.ReactNode;
+  /** Force tone; otherwise inferred from the first char of `change` if string. */
+  tone?: MetricTone;
+  /** Optional icon shown on the right. */
   icon?: React.ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
-}) => (
-  <Card className={cn('rounded-3xl p-4 border-0 shadow-none gap-4', className)}>
-    {(header || title) && (
-      <div className="">
-        {header ? (
-          header
-        ) : (
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{title}</p>
-              {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-            </div>
-            {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
-          </div>
-        )}
-      </div>
-    )}
-    <div className="flex items-center justify-between">
-      <div>
-        {value && <h3>{value}</h3>}
-        {change && (
-          <p
-            className={cn(
-              'text-sm mt-1',
-              trend === 'up'
-                ? 'text-green-600'
-                : trend === 'down'
-                  ? 'text-red-600'
-                  : 'text-muted-foreground',
+  /** Optional custom header/actions area. When provided, it replaces the default title/subtitle row. */
+  header?: React.ReactNode;
+  /** Optional footer content (notes, links). */
+  footer?: React.ReactNode;
+};
+
+const toneToClass: Record<MetricTone, string> = {
+  positive: 'text-green-600',
+  negative: 'text-red-600',
+  neutral: 'text-muted-foreground',
+};
+
+function inferTone(change: React.ReactNode | undefined): MetricTone {
+  if (typeof change === 'string' && change.trim()) {
+    const first = change.trim()[0];
+    if (first === '+') return 'positive';
+    if (first === '-') return 'negative';
+  }
+  return 'neutral';
+}
+
+export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
+  (
+    { title, subtitle, value, change, tone, icon, header, footer, className, children, ...rest },
+    ref,
+  ) => {
+    const resolvedTone = tone ?? inferTone(change);
+
+    return (
+      <Card
+        ref={ref}
+        className={cn(' rounded-2xl shadow-none p-4', 'flex flex-col gap-2', className)}
+        {...rest}
+      >
+        {(header || title) && (
+          <div className="flex items-start justify-between gap-2">
+            {header ? (
+              header
+            ) : (
+              <div className="min-w-0">
+                <p
+                  className="truncate text-sm font-medium text-muted-foreground"
+                  title={typeof title === 'string' ? title : undefined}
+                >
+                  {title}
+                </p>
+                {subtitle && (
+                  <p
+                    className="truncate text-xs text-muted-foreground/80"
+                    title={typeof subtitle === 'string' ? subtitle : undefined}
+                  >
+                    {subtitle}
+                  </p>
+                )}
+              </div>
             )}
-          >
-            {change}
-          </p>
-        )}
-      </div>
-      <div className="p-2 bg-gradient-to-br from-violet-50 to-blue-50 rounded-2xl">{icon}</div>
-    </div>
-    {children && <div className="mt-4">{children}</div>}
-    {footer && <div className="mt-4 pt-4 border-t">{footer}</div>}
-  </Card>
-);
-
-// Profile Card - For user profiles or team members
-export const ProfileCard = ({
-  title, // name
-  subtitle, // role
-  header,
-  avatar,
-  bio,
-  stats,
-  actions,
-  children,
-  footer,
-  className,
-}: StandardCardProps & {
-  avatar?: string;
-  bio?: string;
-  stats?: { label: string; value: string }[];
-}) => (
-  <Card className={cn('rounded-3xl p-4 text-center gap-4 border-0 shadow-none', className)}>
-    {header ? (
-      header
-    ) : (
-      <>
-        <Avatar className="w-20 h-20 mx-auto">
-          <AvatarImage src={avatar || '/placeholder.svg'} />
-          <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-violet-500 to-blue-500 text-white">
-            {title
-              ?.split(' ')
-              .map((n) => n[0])
-              .join('') || 'U'}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h3>{title}</h3>
-          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
-          {actions && <div className="flex justify-center gap-2 mt-2">{actions}</div>}
-        </div>
-      </>
-    )}
-    {bio && <p className="text-sm text-muted-foreground mb-4">{bio}</p>}
-    {children && <div className="mb-4">{children}</div>}
-    {stats && (
-      <div className="flex justify-center pt-4 border-t">
-        {stats.map((stat, index) => (
-          <div key={index} className="text-center">
-            <p className="text-lg font-bold">{stat.value}</p>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
+            {icon && (
+              <div
+                className="flex-shrink-0 rounded-2xl bg-gradient-to-br from-violet-200 to-blue-100 p-2"
+                aria-hidden
+              >
+                {icon}
+              </div>
+            )}
           </div>
-        ))}
-      </div>
-    )}
-    {footer && <div className="pt-4 border-t">{footer}</div>}
-  </Card>
+        )}
+        <div className="flex flex-col gap-1">
+          {(value !== undefined || change !== undefined) && (
+            <div className="flex items-end gap-4">
+              {value !== undefined && (
+                <h2 className="p-0 truncate font-semibold leading-tight tracking-tight flex-shrink-0">
+                  {value}
+                </h2>
+              )}
+              {change !== undefined && (
+                <p className={cn('text-sm p-0 flex-1', toneToClass[resolvedTone])}>{change}</p>
+              )}
+            </div>
+          )}
+          {footer && <div className="text-xs text-muted-foreground">{footer}</div>}
+        </div>
+      </Card>
+    );
+  },
 );
 
-// List Item Card - For scrollable lists with flexible content (renamed from ListItemCard)
+MetricCard.displayName = 'MetricCard';
+
+// ==============================================================
+// List Item Card
+// ==============================================================
+
 export const ListItemCard = ({
   title,
   subtitle,
@@ -387,7 +205,7 @@ export const ListItemCard = ({
   children,
   footer,
   className,
-}: StandardCardProps & {
+}: CardProps & {
   icon?: React.ReactNode;
   iconBackgroundClassName?: string;
   isSelected?: boolean;
@@ -395,9 +213,9 @@ export const ListItemCard = ({
 }) => (
   <Card
     className={cn(
-      'border-1 border-muted/60 bg-gradient-to-br shadow-none overflow-hidden rounded-xl p-2 transition-all duration-200 cursor-pointer w-full min-w-0',
+      'border border-muted bg-gradient-to-br shadow-none overflow-hidden rounded-xl p-2 transition-colors duration-300 ease-in-out cursor-pointer w-full min-w-0',
       isSelected
-        ? 'border-purple-100 from-blue-200/40 via-purple-200/40 to-orange-100'
+        ? 'border-purple-100 from-red-100/60 via-purple-100/60 to-orange-100'
         : 'hover:from-blue-50/50 hover:via-purple-50/50 hover:to-orange-50/50',
       className,
     )}
@@ -422,7 +240,7 @@ export const ListItemCard = ({
           <div className={cn('flex-1 min-w-0')}>
             <div className="flex items-start justify-between gap-2 w-full max-w-full">
               <div className="min-w-0 flex-1">
-                {title && <h4 className="font-medium truncate">{title}</h4>}
+                {title && <p className="truncate font-semibold">{title}</p>}
                 {subtitle && <p className="text-sm text-muted-foreground truncate">{subtitle}</p>}
                 {children && <div>{children}</div>}
               </div>

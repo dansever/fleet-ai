@@ -1,7 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDate } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
+import { Button } from '@/stories/Button/Button';
 import { format } from 'date-fns';
 import { ChevronDown, Eye, EyeOff, Minus, Plus, Search, Upload, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -51,6 +56,8 @@ export const ModernInput = ({
   type = 'text',
   className,
   icon,
+  value,
+  onChange,
   ...props
 }: {
   label?: string;
@@ -60,33 +67,41 @@ export const ModernInput = ({
   type?: string;
   className?: string;
   icon?: React.ReactNode;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   [key: string]: unknown;
-}) => (
-  <div className="w-full">
-    {label && <label className={formStyles.label}>{label}</label>}
-    <div className="relative">
-      {icon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
-          {icon}
-        </div>
-      )}
-      <Input
-        type={type}
-        autoComplete="off"
-        placeholder={placeholder}
-        className={cn(
-          formStyles.input,
-          icon && 'pl-10',
-          error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
-          className,
+}) => {
+  // Determine if this should be controlled or uncontrolled
+  const isControlled = value !== undefined;
+
+  return (
+    <div className="w-full">
+      {label && <label className={formStyles.label}>{label}</label>}
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+            {icon}
+          </div>
         )}
-        {...props}
-      />
+        <Input
+          type={type}
+          autoComplete="off"
+          placeholder={placeholder}
+          className={cn(
+            formStyles.input,
+            icon && 'pl-10',
+            error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
+            className,
+          )}
+          {...(isControlled ? { value, onChange } : {})}
+          {...props}
+        />
+      </div>
+      {error && <p className={formStyles.error}>{error}</p>}
+      {helper && !error && <p className={formStyles.helper}>{helper}</p>}
     </div>
-    {error && <p className={formStyles.error}>{error}</p>}
-    {helper && !error && <p className={formStyles.helper}>{helper}</p>}
-  </div>
-);
+  );
+};
 
 export const SearchInput = ({
   label,
@@ -148,7 +163,7 @@ export const PasswordInput = ({
         />
         <Button
           type="button"
-          variant="ghost"
+          intent="ghost"
           size="sm"
           className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-slate-100"
           onClick={() => setShowPassword(!showPassword)}
@@ -273,7 +288,7 @@ export const NumberInput = ({
         <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
           <Button
             type="button"
-            variant="ghost"
+            intent="ghost"
             size="sm"
             className="h-8 w-6 p-0 hover:bg-slate-100"
             onPointerDown={startHold(handleDecrementOnce)}
@@ -288,7 +303,7 @@ export const NumberInput = ({
 
           <Button
             type="button"
-            variant="ghost"
+            intent="ghost"
             size="sm"
             className="h-8 w-6 p-0 hover:bg-slate-100"
             onPointerDown={startHold(handleIncrementOnce)}
@@ -345,32 +360,36 @@ export const ModernTextarea = ({
   </div>
 );
 
+type Option = { value: string; label: React.ReactNode };
+
 export const ModernSelect = ({
   label,
   error,
   helper,
   placeholder = 'Select an option',
   options,
-  TriggerClassName,
+  value,
+  onValueChange,
   ...props
 }: {
   label?: string;
   error?: string;
   helper?: string;
   placeholder?: string;
-  options: { value: string; label: React.ReactNode }[];
-  TriggerClassName?: string;
+  options: Option[];
+  value?: string;
+  onValueChange?: (value: string) => void;
   [key: string]: unknown;
 }) => (
   <div>
     {label && <label className={formStyles.label}>{label}</label>}
-    <Select {...props}>
+    <Select {...props} value={value || ''} onValueChange={onValueChange || (() => {})}>
       <SelectTrigger
         className={cn(
           formStyles.input,
+          'h-fit pl-4 pr-2 py-5',
           'cursor-pointer',
           error && 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
-          TriggerClassName,
         )}
       >
         <SelectValue placeholder={placeholder} />
@@ -478,7 +497,7 @@ export const DatePicker = ({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            intent="ghost"
             className={cn(
               formStyles.input,
               'justify-between font-normal hover:bg-slate-50 cursor-pointer',
@@ -596,7 +615,7 @@ export const FileUpload = ({
               <span className="text-sm font-medium text-slate-700 truncate">{file.name}</span>
               <Button
                 type="button"
-                variant="ghost"
+                intent="ghost"
                 size="sm"
                 className="h-6 w-6 p-0 hover:bg-slate-200"
                 onClick={() => removeFile(index)}
@@ -613,3 +632,28 @@ export const FileUpload = ({
     </div>
   );
 };
+
+export const ModernDropdownMenu = ({
+  trigger,
+  content,
+  error,
+  helper,
+  align = 'end',
+  className,
+  ...props
+}: {
+  trigger: React.ReactNode;
+  content: React.ReactNode;
+  error?: string;
+  helper?: string;
+  align?: 'start' | 'center' | 'end';
+  className?: string;
+  [key: string]: unknown;
+}) => (
+  <DropdownMenu {...props}>
+    <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+    <DropdownMenuContent align={align} className={cn('bg-white rounded-xl', className)}>
+      {content}
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
