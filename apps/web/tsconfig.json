@@ -29,7 +29,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/(platform)/settings/_components"
+    "src/app/(platform)/settings/_components",
+    "src/app/(platform)/settings/subpages"
   ],
   "exclude": ["node_modules"]
 }

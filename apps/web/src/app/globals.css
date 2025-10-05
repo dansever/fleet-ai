@@ -34,11 +34,11 @@
   --color-warning: #f59e0b;
 
   /* ========= CHART COLORS ========= */
-  --color-chart-1: 12 76% 61%;
-  --color-chart-2: 173 58% 39%;
-  --color-chart-3: 197 37% 24%;
-  --color-chart-4: 43 74% 66%;
-  --color-chart-5: 27 87% 67%;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
 
   /* ========= SEMANTIC COLORS ========= */
   --color-sidebar: white;
@@ -116,11 +116,11 @@
   --color-border: var(--color-border);
   --color-input: var(--color-input);
   --color-ring: var(--color-ring);
-  --color-chart-1: var(--color-chart-1);
-  --color-chart-2: var(--color-chart-2);
-  --color-chart-3: var(--color-chart-3);
-  --color-chart-4: var(--color-chart-4);
-  --color-chart-5: var(--color-chart-5);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --color-sidebar: red;
   --color-sidebar-background: hsl(0 0% 98%);
   --color-sidebar-foreground: hsl(240 5.3% 26.1%);

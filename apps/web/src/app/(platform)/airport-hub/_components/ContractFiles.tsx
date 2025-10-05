@@ -7,8 +7,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { client as parseClient } from '@/modules/ai/parse';
-import { client as documentsClient } from '@/modules/documents/documents';
-import { client as filesClient, storage } from '@/modules/files';
+import { documents, extraction, storage } from '@/modules/file-manager';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
@@ -34,6 +33,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../context';
 import { AIAssistant } from './AIAssistant';
+
+const documentsClient = documents.client;
+const filesClient = extraction.client;
 
 const storageClient = storage.client;
 
@@ -141,12 +143,16 @@ export function ContractDocument() {
 
       toast.success('Document has been uploaded');
 
-      // Refresh documents to get the newly created document and update both cache and UI
-      await refreshDocuments();
+      // Fetch the newly created document and add it to state
+      // This avoids refreshing all documents and prevents the page refresh feeling
+      if (result.documentId) {
+        const newDocument = await documentsClient.getDocumentById(result.documentId);
+        addDocument(newDocument);
+      }
 
-      // Refresh contracts as document processing might have updated contract terms
-      // This ensures contract terms are updated in the UI
-      refreshContracts();
+      // Optionally refresh contracts to update extracted terms if the document processing updated them
+      // Note: This is optional and can be removed if contract terms are not updated during document processing
+      // refreshContracts();
     } catch (error) {
       toast.error('Failed to process contract file');
       console.error(error);

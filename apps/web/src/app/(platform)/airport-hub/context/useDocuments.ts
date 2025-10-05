@@ -1,8 +1,10 @@
 import { Contract, Document } from '@/drizzle/types';
-import { client as documentClient } from '@/modules/documents/documents';
+import { documents } from '@/modules/file-manager';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ErrorState, LoadingState } from './types';
+
+const documentClient = documents.client;
 
 type UseDocumentsProps = {
   selectedContract: Contract | null;

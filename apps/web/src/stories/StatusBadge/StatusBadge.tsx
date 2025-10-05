@@ -17,7 +17,7 @@ export type StatusType =
 export interface StatusBadgeProps {
   status: StatusType;
   text?: string | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
   className?: string | null;
   children?: React.ReactNode;
@@ -72,12 +72,14 @@ const statusConfig = {
 };
 
 const sizeConfig = {
+  xs: 'text-xs px-1 py-0 gap-1',
   sm: 'text-xs px-1.5 py-0.5 gap-1',
   md: 'text-sm px-2 py-1 gap-1.5',
   lg: 'text-base px-3 py-1.5 gap-2',
 };
 
 const iconSizeConfig = {
+  xs: 'h-2 w-2',
   sm: 'h-2.5 w-2.5',
   md: 'h-3 w-3',
   lg: 'h-3.5 w-3.5',

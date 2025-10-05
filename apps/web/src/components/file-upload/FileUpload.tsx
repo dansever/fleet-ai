@@ -1,11 +1,13 @@
 'use client';
 
 import { DocumentType } from '@/drizzle/enums';
-import { client as filesClient } from '@/modules/files';
+import { extraction } from '@/modules/file-manager';
 import { Button } from '@/stories/Button/Button';
 import { Upload } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+
+const filesClient = extraction.client;
 
 interface FileUploadProps {
   documentType: DocumentType;

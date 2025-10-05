@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
 import { updateExtractors } from '@/modules/admin/admin.client';
-import { storage } from '@/modules/files';
+import { storage } from '@/modules/file-manager';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover } from '@/stories/Popover/Popover';
 import { Tabs } from '@/stories/Tabs/Tabs';

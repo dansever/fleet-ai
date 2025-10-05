@@ -17,7 +17,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { User as DbUser } from '@/drizzle/types';
 import { cn } from '@/lib/utils';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { UserButton, useUser } from '@clerk/nextjs';
 import {
   BarChart,
@@ -28,11 +30,10 @@ import {
   Settings,
   Settings2,
   ShoppingCart,
-  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useRef } from 'react';
 
 interface SidebarTab {
   title: string;
@@ -52,18 +53,11 @@ export const sidebarTabs: Record<string, SidebarTab[]> = {
       isReady: true,
     },
     {
-      title: 'AI Assistant',
-      description: 'AI Assistant',
-      url: '/ai-assistant',
-      icon: Sparkles,
-      isReady: true,
-    },
-    {
       title: 'Analytics',
       description: 'Analytics',
       url: '/analytics',
       icon: BarChart,
-      isReady: false,
+      isReady: true,
     },
   ],
   procurement: [
@@ -222,20 +216,43 @@ function SidebarNavItem({
 
 export function MainSidebar({
   variant = 'sidebar',
+  dbUser,
 }: {
   variant?: 'sidebar' | 'floating' | 'inset';
+  dbUser: DbUser;
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
-  const { user } = useUser();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const { user: clerkUser, isLoaded } = useUser();
 
-  useEffect(() => {
-    if (user?.organizationMemberships?.[0]?.organization?.imageUrl) {
-      setImageUrl(user.organizationMemberships[0].organization.imageUrl);
-    }
-  }, [user?.organizationMemberships?.[0]?.organization?.imageUrl]);
+  // Show loading state during hydration to prevent mismatch
+  if (!isLoaded) {
+    return (
+      <Sidebar collapsible="icon" variant={variant} className="border-r-primary/40">
+        <SidebarHeader className="flex flex-row items-center w-full h-16 min-h-16 px-2">
+          <div className="flex items-center h-full">
+            <div className="w-[120px] h-8 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <div className="p-2 space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-8 bg-gray-200 rounded animate-pulse" />
+            ))}
+          </div>
+        </SidebarContent>
+        <SidebarFooter>
+          <div className="flex items-center gap-2 p-2">
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+            <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+    );
+  }
+
+  if (!clerkUser) return null;
 
   return (
     <Sidebar collapsible="icon" variant={variant} className="border-r-primary/40">
@@ -342,39 +359,56 @@ export function MainSidebar({
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        {/* <div style={{ position: 'relative', width: '100%', height: '40px' }}>
-          {!isCollapsed && (
-            <Image
-              src={imageUrl ?? '/placeholder.png'}
-              alt="Organization logo"
-              fill
-              sizes="200px"
-              style={{ objectFit: 'contain' }}
-            />
-          )}
-        </div> */}
-        <ClientUserButton showName={!isCollapsed} />
+        <ClientUserButton showName={!isCollapsed} dbUser={dbUser} clerkUser={clerkUser} />
       </SidebarFooter>
     </Sidebar>
   );
 }
 
-function ClientUserButton({ showName }: { showName: boolean }) {
+function ClientUserButton({
+  showName,
+  dbUser,
+  clerkUser,
+}: {
+  showName: boolean;
+  dbUser: DbUser;
+  clerkUser: ReturnType<typeof useUser>['user'];
+}) {
+  const buttonRef = useRef<HTMLDivElement | null>(null);
+  const name = dbUser.firstName;
+  const fullName = `${dbUser.firstName} ${dbUser.lastName}`.trim();
+
   // Memoize appearance to prevent unnecessary re-renders
   const appearance = useMemo(
     () => ({
       elements: {
-        userButtonBox: {
-          flexDirection: 'row-reverse' as const,
-        },
+        userButtonBox: 'relative',
+        userButtonAvatarBox: 'h-8 w-8',
       },
     }),
     [],
   );
 
+  const handleRowClick = (e: React.MouseEvent) => {
+    // If click originated inside the UserButton, let Clerk handle it
+    if (buttonRef.current?.contains(e.target as Node)) return;
+
+    // Otherwise, forward the click to Clerk’s internal button
+    buttonRef.current?.querySelector('button')?.click();
+  };
+
   return (
-    <div suppressHydrationWarning>
-      <UserButton showName={showName} appearance={appearance} />
+    <div className="flex items-center gap-2 cursor-pointer p-2" onClick={handleRowClick}>
+      <div ref={buttonRef} className="z-50">
+        <UserButton showName={false} appearance={appearance} afterSignOutUrl="/" />
+      </div>
+
+      {showName && (
+        <div className="flex flex-col gap-1 select-none">
+          <span className="text-sm font-medium">{fullName}</span>
+          {dbUser?.position && <StatusBadge status="secondary" text={dbUser.position} size="xs" />}
+        </div>
+      )}
     </div>
   );
 }
