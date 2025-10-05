@@ -1,24 +1,64 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
 import { formatDate, formatFileSize } from '@/lib/core/formatters';
+import { cn } from '@/lib/utils';
 import { client as parseClient } from '@/modules/ai/parse';
 import { client as documentsClient } from '@/modules/documents/documents';
 import { client as filesClient } from '@/modules/files';
 import { client as storageClient } from '@/modules/storage';
 import { Button } from '@/stories/Button/Button';
-import { BaseCard } from '@/stories/Card/Card';
+import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
 import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popover';
+import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { ContractTerm, ExtractedContractData } from '@/types/contracts';
-import { CheckCircle2, Clock, Copy, Eye, File, FileText, Trash, Upload } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  Download,
+  Eye,
+  File,
+  FileText,
+  Sparkles,
+  Trash,
+  Upload,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAirportHub } from '../context';
+import { AIAssistant } from './AIAssistant';
+
+interface Term {
+  key: string;
+  value: {
+    type: string;
+    value: string;
+  };
+  source: {
+    page: number;
+    span: number[];
+    snippet: string;
+  };
+  section: string;
+}
+
+interface DocumentData {
+  terms: Term[];
+  summary: string;
+  confidence: number;
+}
+
+interface DocumentViewerProps {
+  data: DocumentData;
+}
 
 // Helper function to get file type icon and color
 const getFileTypeConfig = (fileType: string | null) => {
@@ -191,111 +231,107 @@ export function ContractDocument() {
     : [];
 
   return (
-    <div className="grid lg:grid-cols-4 gap-4">
-      <BaseCard
-        className="flex flex-col gap-3 lg:col-span-1"
-        title="Uploaded Files"
-        actions={
-          <FileUploadPopover
-            onSend={handleUploadContractFile}
-            trigger={<Button intent="add" icon={Upload} />}
-          />
-        }
-      >
-        {documents.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-8">
-            <File className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="font-medium">No documents yet</p>
-            <p className="text-xs mt-1">Upload a document to get started</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {documents.map((document) => {
-              const fileConfig = getFileTypeConfig(document.fileType);
-              const FileIcon = fileConfig.icon;
-              const isSelected = selectedDocument?.id === document.id;
+    <>
+      {/* Floating AI Assistant */}
+      {selectedDocument && (
+        <AIAssistant
+          mode="floating"
+          context={{
+            documentId: selectedDocument.id,
+            contractId: selectedContract?.id,
+            documentName: selectedDocument.fileName || undefined,
+          }}
+          insights={[
+            {
+              type: 'expiration',
+              title: 'Contract Expiration',
+              description:
+                'This contract expires in 45 days. Consider initiating renewal discussions.',
+            },
+            {
+              type: 'opportunity',
+              title: 'Potential Savings',
+              description:
+                'Market analysis suggests 12% cost reduction opportunity on similar services.',
+            },
+          ]}
+        />
+      )}
 
-              return (
-                <button
-                  key={document.id}
-                  onClick={() => setSelectedDocument(document)}
-                  className={`
-                    flex flex-col gap-2 p-3 rounded-xl border-2 transition-all
-                    hover:shadow-md hover:scale-[1.02] cursor-pointer text-left
-                    ${
-                      isSelected
-                        ? 'border-blue-500 bg-blue-50 shadow-sm'
-                        : 'border-transparent bg-gray-50 hover:border-gray-200'
-                    }
-                  `}
-                >
-                  {/* Header with icon and name */}
-                  <div className="flex items-start gap-2">
-                    <div className={`p-2 rounded-lg ${fileConfig.bgColor} flex-shrink-0`}>
-                      <FileIcon className={`w-4 h-4 ${fileConfig.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {document.fileName || 'Untitled'}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge className={`text-xs px-2 py-0 ${fileConfig.badgeColor}`}>
-                          {document.fileType?.toUpperCase() || 'FILE'}
-                        </Badge>
-                        <span className="text-xs text-gray-500">
-                          {formatFileSize(document.fileSize || 0)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Processing status */}
-                  {document.extractedAt ? (
-                    <div className="flex items-center gap-1.5 text-xs text-green-600">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>Processed</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-xs text-amber-600">
-                      <Clock className="w-3 h-3" />
-                      <span>Processing...</span>
-                    </div>
-                  )}
-
-                  {/* Date info */}
-                  <div className="text-xs text-gray-500 border-t pt-2">
-                    Updated {formatDate(document.updatedAt)}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </BaseCard>
-      <BaseCard className="lg:col-span-3" title="File Details">
-        <CardContent className="flex flex-col gap-4">
-          {documents.length === 0 ? (
-            <div className="text-center text-muted-foreground py-16 gap-4 flex flex-col items-center">
-              <FileText className="w-16 h-16 text-gray-300" />
-              <div>
-                <h2 className="text-lg font-semibold text-gray-700">No documents found</h2>
-                <p className="text-sm mt-1">Upload documents to this contract to get started</p>
-              </div>
+      <div className="grid lg:grid-cols-4 gap-4">
+        <BaseCard
+          cardType="inner"
+          className="flex flex-col lg:col-span-1"
+          title="Files"
+          actions={
+            <FileUploadPopover
+              onSend={handleUploadContractFile}
+              trigger={<Button size="sm" intent="add" text="Upload" icon={Upload} />}
+            />
+          }
+          contentClassName="px-4"
+        >
+          {loading.documents ? (
+            <div className="flex flex-col gap-2 py-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 rounded-lg border bg-card">
+                  <Skeleton className="h-4 w-3/4 mb-3" />
+                  <Skeleton className="h-3 w-1/2 mb-2" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              ))}
             </div>
-          ) : !selectedDocument ? (
-            <div className="text-center text-muted-foreground py-16 gap-4 flex flex-col items-center">
-              <Eye className="w-16 h-16 text-gray-300" />
-              <div>
-                <h2 className="text-lg font-semibold text-gray-700">Select a document to view</h2>
-                <p className="text-sm mt-1">
-                  Choose a document from the sidebar to see its details
-                </p>
-              </div>
+          ) : documents.length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-8">
+              <File className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p className="font-medium">No documents yet</p>
+              <p className="text-xs mt-1">Upload a document to get started</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-6">
-              {/* Document Header */}
-              <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200">
+            <div className="flex flex-col gap-2">
+              {documents.map((document) => {
+                const fileConfig = getFileTypeConfig(document.fileType);
+                const FileIcon = fileConfig.icon;
+                const isSelected = selectedDocument?.id === document.id;
+
+                return (
+                  <ListItemCard
+                    key={document.id}
+                    onClick={() => setSelectedDocument(document)}
+                    isSelected={isSelected}
+                    title={document.fileName || 'Untitled'}
+                    className="rounded-sm"
+                  >
+                    <div className="flex flex-col items-start gap-1 py-1">
+                      <div className="flex items-center gap-2">
+                        <FileIcon className={`flex-shrink-0 w-4 h-4 ${fileConfig.color}`} />
+                        <Badge className={`text-xs px-2 py-0 ${fileConfig.badgeColor}`}>
+                          {document.fileType || 'FILE'}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-xs text-green-600">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Processed</span>
+                      </div>
+                    </div>
+
+                    {/* Date info */}
+                    <div className="text-xs text-gray-500 border-t pt-2">
+                      Updated {formatDate(document.updatedAt)}
+                    </div>
+                  </ListItemCard>
+                );
+              })}
+            </div>
+          )}
+        </BaseCard>
+        <BaseCard
+          cardType="inner"
+          className="lg:col-span-3"
+          header={
+            selectedDocument ? (
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {(() => {
                     const fileConfig = getFileTypeConfig(selectedDocument.fileType);
@@ -312,7 +348,7 @@ export function ContractDocument() {
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge className={getFileTypeConfig(selectedDocument.fileType).badgeColor}>
-                        {selectedDocument.fileType?.toUpperCase() || 'FILE'}
+                        {selectedDocument.fileType || 'FILE'}
                       </Badge>
                       {selectedDocument.extractedAt ? (
                         <Badge className="bg-green-100 text-green-700 flex items-center gap-1">
@@ -331,7 +367,7 @@ export function ContractDocument() {
                 <div className="flex gap-2 flex-shrink-0">
                   <Button
                     intent="secondary"
-                    icon={Eye}
+                    icon={Download}
                     text="View"
                     onClick={() => handleViewDocument(selectedDocument.storagePath ?? '')}
                     disabled={viewDocumentLoading}
@@ -354,168 +390,339 @@ export function ContractDocument() {
                   />
                 </div>
               </div>
-
-              {/* Metadata Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
-                  <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
-                    File Size
-                  </span>
-                  <p className="text-lg font-semibold text-blue-900 mt-1">
-                    {selectedDocument.fileSize
-                      ? formatFileSize(selectedDocument.fileSize)
-                      : 'Unknown'}
-                  </p>
+            ) : undefined
+          }
+        >
+          <div className="flex flex-col gap-4">
+            {loading.documents ? (
+              <div className="flex flex-col gap-6 p-4">
+                {/* Header Skeleton */}
+                <div className="p-4 rounded-xl border">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-12 w-12 rounded-xl" />
+                    <div className="flex-1">
+                      <Skeleton className="h-6 w-2/3 mb-2" />
+                      <Skeleton className="h-4 w-1/3" />
+                    </div>
+                  </div>
                 </div>
-
-                <div className="p-4 rounded-lg bg-purple-50 border border-purple-100">
-                  <span className="text-xs font-medium text-purple-600 uppercase tracking-wide">
-                    Created
-                  </span>
-                  <p className="text-lg font-semibold text-purple-900 mt-1">
-                    {selectedDocument.createdAt
-                      ? formatDate(selectedDocument.createdAt)
-                      : 'Unknown'}
-                  </p>
+                {/* Metadata Grid Skeleton */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="p-4 rounded-lg border">
+                      <Skeleton className="h-3 w-20 mb-2" />
+                      <Skeleton className="h-6 w-24" />
+                    </div>
+                  ))}
                 </div>
-
-                <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-100">
-                  <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
-                    Updated
-                  </span>
-                  <p className="text-lg font-semibold text-indigo-900 mt-1">
-                    {selectedDocument.updatedAt
-                      ? formatDate(selectedDocument.updatedAt)
-                      : 'Unknown'}
-                  </p>
+                {/* Content Skeleton */}
+                <div className="space-y-3">
+                  <Skeleton className="h-40 w-full rounded-xl" />
+                  <Skeleton className="h-32 w-full rounded-xl" />
                 </div>
-
-                <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <span className="text-xs font-medium text-emerald-600 uppercase tracking-wide">
-                    {selectedDocument.confidence ? 'AI Confidence' : 'Status'}
-                  </span>
-                  <p className="text-lg font-semibold text-emerald-900 mt-1">
-                    {selectedDocument.confidence
-                      ? `${(parseFloat(selectedDocument.confidence.toString()) * 100).toFixed(0)}%`
-                      : selectedDocument.extractedAt
-                        ? 'Ready'
-                        : 'Processing'}
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="text-center text-muted-foreground py-16 gap-4 flex flex-col items-center">
+                <FileText className="w-16 h-16 text-gray-300" />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700">No documents found</h2>
+                  <p className="text-sm mt-1">Upload documents to this contract to get started</p>
+                </div>
+              </div>
+            ) : !selectedDocument ? (
+              <div className="text-center text-muted-foreground py-16 gap-4 flex flex-col items-center">
+                <Eye className="w-16 h-16 text-gray-300" />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700">Select a document to view</h2>
+                  <p className="text-sm mt-1">
+                    Choose a document from the sidebar to see its details
                   </p>
                 </div>
               </div>
-
-              {/* Document Content */}
-              <Separator />
-
-              <Tabs
-                tabs={[
-                  { label: 'Summary', value: 'summary', icon: <FileText /> },
-                  { label: 'Extracted Data', value: 'extractedData', icon: <FileText /> },
-                  { label: 'Content', value: 'content', icon: <FileText /> },
-                ]}
-                defaultTab="summary"
-                onTabChange={() => {}}
-              >
-                <TabsContent value="summary">
-                  <div className="rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-100 p-6">
-                    {selectedDocument.summary ? (
-                      <p className="text-base text-slate-700 whitespace-pre-wrap leading-relaxed">
-                        {selectedDocument.summary}
-                      </p>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="text-sm font-medium">No summary available</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Summary will be generated after document processing completes
-                        </p>
-                      </div>
-                    )}
+            ) : (
+              <div className="flex flex-col gap-4">
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="px-2 py-1 rounded-lg bg-blue-50 border border-blue-100">
+                    <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                      File Size
+                    </span>
+                    <p className="text-lg font-semibold text-blue-900">
+                      {selectedDocument.fileSize
+                        ? formatFileSize(selectedDocument.fileSize)
+                        : 'Unknown'}
+                    </p>
                   </div>
-                </TabsContent>
 
-                <TabsContent value="extractedData">
-                  <div className="flex flex-col gap-3">
-                    <div className="sticky top-0 z-10 bg-white pb-2">
-                      <ModernInput
-                        placeholder="Search extracted terms and data..."
-                        value={searchTerms}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setSearchTerms(e.target.value)
-                        }
+                  <div className="px-2 py-1 rounded-lg bg-purple-50 border border-purple-100">
+                    <span className="text-xs font-medium text-purple-600 uppercase tracking-wide">
+                      Created
+                    </span>
+                    <p className="text-lg font-semibold text-purple-900">
+                      {selectedDocument.createdAt
+                        ? formatDate(selectedDocument.createdAt)
+                        : 'Unknown'}
+                    </p>
+                  </div>
+
+                  <div className="px-2 py-1 rounded-lg bg-indigo-50 border border-indigo-100">
+                    <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+                      Updated
+                    </span>
+                    <p className="text-lg font-semibold text-indigo-900">
+                      {selectedDocument.updatedAt
+                        ? formatDate(selectedDocument.updatedAt)
+                        : 'Unknown'}
+                    </p>
+                  </div>
+
+                  <div className="px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100">
+                    <span className="text-xs font-medium text-emerald-600 uppercase tracking-wide">
+                      {selectedDocument.confidence ? 'AI Confidence' : 'Status'}
+                    </span>
+                    <p className="text-lg font-semibold text-emerald-900">
+                      {selectedDocument.confidence
+                        ? `${(parseFloat(selectedDocument.confidence.toString()) * 100).toFixed(0)}%`
+                        : selectedDocument.extractedAt
+                          ? 'Ready'
+                          : 'Processing'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Document Content */}
+                <Separator />
+
+                <Tabs
+                  tabs={[
+                    { label: 'Summary', value: 'summary', icon: <FileText /> },
+                    { label: 'Extracted Data', value: 'extractedData', icon: <FileText /> },
+                    { label: 'Content', value: 'content', icon: <FileText /> },
+                  ]}
+                  defaultTab="summary"
+                  onTabChange={() => {}}
+                >
+                  <TabsContent value="summary">
+                    <div className="flex flex-col gap-4">
+                      <div className="rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-100 p-6">
+                        {selectedDocument.summary ? (
+                          <p className="text-base text-slate-700 whitespace-pre-wrap leading-relaxed">
+                            {selectedDocument.summary}
+                          </p>
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p className="text-sm font-medium">No summary available</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Summary will be generated after document processing completes
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* AI Assistant integrated into summary */}
+                      <AIAssistant
+                        mode="inline"
+                        context={{
+                          documentId: selectedDocument.id,
+                          contractId: selectedContract?.id,
+                          documentName: selectedDocument.fileName || undefined,
+                        }}
+                        insights={[
+                          {
+                            type: 'info',
+                            title: 'Key Highlights',
+                            description:
+                              'AI will analyze the document and provide key highlights here.',
+                          },
+                        ]}
                       />
                     </div>
-                    {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
-                      <div className="grid gap-3">
-                        {filteredTerms.map((term: ContractTerm, idx: number) => (
-                          <div
-                            key={idx}
-                            className="rounded-xl p-4 bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:shadow-md transition-shadow"
-                          >
-                            <div className="flex flex-row items-center gap-2 mb-2">
-                              <div className="font-semibold text-gray-900 flex-1">{term.key}</div>
-                              <button
-                                onClick={() => copyMessage(term.value?.value)}
-                                className="p-2 rounded-lg hover:bg-white transition-colors"
-                                title="Copy to clipboard"
-                              >
-                                <Copy className="w-4 h-4 text-gray-500 hover:text-gray-700" />
-                              </button>
-                            </div>
-                            <div className="text-sm text-gray-700 bg-white rounded-lg p-3 mb-2">
-                              {term.value?.value}
-                            </div>
+                  </TabsContent>
 
-                            {term.source?.snippet && (
-                              <div className="text-xs text-gray-600 border-l-3 border-blue-400 pl-3 py-1 bg-blue-50 rounded-r italic">
-                                "{term.source.snippet}"
-                              </div>
-                            )}
+                  <TabsContent value="extractedData">
+                    <div className="flex flex-col gap-4">
+                      {/* AI Insights Section */}
+                      <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-xl p-4 border border-purple-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Sparkles className="w-5 h-5 text-purple-600" />
+                          <h4 className="font-semibold text-gray-900">AI Insights</h4>
+                          <Badge className="bg-purple-100 text-purple-700 text-xs">
+                            Smart Analysis
+                          </Badge>
+                        </div>
+                        <div className="grid gap-3">
+                          {/* Example AI Insights - These will be generated by AI agents later */}
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-3">
+                            <div className="bg-amber-100 rounded-full p-2 flex-shrink-0">
+                              <Clock className="w-4 h-4 text-amber-700" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-amber-900">
+                                Contract Expiration
+                              </p>
+                              <p className="text-xs text-amber-800 mt-1">
+                                This contract expires in 45 days. Consider initiating renewal
+                                discussions.
+                              </p>
+                            </div>
                           </div>
-                        ))}
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-3">
+                            <div className="bg-green-100 rounded-full p-2 flex-shrink-0">
+                              <Sparkles className="w-4 h-4 text-green-700" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-green-900">
+                                Potential Savings
+                              </p>
+                              <p className="text-xs text-green-800 mt-1">
+                                Market analysis suggests 12% cost reduction opportunity on similar
+                                services.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    ) : extractedData?.terms ? (
-                      <div className="text-center py-12 text-gray-500">
-                        <p className="text-sm font-medium">No matching terms found</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Try a different search term
-                        </p>
+
+                      {/* Search Bar */}
+                      <div className="sticky top-0 z-10 bg-white pb-2">
+                        <ModernInput
+                          placeholder="Search extracted terms and data..."
+                          value={searchTerms}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setSearchTerms(e.target.value)
+                          }
+                        />
                       </div>
-                    ) : (
-                      <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                        <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="text-sm font-medium">No extracted data available</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Data will appear here after document processing completes
-                        </p>
+
+                      {/* Extracted Terms Table */}
+                      {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
+                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
+                          {filteredTerms.map((term, index) => (
+                            <TermCard key={index} term={term as Term} />
+                          ))}
+                        </div>
+                      ) : extractedData?.terms ? (
+                        <div className="text-center py-12 text-gray-500">
+                          <p className="text-sm font-medium">No matching terms found</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Try a different search term
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                          <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p className="text-sm font-medium">No extracted data available</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Data will appear here after document processing completes
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="content">
+                    <div className="flex flex-col gap-4">
+                      <div className="rounded-xl border border-gray-200 overflow-hidden">
+                        {selectedDocument.content ? (
+                          <div className="max-h-[600px] overflow-y-auto">
+                            <p className="font-serif p-6 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                              {selectedDocument.content}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-center py-12 text-gray-500 bg-gray-50">
+                            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p className="text-sm font-medium">No content extracted</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Text content will be extracted during processing
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </TabsContent>
-                <TabsContent value="content">
-                  <div className="rounded-xl border border-gray-200 overflow-hidden">
-                    {selectedDocument.content ? (
-                      <div className="max-h-[600px] overflow-y-auto">
-                        <pre className="bg-gradient-to-br from-slate-50 to-gray-100 p-6 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono">
-                          {selectedDocument.content}
-                        </pre>
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 text-gray-500 bg-gray-50">
-                        <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="text-sm font-medium">No content extracted</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Text content will be extracted during processing
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
+
+                      {/* AI Assistant for content queries */}
+                      <AIAssistant
+                        mode="inline"
+                        context={{
+                          documentId: selectedDocument.id,
+                          contractId: selectedContract?.id,
+                          documentName: selectedDocument.fileName || undefined,
+                        }}
+                        insights={[]}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
+          </div>
+        </BaseCard>
+      </div>
+    </>
+  );
+}
+
+function TermCard({ term }: { term: Term }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(term.value.value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.info('Copied to clipboard');
+  };
+
+  return (
+    <BaseCard
+      cardType="inner"
+      className="gap-0"
+      headerClassName="px-4 py-2"
+      contentClassName="px-4"
+      title={term.key}
+      subtitle={<StatusBadge status="default" text={term.section} />}
+      actions={<Button intent="ghost" onClick={handleCopy} icon={Copy} />}
+    >
+      <div className="space-y-2">
+        <div className="text-sm leading-relaxed text-foreground/90">{term.value.value}</div>
+        <Separator />
+        {/* Source Quote Section */}
+        <div className="border-border/50">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="cursor-pointer flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="font-medium">Source Quote</span>
+              <Badge variant="outline" className="text-xs">
+                Page {term.source.page}
+              </Badge>
+            </span>
+            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+
+          <div
+            className={cn(
+              'grid transition-all duration-200 ease-in-out',
+              isExpanded ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0',
+            )}
+          >
+            <div className="overflow-hidden">
+              <div className="p-3 bg-muted/50 rounded-md border border-border/50">
+                <p className="text-sm text-muted-foreground leading-relaxed font-serif">
+                  "{term.source.snippet}"
+                </p>
+                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  <span>
+                    Span: {term.source.span[0]}-{term.source.span[1]}
+                  </span>
+                </div>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </BaseCard>
-    </div>
+          </div>
+        </div>{' '}
+      </div>
+    </BaseCard>
   );
 }

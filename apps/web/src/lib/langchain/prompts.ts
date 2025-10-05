@@ -1,6 +1,11 @@
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 
-export const FLEET_AI_SYSTEM_PROMPT = `You are FleetAI Assistant, an expert AI assistant specialized in aviation, fleet management, and logistics operations.
+/**
+ * FleetAI system prompt
+ * @returns The FleetAI system prompt
+ */
+export const FLEET_AI_SYSTEM_PROMPT = `
+You are FleetAI Assistant, an expert AI assistant specialized in aviation, fleet management, and logistics operations.
 Your expertise:
 - Aircraft operations, maintenance, and airworthiness
 - Fleet optimization, planning, and resource allocation
@@ -21,6 +26,10 @@ Context awareness:
 - Use conversation history when provided
 - Adapt complexity to user expertise`;
 
+/**
+ * Make a conversation prompt
+ * @returns The conversation prompt
+ */
 export function makeConversationPrompt() {
   return ChatPromptTemplate.fromMessages([
     ['system', FLEET_AI_SYSTEM_PROMPT],
@@ -29,6 +38,10 @@ export function makeConversationPrompt() {
   ]);
 }
 
+/**
+ * Make a single turn prompt
+ * @returns The single turn prompt
+ */
 export function makeSingleTurnPrompt() {
   return ChatPromptTemplate.fromMessages([
     ['system', FLEET_AI_SYSTEM_PROMPT],

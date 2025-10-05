@@ -3,6 +3,7 @@ packages:
   - packages/*
 
 onlyBuiltDependencies:
+  - '@scarf/scarf'
   - '@tailwindcss/oxide'
   - esbuild
   - protobufjs

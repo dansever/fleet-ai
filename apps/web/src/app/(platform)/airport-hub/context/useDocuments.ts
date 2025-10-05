@@ -48,6 +48,10 @@ export function useDocuments({
 
     console.log(`Contract selected: ${selectedContract.id}, loading documents...`);
 
+    // Immediately clear documents to show loading state and prevent showing stale data
+    setDocuments([]);
+    setSelectedDocument(null);
+
     // Store contract ID to handle race conditions
     const contractId = selectedContract.id;
     let isCancelled = false;

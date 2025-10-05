@@ -7,6 +7,10 @@ import { makeConversationPrompt, makeSingleTurnPrompt } from './prompts';
 type ConvInput = { input: string; chat_history: any[] };
 type SingleInput = { input: string };
 
+/**
+ * Make a conversation chain
+ * @returns The conversation chain
+ */
 export function makeConversationChain() {
   const model = createChatModel();
   const prompt = makeConversationPrompt();
@@ -23,6 +27,10 @@ export function makeConversationChain() {
   ]);
 }
 
+/**
+ * Make a raw conversation chain
+ * @returns The raw conversation chain
+ */
 export function makeRawConversationChain() {
   // No StringOutputParser; keep metadata on the AIMessageChunk
   const model = createChatModel();
@@ -37,6 +45,10 @@ export function makeRawConversationChain() {
   ]);
 }
 
+/**
+ * Make a single turn chain
+ * @returns The single turn chain
+ */
 export function makeSingleTurnChain() {
   const model = createChatModel();
   const prompt = makeSingleTurnPrompt();
@@ -45,6 +57,8 @@ export function makeSingleTurnChain() {
 
 /**
  * Skeleton for RAG: pass a retriever that returns docs and inject into prompt.
+ * @param retriever - The retriever
+ * @returns The RAG chain
  */
 export function makeRAGChain(retriever: {
   getRelevantDocuments: (q: string) => Promise<{ pageContent: string }[]>;

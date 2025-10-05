@@ -48,10 +48,12 @@ export default function ContractList() {
       className="h-fit flex flex-col p-0 gap-0"
       contentClassName="p-0"
       headerClassName="p-0"
+      title={`Contacts at ${selectedAirport?.name}`}
       header={
-        <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 pt-2">
+        <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 pt-2 gap-2">
           <div className="text-sm text-muted-foreground">
-            {contracts.length} of {contracts.length} contracts
+            {contracts.length}/{contracts.length} contracts at{' '}
+            <span className="font-semibold italic">{selectedAirport?.name}</span>
           </div>
           <SimpleContractDialog
             airport={selectedAirport!}

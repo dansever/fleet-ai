@@ -7,7 +7,7 @@ import { ChatOpenAI } from '@langchain/openai';
 // Initialize the LangChain OpenAI model with optimal settings
 export const createOpenAIChatModel = () => {
   return new ChatOpenAI({
-    model: process.env.ACTIVE_OPENAI_MODEL, // Use the GPT-4o model
+    model: process.env.ACTIVE_OPENAI_MODEL,
     temperature: 0.7, // Adjust temperature for desired creativity
     maxTokens: 500, // Increased for more detailed responses
     streaming: true, // Enable streaming mode

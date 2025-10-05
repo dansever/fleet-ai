@@ -1,3 +1,8 @@
+/**
+ * Format a chain error
+ * @param error - The error to format
+ * @returns The formatted error
+ */
 export function formatChainError(error: any): string {
   const msg = String(error?.message ?? error);
   if (msg.toLowerCase().includes('rate limit')) {

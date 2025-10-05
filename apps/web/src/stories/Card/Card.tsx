@@ -17,7 +17,7 @@ export interface CardProps extends React.ComponentPropsWithoutRef<typeof Card> {
   header?: React.ReactNode; // Takes precedence over title/subtitle
   headerClassName?: string;
   title?: string;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   icon?: React.ReactNode;
   actions?: React.ReactNode;
   // footer
@@ -65,7 +65,11 @@ export const BaseCard = ({
                       {icon && icon}
                       <div className="flex flex-col gap-1">
                         {cardType === 'main' ? <h2>{title}</h2> : <h3>{title}</h3>}
-                        <div className="leading-tight">{subtitle}</div>
+                        {typeof subtitle === 'string' ? (
+                          <div className="leading-tight">{subtitle}</div>
+                        ) : (
+                          subtitle
+                        )}
                       </div>
                     </div>
                   </div>
@@ -236,7 +240,7 @@ export const ListItemCard = ({
           <div className={cn('flex-1 min-w-0')}>
             <div className="flex items-start justify-between gap-2 w-full max-w-full">
               <div className="min-w-0 flex-1">
-                {title && <h4 className="font-medium truncate">{title}</h4>}
+                {title && <p className="truncate font-semibold">{title}</p>}
                 {subtitle && <p className="text-sm text-muted-foreground truncate">{subtitle}</p>}
                 {children && <div>{children}</div>}
               </div>

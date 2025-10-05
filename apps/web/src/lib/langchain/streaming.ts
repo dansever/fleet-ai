@@ -6,6 +6,10 @@ import type { Runnable } from '@langchain/core/runnables';
  * - onToken: called for every token chunk
  * - onFinal: called once with the aggregated final message and usage
  * - onError: called on error
+ * @param runnable - The runnable
+ * @param input - The input
+ * @param opts - The options
+ * @returns The stream
  */
 export async function streamToCallbacks(
   runnable: Runnable<any, AIMessageChunk>,
