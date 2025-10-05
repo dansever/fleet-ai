@@ -447,7 +447,7 @@ export function ContractDocument() {
                     <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
                       File Size
                     </span>
-                    <p className="text-lg font-semibold text-blue-900">
+                    <p className="font-semibold text-blue-700">
                       {selectedDocument.fileSize
                         ? formatFileSize(selectedDocument.fileSize)
                         : 'Unknown'}
@@ -458,7 +458,7 @@ export function ContractDocument() {
                     <span className="text-xs font-medium text-purple-600 uppercase tracking-wide">
                       Created
                     </span>
-                    <p className="text-lg font-semibold text-purple-900">
+                    <p className="font-semibold text-purple-700">
                       {selectedDocument.createdAt
                         ? formatDate(selectedDocument.createdAt)
                         : 'Unknown'}
@@ -469,7 +469,7 @@ export function ContractDocument() {
                     <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
                       Updated
                     </span>
-                    <p className="text-lg font-semibold text-indigo-900">
+                    <p className="font-semibold text-indigo-700">
                       {selectedDocument.updatedAt
                         ? formatDate(selectedDocument.updatedAt)
                         : 'Unknown'}
@@ -480,7 +480,7 @@ export function ContractDocument() {
                     <span className="text-xs font-medium text-emerald-600 uppercase tracking-wide">
                       {selectedDocument.confidence ? 'AI Confidence' : 'Status'}
                     </span>
-                    <p className="text-lg font-semibold text-emerald-900">
+                    <p className="font-semibold text-emerald-700">
                       {selectedDocument.confidence
                         ? `${(parseFloat(selectedDocument.confidence.toString()) * 100).toFixed(0)}%`
                         : selectedDocument.extractedAt

@@ -8,10 +8,11 @@ import { MainSidebar } from './_components/MainSidebar';
 export default function PlatformLayout({ children }: { children: ReactNode }) {
   // const copilotKitRuntimeUrl = 'api/ai-chat/langchain';
   const copilotKitApiKey = process.env.COPILOTKIT_API_KEY;
+  const copilotKitRuntimeUrl = 'api/copilotkit';
   return (
     <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
       <MainSidebar variant="sidebar" />
-      <CopilotKit publicApiKey={copilotKitApiKey}>
+      <CopilotKit publicApiKey={copilotKitApiKey} runtimeUrl={copilotKitRuntimeUrl}>
         <main className="flex-1 min-w-0  h-screen overflow-hidden">
           {children}
           <StatusIndicator />

@@ -3,7 +3,8 @@
   "dockerfile_lines": [],
   "dependencies": ["."],
   "graphs": {
-    "assistant_agent": "./src/agents/assistantAgent.ts:graph"
+    "assistant_agent": "./src/agents/assistantAgent.ts:graph",
+    "conversation_agent": "./src/agents/conversationAgent.ts:graph"
   },
   "env": ".env.local"
 }
