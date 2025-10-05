@@ -1,6 +1,7 @@
 import { StatusIndicator } from '@/components/miscellaneous/StatusIndicator';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { CopilotKit } from '@copilotkit/react-core';
+import '@copilotkit/react-ui/styles.css';
 import { ReactNode } from 'react';
 import { MainSidebar } from './_components/MainSidebar';
 

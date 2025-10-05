@@ -9,6 +9,7 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
+import { CopilotPopup } from '@copilotkit/react-ui';
 import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
 import { useState } from 'react';
 import AirportsPanel from '../_components/AirportsPanel';
@@ -167,6 +168,15 @@ export default function AirportHubClientPage() {
           initial: 'Need any help?',
         }}
       /> */}
+      <CopilotPopup
+        instructions={
+          'You are assisting the user as best as you can. Answer in the best way possible given the data you have.'
+        }
+        labels={{
+          title: 'Your Assistant',
+          initial: 'Hi! 👋 How can I assist you today?',
+        }}
+      />
     </PageLayout>
   );
 }
