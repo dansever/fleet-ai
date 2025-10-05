@@ -6,7 +6,12 @@ import { client as fuelBidClient } from '@/modules/fuel/bids';
 import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { client as invoiceClient } from '@/modules/invoices';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { ConversionProgress, convertBidsToTenderBase, ConvertedBid } from '../utils/bidConversion';
+import {
+  ConversionProgress,
+  convertBidsToTenderBase,
+  ConvertedBid,
+  getCachedConvertedBids,
+} from '../utils/bidConversion';
 import { CACHE_KEYS, CACHE_TTL, cacheManager, createCacheKey } from '../utils/cacheManager';
 
 // ============================================================================
@@ -266,6 +271,17 @@ export function FuelProcurementProvider({
   const triggerBidConversion = useCallback(
     async (bids: FuelBid[], tender: FuelTender) => {
       if (bids.length === 0) return;
+
+      // Check if we already have cached converted bids
+      const cachedConvertedBids = getCachedConvertedBids(tender.id);
+      if (cachedConvertedBids && cachedConvertedBids.length === bids.length) {
+        console.log('Using cached converted bids for tender:', tender.id);
+        updateState({
+          convertedBids: cachedConvertedBids,
+          convertingBids: false,
+        });
+        return;
+      }
 
       updateState({ convertingBids: true });
       setConversionProgress({

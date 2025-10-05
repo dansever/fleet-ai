@@ -45,6 +45,7 @@ import ConversionLoadingOverlay from '../_components/ConversionLoadingOverlay';
 import { useFuelBidColumns } from '../_components/FuelBidsDataTableColumns';
 import { NormalizedBidTable } from '../_components/NormalizedBidTable';
 import { useFuelProcurement } from '../contexts';
+import { copyBidsToClipboard, downloadBidsAsCSV } from '../utils/spreadsheetExport';
 
 const FuelTendersPage = memo(function TendersPage() {
   const {
@@ -133,6 +134,34 @@ const FuelTendersPage = memo(function TendersPage() {
     try {
     } catch (error) {
       toast.error('Failed to refresh normalized bids');
+    }
+  };
+
+  const handleDownloadCSV = () => {
+    if (bids.length === 0) {
+      toast.error('No bids to export');
+      return;
+    }
+    try {
+      downloadBidsAsCSV(bids, currentTender);
+      toast.success('Bids exported successfully');
+    } catch (error) {
+      toast.error('Failed to export bids');
+      console.error(error);
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (bids.length === 0) {
+      toast.error('No bids to copy');
+      return;
+    }
+    try {
+      await copyBidsToClipboard(bids);
+      toast.success('Bids copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy bids to clipboard');
+      console.error(error);
     }
   };
 
@@ -257,18 +286,6 @@ const FuelTendersPage = memo(function TendersPage() {
         </BaseCard>
       )}
 
-      {/* Conversion Status */}
-      {loading.convertingBids && currentTender && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-blue-800">
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium">
-              Converting bid values to base currency ({currentTender.baseCurrency}) and units (
-              {currentTender.baseUom})...
-            </span>
-          </div>
-        </div>
-      )}
       {/* Bids Section */}
       {currentTender && (
         <div className="space-y-6">
@@ -307,7 +324,14 @@ const FuelTendersPage = memo(function TendersPage() {
                     <StatusBadge status="warning" text="Soon..." />
                   </div>
                 </Button>
-                <Button intent="secondary" text="Download CSV" icon={Download} size="sm" />
+                <Button
+                  intent="secondary"
+                  text="Download CSV"
+                  icon={Download}
+                  size="sm"
+                  onClick={handleDownloadCSV}
+                  disabled={bids.length === 0}
+                />
                 <Button intent="primary" text="Approve Winner" icon={CheckCircle} size="sm" />
               </div>
             }
@@ -323,6 +347,7 @@ const FuelTendersPage = memo(function TendersPage() {
             ) : (
               <div className="grid grid-cols-1">
                 <DataTable
+                  csvDownload={false}
                   columns={fuelBidColumns}
                   data={bids}
                   tabs={[

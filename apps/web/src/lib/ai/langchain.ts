@@ -1,3 +1,6 @@
+import 'server-only';
+
+import { serverEnv } from '@/lib/env/server';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
@@ -7,12 +10,13 @@ import { ChatOpenAI } from '@langchain/openai';
 // Initialize the LangChain OpenAI model with optimal settings
 export const createOpenAIChatModel = () => {
   return new ChatOpenAI({
-    model: process.env.ACTIVE_OPENAI_MODEL,
-    temperature: 0.7, // Adjust temperature for desired creativity
-    maxTokens: 500, // Increased for more detailed responses
-    streaming: true, // Enable streaming mode
-    streamUsage: true, // Enable token usage tracking in streaming mode
-    maxRetries: 3, // Add retry logic for robustness
+    apiKey: serverEnv.OPENAI_API_KEY,
+    model: serverEnv.ACTIVE_OPENAI_MODEL,
+    temperature: 0.7,
+    maxTokens: 500,
+    streaming: true,
+    streamUsage: true,
+    maxRetries: 3,
   });
 };
 

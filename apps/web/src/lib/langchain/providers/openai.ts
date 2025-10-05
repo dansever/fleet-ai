@@ -1,5 +1,8 @@
 // /lib/langchain/providers/openai.ts
 
+import 'server-only';
+
+import { serverEnv } from '@/lib/env/server';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { Runnable } from '@langchain/core/runnables';
 import { ChatOpenAI, type ChatOpenAIFields } from '@langchain/openai';
@@ -23,7 +26,8 @@ type CreateOptions = {
 
 export function createOpenAIAgent(options: CreateOptions = {}) {
   const fields: ChatOpenAIFields = {
-    model: options.model ?? process.env.ACTIVE_OPENAI_MODEL,
+    apiKey: serverEnv.OPENAI_API_KEY,
+    model: options.model ?? serverEnv.ACTIVE_OPENAI_MODEL,
     temperature: options.temperature ?? 0,
     maxTokens: options.maxTokens ?? 1000,
     timeout: options.timeout,

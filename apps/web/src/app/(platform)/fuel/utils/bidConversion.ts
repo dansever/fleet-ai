@@ -1,6 +1,5 @@
-import { runConversionAgent } from '@/agents/unit-converter/unitConverterAgent';
 import { FuelBid, FuelTender } from '@/drizzle/types';
-import { cacheManager, createCacheKey } from './cacheManager';
+import { CACHE_TTL, cacheManager, createCacheKey } from './cacheManager';
 
 // ============================================================================
 // Types
@@ -61,8 +60,6 @@ const CACHE_KEYS_CONVERSION = {
   CONVERTED_BIDS: 'converted-bids',
 } as const;
 
-const CONVERSION_TTL = 30 * 60 * 1000; // 30 minutes - longer than regular cache since conversions are expensive
-
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -88,67 +85,32 @@ function needsConversion(
 }
 
 /**
- * Creates conversion request text for the AI agent
+ * Calls the conversion API endpoint
  */
-function createConversionRequest(
-  value: number,
-  fromUnit: string,
-  toUnit: string,
-  isCurrency: boolean = false,
-): string {
-  if (isCurrency) {
-    return `Convert ${value} ${fromUnit} to ${toUnit}`;
-  }
-  return `Convert ${value} ${fromUnit} to ${toUnit}`;
-}
-
-/**
- * Calls the unit converter agent for conversion
- */
-async function convertValue(conversionRequest: string): Promise<string> {
+async function convertBidsViaAPI(bids: FuelBid[], tender: FuelTender): Promise<ConvertedBid[]> {
   try {
-    const result = await runConversionAgent(conversionRequest);
-    if (!result) {
-      return '{}';
-    }
-    return JSON.stringify(result);
-  } catch (error) {
-    console.error('Conversion agent failed:', error);
-    return JSON.stringify({
-      error: 'AGENT_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown conversion error',
+    const response = await fetch('/api/fuel/convert-bids', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ bids, tender }),
     });
-  }
-}
 
-/**
- * Parses conversion result from AI agent
- */
-function parseConversionResult(result: string): ConvertedBidField | null {
-  try {
-    const parsed = JSON.parse(result);
-
-    // Handle error responses
-    if (parsed.error) {
-      return {
-        originalValue: 0,
-        originalUnit: '',
-        convertedValue: 0,
-        convertedUnit: '',
-        error: parsed.message || 'Conversion failed',
-      };
+    if (!response.ok) {
+      throw new Error(`Conversion API failed: ${response.status} ${response.statusText}`);
     }
 
-    return {
-      originalValue: parsed.meta?.originalAmount || parsed.value || 0,
-      originalUnit: parsed.meta?.fromCurrency || parsed.meta?.fromUnit || '',
-      convertedValue: parsed.value || 0,
-      convertedUnit: parsed.unit || parsed.meta?.toCurrency || parsed.meta?.toUnit || '',
-      conversionRate: parsed.meta?.exchangeRate || parsed.meta?.precision,
-    };
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Conversion failed');
+    }
+
+    return result.convertedBids;
   } catch (error) {
-    console.error('Failed to parse conversion result:', error);
-    return null;
+    console.error('Conversion API failed:', error);
+    throw error;
   }
 }
 
@@ -158,7 +120,7 @@ function parseConversionResult(result: string): ConvertedBidField | null {
 
 /**
  * Converts bid fields to tender's base currency and UOM
- * Uses AI agent for conversions and caches results to avoid repeated API calls
+ * Uses API endpoint for conversions and caches results to avoid repeated API calls
  */
 export async function convertBidsToTenderBase(
   bids: FuelBid[],
@@ -168,7 +130,7 @@ export async function convertBidsToTenderBase(
   const cacheKey = createCacheKey(CACHE_KEYS_CONVERSION.CONVERTED_BIDS, tender.id);
 
   // Check cache first
-  const cachedConvertedBids = cacheManager.get<ConvertedBid[]>(cacheKey, CONVERSION_TTL);
+  const cachedConvertedBids = cacheManager.get<ConvertedBid[]>(cacheKey, CACHE_TTL.CONVERSIONS);
   if (cachedConvertedBids && cachedConvertedBids.length === bids.length) {
     console.log('Using cached converted bids for tender:', tender.id);
     return cachedConvertedBids;
@@ -178,169 +140,27 @@ export async function convertBidsToTenderBase(
     `Starting conversion for ${bids.length} bids to base currency: ${tender.baseCurrency}, base UOM: ${tender.baseUom}`,
   );
 
-  const convertedBids: ConvertedBid[] = [];
-  const errors: string[] = [];
-  let completed = 0;
+  try {
+    // Call the API endpoint for conversion
+    const convertedBids = await convertBidsViaAPI(bids, tender);
 
-  // Initialize progress tracking
-  const progress: ConversionProgress = {
-    total: bids.length,
-    completed: 0,
-    current: '',
-    errors: [],
-  };
+    // Cache the results
+    cacheManager.set(cacheKey, convertedBids, CACHE_TTL.CONVERSIONS);
 
-  for (const bid of bids) {
-    progress.current = bid.id;
-    onProgress?.(progress);
+    console.log(`Conversion completed: ${convertedBids.length} bids processed`);
 
-    const convertedBid: ConvertedBid = {
+    return convertedBids;
+  } catch (error) {
+    console.error('Bid conversion failed:', error);
+
+    // Return bids with error status
+    return bids.map((bid) => ({
       ...bid,
-      conversionStatus: 'converting',
+      conversionStatus: 'error' as const,
+      conversionError: error instanceof Error ? error.message : 'Unknown conversion error',
       lastConvertedAt: new Date(),
-    };
-
-    try {
-      // Convert base unit price (UOM conversion)
-      if (needsConversion(bid.baseUnitPrice, bid.uom, tender.baseUom)) {
-        const conversionRequest = createConversionRequest(
-          Number(bid.baseUnitPrice),
-          bid.uom || 'USG',
-          tender.baseUom || 'USG',
-          false, // UOM conversion
-        );
-
-        const result = await convertValue(conversionRequest);
-        const converted = parseConversionResult(result);
-
-        if (converted && !converted.error) {
-          convertedBid.convertedBaseUnitPrice = converted;
-        } else {
-          errors.push(
-            `Failed to convert base unit price for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
-          );
-        }
-      }
-
-      // Convert currency-based fields if needed
-      const needsCurrencyConversion =
-        bid.currency &&
-        tender.baseCurrency &&
-        bid.currency.toUpperCase() !== tender.baseCurrency.toUpperCase();
-
-      if (needsCurrencyConversion) {
-        // Convert into plane fee (currency conversion)
-        if (bid.intoPlaneFee && Number(bid.intoPlaneFee) > 0) {
-          const conversionRequest = createConversionRequest(
-            Number(bid.intoPlaneFee),
-            bid.currency || 'USD',
-            tender.baseCurrency || 'USD',
-            true, // Currency conversion
-          );
-
-          const result = await convertValue(conversionRequest);
-          const converted = parseConversionResult(result);
-
-          if (converted && !converted.error) {
-            convertedBid.convertedIntoPlaneFee = converted;
-          } else {
-            errors.push(
-              `Failed to convert into plane fee for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
-            );
-          }
-        }
-
-        // Convert handling fee (currency conversion)
-        if (bid.handlingFee && Number(bid.handlingFee) > 0) {
-          const conversionRequest = createConversionRequest(
-            Number(bid.handlingFee),
-            bid.currency || 'USD',
-            tender.baseCurrency || 'USD',
-            true, // Currency conversion
-          );
-
-          const result = await convertValue(conversionRequest);
-          const converted = parseConversionResult(result);
-
-          if (converted && !converted.error) {
-            convertedBid.convertedHandlingFee = converted;
-          } else {
-            errors.push(
-              `Failed to convert handling fee for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
-            );
-          }
-        }
-
-        // Convert other fee (currency conversion)
-        if (bid.otherFee && Number(bid.otherFee) > 0) {
-          const conversionRequest = createConversionRequest(
-            Number(bid.otherFee),
-            bid.currency || 'USD',
-            tender.baseCurrency || 'USD',
-            true, // Currency conversion
-          );
-
-          const result = await convertValue(conversionRequest);
-          const converted = parseConversionResult(result);
-
-          if (converted && !converted.error) {
-            convertedBid.convertedOtherFee = converted;
-          } else {
-            errors.push(
-              `Failed to convert other fee for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
-            );
-          }
-        }
-      }
-
-      // Convert differential for index-based pricing (UOM conversion)
-      if (
-        bid.priceType === 'index_formula' &&
-        needsConversion(bid.differentialValue, bid.differentialUnit, tender.baseUom)
-      ) {
-        const conversionRequest = createConversionRequest(
-          Number(bid.differentialValue),
-          bid.differentialUnit || bid.uom || 'USG',
-          tender.baseUom || 'USG',
-          false, // UOM conversion
-        );
-
-        const result = await convertValue(conversionRequest);
-        const converted = parseConversionResult(result);
-
-        if (converted && !converted.error) {
-          convertedBid.convertedDifferential = converted;
-        } else {
-          errors.push(
-            `Failed to convert differential for bid ${bid.id}: ${converted?.error || 'Unknown error'}`,
-          );
-        }
-      }
-
-      convertedBid.conversionStatus = 'completed';
-    } catch (error) {
-      console.error(`Error converting bid ${bid.id}:`, error);
-      convertedBid.conversionStatus = 'error';
-      convertedBid.conversionError =
-        error instanceof Error ? error.message : 'Unknown conversion error';
-      errors.push(`Conversion error for bid ${bid.id}: ${convertedBid.conversionError}`);
-    }
-
-    convertedBids.push(convertedBid);
-    completed++;
-    progress.completed = completed;
-    progress.errors = errors;
-    onProgress?.(progress);
+    }));
   }
-
-  // Cache the results
-  cacheManager.set(cacheKey, convertedBids, CONVERSION_TTL);
-
-  console.log(
-    `Conversion completed: ${completed}/${bids.length} bids processed, ${errors.length} errors`,
-  );
-
-  return convertedBids;
 }
 
 /**
@@ -348,7 +168,7 @@ export async function convertBidsToTenderBase(
  */
 export function getCachedConvertedBids(tenderId: string): ConvertedBid[] | null {
   const cacheKey = createCacheKey(CACHE_KEYS_CONVERSION.CONVERTED_BIDS, tenderId);
-  return cacheManager.get<ConvertedBid[]>(cacheKey, CONVERSION_TTL);
+  return cacheManager.get<ConvertedBid[]>(cacheKey, CACHE_TTL.CONVERSIONS);
 }
 
 /**

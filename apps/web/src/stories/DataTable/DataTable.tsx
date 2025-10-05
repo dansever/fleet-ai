@@ -1,6 +1,7 @@
 'use client';
 
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 import { Button } from '@/stories/Button/Button';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { downloadTableAsCSV } from '@/utils/download-csv';
@@ -248,7 +249,7 @@ export function DataTable<T extends Record<string, unknown>>({
           </div>
         ) : (
           <ScrollArea className="w-full max-w-full rounded-md border-1 border-slate-200">
-            <table className="min-w-full">
+            <table className={cn('min-w-full', className)}>
               <thead>
                 <tr className="border-b border-gray-400/50">
                   {columns.map((column) => (

@@ -1,3 +1,6 @@
+import 'server-only';
+
+import { serverEnv } from '@/lib/env/server';
 import type { ChatOpenAIFields } from '@langchain/openai';
 import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
@@ -38,6 +41,7 @@ export type ActiveModelConfig = z.infer<typeof ActiveModelConfigSchema>;
 export function createChatModel(cfg: Partial<ActiveModelConfig> = {}) {
   const conf = ActiveModelConfigSchema.parse(cfg);
   const fields: ChatOpenAIFields = {
+    apiKey: serverEnv.OPENAI_API_KEY,
     model: conf.model,
     temperature: conf.temperature,
     maxTokens: conf.maxTokens,
