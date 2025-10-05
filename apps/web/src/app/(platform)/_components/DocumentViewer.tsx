@@ -233,21 +233,33 @@ export function ContractViewer({ contract, className }: ContractViewerProps) {
         )}
 
         {/* Key Terms */}
-        {contract.keyTerms && Array.isArray(contract.keyTerms) && contract.keyTerms.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Key Terms & Conditions</h3>
-            <div className="bg-gray-50 p-6 rounded-lg border">
-              <ul className="space-y-3">
-                {contract.keyTerms.map((term: string, index: number) => (
-                  <li key={index} className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-gray-700 leading-relaxed">{term}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+        {(() => {
+          const contractDetails =
+            contract.details && typeof contract.details === 'object'
+              ? (contract.details as Record<string, unknown>)
+              : {};
+          const keyTerms = contractDetails.keyTerms;
+
+          return (
+            keyTerms &&
+            Array.isArray(keyTerms) &&
+            keyTerms.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Key Terms & Conditions</h3>
+                <div className="bg-gray-50 p-6 rounded-lg border">
+                  <ul className="space-y-3">
+                    {keyTerms.map((term: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <p className="text-sm text-gray-700 leading-relaxed">{term}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )
+          );
+        })()}
 
         {/* Vendor Comments */}
         {contract.vendorComments && (

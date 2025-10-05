@@ -1,21 +1,21 @@
 // /api/extract/agent/[name]/route.ts
 
-import { getAuthContext } from '@/lib/authorization/authenticate-user';
+import { authenticateUser } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as extractServer } from '@/modules/ai/extract';
 import { NextRequest, NextResponse } from 'next/server';
 
-type RouteParams = { agentName: string };
+type RouteParams = { params: Promise<{ agentName: string }> };
 
 /**
  * This API is used to get an extraction agent by name
  * @param request - the request with the agent name in the body
  * @returns the extraction agent
  */
-export async function GET(request: NextRequest, { params }: { params: RouteParams }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Authorize user
-    const { dbUser, orgId, error: authError } = await getAuthContext();
+    const { dbUser, orgId, error: authError } = await authenticateUser();
     if (authError || !dbUser || !orgId) return jsonError('Unauthorized', 401);
 
     // Read the query string

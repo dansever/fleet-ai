@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type Params = { bucketName: string };
+type RouteParams = { params: Promise<{ bucketName: string }> };
 
 function isSafeFolder(s: string) {
   return typeof s === 'string' && s.length > 0 && !s.startsWith('/') && !s.includes('..');
@@ -18,8 +18,8 @@ function isSafeBucketName(s: string) {
   return /^[a-z0-9-_.]+$/.test(s);
 }
 
-export async function GET(req: NextRequest, { params }: { params: Params }) {
-  const { bucketName } = params;
+export async function GET(req: NextRequest, { params }: RouteParams) {
+  const { bucketName } = await params;
   if (!isSafeBucketName(bucketName)) {
     return NextResponse.json({ error: 'Invalid bucket name' }, { status: 400 });
   }

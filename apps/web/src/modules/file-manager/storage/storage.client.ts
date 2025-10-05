@@ -6,6 +6,8 @@
  * - listFiles
  * - getSignedUrl
  * - deleteFile
+ * - downloadFile
+ * - getBucketFolderCounts
  */
 
 import { api } from '@/services/api-client';
@@ -63,5 +65,17 @@ export async function deleteFile(path: string) {
 export async function downloadFile(path: string) {
   console.log('Downloading file:', path);
   const { data } = await api.get('/api/file-manager/storage/download', { params: { path } });
+  return data;
+}
+
+/**
+ * Get folder counts for a bucket
+ * @param bucketName - the name of the bucket
+ * @returns the folder counts
+ */
+export async function getBucketFolderCounts(bucketName: string) {
+  const { data } = await api.get(`/api/admin/storage/buckets/${bucketName}`, {
+    params: { action: 'folder-counts' },
+  });
   return data;
 }
