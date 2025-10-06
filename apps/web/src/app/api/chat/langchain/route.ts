@@ -1,7 +1,7 @@
-import { createSimpleFleetAIChain, handleChainError } from '@/lib/ai/langchain';
 import { LangChainStreamHandler, extractUserInput } from '@/lib/ai/streaming-utils';
-import { getAuthContext } from '@/lib/authorization/authenticate-user';
+import { authenticateUser } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
+import { formatChainError, makeSingleTurnChain } from '@/lib/langchain';
 import { recordAiTokenUsageAsync } from '@/services/record-usage';
 import { UIMessage } from 'ai';
 import { NextRequest } from 'next/server';
@@ -12,7 +12,7 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   try {
     // Get auth context once at the start
-    const { dbUser, orgId, error } = await getAuthContext();
+    const { dbUser, orgId, error } = await authenticateUser();
     if (error || !dbUser || !orgId) {
       return jsonError('Unauthorized', 401);
     }
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Extract user input and create LangChain chain
     const userInput = extractUserInput(messages);
-    const chain = createSimpleFleetAIChain();
+    const chain = makeSingleTurnChain();
 
     // Stream the response
     const stream = await chain.stream({
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('LangChain API error:', error);
-    const errorMessage = handleChainError(error);
+    const errorMessage = formatChainError(error);
     return jsonError(errorMessage, 500);
   }
 }

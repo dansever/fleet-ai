@@ -1,7 +1,10 @@
 import { clientLogger } from '../core/clientLogger';
+import { LLAMA_BASE } from './constants';
 
-export const LLAMA_BASE = 'https://api.cloud.llamaindex.ai';
-
+/**
+ * Add authentication headers to every API call
+ * @returns the authentication headers
+ */
 export function authHeaders() {
   const apiKey = process.env.LLAMA_CLOUD_API_KEY;
 
@@ -19,7 +22,7 @@ export function authHeaders() {
 }
 
 /**
- * Add ?project_id & ?organization_id to every call
+ * Add ?project_id & ?organization_id to every API call
  * @param path - the path to the llama cloud api
  * @returns the path with ?project_id & ?organization_id
  * @example

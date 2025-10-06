@@ -134,66 +134,72 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
         {analysisResult && (
           <div className="space-y-4">
             {/* Analysis Summary */}
-            <BaseCard title="Analysis Summary" className="space-y-3" neutralHeader={true}>
+            <BaseCard title="Analysis Summary" className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">Quotes Analyzed</span>
+                    <span className="text-sm font-medium">Vendors Analyzed</span>
                   </div>
-                  <p className="text-xl font-bold mt-1">{analysisResult.quotes_analyzed}</p>
+                  <p className="text-xl font-bold mt-1">{analysisResult.vendorAnalysis.length}</p>
                 </div>
 
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-green-500" />
-                    <span className="text-sm font-medium">RFQ Number</span>
+                    <span className="text-sm font-medium">Best Value</span>
                   </div>
-                  <p className="text-lg font-semibold mt-1">{analysisResult.rfq_number || 'N/A'}</p>
+                  <p className="text-lg font-semibold mt-1">
+                    {analysisResult.comparison.bestValue.vendor}
+                  </p>
                 </div>
 
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm font-medium">Status</span>
+                    <span className="text-sm font-medium">Confidence</span>
                   </div>
                   <Badge variant="secondary" className="mt-1">
-                    Complete
+                    {Math.round(analysisResult.confidence * 100)}%
                   </Badge>
                 </div>
               </div>
             </BaseCard>
 
-            {/* Quotes Summary */}
-            <BaseCard title="Quotes Overview" className="space-y-3" neutralHeader={true}>
+            {/* Vendor Analysis */}
+            <BaseCard title="Vendor Analysis" className="space-y-3">
               <div className="space-y-2">
-                {analysisResult.quotes_summary.map((quote, index) => (
+                {analysisResult.vendorAnalysis.map((vendor: any, index: any) => (
                   <div
-                    key={quote.quote_id}
+                    key={vendor.vendor}
                     className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
                       <Badge variant="outline">#{index + 1}</Badge>
                       <div>
-                        <p className="font-medium">{quote.vendor_name || 'Unknown Vendor'}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Lead Time: {quote.lead_time || 'N/A'}
-                        </p>
+                        <p className="font-medium">{vendor.vendor}</p>
+                        <p className="text-sm text-muted-foreground">Score: {vendor.score}/10</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-1">
                         <DollarSign className="h-4 w-4 text-green-500" />
                         <span className="font-semibold">
-                          {quote.price ? `${quote.price} ${quote.currency || ''}` : 'Price TBD'}
+                          {vendor.totalCost} {vendor.currency}
                         </span>
                       </div>
-                      <Badge
-                        variant={quote.status === 'pending' ? 'secondary' : 'default'}
-                        className="text-xs mt-1"
-                      >
-                        {quote.status}
-                      </Badge>
+                      <div className="flex gap-1 mt-1">
+                        {vendor.strengths.length > 0 && (
+                          <Badge variant="default" className="text-xs">
+                            {vendor.strengths.length} strengths
+                          </Badge>
+                        )}
+                        {vendor.weaknesses.length > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {vendor.weaknesses.length} concerns
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -201,58 +207,51 @@ export default function QuoteAnalysis({ isRefreshing = false }: QuoteAnalysisPro
             </BaseCard>
 
             {/* AI Analysis Results */}
-            {analysisResult.llm_analysis && (
-              <BaseCard title="AI Insights" className="space-y-3" neutralHeader={true}>
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg border">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="h-5 w-5 text-purple-500" />
-                    <span className="font-medium">AI Analysis</span>
-                  </div>
+            <BaseCard title="AI Insights" className="space-y-3">
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg border">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="h-5 w-5 text-purple-500" />
+                  <span className="font-medium">AI Analysis</span>
+                </div>
 
-                  {typeof analysisResult.llm_analysis === 'string' ? (
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {analysisResult.llm_analysis}
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {analysisResult.llm_analysis.overall_assessment && (
-                        <div>
-                          <h4 className="font-medium text-sm mb-1">Overall Assessment</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {analysisResult.llm_analysis.overall_assessment}
-                          </p>
-                        </div>
-                      )}
+                <div className="space-y-3">
+                  {analysisResult.summary && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-1">Summary</h4>
+                      <p className="text-sm text-muted-foreground">{analysisResult.summary}</p>
+                    </div>
+                  )}
 
-                      {analysisResult.llm_analysis.recommendation_reason && (
-                        <div>
-                          <h4 className="font-medium text-sm mb-1">Recommendation</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {analysisResult.llm_analysis.recommendation_reason}
-                          </p>
-                        </div>
-                      )}
-
-                      {analysisResult.llm_analysis.key_insights &&
-                        Array.isArray(analysisResult.llm_analysis.key_insights) && (
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Key Insights</h4>
-                            <ul className="list-disc list-inside space-y-1">
-                              {analysisResult.llm_analysis.key_insights.map(
-                                (insight: string, index: number) => (
-                                  <li key={index} className="text-sm text-muted-foreground">
-                                    {insight}
-                                  </li>
-                                ),
-                              )}
-                            </ul>
-                          </div>
+                  {analysisResult.recommendations && analysisResult.recommendations.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-2">Recommendations</h4>
+                      <ul className="list-disc list-inside space-y-1">
+                        {analysisResult.recommendations.map(
+                          (recommendation: string, index: number) => (
+                            <li key={index} className="text-sm text-muted-foreground">
+                              {recommendation}
+                            </li>
+                          ),
                         )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysisResult.insights && analysisResult.insights.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-2">Key Insights</h4>
+                      <ul className="list-disc list-inside space-y-1">
+                        {analysisResult.insights.map((insight: string, index: number) => (
+                          <li key={index} className="text-sm text-muted-foreground">
+                            {insight}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </div>
-              </BaseCard>
-            )}
+              </div>
+            </BaseCard>
           </div>
         )}
 

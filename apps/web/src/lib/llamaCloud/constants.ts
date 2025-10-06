@@ -1,4 +1,7 @@
-// lib/llama.ts
+/**
+ * LlamaCloud base URL
+ */
+export const LLAMA_BASE = 'https://api.cloud.llamaindex.ai';
 
 /**
  * Llama parser name
