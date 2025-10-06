@@ -1,3 +1,7 @@
+// /lib/langchain/structured.ts
+
+'use server';
+
 import type { AIMessage } from '@langchain/core/messages';
 import type { Runnable } from '@langchain/core/runnables';
 import { z, ZodTypeAny } from 'zod';

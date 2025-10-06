@@ -1,6 +1,7 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
@@ -10,7 +11,8 @@ import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { CopilotPopup } from '@copilotkit/react-ui';
-import { Eye, FileText, MapPin, RefreshCw, Star, Users } from 'lucide-react';
+import { Eye, FileText, MapPin, Plane, RefreshCw, Star, Users } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 import AirportsPanel from '../_components/AirportsPanel';
 import { useAirportHub } from './context';
@@ -73,12 +75,56 @@ export default function AirportHubClientPage() {
 
   if (!airports || airports.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-        <div className="text-center">
-          <h3 className="text-lg font-medium mb-2">No Airports Found</h3>
-          <p className="text-sm">No airports have been added to your organization yet.</p>
+      <PageLayout
+        headerContent={
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-[180px] rounded-lg" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+        }
+        sidebarWidth={isCollapsed ? '18rem' : '18rem'}
+      >
+        <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  <MapPin className="w-12 h-12 text-gray-500" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <CardTitle className="text-2xl">No Airports Found</CardTitle>
+                <CardDescription className="text-base">
+                  No airports have been added to your organization yet. Add your first airport to
+                  get started.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <AirportDialog
+                airport={null}
+                DialogType="add"
+                trigger={<Button intent="primary" text="Add Airport" icon={MapPin} />}
+                onChange={(newAirport) => {
+                  addAirport(newAirport);
+                }}
+              />
+              <div className="flex justify-center pt-4">
+                <Image
+                  src="/logos/fleet-ai-logo.svg"
+                  alt="FleetAI Logo"
+                  width={120}
+                  height={40}
+                  className="opacity-40"
+                />
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -87,7 +133,7 @@ export default function AirportHubClientPage() {
       headerContent={
         loading.airports ? (
           <div className="flex items-center space-x-4">
-            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-12 w-[180px] rounded-lg" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-[250px]" />
               <Skeleton className="h-4 w-[200px]" />
@@ -146,12 +192,16 @@ export default function AirportHubClientPage() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-row items-center gap-4 justify-between w-full">
-            <div className="flex flex-col">
-              <h1 className="text-gray-400">No Airport Selected</h1>
-              <p className="text-sm text-gray-500">
-                Select an airport from the sidebar to continue
-              </p>
+          <div className="flex flex-row items-center gap-4">
+            <AirportsPanel
+              airports={airports}
+              selectedAirport={null}
+              onAirportSelect={setSelectedAirport}
+              onAirportAdd={setSelectedAirport}
+            />
+            <div className="flex flex-col gap-1">
+              <Skeleton className="h-4 w-[200px]" />
+              <Skeleton className="h-3 w-[150px]" />
             </div>
           </div>
         )
@@ -190,11 +240,22 @@ function MainContentSection() {
   // Show empty state if no airports exist
   if (airports.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-        <div className="text-center">
-          <h3 className="text-lg font-medium mb-2">No Airports Found</h3>
-          <p className="text-sm">No airports have been added to your organization yet.</p>
-        </div>
+      <div className="flex items-center justify-center h-[calc(100vh-300px)]">
+        <Card className="max-w-md w-full mx-4">
+          <CardHeader className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <MapPin className="w-12 h-12 text-gray-500" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-2xl">No Airports Found</CardTitle>
+              <CardDescription className="text-base">
+                No airports have been added to your organization yet.
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
@@ -202,13 +263,34 @@ function MainContentSection() {
   // Show empty state if no airport is selected
   if (!selectedAirport) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-        <div className="text-center">
-          <h3 className="text-lg font-medium mb-2">No Airport Selected</h3>
-          <p className="text-sm">
-            Please select an airport from the sidebar to view fuel procurement data.
-          </p>
-        </div>
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <Card className="max-w-md w-full mx-4">
+          <CardHeader className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-violet-100 flex items-center justify-center">
+                <Plane className="w-12 h-12 text-blue-600" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-2xl">No Airport Selected</CardTitle>
+              <CardDescription className="text-base">
+                Please select an airport from the sidebar to view service agreements, contacts, and
+                airport management data.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <div className="flex justify-center">
+              <Image
+                src="/logos/fleet-ai-logo.svg"
+                alt="FleetAI Logo"
+                width={120}
+                height={40}
+                className="opacity-40"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -1,3 +1,5 @@
+'use server';
+
 import type { AIMessageChunk } from '@langchain/core/messages';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { RunnableSequence } from '@langchain/core/runnables';

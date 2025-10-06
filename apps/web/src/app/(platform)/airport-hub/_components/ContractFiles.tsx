@@ -373,7 +373,8 @@ export function ContractDocument() {
                   <Button
                     intent="secondary"
                     icon={Download}
-                    text="View"
+                    text="Download"
+                    size="sm"
                     onClick={() => handleViewDocument(selectedDocument.storagePath ?? '')}
                     disabled={viewDocumentLoading}
                     isLoading={viewDocumentLoading}
@@ -383,6 +384,7 @@ export function ContractDocument() {
                     trigger={
                       <Button
                         intent="secondary"
+                        size="sm"
                         icon={Trash}
                         text="Delete"
                         disabled={deleteDocumentLoading}

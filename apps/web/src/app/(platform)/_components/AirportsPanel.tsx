@@ -22,7 +22,7 @@ export default function AirportsPanel({
         <Button
           intent="secondary"
           size="lg"
-          text={selectedAirport?.name}
+          text={selectedAirport?.name || 'Select Airport'}
           icon={PanelLeftOpen}
           className={cn(
             'gap-2 hover:scale-100 shadow-none hover:shadow-md',

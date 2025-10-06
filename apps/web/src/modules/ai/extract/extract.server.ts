@@ -1,8 +1,8 @@
 'use server';
 import 'server-only';
 
-import { authHeaders, withCtx } from '@/lib/ai/llamaCloud';
 import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
+import { authHeaders, withCtx } from '@/lib/llamaCloud/api';
 import { api } from '@/services/api-client';
 import { recordAiTokenUsage } from '@/services/record-usage';
 import type {

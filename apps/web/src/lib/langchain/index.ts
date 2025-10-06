@@ -1,3 +1,7 @@
+// /lib/langchain/index.ts
+
+'use server';
+
 export * from './chains';
 export * from './errors';
 export * from './messages';

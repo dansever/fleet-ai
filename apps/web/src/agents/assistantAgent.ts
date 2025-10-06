@@ -1,3 +1,5 @@
+'use server';
+
 import { createChatModel, FLEET_AI_SYSTEM_PROMPT } from '@/lib/langchain';
 import { SystemMessage } from '@langchain/core/messages';
 import { MessagesAnnotation, StateGraph } from '@langchain/langgraph';

@@ -35,7 +35,7 @@ Chat History                                      Structured/Raw Output
 - `errors.ts`: User-friendly error formatting.
 - `types.ts`: Shared types.
 - `providers/openai.ts`: OpenAI provider-specific creators and helpers.
-- `providers/openaidemo.ts`: Demo runner showcasing provider patterns.
+- `providers/openai-demo.ts`: Demo runner showcasing provider patterns.
 
 ### File Structure
 
@@ -53,7 +53,7 @@ lib/langchain/
 ├── usage.ts              # Token usage tracking
 └── providers/
     ├── openai.ts         # OpenAI-specific implementations
-    └── openaidemo.ts     # Usage examples & demos
+    └── openai-demo.ts     # Usage examples & demos
 ```
 
 ---
@@ -119,7 +119,7 @@ lib/langchain/
 - **`streamRunnable(runnable, input, config?)`**: Streams from any runnable (async iterable of `AIMessageChunk`).
 - **`streamOpenAI(input, options?)`**: Quick single-turn streaming helper (string or messages array input).
 
-## `providers/openaidemo.ts`
+## `providers/openai-demo.ts`
 
 - **`runOpenAIDemo()`**: Runs a sequence of examples demonstrating streaming, prompt+model chains, structured output, JSON mode, and tool-calling.
 
@@ -208,7 +208,7 @@ lib/langchain/
 2. Add usage examples to `documentation/EXAMPLES.md`.
 3. Include JSDoc comments in code.
 4. Follow naming conventions (`create*`, `make*`, `to*`, `format*`, `stream*`).
-5. Test provider patterns with `providers/openaidemo.ts` where applicable.
+5. Test provider patterns with `providers/openai-demo.ts` where applicable.
 
 ---
 

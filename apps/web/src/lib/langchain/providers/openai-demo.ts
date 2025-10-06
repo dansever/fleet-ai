@@ -1,4 +1,7 @@
-// /lib/langchain/openaidemo.ts
+// /lib/langchain/openai-demo.ts
+
+'use server';
+
 import type { AIMessageChunk } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
