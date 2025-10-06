@@ -3,9 +3,8 @@
   "dockerfile_lines": [],
   "dependencies": ["."],
   "graphs": {
-    "assistant_agent": "./src/agents/assistantAgent.ts:graph",
-    "conversation_agent": "./src/agents/conversationAgent.ts:graph",
-    "unit_converter_agent": "./src/agents/unit-converter/unitConverterAgent.ts:graph"
+    "assistant_agent": "./src/agents/assistant/assistantAgent.ts:graph",
+    "uom_converter_agent": "./src/agents/uom-converter/uomConverterAgent.ts:graph"
   },
   "env": ".env.local"
 }

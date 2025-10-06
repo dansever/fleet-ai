@@ -34,6 +34,12 @@ export const serverEnv = createEnv({
 
     // CopilotKit API Key
     COPILOTKIT_API_KEY: z.string().min(1),
+
+    // Tavily API Key
+    TAVILY_API_KEY: z.string().min(1),
+
+    // Weather API Key
+    WEATHER_API_KEY: z.string().min(1),
   },
   experimental__runtimeEnv: process.env,
 });

@@ -14,8 +14,8 @@ const runtime = new CopilotRuntime({
       langsmithApiKey: process.env.LANGSMITH_API_KEY || '', // only used in LangGraph Platform deployments
       agents: [
         {
-          name: 'conversation_agent',
-          description: 'A helpful LLM agent.',
+          name: 'assistant_agent',
+          description: 'FleetAI main AI assistant (copilot chat assistant).',
         },
       ],
     }),

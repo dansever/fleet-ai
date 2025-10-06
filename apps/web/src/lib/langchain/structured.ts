@@ -20,7 +20,7 @@ export function makeStructuredRunnable<T extends ZodTypeAny>(
 ): Runnable<any, z.infer<T>> {
   const llm = createChatModel({
     model: cfg?.model,
-    temperature: cfg?.temperature ?? 0,
+    temperature: cfg?.temperature ?? 1,
   });
 
   // Default mode returns the parsed object directly.

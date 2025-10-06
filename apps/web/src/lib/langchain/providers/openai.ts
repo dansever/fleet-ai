@@ -26,7 +26,7 @@ export function createOpenAIAgent(options: CreateOptions = {}) {
   const fields: ChatOpenAIFields = {
     apiKey: serverEnv.OPENAI_API_KEY,
     model: options.model ?? serverEnv.ACTIVE_OPENAI_MODEL,
-    temperature: options.temperature ?? 0,
+    temperature: options.temperature ?? 1,
     maxTokens: options.maxTokens ?? 1000,
     timeout: options.timeout,
     maxRetries: options.maxRetries ?? 3,
@@ -41,10 +41,10 @@ export function createOpenAIAgent(options: CreateOptions = {}) {
 /**
  * Structured output helper
  * - Uses provider-optimized structured parsing
- * - Prefer temperature 0 for determinism
+ * - Uses low temperature (0.1) for near-deterministic results
  */
 export function createStructuredRunnable<T extends ZodTypeAny>(schema: T, opts?: CreateOptions) {
-  const llm = createOpenAIAgent({ temperature: 0, ...opts });
+  const llm = createOpenAIAgent({ temperature: 0.1, ...opts });
   return llm.withStructuredOutput(schema);
 }
 
@@ -52,7 +52,7 @@ export function createStructuredRunnable<T extends ZodTypeAny>(schema: T, opts?:
  * JSON mode variant if you want { parsed, raw } back
  */
 export function createJsonModeRunnable<T extends ZodTypeAny>(schema: T, opts?: CreateOptions) {
-  const llm = createOpenAIAgent({ temperature: 0, ...opts });
+  const llm = createOpenAIAgent({ temperature: 0.1, ...opts });
   return llm.withStructuredOutput(schema, { method: 'jsonMode', includeRaw: true });
 }
 
