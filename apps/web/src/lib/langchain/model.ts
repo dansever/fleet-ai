@@ -1,7 +1,5 @@
 // /lib/langchain/model.ts
 
-import 'server-only';
-
 import { serverEnv } from '@/lib/env/server';
 import type { ChatOpenAIFields } from '@langchain/openai';
 import { ChatOpenAI } from '@langchain/openai';

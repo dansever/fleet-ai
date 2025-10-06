@@ -145,7 +145,9 @@ const workflow = new StateGraph(ConverterStateAnnotation)
   .addEdge('extract_result', '__end__');
 
 // 8. Compile and export the graph
-export const unitConverterGraph = workflow.compile();
+export const graph = workflow.compile();
+// Backwards compatibility - keep the old export name
+export const unitConverterGraph = graph;
 
 // 9. Convenience function for simple conversions
 export async function runConversion(text: string): Promise<{

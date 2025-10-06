@@ -1,7 +1,5 @@
 // /lib/langchain/providers/openai.ts
 
-import 'server-only';
-
 import { serverEnv } from '@/lib/env/server';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { Runnable } from '@langchain/core/runnables';

@@ -3,7 +3,6 @@ import { date, foreignKey, index, jsonb, pgTable, text, uuid } from 'drizzle-orm
 import { ContractTypeEnum, ProcessStatusEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
 import { airportsTable, organizationsTable } from './schema.core';
-import { documentsTable } from './schema.documents';
 import { vendorsTable } from './schema.vendors';
 
 /* -------------------- Contracts -------------------- */
@@ -86,6 +85,6 @@ export const contractsRelations = relations(contractsTable, ({ one, many }) => (
     fields: [contractsTable.vendorId],
     references: [vendorsTable.id],
   }),
-  // Each contract can have many documents
-  documents: many(documentsTable),
+  // Note: Documents relationship is polymorphic via parentId/parentType
+  // and must be resolved programmatically (see schema.documents.ts)
 }));
