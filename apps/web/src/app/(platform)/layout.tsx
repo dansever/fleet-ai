@@ -1,4 +1,3 @@
-import { StatusIndicator } from '@/components/miscellaneous/StatusIndicator';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AuthProvider } from '@/lib/authorization/auth-context';
 import { authenticateUser } from '@/lib/authorization/authenticate-user';
@@ -23,10 +22,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
       <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
         <MainSidebar variant="sidebar" dbUser={dbUser} />
         <CopilotKit publicApiKey={copilotKitApiKey} runtimeUrl={copilotKitRuntimeUrl}>
-          <main className="flex-1 min-w-0 h-screen overflow-hidden">
-            {children}
-            <StatusIndicator />
-          </main>
+          <main className="flex-1 min-w-0 h-screen overflow-hidden">{children}</main>
         </CopilotKit>
       </SidebarProvider>
     </AuthProvider>

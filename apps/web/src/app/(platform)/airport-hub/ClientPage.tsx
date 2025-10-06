@@ -1,7 +1,16 @@
 'use client';
 
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { StatusIndicator } from '@/components/miscellaneous/StatusIndicator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TabsContent } from '@/components/ui/tabs';
@@ -181,7 +190,7 @@ export default function AirportHubClientPage() {
                 />
               </div>
             </div>
-            <div className="fixed top-2 right-36">
+            <div className="flex flex-row gap-4">
               <Button
                 intent="glass"
                 text="Refresh"
@@ -189,6 +198,7 @@ export default function AirportHubClientPage() {
                 onClick={handleRefresh}
                 isLoading={loading.contracts || loading.documents || loading.vendorContacts}
               />
+              <StatusIndicator />
             </div>
           </div>
         ) : (
@@ -263,34 +273,19 @@ function MainContentSection() {
   // Show empty state if no airport is selected
   if (!selectedAirport) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <Card className="max-w-md w-full mx-4">
-          <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-violet-100 flex items-center justify-center">
-                <Plane className="w-12 h-12 text-blue-600" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <CardTitle className="text-2xl">No Airport Selected</CardTitle>
-              <CardDescription className="text-base">
-                Please select an airport from the sidebar to view service agreements, contacts, and
-                airport management data.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <div className="flex justify-center">
-              <Image
-                src="/logos/fleet-ai-logo.svg"
-                alt="FleetAI Logo"
-                width={120}
-                height={40}
-                className="opacity-40"
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mt-20 flex items-center justify-center">
+        <Empty className="max-w-md border border-dashed shadow-lg bg-white">
+          <EmptyHeader>
+            <EmptyMedia className="bg-blue-100 p-4 rounded-full">
+              <Plane className="w-12 h-12 text-blue-600" />
+            </EmptyMedia>
+            <EmptyTitle>No Airport Selected</EmptyTitle>
+            <EmptyDescription>Please select an airport from the sidebar.</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Image src="/logos/fleet-ai-logo.svg" alt="FleetAI Logo" width={120} height={40} />
+          </EmptyContent>
+        </Empty>
       </div>
     );
   }

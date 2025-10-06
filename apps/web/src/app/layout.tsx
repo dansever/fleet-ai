@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
+
 import React from 'react';
 import BackendApiAuth from './BackendApiAuth';
 import ClerkOrgSetter from './ClerkOrgSetter';
@@ -26,6 +27,12 @@ const manrope = Manrope({ subsets: ['latin'] });
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning lang="en">
+      <head>
+        <style>
+          @import
+          url('https://fonts.googleapis.com/css2?family=Delius+Swash+Caps&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+        </style>
+      </head>
       <body className={manrope.className}>
         {/* Clerk Provider */}
         <ClerkProvider>

@@ -72,6 +72,16 @@ export abstract class BaseFileProcessor implements FileProcessor {
         await this.createChunksAndEmbeddings(context);
       }
 
+      // Step 7: Final completion step
+      context.onProgress?.(
+        {
+          name: 'complete',
+          description: 'Processing completed successfully',
+          progress: 100,
+        },
+        100,
+      );
+
       const processingTime = Date.now() - startTime;
 
       return {

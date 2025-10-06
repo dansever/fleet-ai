@@ -1,5 +1,6 @@
 'use client';
 
+import { StatusIndicator } from '@/components/miscellaneous/StatusIndicator';
 import { CardContent } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -102,7 +103,14 @@ const categoryColors = [
 export default function DashboardClientPage() {
   const { user } = useDashboardContext();
   return (
-    <PageLayout sidebarContent={null} headerContent={<h1>Hello {user?.firstName}</h1>}>
+    <PageLayout
+      headerContent={
+        <div className="flex flex-row gap-2 justify-between">
+          <h1 className="font-delius">Hello {user?.firstName}</h1>
+          <StatusIndicator />
+        </div>
+      }
+    >
       <div className="grid grid-cols-6 gap-4">
         {/* Executive KPI Metrics */}
         <div className="col-span-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

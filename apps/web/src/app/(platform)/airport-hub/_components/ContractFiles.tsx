@@ -8,6 +8,7 @@ import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { client as parseClient } from '@/modules/ai/parse';
 import { documents, extraction, storage } from '@/modules/file-manager';
+import { resetGlobalStatus, updateGlobalStatus } from '@/stores/statusStore';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
@@ -15,6 +16,7 @@ import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popove
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { ContractTerm, ExtractedContractData } from '@/types/contracts';
+import type { JobStatus } from '@/types/job';
 import {
   CheckCircle2,
   ChevronDown,
@@ -61,6 +63,36 @@ interface DocumentData {
 
 interface DocumentViewerProps {
   data: DocumentData;
+}
+
+/**
+ * Poll job status until completion or timeout
+ */
+async function pollJob(
+  jobId: string,
+  onUpdate: (data: {
+    status: JobStatus;
+    message?: string;
+    progress?: number;
+    documentId?: string;
+  }) => void,
+  timeoutMs = 5 * 60 * 1000,
+  intervalMs = 1200,
+) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const res = await fetch(`/api/jobs/${jobId}`);
+    if (!res.ok) throw new Error('Failed to fetch job status');
+    const data = await res.json();
+
+    onUpdate(data);
+
+    if (data.status === 'completed' || data.status === 'error') {
+      return data;
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  throw new Error('Timed out waiting for job to finish');
 }
 
 // Helper function to get file type icon and color
@@ -123,39 +155,72 @@ export function ContractDocument() {
   const [deleteDocumentLoading, setDeleteDocumentLoading] = useState(false);
   const [searchTerms, setSearchTerms] = useState('');
 
-  // Handle file upload for contract extraction
+  // Simplified file upload handler
   const handleUploadContractFile = async (file: File) => {
     if (!selectedContract) {
       toast.error('No contract selected');
       return;
     }
+
     setUploadLoading(true);
+
+    // Reset any stuck status first
+    resetGlobalStatus();
+
     try {
-      // Process the new document using unified files module
-      const result = await filesClient.uploadAndProcessFile(file, {
-        documentType: 'contract',
-        parentId: selectedContract.id,
+      // Step 1: Start processing
+      updateGlobalStatus('processing', 'Uploading file...', 10);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', 'contract');
+      formData.append('parentId', selectedContract.id);
+
+      const createJobRes = await fetch('/api/jobs', {
+        method: 'POST',
+        body: formData,
       });
 
-      if (!result.success) {
-        throw new Error(result.error || 'Upload failed');
+      if (!createJobRes.ok) {
+        throw new Error('Failed to create job');
       }
 
-      toast.success('Document has been uploaded');
+      const { jobId } = (await createJobRes.json()) as { jobId: string };
 
-      // Fetch the newly created document and add it to state
-      // This avoids refreshing all documents and prevents the page refresh feeling
+      // Step 2: Simple polling approach (more reliable than SSE)
+      const result = await pollJob(jobId, (data) => {
+        if (data.status === 'processing') {
+          updateGlobalStatus('processing', data.message || 'Processing...', data.progress);
+        } else if (data.status === 'completed') {
+          updateGlobalStatus('completed', 'Document processed successfully', 100);
+        } else if (data.status === 'error') {
+          updateGlobalStatus('error', data.message || 'Processing failed');
+        }
+      });
+
+      // Step 3: Fetch and add the newly created document
       if (result.documentId) {
         const newDocument = await documentsClient.getDocumentById(result.documentId);
         addDocument(newDocument);
+        toast.success('Document has been uploaded and processed');
+      } else {
+        toast.success('Document processing completed');
       }
 
-      // Optionally refresh contracts to update extracted terms if the document processing updated them
-      // Note: This is optional and can be removed if contract terms are not updated during document processing
-      // refreshContracts();
+      // Step 4: Auto-reset status after 3 seconds
+      setTimeout(() => {
+        resetGlobalStatus();
+      }, 3000);
     } catch (error) {
-      toast.error('Failed to process contract file');
+      const msg = error instanceof Error ? error.message : 'Failed to process file';
+      updateGlobalStatus('error', msg);
+      toast.error(msg);
       console.error(error);
+
+      // Auto-reset error status after 5 seconds
+      setTimeout(() => {
+        resetGlobalStatus();
+      }, 5000);
     } finally {
       setUploadLoading(false);
     }

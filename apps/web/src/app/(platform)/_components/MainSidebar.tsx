@@ -232,7 +232,7 @@ export function MainSidebar({
       <Sidebar collapsible="icon" variant={variant} className="border-r-primary/40">
         <SidebarHeader className="flex flex-row items-center w-full h-16 min-h-16 px-2">
           <div className="flex items-center h-full">
-            <div className="w-[120px] h-8 bg-gray-200 rounded animate-pulse" />
+            <BrandLogo width={120} />
           </div>
         </SidebarHeader>
         <SidebarContent>
