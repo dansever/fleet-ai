@@ -227,3 +227,24 @@ input[type='number']::-webkit-inner-spin-button {
 input[type='number'] {
   -moz-appearance: textfield;
 }
+
+/* ========= COPILOT KIT STYLES ========= */
+/* Base styling for all chat messages */
+.copilotKitMessage {
+  font-family: 'Manrope', sans-serif;
+}
+
+.copilotKitButton {
+  border: none !important;
+  /* purple-600, blue-600 */
+  background: linear-gradient(90deg, oklch(55.8% 0.288 302.321), oklch(54.6% 0.245 262.881));
+  transition:
+    opacity 150ms ease,
+    filter 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.copilotKitButton.open {
+  /* purple-600, blue-600 */
+  background: linear-gradient(90deg, oklch(55.8% 0.288 302.321), oklch(54.6% 0.245 262.881));
+}

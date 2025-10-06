@@ -155,7 +155,7 @@ export function ContractDocument() {
   const [deleteDocumentLoading, setDeleteDocumentLoading] = useState(false);
   const [searchTerms, setSearchTerms] = useState('');
 
-  // Simplified file upload handler
+  // File upload handler
   const handleUploadContractFile = async (file: File) => {
     if (!selectedContract) {
       toast.error('No contract selected');
@@ -187,7 +187,7 @@ export function ContractDocument() {
 
       const { jobId } = (await createJobRes.json()) as { jobId: string };
 
-      // Step 2: Simple polling approach (more reliable than SSE)
+      // Step 2: Polling approach (more reliable than SSE)
       const result = await pollJob(jobId, (data) => {
         if (data.status === 'processing') {
           updateGlobalStatus('processing', data.message || 'Processing...', data.progress);
@@ -285,11 +285,6 @@ export function ContractDocument() {
     }
   };
 
-  const copyMessage = (message: string | number | boolean) => {
-    navigator.clipboard.writeText(message.toString());
-    toast.info('Copied to clipboard');
-  };
-
   const extractedData = selectedDocument?.extractedData as ExtractedContractData | undefined;
   const filteredTerms = Array.isArray(extractedData?.terms)
     ? extractedData.terms.filter((term: ContractTerm) => {
@@ -328,10 +323,10 @@ export function ContractDocument() {
         />
       )}
 
-      <div className="grid lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
         <BaseCard
           cardType="inner"
-          className="flex flex-col lg:col-span-1"
+          className="flex flex-col col-span-1"
           title="Files"
           actions={
             <FileUploadPopover
@@ -345,8 +340,8 @@ export function ContractDocument() {
             <div className="flex flex-col gap-2 py-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="p-4 rounded-lg border bg-card">
-                  <Skeleton className="h-4 w-3/4 mb-3" />
-                  <Skeleton className="h-3 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-3 w-1/2 mb-1" />
                   <Skeleton className="h-3 w-2/3" />
                 </div>
               ))}
@@ -373,16 +368,11 @@ export function ContractDocument() {
                     className="rounded-sm"
                   >
                     <div className="flex flex-col items-start gap-1 py-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <FileIcon className={`flex-shrink-0 w-4 h-4 ${fileConfig.color}`} />
                         <Badge className={`text-xs px-2 py-0 ${fileConfig.badgeColor}`}>
                           {document.fileType || 'FILE'}
                         </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-xs text-green-600">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>Processed</span>
                       </div>
                     </div>
 
@@ -398,7 +388,7 @@ export function ContractDocument() {
         </BaseCard>
         <BaseCard
           cardType="inner"
-          className="lg:col-span-3"
+          className="col-start-2 col-span-full"
           header={
             selectedDocument ? (
               <div className="flex items-center justify-between gap-4">
@@ -482,8 +472,8 @@ export function ContractDocument() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="p-4 rounded-lg border">
-                      <Skeleton className="h-3 w-20 mb-2" />
-                      <Skeleton className="h-6 w-24" />
+                      <Skeleton className="h-4 w-1/2 mb-2" />
+                      <Skeleton className="h-6 w-4/5" />
                     </div>
                   ))}
                 </div>

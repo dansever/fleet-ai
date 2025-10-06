@@ -144,14 +144,9 @@ export function ContractOverview() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Contract Period Section */}
-        <BaseCard
-          cardType="inner"
-          className="col-span-2"
-          icon={<Calendar />}
-          title="Contract Period"
-        >
+        <BaseCard cardType="inner" icon={<Calendar />} title="Contract Period">
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -192,22 +187,22 @@ export function ContractOverview() {
               <p>Company Name</p>
               <h3>{contract.vendorName}</h3>
             </div>
-            <div className="flex flex-row gap-2 items-center">
-              <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <div className="flex flex-row gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 text-gray-400 flex-shrink-0" />
               <div>
                 <p>Address</p>
                 <p className="font-semibold">{contract.vendorAddress}</p>
               </div>
             </div>
-            <div className="flex flex-row gap-2 items-center">
-              <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <div className="flex flex-row gap-2">
+              <User className="h-4 w-4 mt-0.5 text-gray-400 flex-shrink-0" />
               <div>
                 <p>Contact Person</p>
                 <p className="font-semibold">{contract.vendorContactName}</p>
               </div>
             </div>
-            <div className="flex flex-row gap-2 justify-start">
-              <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <div className="flex flex-row gap-2">
+              <Mail className="h-4 w-4 mt-0.5 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p>Email</p>
                 {contract.vendorContactEmail && (
@@ -218,8 +213,8 @@ export function ContractOverview() {
                 )}
               </div>
             </div>
-            <div className="flex flex-row gap-2 items-center">
-              <Phone className="h-4 w-4 text-gray-400" />
+            <div className="flex flex-row gap-2">
+              <Phone className="h-4 w-4 mt-0.5 text-gray-400" />
               <div>
                 <p>Phone</p>
                 <p className="font-semibold">{contract.vendorContactPhone}</p>
