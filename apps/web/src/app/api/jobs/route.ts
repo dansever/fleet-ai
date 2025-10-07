@@ -4,7 +4,7 @@
  */
 
 import { DocumentType } from '@/drizzle/enums';
-import { getAuthContext } from '@/lib/authorization/authenticate-user';
+import { authenticateUser } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { completeJob, createJob, failJob, updateJobWithNotification } from '@/modules/core/jobs';
 import { extraction } from '@/modules/file-manager';
@@ -14,8 +14,7 @@ const filesServer = extraction.server;
 
 export async function POST(request: NextRequest) {
   try {
-    // Authorize user
-    const { dbUser, orgId, error } = await getAuthContext();
+    const { dbUser, orgId, error } = await authenticateUser();
     if (error || !dbUser || !orgId) {
       return jsonError('Unauthorized', 401);
     }

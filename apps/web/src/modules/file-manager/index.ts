@@ -49,8 +49,3 @@ export * as processors from './processors';
 // ============================================================================
 export * as workflows from './workflows';
 export type { DocumentProcessorTypes } from './workflows/orchestrator.types';
-
-// ============================================================================
-// Convenience Exports (Backward Compatibility)
-// ============================================================================
-// Note: No deprecated exports - use the new imports instead

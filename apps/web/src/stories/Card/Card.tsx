@@ -55,7 +55,13 @@ export const BaseCard = ({
       )}
     >
       {hasHeaderParams ? (
-        <CardHeader className={cn('pt-4 pb-1 bg-gradient-to-r', headerClassName)}>
+        <CardHeader
+          className={cn(
+            { 'px-4 lg:px-6': cardType === 'inner' },
+            'pt-4 pb-1 bg-gradient-to-r',
+            headerClassName,
+          )}
+        >
           {header
             ? header
             : (title || subtitle || actions) && (
@@ -78,7 +84,9 @@ export const BaseCard = ({
               )}
         </CardHeader>
       ) : null}
-      <CardContent className={contentClassName}>{children}</CardContent>
+      <CardContent className={cn({ 'px-4 lg:px-6': cardType === 'inner' }, contentClassName)}>
+        {children}
+      </CardContent>
       {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );
