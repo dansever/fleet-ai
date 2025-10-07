@@ -1,6 +1,7 @@
 import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
 import { server as contractServer } from '@/modules/contracts';
+import { server as documentsServer } from '@/modules/file-manager/documents';
 import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -67,6 +68,9 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     const existing = await contractServer.getContractById(id);
     if (!existing) return jsonError('Contract not found', 404);
     if (existing.orgId !== orgId) return jsonError('Unauthorized', 401);
+
+    /* TODO: Delete cascading documents */
+    await documentsServer.deleteDocumentCascade(id, existing.storagePath);
 
     await contractServer.deleteContract(id);
     return NextResponse.json({ success: true });

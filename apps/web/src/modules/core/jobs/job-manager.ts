@@ -13,6 +13,7 @@ const CLEANUP_DELAY = 5 * 60 * 1000;
 
 /**
  * Generate a unique job ID
+ * @returns
  */
 function generateJobId(): string {
   return `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -20,6 +21,7 @@ function generateJobId(): string {
 
 /**
  * Schedule job cleanup after delay
+ * @param jobId
  */
 function scheduleCleanup(jobId: string) {
   setTimeout(() => {
@@ -32,12 +34,15 @@ function scheduleCleanup(jobId: string) {
 }
 
 /**
- * Create a new job
+ * Create a new job for tracking an async operation
+ * @param options
+ * @returns
  */
 export function createJob(options: CreateJobOptions = {}): JobState {
   const jobId = generateJobId();
   const job: JobState = {
     jobId,
+    jobType: options.jobType || 'generic',
     status: 'queued',
     message: options.message || 'Job created',
     timestamp: new Date().toISOString(),
@@ -45,19 +50,24 @@ export function createJob(options: CreateJobOptions = {}): JobState {
   };
 
   jobs.set(jobId, job);
-  console.log(`✨ Created job: ${jobId}`);
+  console.log(`✨ Created job: ${jobId} (${job.jobType})`);
   return job;
 }
 
 /**
  * Get a job by ID
+ * @param jobId
+ * @returns
  */
 export function getJob(jobId: string): JobState | undefined {
   return jobs.get(jobId);
 }
 
 /**
- * Update a job's state
+ * Update a job's state with new information
+ * @param jobId
+ * @param updates
+ * @returns
  */
 export function updateJob(jobId: string, updates: UpdateJobOptions): JobState | undefined {
   const job = jobs.get(jobId);
@@ -85,6 +95,8 @@ export function updateJob(jobId: string, updates: UpdateJobOptions): JobState | 
 
 /**
  * Delete a job
+ * @param jobId
+ * @returns
  */
 export function deleteJob(jobId: string): boolean {
   return jobs.delete(jobId);
@@ -92,6 +104,7 @@ export function deleteJob(jobId: string): boolean {
 
 /**
  * Get all jobs (for debugging)
+ * @returns
  */
 export function getAllJobs(): JobState[] {
   return Array.from(jobs.values());
@@ -99,6 +112,10 @@ export function getAllJobs(): JobState[] {
 
 /**
  * Helper to update job progress
+ * @param jobId
+ * @param progress
+ * @param message
+ * @returns
  */
 export function updateJobProgress(
   jobId: string,
@@ -114,6 +131,10 @@ export function updateJobProgress(
 
 /**
  * Helper to mark job as completed
+ * @param jobId
+ * @param documentId
+ * @param message
+ * @returns
  */
 export function completeJob(
   jobId: string,
@@ -130,6 +151,9 @@ export function completeJob(
 
 /**
  * Helper to mark job as failed
+ * @param jobId
+ * @param error
+ * @returns
  */
 export function failJob(jobId: string, error: string): JobState | undefined {
   return updateJob(jobId, {
@@ -145,6 +169,9 @@ const listeners = new Map<string, Set<JobUpdateListener>>();
 
 /**
  * Subscribe to job updates (for SSE)
+ * @param jobId
+ * @param listener
+ * @returns
  */
 export function subscribeToJob(jobId: string, listener: JobUpdateListener): () => void {
   if (!listeners.has(jobId)) {
@@ -166,6 +193,8 @@ export function subscribeToJob(jobId: string, listener: JobUpdateListener): () =
 
 /**
  * Notify all listeners of a job update
+ * @param jobId
+ * @param job
  */
 export function notifyJobUpdate(jobId: string, job: JobState) {
   const jobListeners = listeners.get(jobId);
@@ -176,6 +205,9 @@ export function notifyJobUpdate(jobId: string, job: JobState) {
 
 /**
  * Enhanced updateJob that notifies listeners
+ * @param jobId
+ * @param updates
+ * @returns
  */
 export function updateJobWithNotification(
   jobId: string,

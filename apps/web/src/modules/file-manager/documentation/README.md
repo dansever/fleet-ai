@@ -159,23 +159,34 @@ Each processor:
 
 ### Workflows (`workflows/`)
 
-**What it does:** High-level workflows coordinating multiple operations
+**What it does:** Client-side orchestration of complex file processing operations with optional job tracking
 
 **Key functions:**
 
-- `processDocument()` - Complete document processing: upload → extract → save → chunk → embed
+- `processDocument()` - Complete document workflow with job tracking and status updates
+
+**Features:**
+
+- Optional job tracking for user-facing operations
+- Real-time status indicator updates
+- Automatic error handling and recovery
+- Progress callbacks for custom UI updates
+- Coordinates file-manager, jobs system, and status store
+
+**How it works:**
+
+1. Creates a tracking job (if enabled)
+2. Updates global status indicator
+3. Calls file-manager API to process file
+4. Polls job for progress updates
+5. Updates status indicator in real-time
+6. Returns processing result with documentId
 
 **Use cases:**
 
-- Complex multi-step operations
-- Coordination between multiple modules
-- Higher-level abstractions over extraction processing
-
-**Notes:**
-
-- Builds on top of extraction file processing
-- Provides convenient workflows for common use cases
-- Can include progress tracking and error recovery
+- User-initiated file uploads requiring progress tracking
+- Document processing with status feedback
+- Complex workflows requiring coordination between multiple systems
 
 ---
 
@@ -239,18 +250,43 @@ const doc = await documents.client.getDocumentById(docId);
 const allDocs = await documents.client.listDocumentsByContract(contractId);
 ```
 
-### Workflows
+### Workflows (Client-Side Orchestration)
 
 ```typescript
 import { workflows } from '@/modules/file-manager';
 
-// Complete document processing workflow
+// Complete document processing workflow with job tracking
 const result = await workflows.client.processDocument(file, {
   parentId: contractId,
   parentType: 'contract',
-  onProgress: (step, progress) => {
-    console.log(`${step.name}: ${step.description} (${progress}%)`);
+  trackProgress: true, // Enable job tracking and status indicator updates (default: true)
+  onProgress: (progress, message) => {
+    console.log(`${progress}%: ${message}`);
+    // Optional: Update custom UI components
   },
+});
+
+// Result contains:
+// - success: boolean
+// - documentId?: string
+// - extractedData?: any
+// - error?: string
+
+if (result.success && result.documentId) {
+  console.log('Document processed successfully:', result.documentId);
+} else {
+  console.error('Processing failed:', result.error);
+}
+```
+
+**Processing without job tracking:**
+
+```typescript
+// For background operations or non-user-facing tasks
+const result = await workflows.client.processDocument(file, {
+  parentId: contractId,
+  parentType: 'contract',
+  trackProgress: false, // Disable job tracking
 });
 ```
 
@@ -269,7 +305,23 @@ import type {
 
 ## 🔄 Processing Pipeline
 
-Standard flow for all document types:
+### Client-Side Workflow (Recommended)
+
+For user-facing file uploads, use the workflow orchestrator:
+
+```typescript
+workflows.client.processDocument(file, options)
+  ├── 1. Create tracking job (optional)
+  ├── 2. Update status indicator
+  ├── 3. Call /api/file-manager/process
+  ├── 4. Poll job for updates
+  ├── 5. Update status indicator during processing
+  └── 6. Return result + handle completion/errors
+```
+
+### Server-Side Processing
+
+Standard flow for all document types (executed by processors):
 
 1. **Validate** → Check file type, size, custom rules
 2. **Create Document** → Insert DB record with pending status
@@ -280,6 +332,17 @@ Standard flow for all document types:
 7. **Chunk & Embed** → Create searchable chunks (if configured)
 
 Each processor can customize steps 5-7.
+
+**Progress Updates:**
+
+If a jobId is provided, the processor updates the job at each step:
+
+- Step 1-2: 10% - "Creating document record..."
+- Step 3: 30% - "Uploading to storage..."
+- Step 4: 50% - "Extracting document data..."
+- Step 5-6: 80% - "Saving extracted data..."
+- Step 7: 95% - "Creating searchable chunks..."
+- Complete: 100% - "Document processed successfully"
 
 ---
 
@@ -296,10 +359,11 @@ Each processor can customize steps 5-7.
 
 **API Routes:**
 
-- `/api/storage/*` → Storage operations (upload, download, delete, list, sign)
-- `/api/files/process` → Unified document processing endpoint
-- `/api/documents/*` → Document CRUD operations
-- `/api/chunks/*` → Chunk creation and management
+- `/api/file-manager/storage/*` → Storage operations (upload, download, delete, list, sign)
+- `/api/file-manager/process` → Unified document processing endpoint (with optional job tracking)
+- `/api/file-manager/documents/*` → Document CRUD operations
+- `/api/file-manager/chunks/*` → Chunk creation and management
+- `/api/jobs` → Generic job tracking for async operations (used by workflows)
 
 **Configuration:**
 Each processor defines:
@@ -373,13 +437,16 @@ Each processor defines:
 - **Maintainable** - DRY principle, shared base logic
 - **Performant** - Optimized with parallel operations
 - **Well-Organized** - Clear separation of concerns
+- **Progress Tracking** - Optional job tracking with status updates
+- **Flexible** - Works with or without job tracking
+- **User-Friendly** - Real-time feedback through status indicator
 - **Documented** - Comprehensive documentation and examples
 
 ---
 
 ## 🔧 Migration Notes
 
-If migrating from old structure:
+### Migrating from Old Structure
 
 **Old imports:**
 
@@ -396,6 +463,68 @@ import { storage, documents, extraction, workflows } from '@/modules/file-manage
 ```
 
 **Note:** Naming improvements - `orchastration` → `workflows`, `core` → `extraction`
+
+### Migrating from Direct /api/jobs Calls
+
+**Old approach (tightly coupled):**
+
+```typescript
+// Create FormData and call /api/jobs directly
+const formData = new FormData();
+formData.append('file', file);
+formData.append('documentType', 'contract');
+formData.append('parentId', contractId);
+
+const res = await fetch('/api/jobs', {
+  method: 'POST',
+  body: formData,
+});
+
+const { jobId } = await res.json();
+
+// Manual polling logic
+while (true) {
+  const statusRes = await fetch(`/api/jobs/${jobId}`);
+  const status = await statusRes.json();
+
+  // Manual status indicator updates
+  updateGlobalStatus(status.status, status.message, status.progress);
+
+  if (status.status === 'completed' || status.status === 'error') {
+    break;
+  }
+
+  await new Promise((r) => setTimeout(r, 1000));
+}
+```
+
+**New approach (decoupled):**
+
+```typescript
+// Use workflow orchestrator
+import { workflows } from '@/modules/file-manager';
+
+const result = await workflows.client.processDocument(file, {
+  parentId: contractId,
+  parentType: 'contract',
+  trackProgress: true,
+});
+
+// That's it! Workflow handles:
+// - Job creation
+// - Status indicator updates
+// - Polling
+// - Error handling
+// - Completion
+```
+
+**Benefits of new approach:**
+
+- 70% less code in components
+- Automatic status indicator management
+- Consistent error handling
+- Progress tracking is optional
+- Reusable across all document types
 
 ---
 

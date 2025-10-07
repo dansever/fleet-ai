@@ -11,7 +11,8 @@ export namespace DocumentProcessorTypes {
   export interface DocumentProcessingOptions {
     parentId: string;
     parentType: DocumentType;
-    onProgress?: (step: ProcessingStep, progress: number) => void;
+    trackProgress?: boolean; // Enable job tracking and status indicator updates
+    onProgress?: (progress: number, message: string) => void;
   }
 
   export interface ProcessingStep {
@@ -30,10 +31,17 @@ export namespace DocumentProcessorTypes {
   }
 
   export interface DocumentProcessingResult {
-    document: Document;
-    extractedData?: any;
-    chunksCreated: number;
     success: boolean;
+    documentId?: string;
+    document?: Document;
+    extractedData?: any;
+    chunksCreated?: number;
     error?: string;
+    metadata?: {
+      fileSize: number;
+      fileName: string;
+      processingTime: number;
+      extractionAgent: string;
+    };
   }
 }

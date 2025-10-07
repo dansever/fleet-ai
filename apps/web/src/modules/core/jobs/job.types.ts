@@ -5,8 +5,18 @@
 
 export type JobStatus = 'queued' | 'processing' | 'completed' | 'error';
 
+/**
+ * Job types for different async operations in the system
+ */
+export type JobType =
+  | 'file_processing' // File upload and document extraction
+  | 'document_analysis' // Document analysis and insights
+  | 'llm_agent' // LLM agent operations
+  | 'generic'; // Generic async operations
+
 export interface JobState {
   jobId: string;
+  jobType: JobType;
   status: JobStatus;
   message: string;
   progress?: number; // 0-100
@@ -17,11 +27,13 @@ export interface JobState {
 }
 
 export interface CreateJobOptions {
+  jobType?: JobType;
   message?: string;
   metadata?: Record<string, any>;
 }
 
 export interface UpdateJobOptions {
+  jobType?: JobType;
   status?: JobStatus;
   message?: string;
   progress?: number;

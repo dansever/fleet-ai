@@ -6,6 +6,18 @@ import { LlamaParseReader } from 'llama-cloud-services';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
+// Create a singleton instance to avoid multiple imports
+let readerInstance: LlamaParseReader | null = null;
+
+function getLlamaParseReader() {
+  if (!readerInstance) {
+    readerInstance = new LlamaParseReader({
+      resultType: 'text',
+    });
+  }
+  return readerInstance;
+}
+
 /**
  * Parse a document using LlamaParse
  */
@@ -20,10 +32,8 @@ export async function parseDocument(file: File) {
     // Write the file to the temp path
     await writeFile(tmpPath, buffer);
 
-    // Set up the llamaparse reader
-    const reader = new LlamaParseReader({
-      resultType: 'text',
-    });
+    // Use the singleton reader instance
+    const reader = getLlamaParseReader();
 
     // Parse by file path
     const data = await reader.loadData(tmpPath);

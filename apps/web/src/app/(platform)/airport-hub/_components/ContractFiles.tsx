@@ -7,8 +7,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { formatDate, formatFileSize } from '@/lib/core/formatters';
 import { cn } from '@/lib/utils';
 import { client as parseClient } from '@/modules/ai/parse';
-import { documents, extraction, storage } from '@/modules/file-manager';
-import { resetGlobalStatus, updateGlobalStatus } from '@/stores/statusStore';
+import { documents, storage, workflows } from '@/modules/file-manager';
 import { Button } from '@/stories/Button/Button';
 import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { ModernInput } from '@/stories/Form/Form';
@@ -16,7 +15,6 @@ import { ConfirmationPopover, FileUploadPopover } from '@/stories/Popover/Popove
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { ContractTerm, ExtractedContractData } from '@/types/contracts';
-import type { JobStatus } from '@/types/job';
 import {
   CheckCircle2,
   ChevronDown,
@@ -37,8 +35,6 @@ import { useAirportHub } from '../context';
 import { AIAssistant } from './AIAssistant';
 
 const documentsClient = documents.client;
-const filesClient = extraction.client;
-
 const storageClient = storage.client;
 
 interface Term {
@@ -63,36 +59,6 @@ interface DocumentData {
 
 interface DocumentViewerProps {
   data: DocumentData;
-}
-
-/**
- * Poll job status until completion or timeout
- */
-async function pollJob(
-  jobId: string,
-  onUpdate: (data: {
-    status: JobStatus;
-    message?: string;
-    progress?: number;
-    documentId?: string;
-  }) => void,
-  timeoutMs = 5 * 60 * 1000,
-  intervalMs = 1200,
-) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    const res = await fetch(`/api/jobs/${jobId}`);
-    if (!res.ok) throw new Error('Failed to fetch job status');
-    const data = await res.json();
-
-    onUpdate(data);
-
-    if (data.status === 'completed' || data.status === 'error') {
-      return data;
-    }
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  throw new Error('Timed out waiting for job to finish');
 }
 
 // Helper function to get file type icon and color
@@ -155,7 +121,7 @@ export function ContractDocument() {
   const [deleteDocumentLoading, setDeleteDocumentLoading] = useState(false);
   const [searchTerms, setSearchTerms] = useState('');
 
-  // File upload handler
+  // File upload handler using workflow orchestrator
   const handleUploadContractFile = async (file: File) => {
     if (!selectedContract) {
       toast.error('No contract selected');
@@ -164,63 +130,30 @@ export function ContractDocument() {
 
     setUploadLoading(true);
 
-    // Reset any stuck status first
-    resetGlobalStatus();
-
     try {
-      // Step 1: Start processing
-      updateGlobalStatus('processing', 'Uploading file...', 10);
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('documentType', 'contract');
-      formData.append('parentId', selectedContract.id);
-
-      const createJobRes = await fetch('/api/jobs', {
-        method: 'POST',
-        body: formData,
+      // Use workflow orchestrator for complete processing with job tracking
+      const result = await workflows.client.processDocument(file, {
+        parentId: selectedContract.id,
+        parentType: 'contract',
+        trackProgress: true, // Enable job tracking and status indicator updates
+        onProgress: (progress, message) => {
+          // Optional: Additional progress handling if needed
+          console.log(`Progress: ${progress}% - ${message}`);
+        },
       });
 
-      if (!createJobRes.ok) {
-        throw new Error('Failed to create job');
-      }
-
-      const { jobId } = (await createJobRes.json()) as { jobId: string };
-
-      // Step 2: Polling approach (more reliable than SSE)
-      const result = await pollJob(jobId, (data) => {
-        if (data.status === 'processing') {
-          updateGlobalStatus('processing', data.message || 'Processing...', data.progress);
-        } else if (data.status === 'completed') {
-          updateGlobalStatus('completed', 'Document processed successfully', 100);
-        } else if (data.status === 'error') {
-          updateGlobalStatus('error', data.message || 'Processing failed');
-        }
-      });
-
-      // Step 3: Fetch and add the newly created document
-      if (result.documentId) {
+      if (result.success && result.documentId) {
+        // Fetch and add the newly created document
         const newDocument = await documentsClient.getDocumentById(result.documentId);
         addDocument(newDocument);
         toast.success('Document has been uploaded and processed');
       } else {
-        toast.success('Document processing completed');
+        throw new Error(result.error || 'Processing failed');
       }
-
-      // Step 4: Auto-reset status after 3 seconds
-      setTimeout(() => {
-        resetGlobalStatus();
-      }, 3000);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Failed to process file';
-      updateGlobalStatus('error', msg);
       toast.error(msg);
       console.error(error);
-
-      // Auto-reset error status after 5 seconds
-      setTimeout(() => {
-        resetGlobalStatus();
-      }, 5000);
     } finally {
       setUploadLoading(false);
     }
