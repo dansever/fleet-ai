@@ -22,8 +22,13 @@ import { toast } from 'sonner';
 import { useAirportHub } from '../context';
 
 export function ContractOverview() {
-  const { selectedContract, refreshContracts, removeContract, setSelectedContract } =
-    useAirportHub();
+  const {
+    selectedContract,
+    selectedAirport,
+    refreshContracts,
+    removeContract,
+    setSelectedContract,
+  } = useAirportHub();
 
   if (!selectedContract) {
     return (
@@ -123,6 +128,7 @@ export function ContractOverview() {
             <ContractDialog
               DialogType="view"
               contract={contract}
+              airport={selectedAirport}
               trigger={<Button intent="secondary" text="View Contract" icon={Eye}></Button>}
               onChange={refreshContracts}
             />

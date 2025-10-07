@@ -13,7 +13,7 @@ const DEFAULT_STATE: JobState = {
 };
 
 // The name of the channel to broadcast the status to
-const CHANNEL_NAME = 'global-status-indicator';
+const CHANNEL_NAME = 'fleet-ai-global-status-indicator';
 // Cross-tab synchronization via BroadcastChannel
 let bc: BroadcastChannel | null = null;
 

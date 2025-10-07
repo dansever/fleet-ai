@@ -6,6 +6,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
+/**
+ * Get an airport by id
+ * @param _request
+ * @param param1
+ * @returns
+ */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { dbUser, orgId, error } = await getAuthContext();

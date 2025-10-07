@@ -22,6 +22,7 @@ export default function ContractDialog({
   trigger,
   open,
   onOpenChange,
+  airport: airportProp,
 }: {
   contract: Contract | null;
   onChange: (contract: Contract) => void;
@@ -29,10 +30,18 @@ export default function ContractDialog({
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  airport?: Airport | null;
 }) {
   const [airport, setAirport] = useState<Airport | null>(null);
   // Get airport object --> For name display
   useEffect(() => {
+    // If airport is provided via props, use it (cached from context)
+    if (airportProp) {
+      setAirport(airportProp);
+      return;
+    }
+
+    // Otherwise, fetch it (for backwards compatibility)
     if (!contract?.airportId) {
       setAirport(null);
       return;
@@ -44,7 +53,7 @@ export default function ContractDialog({
       }
     };
     fetchAirport();
-  }, [contract?.airportId]);
+  }, [contract?.airportId, airportProp]);
 
   const [formData, setFormData] = useState({
     // Contract Information (matching schema)
