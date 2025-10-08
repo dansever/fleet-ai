@@ -3,7 +3,6 @@
 import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { Badge } from '@/components/ui/badge';
 import { CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import {
   getContractTypeColor,
@@ -232,22 +231,17 @@ export function ContractOverview() {
         {/* Summary Section */}
         <BaseCard cardType="inner" className="col-span-full">
           <div className="space-y-6">
-            {contract.summary && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold">Contract Summary</h3>
-                <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-gray-700 leading-relaxed">
-                  {contract.summary}
-                </div>
-              </div>
-            )}
-
-            <Separator />
-
             {contractDetails && (
               <div className="space-y-2">
                 <h3 className="text-lg font-bold">Key Details & Conditions</h3>
                 <Table>
                   <TableBody>
+                    {contract.summary && (
+                      <TableRow>
+                        <TableCell className="font-bold">Summary</TableCell>
+                        <TableCell className="whitespace-pre-wrap">{contract.summary}</TableCell>
+                      </TableRow>
+                    )}
                     {Object.entries(contractDetails).map(([key, value]) => (
                       <TableRow key={key}>
                         <TableCell className="font-bold">{formatSnakeCaseToTitle(key)}</TableCell>

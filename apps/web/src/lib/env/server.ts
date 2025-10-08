@@ -18,13 +18,15 @@ export const serverEnv = createEnv({
     CLERK_WEBHOOK_SECRET: z.string().min(1),
 
     // Backend server config
-    BACKEND_URL: z.string().url().default('http://localhost:8000'),
-    CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:8000'),
+    BACKEND_URL: z.string().url().default('http://localhost:8001'),
+    CORS_ALLOWED_ORIGINS: z
+      .string()
+      .default('http://localhost:3000,http://localhost:8000,http://localhost:8001'),
 
     NODE_ENV: z.enum(['development', 'production']).default('development'),
 
     // LangGraph
-    LANGRAPH_DEPLOYMENT_URL: z.string().url().default('http://localhost:8000'),
+    LANGGRAPH_DEPLOYMENT_URL: z.string().url().default('http://localhost:8000'),
 
     // LangSmith
     LANGSMITH_API_KEY: z.string().min(1),

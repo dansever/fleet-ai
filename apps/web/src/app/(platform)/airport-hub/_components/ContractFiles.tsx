@@ -133,8 +133,8 @@ export function ContractDocument() {
     try {
       // Use workflow orchestrator for complete processing with job tracking
       const result = await workflows.client.processDocument(file, {
-        parentId: selectedContract.id,
-        parentType: 'contract',
+        contractId: selectedContract.id,
+        documentType: 'contract',
         trackProgress: true, // Enable job tracking and status indicator updates
         onProgress: (progress, message) => {
           // Optional: Additional progress handling if needed
@@ -192,7 +192,7 @@ export function ContractDocument() {
 
     try {
       setDeleteDocumentLoading(true);
-      await documentsClient.deleteDocument(document.id, document.storagePath);
+      await documentsClient.deleteDocument(document.id);
 
       // Immediately update local state to reflect deletion
       removeDocument(document.id);

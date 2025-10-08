@@ -9,8 +9,10 @@ export namespace DocumentProcessorTypes {
   export type DocumentUpdateInput = Partial<DocumentCreateInput>;
 
   export interface DocumentProcessingOptions {
-    parentId: string;
-    parentType: DocumentType;
+    contractId?: string;
+    invoiceId?: string;
+    fuelBidId?: string;
+    documentType: DocumentType;
     trackProgress?: boolean; // Enable job tracking and status indicator updates
     onProgress?: (progress: number, message: string) => void;
   }

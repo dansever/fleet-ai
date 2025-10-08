@@ -222,16 +222,6 @@ export function ContractViewer({ contract, className }: ContractViewerProps) {
 
         <Separator />
 
-        {/* Contract Summary */}
-        {contract.summary && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Contract Summary</h3>
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-              <p className="text-sm text-gray-700 leading-relaxed">{contract.summary}</p>
-            </div>
-          </div>
-        )}
-
         {/* Key Terms */}
         {(() => {
           const contractDetails =

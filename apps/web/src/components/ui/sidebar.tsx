@@ -27,6 +27,19 @@ const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
+function getSidebarState(cookieString?: string): boolean {
+  if (typeof window === 'undefined') {
+    // Server-side: parse from provided cookie string
+    return cookieString?.includes(`${SIDEBAR_COOKIE_NAME}=true`) ?? true;
+  }
+  // Client-side: parse from document.cookie
+  const value = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
+    ?.split('=')[1];
+  return value === 'true' || value === undefined; // default true if no cookie
+}
+
 type SidebarContextProps = {
   state: 'expanded' | 'collapsed';
   open: boolean;
@@ -48,25 +61,32 @@ function useSidebar() {
   return context;
 }
 
-function SidebarProvider({
+type SidebarProviderProps = {
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  cookieString?: string; // NEW: for SSR
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+};
+
+export function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
+  cookieString, // NEW
   className,
   style,
   children,
   ...props
-}: React.ComponentProps<'div'> & {
-  defaultOpen?: boolean;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-}) {
+}: SidebarProviderProps) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  // Read initial state from cookie
+  const initialOpen = getSidebarState(cookieString) ?? defaultOpen;
+  const [_open, _setOpen] = React.useState(initialOpen); // Use initialOpen instead of defaultOpen
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -236,7 +256,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-none"
+          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>

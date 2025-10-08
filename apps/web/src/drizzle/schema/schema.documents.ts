@@ -4,8 +4,9 @@
  * - Chunks
  */
 
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
+  check,
   foreignKey,
   index,
   integer,
@@ -19,35 +20,24 @@ import {
 } from 'drizzle-orm/pg-core';
 import { DocumentTypeEnum } from '../enums';
 import { createdAt, updatedAt } from './common';
+import { contractsTable } from './schema.contracts';
 import { organizationsTable } from './schema.core';
+import { fuelBidsTable } from './schema.fuel';
+import { invoicesTable } from './schema.invoices';
 
-/* -------------------- Documents --------------------
- * Documents use a polymorphic relationship pattern with parentId/parentType
- * to support attachment to multiple entity types:
- *
- * Supported parent types (via DocumentTypeEnum):
- * - contract: Legal contracts and agreements
- * - invoice: Vendor invoices and billing documents
- * - rfq: Request for Quote documents
- * - fuel_tender: Fuel tender documentation
- * - fuel_bid: Fuel bid submissions
- * - other: General organizational documents
- *
- * Each parent entity has a `documents: many(documentsTable)` relation
- * for easy reverse lookup of all documents for that entity.
- * --------------------------------------------------------- */
+// -------------------- Documents --------------------
 export const documentsTable = pgTable(
   'documents',
   {
     // System
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     orgId: uuid('org_id').notNull(),
-
-    // Generic parent relationship
-    parentId: uuid('parent_id'), // Generic FK to any parent entity
-    parentType: DocumentTypeEnum('parent_type'), // contract | invoice | rfq | fuel_tender | fuel_bid | other
+    contractId: uuid('contract_id'), // FK to contracts table
+    invoiceId: uuid('invoice_id'), // FK to invoices table
+    fuelBidId: uuid('fuel_bid_id'), // FK to fuel bids table
 
     // File data
+    documentType: DocumentTypeEnum('document_type'),
     storageId: text('storage_id'), // file storage id
     fileName: text('file_name'), // file name
     fileType: text('file_type'), // 'pdf' | 'docx' | 'scan'
@@ -66,15 +56,41 @@ export const documentsTable = pgTable(
     updatedAt,
   },
   (table) => [
+    // If the organization is deleted, delete the document
     foreignKey({
       columns: [table.orgId],
       foreignColumns: [organizationsTable.id],
       name: 'fk_documents_org_id',
     }).onDelete('cascade'),
-
+    // If the contract is deleted, delete the document
+    foreignKey({
+      columns: [table.contractId],
+      foreignColumns: [contractsTable.id],
+      name: 'fk_documents_contract_id',
+    }).onDelete('cascade'),
+    // If the invoice is deleted, delete the document
+    foreignKey({
+      columns: [table.invoiceId],
+      foreignColumns: [invoicesTable.id],
+      name: 'fk_documents_invoice_id',
+    }).onDelete('cascade'),
+    // If the fuel bid is deleted, delete the document
+    foreignKey({
+      columns: [table.fuelBidId],
+      foreignColumns: [fuelBidsTable.id],
+      name: 'fk_documents_fuel_bid_id',
+    }).onDelete('cascade'),
     // Indexes for efficient querying
-    index('documents_parent_idx').on(table.parentId, table.parentType),
     index('documents_org_id_idx').on(table.orgId),
+    // Check that only one parent is set at a time (contract, invoice, or fuel bid)
+    check(
+      'documents_single_parent_check',
+      sql`(
+        (contract_id IS NOT NULL)::int + 
+        (invoice_id IS NOT NULL)::int + 
+        (fuel_bid_id IS NOT NULL)::int
+      ) <= 1`,
+    ),
   ],
 );
 
@@ -85,10 +101,23 @@ export const documentsRelations = relations(documentsTable, ({ one, many }) => (
     fields: [documentsTable.orgId],
     references: [organizationsTable.id],
   }),
+  // Each document is tied to one contract
+  contract: one(contractsTable, {
+    fields: [documentsTable.contractId],
+    references: [contractsTable.id],
+  }),
+  // Each document is tied to one invoice
+  invoice: one(invoicesTable, {
+    fields: [documentsTable.invoiceId],
+    references: [invoicesTable.id],
+  }),
+  // Each document is tied to one fuel bid
+  fuelBid: one(fuelBidsTable, {
+    fields: [documentsTable.fuelBidId],
+    references: [fuelBidsTable.id],
+  }),
   // Each document can have many chunks
   chunks: many(chunksTable),
-  // Note: Parent relationship (contract, invoice, etc.) is handled via parentId/parentType
-  // and must be resolved programmatically since Drizzle relations don't support polymorphic FKs
 }));
 
 /* -------------------- Embeddings (vector-enabled) -------------------- */

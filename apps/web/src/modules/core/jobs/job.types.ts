@@ -27,6 +27,7 @@ export interface JobState {
 }
 
 export interface CreateJobOptions {
+  jobId?: string; // Optional: provide specific jobId (for serverless instance sync)
   jobType?: JobType;
   message?: string;
   metadata?: Record<string, any>;

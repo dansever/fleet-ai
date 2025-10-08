@@ -2,5 +2,5 @@
 
 # Activate the virtual environment
 .\.venv\Scripts\Activate.ps1
-# Run uvicorn with module resolution
-py -m uvicorn app.main:app --reload
+# Run uvicorn with module resolution on port 8001
+py -m uvicorn app.main:app --reload --port 8001

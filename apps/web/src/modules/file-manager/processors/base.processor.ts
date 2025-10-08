@@ -122,8 +122,9 @@ export abstract class BaseFileProcessor implements FileProcessor {
 
     context.documentRecord = await documentsServer.createDocument({
       orgId: context.request.orgId,
-      parentId: context.request.parentId,
-      parentType: this.documentType,
+      contractId: context.request.contractId,
+      invoiceId: context.request.invoiceId,
+      fuelBidId: context.request.fuelBidId,
       fileName: context.request.file.name,
       fileSize: context.request.file.size,
       fileType: context.request.file.type,
@@ -140,10 +141,14 @@ export abstract class BaseFileProcessor implements FileProcessor {
       20,
     );
 
+    // Get the parent ID from whichever FK is set
+    const parentId =
+      context.request.contractId || context.request.invoiceId || context.request.fuelBidId || '';
+
     context.storageResult = await storageServer.uploadFile(
       context.request.file,
       this.documentType,
-      context.request.parentId,
+      parentId,
     );
 
     // Update document record with storage info

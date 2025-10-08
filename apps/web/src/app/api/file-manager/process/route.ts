@@ -3,7 +3,7 @@
 import { DocumentType } from '@/drizzle/enums';
 import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
-import { updateJobWithNotification } from '@/modules/core/jobs';
+import { createJob, getJob, updateJobWithNotification } from '@/modules/core/jobs';
 import { extraction } from '@/modules/file-manager';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -19,15 +19,43 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const documentType = formData.get('documentType') as DocumentType;
-    const parentId = formData.get('parentId') as string;
+    const contractId = formData.get('contractId') as string | null;
+    const invoiceId = formData.get('invoiceId') as string | null;
+    const fuelBidId = formData.get('fuelBidId') as string | null;
     const jobId = formData.get('jobId') as string | null; // Optional job tracking
 
-    if (!file || !documentType || !parentId) {
-      return jsonError('Missing required fields: file, documentType, parentId', 400);
+    if (!file || !documentType) {
+      return jsonError('Missing required fields: file, documentType', 400);
     }
 
-    // Update job if provided
+    // Validate that at least one parent FK is provided
+    if (!contractId && !invoiceId && !fuelBidId) {
+      return jsonError(
+        'Missing parent reference: contractId, invoiceId, or fuelBidId required',
+        400,
+      );
+    }
+
+    // Update job if provided (create it if it doesn't exist due to serverless instance issues)
     if (jobId) {
+      const job = getJob(jobId);
+      if (!job) {
+        console.warn(`⚠️ Job ${jobId} not found, creating it now (serverless instance issue)`);
+        createJob({
+          jobId: jobId, // Use the provided jobId
+          jobType: 'file_processing',
+          message: 'Starting file processing...',
+          metadata: {
+            fileName: file.name,
+            fileSize: file.size,
+            documentType,
+            contractId,
+            invoiceId,
+            fuelBidId,
+          },
+        });
+      }
+
       updateJobWithNotification(jobId, {
         status: 'processing',
         message: 'Starting file processing...',
@@ -40,7 +68,9 @@ export async function POST(request: NextRequest) {
       {
         file,
         documentType,
-        parentId,
+        contractId: contractId || undefined,
+        invoiceId: invoiceId || undefined,
+        fuelBidId: fuelBidId || undefined,
         orgId,
         userId: dbUser.id,
       },

@@ -40,13 +40,8 @@ export async function updateDocument(
 /**
  * Delete a document
  * @param id - The ID of the document to delete
- * @param path - The path of the document to delete
  * @returns void
  */
-export async function deleteDocument(
-  id: Document['id'],
-  storagePath: Document['storagePath'],
-): Promise<void> {
-  console.log(`🗑️ INSIDE CLIENT StoragePath: ${storagePath}`);
-  await api.delete(`/api/file-manager/documents/${id}`, { data: { storagePath } });
+export async function deleteDocument(id: Document['id']): Promise<void> {
+  await api.delete(`/api/file-manager/documents/${id}`);
 }

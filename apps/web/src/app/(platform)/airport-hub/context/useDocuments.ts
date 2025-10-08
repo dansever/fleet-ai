@@ -227,7 +227,7 @@ export function useDocuments({
       setDocuments((prevDocuments) => [newDocument, ...prevDocuments]);
 
       // Update cache as well
-      if (selectedContract && selectedContract.id === newDocument.parentId) {
+      if (selectedContract && selectedContract.id === newDocument.contractId) {
         setDocumentsCache((prev) => {
           const updated = {
             ...prev,

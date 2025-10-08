@@ -20,7 +20,7 @@ export const env = createEnv({
       .default('false'),
 
     // Backend API (for direct calls)
-    NEXT_PUBLIC_BACKEND_URL: z.string().url('Invalid backend URL').default('http://localhost:8000'),
+    NEXT_PUBLIC_BACKEND_URL: z.string().url('Invalid backend URL').default('http://localhost:8001'),
 
     // Azure Integration (Optional)
     NEXT_PUBLIC_AZURE_CLIENT_ID: z.string().optional(),

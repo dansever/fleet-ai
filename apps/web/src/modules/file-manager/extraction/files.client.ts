@@ -13,7 +13,9 @@ export async function uploadAndProcessFile(
     const formData = new FormData();
     formData.append('file', file);
     formData.append('documentType', options.documentType);
-    formData.append('parentId', options.parentId);
+    if (options.contractId) formData.append('contractId', options.contractId);
+    if (options.invoiceId) formData.append('invoiceId', options.invoiceId);
+    if (options.fuelBidId) formData.append('fuelBidId', options.fuelBidId);
 
     const response = await fetch('/api/file-manager/process', {
       method: 'POST',

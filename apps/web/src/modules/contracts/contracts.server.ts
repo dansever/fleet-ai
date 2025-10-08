@@ -6,6 +6,10 @@ import { ContractType } from '@/drizzle/enums';
 import { contractsTable } from '@/drizzle/schema/schema.contracts';
 import { Airport, Contract, NewContract, Organization, UpdateContract } from '@/drizzle/types';
 import { and, desc, eq } from 'drizzle-orm';
+import {
+  deleteDocument,
+  listDocumentsByContract,
+} from '../file-manager/documents/documents.server';
 
 /**
  * Get a contract by ID
@@ -73,8 +77,18 @@ export async function updateContract(id: Contract['id'], data: UpdateContract): 
 }
 
 /**
- * Delete a contract
+ * Delete a contract and all documents associated with it
+ * Note: This will delete all documents associated with the contract (ORM cascade does not work for storage files)
  */
 export async function deleteContract(id: Contract['id']): Promise<void> {
+  // Step 1: Get all documents for this contract
+  const documents = await listDocumentsByContract(id);
+
+  // Step 2: Delete each document (which deletes storage files)
+  for (const doc of documents) {
+    await deleteDocument(doc.id);
+  }
+
+  // Step 3: Delete the contract
   await db.delete(contractsTable).where(eq(contractsTable.id, id));
 }

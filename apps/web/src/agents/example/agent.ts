@@ -1,3 +1,5 @@
+//@link github.com/CopilotKit/coagents-starter-langgraph/blob/main/agent-js/src/agent.ts
+
 /**
  * This is the main entry point for the agent.
  * It defines the workflow graph, state, tools, nodes and edges.
@@ -5,24 +7,22 @@
 
 import { AIMessage, SystemMessage } from '@langchain/core/messages';
 import { RunnableConfig } from '@langchain/core/runnables';
+import { tool } from '@langchain/core/tools';
 import { Annotation, MemorySaver, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { ChatOpenAI } from '@langchain/openai';
+import { z } from 'zod';
 
 // 1. Import necessary helpers for CopilotKit actions
-import { createChatModel } from '@/lib/langchain/model';
 import {
   convertActionsToDynamicStructuredTools,
   CopilotKitStateAnnotation,
 } from '@copilotkit/sdk-js/langgraph';
-import { webSearch } from '../tools/TavilySearch';
-import { getWeather } from '../tools/weather';
-import { currencyConvert } from '../uom-converter/tools/currencyTool';
-import { uomConvert } from '../uom-converter/tools/uomTool';
-import { assistantSystemPrompt } from './prompts';
 
 // 2. Define our agent state, which includes CopilotKit state to
 //    provide actions to the state.
 export const AgentStateAnnotation = Annotation.Root({
+  language: Annotation<string>,
   proverbs: Annotation<string[]>,
   ...CopilotKitStateAnnotation.spec,
 });
@@ -30,54 +30,68 @@ export const AgentStateAnnotation = Annotation.Root({
 // 3. Define the type for our agent state
 export type AgentState = typeof AgentStateAnnotation.State;
 
-// 4. Put our tools into an array
-const tools = [getWeather, webSearch, uomConvert, currencyConvert];
+// 4. Define a simple tool to get the weather statically
+const getWeather = tool(
+  (args) => {
+    return `The weather for ${args.location} is 70 degrees, clear skies, 45% humidity, 5 mph wind, and feels like 72 degrees.`;
+  },
+  {
+    name: 'getWeather',
+    description: 'Get the weather for a given location.',
+    schema: z.object({
+      location: z.string().describe('The location to get weather for'),
+    }),
+  },
+);
 
-// 5. Define the chat node, which will handle the chat logic
+// 5. Put our tools into an array
+const tools = [getWeather];
+
+// 6. Define the chat node, which will handle the chat logic
 async function chat_node(state: AgentState, config: RunnableConfig) {
-  // 5.1 Define the model, lower temperature for deterministic responses
-  const model = createChatModel();
+  // 6.1 Define the model, lower temperature for deterministic responses
+  const model = new ChatOpenAI({ temperature: 0, model: 'gpt-4o' });
 
-  // 5.2 Bind the tools to the model, include CopilotKit actions. This allows
+  // 6.2 Bind the tools to the model, include CopilotKit actions. This allows
   //     the model to call tools that are defined in CopilotKit by the frontend.
   const modelWithTools = model.bindTools!([
     ...convertActionsToDynamicStructuredTools(state.copilotkit?.actions || []),
     ...tools,
   ]);
 
-  // 5.3 Define the system message, which will be used to guide the model, in this case
+  // 6.3 Define the system message, which will be used to guide the model, in this case
   //     we also add in the language to use from the state.
   const systemMessage = new SystemMessage({
-    content: assistantSystemPrompt,
+    content: `You are a helpful assistant. Talk in ${state.language || 'english'}.`,
   });
 
-  // 5.4 Invoke the model with the system message and the messages in the state
+  // 6.4 Invoke the model with the system message and the messages in the state
   const response = await modelWithTools.invoke([systemMessage, ...state.messages], config);
 
-  // 5.5 Return the response, which will be added to the state
+  // 6.5 Return the response, which will be added to the state
   return {
     messages: response,
   };
 }
 
-// 6. Define the function that determines whether to continue or not,
+// 7. Define the function that determines whether to continue or not,
 //    this is used to determine the next node to run
 function shouldContinue({ messages, copilotkit }: AgentState) {
-  // 6.1 Get the last message from the state
+  // 7.1 Get the last message from the state
   const lastMessage = messages[messages.length - 1] as AIMessage;
 
-  // 6.2 If the LLM makes a tool call, then we route to the "tools" node
+  // 7.2 If the LLM makes a tool call, then we route to the "tools" node
   if (lastMessage.tool_calls?.length) {
     const actions = copilotkit?.actions;
     const toolCallName = lastMessage.tool_calls![0].name;
 
-    // 6.3 Only route to the tool node if the tool call is not a CopilotKit action
+    // 7.3 Only route to the tool node if the tool call is not a CopilotKit action
     if (!actions || actions.every((action) => action.name !== toolCallName)) {
       return 'tool_node';
     }
   }
 
-  // 6.4 Otherwise, we stop (reply to the user) using the special "__end__" node
+  // 7.4 Otherwise, we stop (reply to the user) using the special "__end__" node
   return '__end__';
 }
 

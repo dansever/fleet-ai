@@ -25,10 +25,10 @@ export class FuelBidProcessor extends BaseFileProcessor {
     // For fuel bids, we need special handling to update the bid record
     const result = await super.process(request, onProgress);
 
-    if (result.success && result.extractedData) {
+    if (result.success && result.extractedData && request.fuelBidId) {
       try {
         // Update the fuel bid record with extracted data
-        await fuelBidServer.updateFuelBid(request.parentId, {
+        await fuelBidServer.updateFuelBid(request.fuelBidId, {
           ...result.extractedData,
           updatedAt: new Date(),
         });

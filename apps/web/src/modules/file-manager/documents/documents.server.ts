@@ -4,11 +4,9 @@ import 'server-only';
 import { db } from '@/drizzle';
 import { documentsTable } from '@/drizzle/schema/schema.documents';
 import { Contract, Document, NewDocument } from '@/drizzle/types';
-import { storage } from '@/modules/file-manager';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
+import { server as storageServer } from '../storage';
 import { DocumentUpdateInput } from './documents.types';
-
-const storageServer = storage.server;
 
 /**
  * Get a document by ID
@@ -30,7 +28,29 @@ export async function listDocumentsByContract(contractId: Contract['id']): Promi
   const documents = await db
     .select()
     .from(documentsTable)
-    .where(and(eq(documentsTable.parentId, contractId), eq(documentsTable.parentType, 'contract')));
+    .where(eq(documentsTable.contractId, contractId));
+  return documents;
+}
+
+/**
+ * Get all documents for an invoice
+ */
+export async function listDocumentsByInvoice(invoiceId: string): Promise<Document[]> {
+  const documents = await db
+    .select()
+    .from(documentsTable)
+    .where(eq(documentsTable.invoiceId, invoiceId));
+  return documents;
+}
+
+/**
+ * Get all documents for a fuel bid
+ */
+export async function listDocumentsByFuelBid(fuelBidId: string): Promise<Document[]> {
+  const documents = await db
+    .select()
+    .from(documentsTable)
+    .where(eq(documentsTable.fuelBidId, fuelBidId));
   return documents;
 }
 
@@ -61,28 +81,22 @@ export async function updateDocument(
 }
 
 /**
- * Delete a document
+ * Delete a document and its associated storage file
  * @param id - The ID of the document to delete
  */
 export async function deleteDocument(id: Document['id']): Promise<void> {
-  await db.delete(documentsTable).where(eq(documentsTable.id, id));
-}
-
-/**
- * Delete a document and its associated storage file (if any)
- * This is the canonical cascade deletion for documents.
- */
-export async function deleteDocumentCascade(
-  id: Document['id'],
-  storagePath: Document['storagePath'],
-): Promise<void> {
-  if (storagePath) {
-    try {
-      await storageServer.deleteFile(storagePath);
-    } catch (err) {
-      // Non-fatal: proceed with DB deletion even if storage removal fails
-      console.warn('Warning: failed to delete storage file for document', id, err);
-    }
+  try {
+    // Step 0: Get the document
+    const document = await getDocumentById(id);
+    if (!document) throw new Error('Document not found');
+    // Step 1: Delete the storage file
+    if (document.storagePath) await storageServer.deleteFile(document.storagePath);
+    // Step 2: Delete Embeddings
+    // TODO: Delete embeddings
+    // Step 3: Delete the document
+    await db.delete(documentsTable).where(eq(documentsTable.id, id));
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    throw new Error('Failed to delete document');
   }
-  await deleteDocument(id);
 }

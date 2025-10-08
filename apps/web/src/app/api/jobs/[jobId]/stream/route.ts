@@ -18,10 +18,21 @@ export async function GET(
     return new Response('Job ID is required', { status: 400 });
   }
 
-  // Check if job exists
-  const initialJob = getJob(jobId);
+  // Check if job exists, retry a few times to handle serverless race conditions
+  let initialJob = getJob(jobId);
   if (!initialJob) {
-    return new Response('Job not found', { status: 404 });
+    // Retry up to 3 times with small delays (total ~600ms)
+    for (let i = 0; i < 3; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      initialJob = getJob(jobId);
+      if (initialJob) break;
+    }
+
+    // If still not found, return 404
+    if (!initialJob) {
+      console.warn(`⚠️ Job not found after retries: ${jobId}`);
+      return new Response('Job not found', { status: 404 });
+    }
   }
 
   // Create SSE stream

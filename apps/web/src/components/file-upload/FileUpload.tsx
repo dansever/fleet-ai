@@ -11,7 +11,9 @@ const filesClient = extraction.client;
 
 interface FileUploadProps {
   documentType: DocumentType;
-  parentId: string;
+  contractId?: string;
+  invoiceId?: string;
+  fuelBidId?: string;
   onSuccess?: (result: any) => void;
   onError?: (error: string) => void;
   disabled?: boolean;
@@ -24,7 +26,9 @@ interface FileUploadProps {
  */
 export function FileUpload({
   documentType,
-  parentId,
+  contractId,
+  invoiceId,
+  fuelBidId,
   onSuccess,
   onError,
   disabled = false,
@@ -52,7 +56,9 @@ export function FileUpload({
       // Use unified file processing API
       const result = await filesClient.uploadAndProcessFile(file, {
         documentType,
-        parentId,
+        contractId,
+        invoiceId,
+        fuelBidId,
         onProgress: (progress) => {
           setUploadProgress(progress);
         },
@@ -82,14 +88,14 @@ export function FileUpload({
     <div className={`relative ${className}`}>
       <input
         type="file"
-        id={`file-upload-${documentType}-${parentId}`}
+        id={`file-upload-${documentType}-${contractId || invoiceId || fuelBidId}`}
         className="hidden"
         accept=".pdf,.doc,.docx"
         onChange={handleFileSelect}
         disabled={disabled || isUploading}
       />
 
-      <label htmlFor={`file-upload-${documentType}-${parentId}`}>
+      <label htmlFor={`file-upload-${documentType}-${contractId || invoiceId || fuelBidId}`}>
         <Button
           intent="primary"
           size="md"

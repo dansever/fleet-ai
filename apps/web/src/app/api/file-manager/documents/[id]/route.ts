@@ -1,10 +1,7 @@
 import { getAuthContext } from '@/lib/authorization/authenticate-user';
 import { jsonError } from '@/lib/core/errors';
-import { documents, storage } from '@/modules/file-manager';
+import { documents } from '@/modules/file-manager';
 import { NextRequest, NextResponse } from 'next/server';
-
-const documentsServer = documents.server;
-const storageServer = storage.server;
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -27,7 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Get document by ID
-    const document = await documentsServer.getDocumentById(id);
+    const document = await documents.server.getDocumentById(id);
     if (!document) {
       return jsonError('Document not found', 404);
     }
@@ -62,7 +59,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const data = await request.json();
 
     // Update document
-    const document = await documentsServer.updateDocument(id, data);
+    const document = await documents.server.updateDocument(id, data);
 
     // Return updated document
     return NextResponse.json(document);
@@ -91,22 +88,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Get the document
-    const document = await documentsServer.getDocumentById(id);
+    const document = await documents.server.getDocumentById(id);
     if (!document) {
       return jsonError('Document not found', 404);
     }
-    if (!document.storagePath) {
-      return jsonError('Document storage path not found', 404);
-    }
-    if (document.orgId !== orgId) {
-      return jsonError('Unauthorized', 401);
-    }
 
-    // Delete document record
-    await documentsServer.deleteDocument(id);
-
-    // Delete file from storage
-    await storageServer.deleteFile(document.storagePath);
+    // Delete document record and its associated storage file
+    await documents.server.deleteDocument(id);
 
     // Return response
     return NextResponse.json({ success: true });

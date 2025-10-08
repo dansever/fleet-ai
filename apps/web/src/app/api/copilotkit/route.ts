@@ -1,4 +1,5 @@
 import { getServiceAdapter } from '@/lib/dynamic-service-adapters';
+import { serverEnv } from '@/lib/env/server';
 import {
   CopilotRuntime,
   copilotRuntimeNextJSAppRouterEndpoint,
@@ -10,15 +11,14 @@ import { NextRequest } from 'next/server';
  * Service adapter
  */
 const serviceAdapter = await getServiceAdapter('openai');
-
 /**
  * Copilot runtime
  */
 const runtime = new CopilotRuntime({
   remoteEndpoints: [
     langGraphPlatformEndpoint({
-      deploymentUrl: process.env.LANGRAPH_DEPLOYMENT_URL || '',
-      langsmithApiKey: process.env.LANGSMITH_API_KEY,
+      deploymentUrl: serverEnv.LANGGRAPH_DEPLOYMENT_URL,
+      langsmithApiKey: serverEnv.LANGSMITH_API_KEY,
       agents: [
         {
           name: 'assistant_agent',

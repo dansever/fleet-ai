@@ -13,5 +13,5 @@ else
   exit 1
 fi
 
-# 2) Run uvicorn
-exec python -m uvicorn app.main:app --reload
+# 2) Run uvicorn on port 8001
+exec python -m uvicorn app.main:app --reload --port 8001

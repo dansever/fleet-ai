@@ -35,11 +35,18 @@ function scheduleCleanup(jobId: string) {
 
 /**
  * Create a new job for tracking an async operation
- * @param options
- * @returns
+ * @param options - Job creation options, optionally including a specific jobId
+ * @returns The created job state
  */
 export function createJob(options: CreateJobOptions = {}): JobState {
-  const jobId = generateJobId();
+  const jobId = options.jobId || generateJobId();
+
+  // If jobId is provided and already exists, return existing job
+  if (options.jobId && jobs.has(options.jobId)) {
+    console.log(`✅ Job already exists: ${jobId}`);
+    return jobs.get(jobId)!;
+  }
+
   const job: JobState = {
     jobId,
     jobType: options.jobType || 'generic',

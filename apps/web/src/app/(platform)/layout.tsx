@@ -3,6 +3,7 @@ import { AuthProvider } from '@/lib/authorization/auth-context';
 import { authenticateUser } from '@/lib/authorization/authenticate-user';
 import { CopilotKit } from '@copilotkit/react-core';
 import '@copilotkit/react-ui/styles.css';
+import { cookies } from 'next/headers';
 import { ReactNode } from 'react';
 import { MainSidebar } from './_components/MainSidebar';
 
@@ -17,14 +18,21 @@ export default async function PlatformLayout({ children }: { children: ReactNode
   const copilotKitApiKey = process.env.COPILOTKIT_API_KEY;
   const copilotKitRuntimeUrl = 'api/copilotkit';
 
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
+
   return (
     <AuthProvider dbUser={dbUser} orgId={orgId}>
-      <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
+      <SidebarProvider
+        style={{ ['--sidebar-width' as string]: '12rem' }}
+        cookieString={cookieString} // Pass cookies for SSR
+      >
         <MainSidebar variant="sidebar" dbUser={dbUser} />
         <CopilotKit
           publicApiKey={copilotKitApiKey}
           runtimeUrl={copilotKitRuntimeUrl}
           showDevConsole={false}
+          agent={'assistant_agent'}
         >
           <main className="flex-1 min-w-0 h-screen overflow-hidden">{children}</main>
         </CopilotKit>

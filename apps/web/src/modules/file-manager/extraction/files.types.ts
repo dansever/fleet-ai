@@ -8,7 +8,9 @@ import { ExtractionAgentName } from '@/lib/constants/extractionAgents';
 export interface FileProcessingRequest {
   file: File;
   documentType: DocumentType;
-  parentId: string;
+  contractId?: string;
+  invoiceId?: string;
+  fuelBidId?: string;
   orgId: string;
   userId: string;
 }
@@ -75,7 +77,9 @@ export type ProcessorRegistry = Map<DocumentType, FileProcessor>;
 
 export interface FileUploadOptions {
   documentType: DocumentType;
-  parentId: string;
+  contractId?: string;
+  invoiceId?: string;
+  fuelBidId?: string;
   onProgress?: (progress: number) => void;
 }
 

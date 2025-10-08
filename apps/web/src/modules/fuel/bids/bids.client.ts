@@ -62,10 +62,10 @@ export async function ExtractFuelBid(tenderId: FuelTender['id'], file: File): Pr
   const formData = new FormData();
   formData.append('file', file);
   formData.append('documentType', 'fuel_bid');
-  formData.append('parentId', tenderId);
+  formData.append('fuelBidId', tenderId);
 
   // Use unified file processing endpoint
-  const res = await api.post('/api/files/process', formData, {
+  const res = await api.post('/api/file-manager/process', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
