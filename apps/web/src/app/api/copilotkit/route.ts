@@ -1,27 +1,43 @@
+import { getServiceAdapter } from '@/lib/dynamic-service-adapters';
 import {
   CopilotRuntime,
   copilotRuntimeNextJSAppRouterEndpoint,
   langGraphPlatformEndpoint,
-  OpenAIAdapter,
 } from '@copilotkit/runtime';
 import { NextRequest } from 'next/server';
 
-const serviceAdapter = new OpenAIAdapter({});
+/**
+ * Service adapter
+ */
+const serviceAdapter = await getServiceAdapter('openai');
+
+/**
+ * Copilot runtime
+ */
 const runtime = new CopilotRuntime({
   remoteEndpoints: [
     langGraphPlatformEndpoint({
-      deploymentUrl: 'http://localhost:8000',
-      langsmithApiKey: process.env.LANGSMITH_API_KEY || '', // only used in LangGraph Platform deployments
+      deploymentUrl: process.env.LANGRAPH_DEPLOYMENT_URL || '',
+      langsmithApiKey: process.env.LANGSMITH_API_KEY,
       agents: [
         {
           name: 'assistant_agent',
-          description: 'FleetAI main AI assistant (copilot chat assistant).',
+          description: 'Main AI assistant',
+        },
+        {
+          name: 'uom_converter_agent',
+          description: 'UOM converter assistant.',
         },
       ],
     }),
   ],
 });
 
+/**
+ * CopilotKit API endpoint
+ * @param req - NextRequest
+ * @returns
+ */
 export const POST = async (req: NextRequest) => {
   const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
     runtime,

@@ -1,5 +1,5 @@
 // Improved Currency Tool - More robust with better error handling
-import { StructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 
 // Better currency API with fallback
@@ -67,13 +67,8 @@ const CurrencySchema = z.object({
 
 export type CurrencyInput = z.infer<typeof CurrencySchema>;
 
-export class CurrencyConvertTool extends StructuredTool<typeof CurrencySchema> {
-  name = 'currency_convert';
-  description =
-    'Convert currency amounts using real-time exchange rates. Supports ISO 4217 currency codes (USD, EUR, etc.)';
-  schema = CurrencySchema;
-
-  async _call(input: CurrencyInput): Promise<string> {
+export const currencyConvert = tool(
+  async (input: CurrencyInput) => {
     const { amount, fromCurrency, toCurrency } = input;
     const base = fromCurrency.toUpperCase();
     const quote = toCurrency.toUpperCase();
@@ -107,5 +102,11 @@ export class CurrencyConvertTool extends StructuredTool<typeof CurrencySchema> {
         },
       });
     }
-  }
-}
+  },
+  {
+    name: 'currency_convert',
+    description:
+      'Convert currency amounts using real-time exchange rates. Supports ISO 4217 currency codes (USD, EUR, etc.)',
+    schema: CurrencySchema,
+  },
+);

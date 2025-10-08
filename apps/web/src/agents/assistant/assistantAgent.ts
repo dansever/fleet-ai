@@ -11,8 +11,8 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 // 1. Import necessary helpers for CopilotKit actions
 import { createChatModel } from '@/lib/langchain/model';
 import { CopilotKitStateAnnotation } from '@copilotkit/sdk-js/langgraph';
-import { webSearch } from '../general-tools/TavilySearch';
-import { getWeather } from '../general-tools/weather';
+import { webSearch } from '../tools/TavilySearch';
+import { getWeather } from '../tools/weather';
 import { assistantSystemPrompt } from './prompts';
 
 // 2. Define our agent state, which includes CopilotKit state to

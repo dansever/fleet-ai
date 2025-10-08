@@ -21,7 +21,11 @@ export default async function PlatformLayout({ children }: { children: ReactNode
     <AuthProvider dbUser={dbUser} orgId={orgId}>
       <SidebarProvider style={{ ['--sidebar-width' as string]: '12rem' }}>
         <MainSidebar variant="sidebar" dbUser={dbUser} />
-        <CopilotKit publicApiKey={copilotKitApiKey} runtimeUrl={copilotKitRuntimeUrl}>
+        <CopilotKit
+          publicApiKey={copilotKitApiKey}
+          runtimeUrl={copilotKitRuntimeUrl}
+          showDevConsole={false}
+        >
           <main className="flex-1 min-w-0 h-screen overflow-hidden">{children}</main>
         </CopilotKit>
       </SidebarProvider>

@@ -21,24 +21,30 @@ export const serverEnv = createEnv({
     BACKEND_URL: z.string().url().default('http://localhost:8000'),
     CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:8000'),
 
-    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    NODE_ENV: z.enum(['development', 'production']).default('development'),
 
-    // OpenAI API Key
+    // LangGraph
+    LANGRAPH_DEPLOYMENT_URL: z.string().url().default('http://localhost:8000'),
+
+    // LangSmith
+    LANGSMITH_API_KEY: z.string().min(1),
+
+    // OpenAI
     OPENAI_API_KEY: z.string().min(1),
     ACTIVE_OPENAI_MODEL: z.string().min(1),
 
-    // Llama Cloud API Key
+    // Llama Cloud
     LLAMA_CLOUD_API_KEY: z.string().min(1),
     LLAMA_EXTRACT_PROJECT_ID: z.string().min(1),
     LLAMA_ORGANIZATION_ID: z.string().min(1),
 
-    // CopilotKit API Key
+    // CopilotKit
     COPILOTKIT_API_KEY: z.string().min(1),
 
-    // Tavily API Key
+    // Tavily
     TAVILY_API_KEY: z.string().min(1),
 
-    // Weather API Key
+    // Weather API
     WEATHER_API_KEY: z.string().min(1),
   },
   experimental__runtimeEnv: process.env,
