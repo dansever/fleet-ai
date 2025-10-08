@@ -65,6 +65,8 @@ export function useDocuments({
         const cachedDocuments = documentsCache[contractId];
         setDocuments(cachedDocuments);
         setSelectedDocument(cachedDocuments.length > 0 ? cachedDocuments[0] : null);
+        // Ensure loading state is cleared when loading from cache
+        setLoading((prev) => ({ ...prev, documents: false, isRefreshing: false }));
         console.log(
           `✓ Loaded ${cachedDocuments.length} documents from cache for contract ${contractId}`,
         );

@@ -47,6 +47,8 @@ export function useVendorContacts({
         const cachedContacts = vendorContactsCache[selectedAirport.id];
         setVendorContacts(cachedContacts);
         setSelectedVendorContact(cachedContacts.length > 0 ? cachedContacts[0] : null);
+        // Ensure loading state is cleared when loading from cache
+        setLoading((prev) => ({ ...prev, vendorContacts: false, isRefreshing: false }));
         console.log(
           `Loaded ${cachedContacts.length} vendor contacts from cache for airport ${selectedAirport.id}`,
         );

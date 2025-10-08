@@ -52,6 +52,8 @@ export function useContracts({
         const cachedContracts = contractsCache[selectedAirport.id];
         setContracts(cachedContracts);
         setSelectedContract(cachedContracts.length > 0 ? cachedContracts[0] : null);
+        // Ensure loading state is cleared when loading from cache
+        setLoading((prev) => ({ ...prev, contracts: false, isRefreshing: false }));
         console.log(
           `Loaded ${cachedContracts.length} contracts from cache for airport ${selectedAirport.id}`,
         );

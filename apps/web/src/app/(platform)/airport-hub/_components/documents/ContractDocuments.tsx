@@ -16,6 +16,7 @@ import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
 import { ContractTerm, ExtractedContractData } from '@/types/contracts';
 import {
+  AlertCircle,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -31,7 +32,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useAirportHub } from '../context';
+import { useAirportHub } from '../../context';
 
 const documentsClient = documents.client;
 const storageClient = storage.client;
@@ -101,7 +102,7 @@ const getFileTypeConfig = (fileType: string | null) => {
   };
 };
 
-export function ContractDocument() {
+export function ContractDocuments() {
   const {
     selectedContract,
     refreshContracts,
@@ -195,7 +196,7 @@ export function ContractDocument() {
 
       // Immediately update local state to reflect deletion
       removeDocument(document.id);
-      toast.success('Document has been deleted');
+      toast.success('Document file has been deleted');
 
       // Note: No need to call refreshDocuments() since we've already updated local state
       // The removeDocument function handles both state and cache updates
@@ -228,72 +229,22 @@ export function ContractDocument() {
     : [];
 
   return (
-    <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-      <BaseCard
-        className="flex flex-col col-span-1 gap-0 px-2"
-        headerClassName="px-0 py-2"
-        title="Files"
-        actions={
-          <FileUploadPopover
-            onSend={handleUploadContractFile}
-            trigger={<Button size="sm" intent="add" text="Upload" icon={Upload} />}
-          />
-        }
-        contentClassName="px-0"
-      >
-        {loading.documents ? (
-          <div className="flex flex-col gap-2 py-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="p-4 rounded-lg border bg-card">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-3 w-1/2 mb-1" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-            ))}
-          </div>
-        ) : documents.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-8">
-            <File className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="font-medium">No documents yet</p>
-            <p className="text-xs mt-1">Upload a document to get started</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {documents.map((document) => {
-              const fileConfig = getFileTypeConfig(document.fileType);
-              const FileIcon = fileConfig.icon;
-              const isSelected = selectedDocument?.id === document.id;
+    <div className="flex flex-col gap-4">
+      {/* Information Banner */}
+      <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-amber-900">Document Management</p>
+          <p className="text-xs text-amber-700 mt-1">
+            This page manages individual documents within the contract. To manage the contract
+            itself, navigate to the <span className="font-semibold">Overview</span> tab.
+          </p>
+        </div>
+      </div>
 
-              return (
-                <ListItemCard
-                  key={document.id}
-                  onClick={() => setSelectedDocument(document)}
-                  isSelected={isSelected}
-                  title={document.fileName || 'Untitled'}
-                  className="rounded-sm"
-                >
-                  <div className="flex flex-col items-start gap-1 py-1">
-                    <div className="flex items-center gap-1">
-                      <FileIcon className={`flex-shrink-0 w-4 h-4 ${fileConfig.color}`} />
-                      <Badge className={`text-xs px-2 py-0 ${fileConfig.badgeColor}`}>
-                        {document.fileType || 'FILE'}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Date info */}
-                  <div className="text-xs text-gray-500 border-t pt-2">
-                    Updated {formatDate(document.updatedAt)}
-                  </div>
-                </ListItemCard>
-              );
-            })}
-          </div>
-        )}
-      </BaseCard>
       <BaseCard
         cardType="inner"
-        className="col-start-2 col-span-full"
+        className="col-start-2 col-span-full bg-blue-300"
         header={
           selectedDocument ? (
             <div className="flex items-center justify-between gap-4">
@@ -346,14 +297,14 @@ export function ContractDocument() {
                       intent="secondary"
                       size="sm"
                       icon={Trash}
-                      text="Delete"
+                      text="Delete File"
                       disabled={deleteDocumentLoading}
                       isLoading={deleteDocumentLoading}
                     />
                   }
                   popoverIntent="danger"
-                  title="Delete Document"
-                  description="Are you sure you want to delete this document? This action cannot be undone."
+                  title="Delete Document File"
+                  description={`Are you sure you want to delete "${selectedDocument.fileName}"? This will only delete this document file, not the entire contract. This action cannot be undone.`}
                 />
               </div>
             </div>
@@ -361,6 +312,68 @@ export function ContractDocument() {
         }
       >
         <div className="flex flex-col gap-4">
+          <BaseCard
+            className="flex flex-col col-span-1 gap-0 px-2"
+            headerClassName="px-0 py-2"
+            title="Files"
+            actions={
+              <FileUploadPopover
+                onSend={handleUploadContractFile}
+                trigger={<Button size="sm" intent="add" text="Upload" icon={Upload} />}
+              />
+            }
+            contentClassName="px-0"
+          >
+            {loading.documents ? (
+              <div className="flex flex-col gap-2 py-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="p-4 rounded-lg border bg-card">
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-3 w-1/2 mb-1" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </div>
+                ))}
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="text-center text-sm text-muted-foreground py-8">
+                <File className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p className="font-medium">No documents yet</p>
+                <p className="text-xs mt-1">Upload a document to get started</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {documents.map((document) => {
+                  const fileConfig = getFileTypeConfig(document.fileType);
+                  const FileIcon = fileConfig.icon;
+                  const isSelected = selectedDocument?.id === document.id;
+
+                  return (
+                    <ListItemCard
+                      key={document.id}
+                      onClick={() => setSelectedDocument(document)}
+                      isSelected={isSelected}
+                      title={document.fileName || 'Untitled'}
+                      className="rounded-sm"
+                    >
+                      <div className="flex flex-col items-start gap-1 py-1">
+                        <div className="flex items-center gap-1">
+                          <FileIcon className={`flex-shrink-0 w-4 h-4 ${fileConfig.color}`} />
+                          <Badge className={`text-xs px-2 py-0 ${fileConfig.badgeColor}`}>
+                            {document.fileType || 'FILE'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Date info */}
+                      <div className="text-xs text-gray-500 border-t pt-2">
+                        Updated {formatDate(document.updatedAt)}
+                      </div>
+                    </ListItemCard>
+                  );
+                })}
+              </div>
+            )}
+          </BaseCard>
           {loading.documents ? (
             <div className="flex flex-col gap-6 p-4">
               {/* Header Skeleton */}

@@ -8,11 +8,9 @@ import { twMerge } from 'tailwind-merge';
 const buttonStyles = cva(
   [
     'border border-transparent inline-flex items-center justify-center',
-    'rounded-xl shadow-sm hover:shadow-md ',
-    'transition-all duration-900 ease-in-out',
+    'rounded-xl transition-colors duration-200',
     'font-normal text-center',
     'cursor-pointer flex-shrink-0',
-    'transition-transform duration-200',
     'focus:outline-none focus:ring-none',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],
@@ -24,7 +22,7 @@ const buttonStyles = cva(
           'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white',
         // Secondary action - less prominent, alternative actions
         secondary:
-          'bg-white border border-primary/20 text-gray-600 hover:text-gray-800 hover:border-primary/40',
+          'bg-white border border-primary/20 text-gray-600 hover:text-gray-800 hover:border-primary/30 hover:bg-neutral-50',
         // Secondary inverted - for use on dark/colored backgrounds
         secondaryInverted: 'bg-white/30 hover:bg-white/40 text-white',
         // Add action - for creating new items, bright and inviting

@@ -1,115 +1,151 @@
 # Airport Hub Components
 
-## Contract Files Component
+This directory contains all components related to the Airport Hub feature, organized by responsibility.
 
-The main component for viewing and interacting with contract documents.
+## Directory Structure
 
-### Recent Updates
-
-#### Improved Extracted Data Presentation (Latest)
-
-**Before:**
-
-- Long vertical list of card components
-- Source quotes always visible
-- Cluttered and hard to scan
-- No AI integration
-
-**After:**
-
-- Compact table layout with Term | Value | Actions columns
-- Source quotes hidden by default, expandable via accordion
-- AI Insights section at the top showing:
-  - Contract expiration warnings
-  - Potential savings opportunities
-  - Risk alerts
-- Integrated AI Assistant in all tabs
-- Better visual hierarchy and scannability
-
-#### AI Assistant Integration
-
-The AI Assistant is now deeply integrated into the document viewing experience:
-
-1. **Floating Mode** (Bottom-right corner)
-   - Always accessible when viewing a document
-   - Shows badge with number of insights
-   - Expands into full chat interface
-   - Follows user across tabs
-
-2. **Inline Mode** (Within tabs)
-   - Summary Tab: Shows key highlights
-   - Extracted Data Tab: Shows AI insights section
-   - Content Tab: Available for content-specific queries
-
-3. **Features**
-   - AI-generated insights with color coding
-   - Chat interface for asking questions
-   - Suggested questions to get started
-   - Context-aware responses (once implemented)
-
-### Components
-
-- `ContractFiles.tsx` - Main document viewer
-- `AIAssistant.tsx` - AI assistant component with multiple display modes
-
-### Key Improvements
-
-1. **Compact Data Presentation**
-   - Table-style layout instead of card list
-   - Better use of horizontal space
-   - Easier to scan and compare terms
-
-2. **Progressive Disclosure**
-   - Quotes hidden by default
-   - Expand icon to reveal source text
-   - Accordion animation for smooth UX
-
-3. **AI-First Approach**
-   - AI insights prominently displayed
-   - Chat interface integrated naturally
-   - Not relegated to separate tab
-   - Context-aware assistance
-
-4. **Better Search**
-   - Search across term keys AND values
-   - Sticky search bar
-   - Real-time filtering
-
-### Usage Example
-
-```tsx
-// Floating AI Assistant
-<AIAssistant
-  mode="floating"
-  context={{
-    documentId: selectedDocument.id,
-    contractId: selectedContract?.id,
-    documentName: selectedDocument.fileName,
-  }}
-  insights={[
-    {
-      type: 'expiration',
-      title: 'Contract Expiration',
-      description: 'This contract expires in 45 days.',
-    },
-  ]}
-/>
-
-// Inline AI Assistant
-<AIAssistant
-  mode="inline"
-  context={{ documentId, contractId }}
-  insights={insights}
-/>
+```
+_components/
+├── contract/              # Contract-level components
+│   ├── ContractOverview.tsx   # Overview tab showing contract details
+│   └── ContractSidebar.tsx    # Sidebar listing all contracts
+├── documents/             # Document-level components
+│   └── ContractDocuments.tsx  # Document management and viewer
+└── README.md
 ```
 
-### Future Enhancements
+## Component Responsibilities
 
-See `apps/web/src/docs/ai-assistant-framework.md` for detailed implementation roadmap:
+### Contract-Level Components (`contract/`)
 
-- [ ] RAG implementation for intelligent document search
-- [ ] AI agent integration for insights generation
-- [ ] Multi-document comparison
-- [ ] Proactive notifications
-- [ ] Voice input support
-- [ ] Export insights as reports
+These components manage **entire contracts**. Actions here affect the whole contract entity.
+
+#### ContractOverview.tsx
+
+- **Purpose**: Displays comprehensive contract information
+- **Features**:
+  - Contract details (dates, vendor info, terms)
+  - Contract-level actions (View, Edit)
+  - **DANGER ZONE**: Delete entire contract (red "danger" button)
+- **Delete Action**: Permanently deletes the contract AND all associated documents
+- **Visual Cues**:
+  - Blue information banner explaining contract-level scope
+  - Separated "Danger Zone" section for destructive actions
+  - Red "danger" intent button for delete action
+
+#### ContractSidebar.tsx
+
+- **Purpose**: Lists all contracts for the selected airport
+- **Features**:
+  - Filterable/searchable contract list
+  - Status badges (active, pending, inactive)
+  - Quick add new contract button
+  - Auto-select newly created contracts
+
+### Document-Level Components (`documents/`)
+
+These components manage **individual documents** within a contract. Actions here only affect specific files.
+
+#### ContractDocuments.tsx
+
+- **Purpose**: Document upload, viewing, and management
+- **Features**:
+  - Document list sidebar
+  - Document viewer with tabs (Summary, Extracted Data, Content)
+  - AI-powered insights and analysis
+  - Document-level actions (Download, Delete)
+- **Delete Action**: Only deletes the specific document file, NOT the contract
+- **Visual Cues**:
+  - Amber warning banner explaining document-level scope
+  - Clear labeling: "Delete File" vs "Delete Contract"
+  - Secondary intent button (not danger) for file deletion
+
+## UI/UX Improvements
+
+### 1. Clear Visual Distinction
+
+**Contract-Level (Overview Tab)**:
+
+- 🔵 Blue information banner
+- 🔴 Red "Danger Zone" section
+- 🗑️ "Delete Contract" button (danger intent)
+- ⚠️ Confirmation: "Delete entire contract and all documents"
+
+**Document-Level (Files Tab)**:
+
+- 🟡 Amber warning banner
+- 🗑️ "Delete File" button (secondary intent)
+- ⚠️ Confirmation: "Delete only this document file"
+
+### 2. Consistent Naming
+
+- `ContractOverview` → Contract-level overview
+- `ContractSidebar` → Contract list
+- `ContractDocuments` → Document management (plural, manages multiple documents)
+
+### 3. Improved Confirmations
+
+Delete confirmations now explicitly state:
+
+- **Contract deletion**: "Delete entire contract including all documents"
+- **Document deletion**: "Delete only this file, not the contract"
+
+## Usage Examples
+
+### Importing Contract Components
+
+```tsx
+// Import contract-level components
+import { ContractOverview } from './_components/contract/ContractOverview';
+import ContractSidebar from './_components/contract/ContractSidebar';
+
+// Use in tabs
+<TabsContent value="overview">
+  <ContractOverview />
+</TabsContent>;
+```
+
+### Importing Document Components
+
+```tsx
+// Import document-level components
+import { ContractDocuments } from './_components/documents/ContractDocuments';
+
+// Use in tabs
+<TabsContent value="files">
+  <ContractDocuments />
+</TabsContent>;
+```
+
+## Key Improvements from Previous Structure
+
+### Before:
+
+- ❌ Confusing: Same "Delete" button label in different contexts
+- ❌ Unclear: `ContractFiles.tsx` exported `ContractDocument` (naming mismatch)
+- ❌ Dangerous: No visual distinction between delete actions
+- ❌ Flat structure: All components in one directory
+
+### After:
+
+- ✅ Clear: Explicit labels ("Delete Contract" vs "Delete File")
+- ✅ Consistent: `ContractDocuments.tsx` exports `ContractDocuments`
+- ✅ Safe: Visual cues, color coding, and danger zones
+- ✅ Organized: Components grouped by responsibility
+
+## Related Documentation
+
+- Contract management flow: `/features/contracts/`
+- Document processing: `/modules/file-manager/`
+- AI extraction: `/modules/ai/parse/`
+
+## Contributing
+
+When adding new components:
+
+1. **Determine scope**: Contract-level or document-level?
+2. **Place appropriately**: `contract/` or `documents/` directory
+3. **Follow naming**: Be explicit and consistent
+4. **Add visual cues**: Use info banners for context
+5. **Destructive actions**: Always use danger intent and clear confirmations
+6. **Update this README**: Document new components and their purpose

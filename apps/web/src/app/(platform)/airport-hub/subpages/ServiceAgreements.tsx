@@ -1,15 +1,24 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/context';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
+import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
-import { ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
+import {
+  ContractTypeEnum,
+  getContractTypeColor,
+  getContractTypeDisplayName,
+  getProcessStatusDisplay,
+} from '@/drizzle/enums';
 import { Contract } from '@/drizzle/types';
+import ContractDialog from '@/features/contracts/contracts/ContractDialog';
+import { deleteContract } from '@/modules/contracts/contracts.client';
+import { BaseCard, ConfirmationPopover } from '@/stories';
 import { Button } from '@/stories/Button/Button';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import { Banknote, BarChart, ChartBar, FileText } from 'lucide-react';
+import { Banknote, BarChart, ChartBar, Eye, FileText, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { ContractDocument } from '../_components/ContractFiles';
-import { ContractOverview } from '../_components/ContractOverview';
-import ContractList from '../_components/ContractSidebar';
+import { ContractOverview } from '../_components/contract/ContractOverview';
+import ContractSidebar from '../_components/contract/ContractSidebar';
+import { ContractDocuments } from '../_components/documents/ContractDocuments';
 
 export default function ServiceAgreementsPage() {
   const {
@@ -40,6 +49,19 @@ export default function ServiceAgreementsPage() {
   // Get all contract types to ensure consistent ordering
   const contractTypes = ContractTypeEnum.enumValues;
 
+  // Calculate days remaining
+  const calculateDaysRemaining = (endDate?: string) => {
+    if (!endDate) return null;
+    const end = new Date(endDate);
+    const now = new Date();
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  const daysRemaining = calculateDaysRemaining(selectedContract?.effectiveTo || undefined);
+  const isExpiringSoon = daysRemaining !== null && daysRemaining <= 30 && daysRemaining > 0;
+  const isExpired = daysRemaining !== null && daysRemaining <= 0;
+
   // Calculate contract statistics
   const contractStats = useMemo(() => {
     const total = contracts.length;
@@ -66,6 +88,19 @@ export default function ServiceAgreementsPage() {
 
     return { total, active, expiringSoon, contractsByType };
   }, [contracts, groupedContracts, contractTypes]);
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'secondary';
+      case 'in_progress':
+        return 'default';
+      case 'closed':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
+  };
 
   // Show loading state when initially loading contracts or when refreshing
   if (loading.contracts && contracts.length === 0 && !loading.isRefreshing) {
@@ -101,32 +136,87 @@ export default function ServiceAgreementsPage() {
           willChange: 'width',
         }}
       >
-        <ContractList />
+        <ContractSidebar />
       </div>
-      <Tabs
-        tabs={[
-          { label: 'Overview', value: 'overview', icon: <BarChart /> },
-          { label: 'Files', value: 'files', icon: <FileText /> },
-          { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
-          { label: 'Financials', value: 'financials', icon: <ChartBar /> },
-        ]}
-        defaultTab="overview"
-        onTabChange={() => {}}
-        className="flex-1"
+      <BaseCard
+        headerClassName=""
+        contentClassName=""
+        header={
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row justify-between items-start">
+              {/* Title, Subtitle, Badges */}
+              <div className="flex flex-col gap-2">
+                <h2>{selectedContract?.title}</h2>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={getContractTypeColor(selectedContract?.contractType)}>
+                    {getContractTypeDisplayName(selectedContract?.contractType)}
+                  </Badge>
+                  <Badge
+                    variant={getStatusBadgeVariant(selectedContract?.processStatus || 'unassigned')}
+                  >
+                    {getProcessStatusDisplay(selectedContract?.processStatus)}
+                  </Badge>
+                  {isExpired && (
+                    <Badge variant="destructive" className="text-xs">
+                      Expired
+                    </Badge>
+                  )}
+                  {isExpiringSoon && !isExpired && (
+                    <Badge variant="destructive" className="text-xs">
+                      Expires in {daysRemaining} days
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Contract-Level Actions */}
+              <div className="flex flex-row gap-2">
+                <ContractDialog
+                  DialogType="view"
+                  contract={selectedContract}
+                  airport={selectedAirport}
+                  trigger={<Button intent="secondary" text="View Contract" icon={Eye}></Button>}
+                  onChange={refreshContracts}
+                />
+
+                {/* Dangerous Actions Section */}
+                <ConfirmationPopover
+                  onConfirm={() => deleteContract(selectedContract?.id || '')}
+                  trigger={<Button text="Delete Contract" intent="danger" icon={Trash} />}
+                  popoverIntent="danger"
+                  title="Delete Entire Contract"
+                  description={`Are you sure you want to permanently delete "${selectedContract?.title}"? This will delete the contract and all associated documents. This action cannot be undone.`}
+                />
+              </div>
+            </div>
+          </div>
+        }
       >
-        <TabsContent value="overview">
-          <ContractOverview />
-        </TabsContent>
-        <TabsContent value="files">
-          <ContractDocument />
-        </TabsContent>
-        <TabsContent value="invoices">
-          <div>Invoices</div>
-        </TabsContent>
-        <TabsContent value="financials">
-          <div>Financials</div>
-        </TabsContent>
-      </Tabs>
+        <Tabs
+          tabs={[
+            { label: 'Overview', value: 'overview', icon: <BarChart /> },
+            { label: 'Files', value: 'files', icon: <FileText /> },
+            { label: 'Invoices', value: 'invoices', icon: <Banknote /> },
+            { label: 'Financials', value: 'financials', icon: <ChartBar /> },
+          ]}
+          defaultTab="overview"
+          onTabChange={() => {}}
+          className="flex-1"
+        >
+          <TabsContent value="overview">
+            <ContractOverview />
+          </TabsContent>
+          <TabsContent value="files">
+            <ContractDocuments />
+          </TabsContent>
+          <TabsContent value="invoices">
+            <div>Invoices</div>
+          </TabsContent>
+          <TabsContent value="financials">
+            <div>Financials</div>
+          </TabsContent>
+        </Tabs>
+      </BaseCard>
     </div>
   );
 }

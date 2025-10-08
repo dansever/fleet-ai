@@ -17,9 +17,9 @@ import { BaseCard, ListItemCard } from '@/stories/Card/Card';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
-import { useAirportHub } from '../context';
+import { useAirportHub } from '../../context';
 
-export default function ContractList() {
+export default function ContractSidebar() {
   const {
     contracts,
     selectedContract,
@@ -45,18 +45,19 @@ export default function ContractList() {
 
   return (
     <BaseCard
-      className="h-fit flex flex-col p-0 gap-0 p-0"
+      className="h-fit flex px-2 flex-col pb-2 gap-2"
+      title={`Contracts at ${selectedAirport?.name}`}
       headerClassName="p-2"
-      title={`Contacts at ${selectedAirport?.name}`}
+      contentClassName="p-0"
       header={
-        <div className="flex flex-row justify-between items-center flex-shrink-0 gap-2">
+        <div className="flex flex-col gap-2">
           <div className="text-sm text-muted-foreground">
-            {contracts.length}/{contracts.length} contracts at{' '}
+            {contracts.length} contract{contracts.length !== 1 ? 's' : ''} at{' '}
             <span className="font-semibold italic">{selectedAirport?.name}</span>
           </div>
           <SimpleContractDialog
             airport={selectedAirport!}
-            trigger={<Button intent="add" icon={PlusIcon} />}
+            trigger={<Button intent="add" text="Add Contract" size="sm" icon={PlusIcon} />}
             onOpenChange={(open) => {
               if (!open) {
                 // Close popover when dialog closes
@@ -70,18 +71,15 @@ export default function ContractList() {
                 setSelectedContract(newContract);
               }
             }}
-          />{' '}
+          />
         </div>
       }
-      contentClassName="px-0 py-2"
     >
       {/* Contract List */}
       <div className="flex-1 min-h-0">
         <ScrollArea className="h-full overflow-y-auto">
           {/* Smoothly adjust inner padding as the sidebar width animates */}
-          <div
-            className={cn('p-2 space-y-3 transition-[padding,opacity] duration-200 ease-in-out')}
-          >
+          <div className={cn('space-y-2 transition-[padding,opacity] duration-200 ease-in-out')}>
             {loading.contracts && loading.isRefreshing && contracts.length === 0 ? (
               <div className="py-8">
                 <LoadingComponent size="sm" text="Loading contracts..." />
