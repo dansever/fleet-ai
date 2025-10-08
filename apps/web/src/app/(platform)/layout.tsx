@@ -5,7 +5,7 @@ import { CopilotKit } from '@copilotkit/react-core';
 import '@copilotkit/react-ui/styles.css';
 import { cookies } from 'next/headers';
 import { ReactNode } from 'react';
-import { MainSidebar } from './_components/MainSidebar';
+import { AppSidebar } from './_components/sidebar/AppSidebar';
 
 export default async function PlatformLayout({ children }: { children: ReactNode }) {
   // Authenticate user ONCE at the layout level
@@ -27,7 +27,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
         style={{ ['--sidebar-width' as string]: '12rem' }}
         cookieString={cookieString} // Pass cookies for SSR
       >
-        <MainSidebar variant="sidebar" dbUser={dbUser} />
+        <AppSidebar variant="sidebar" dbUser={dbUser} props={{}} />
         <CopilotKit
           publicApiKey={copilotKitApiKey}
           runtimeUrl={copilotKitRuntimeUrl}

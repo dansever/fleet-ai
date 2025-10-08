@@ -214,12 +214,14 @@ function SidebarNavItem({
   return <SidebarMenuItem>{menuButton}</SidebarMenuItem>;
 }
 
-export function MainSidebar({
+export function AppSidebar({
   variant = 'sidebar',
   dbUser,
+  ...props
 }: {
   variant?: 'sidebar' | 'floating' | 'inset';
   dbUser: DbUser;
+  props: React.ComponentProps<typeof Sidebar>;
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
@@ -229,7 +231,7 @@ export function MainSidebar({
   // Show loading state during hydration to prevent mismatch
   if (!isLoaded) {
     return (
-      <Sidebar collapsible="icon" variant={variant} className="border-r-primary/40">
+      <Sidebar collapsible="icon" variant={variant} {...props} className="border-r-primary/40">
         <SidebarHeader className="flex flex-row items-center w-full h-16 min-h-16 px-2">
           <div className="flex items-center h-full">
             <BrandLogo width={120} />
