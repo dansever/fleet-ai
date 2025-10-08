@@ -15,9 +15,13 @@ export default async function PlatformLayout({ children }: { children: ReactNode
     return <div>Error: {error}</div>;
   }
 
+  // CopilotKit API Key - used to authenticate the CopilotKit API requests
   const copilotKitApiKey = process.env.COPILOTKIT_API_KEY;
+  // CopilotKit Runtime URL - used to authenticate the CopilotKit API requests
   const copilotKitRuntimeUrl = 'api/copilotkit';
 
+  // Pass cookies for SSR (Server Side Rendering)
+  // These cookies are used to store the sidebar state
   const cookieStore = await cookies();
   const cookieString = cookieStore.toString();
 
@@ -25,7 +29,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
     <AuthProvider dbUser={dbUser} orgId={orgId}>
       <SidebarProvider
         style={{ ['--sidebar-width' as string]: '12rem' }}
-        cookieString={cookieString} // Pass cookies for SSR
+        cookieString={cookieString}
       >
         <AppSidebar variant="sidebar" dbUser={dbUser} props={{}} />
         <CopilotKit

@@ -9,10 +9,10 @@ const buttonStyles = cva(
   [
     'border border-transparent inline-flex items-center justify-center',
     'rounded-xl shadow-sm hover:shadow-md ',
-    'transition-colors duration-200',
+    'transition-all duration-900 ease-in-out',
     'font-normal text-center',
     'cursor-pointer flex-shrink-0',
-    'hover:scale-102 transition-transform duration-200',
+    'transition-transform duration-200',
     'focus:outline-none focus:ring-none',
     'disabled:opacity-50 disabled:pointer-events-none',
   ],

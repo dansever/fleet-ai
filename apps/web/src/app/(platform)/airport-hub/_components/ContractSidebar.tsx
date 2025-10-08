@@ -45,12 +45,11 @@ export default function ContractList() {
 
   return (
     <BaseCard
-      className="h-fit flex flex-col p-0 gap-0"
-      contentClassName="p-0"
-      headerClassName="p-0"
+      className="h-fit flex flex-col p-0 gap-0 p-0"
+      headerClassName="p-2"
       title={`Contacts at ${selectedAirport?.name}`}
       header={
-        <div className="flex flex-row justify-between items-center flex-shrink-0 px-4 pt-2 gap-2">
+        <div className="flex flex-row justify-between items-center flex-shrink-0 gap-2">
           <div className="text-sm text-muted-foreground">
             {contracts.length}/{contracts.length} contracts at{' '}
             <span className="font-semibold italic">{selectedAirport?.name}</span>
@@ -74,15 +73,14 @@ export default function ContractList() {
           />{' '}
         </div>
       }
+      contentClassName="px-0 py-2"
     >
-      {/* Header */}
-
       {/* Contract List */}
       <div className="flex-1 min-h-0">
         <ScrollArea className="h-full overflow-y-auto">
           {/* Smoothly adjust inner padding as the sidebar width animates */}
           <div
-            className={cn('p-3 space-y-3 transition-[padding,opacity] duration-200 ease-in-out')}
+            className={cn('p-2 space-y-3 transition-[padding,opacity] duration-200 ease-in-out')}
           >
             {loading.contracts && loading.isRefreshing && contracts.length === 0 ? (
               <div className="py-8">

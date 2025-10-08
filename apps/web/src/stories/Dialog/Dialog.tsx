@@ -240,7 +240,7 @@ export const DetailDialog = <T = unknown,>({
         className={cn(
           'min-w-[60vw] sm:min-w-[65vw] md:min-w-[70vw] lg:min-w-[75vw]',
           'max-h-[90vh] sm:max-h-[85vh] md:max-h-[80vh]',
-          'rounded-xl sm:rounded-2xl md:rounded-3xl',
+          'rounded-lg sm:rounded-xl md:rounded-2xl',
           'border-0 flex flex-col',
           'p-0 overflow-hidden transition-all duration-300 ease-in-out',
           className,

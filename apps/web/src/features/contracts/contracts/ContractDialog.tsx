@@ -1,7 +1,6 @@
 // Updated by CursorAI on Sep 2 2025
 'use client';
 
-import { CardContent } from '@/components/ui/card';
 import { ContractTypeEnum, getContractTypeDisplayName } from '@/drizzle/enums';
 import type { Airport, Contract } from '@/drizzle/types';
 import { formatDate } from '@/lib/core/formatters';
@@ -210,7 +209,7 @@ export default function ContractDialog({
       {(isEditing: boolean) => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <BaseCard title="Contract Information">
-            <CardContent className="flex flex-col justify-between">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
                 value={formData.title}
@@ -239,11 +238,11 @@ export default function ContractDialog({
                 onChange={(value) => handleFieldChange('airport', value)}
                 name="airport"
               />
-            </CardContent>
+            </div>
           </BaseCard>
 
           <BaseCard title="Vendor Information">
-            <CardContent className="flex flex-col justify-between">
+            <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
                 value={formData.vendorName}
@@ -292,11 +291,11 @@ export default function ContractDialog({
                 onChange={(value) => handleFieldChange('vendorComments', value)}
                 name="vendorComments"
               />
-            </CardContent>
+            </div>
           </BaseCard>
 
           <BaseCard title="Contract Period">
-            <CardContent>
+            <div>
               {!isEditing && (
                 <ModernTimeline
                   orientation="horizontal"
@@ -344,7 +343,7 @@ export default function ContractDialog({
                   />
                 </div>
               )}
-            </CardContent>
+            </div>
           </BaseCard>
         </div>
       )}
