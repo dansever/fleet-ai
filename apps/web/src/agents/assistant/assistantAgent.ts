@@ -17,8 +17,8 @@ import {
 } from '@copilotkit/sdk-js/langgraph';
 import { webSearch } from '../tools/TavilySearch';
 import { getWeather } from '../tools/weather';
-import { currencyConvert } from '../uom-converter/tools/currencyTool';
-import { uomConvert } from '../uom-converter/tools/uomTool';
+import { currencyConvert } from '../unit-converter/tools/currencyTool';
+import { uomConvert } from '../unit-converter/tools/uomTool';
 import { assistantSystemPrompt } from './prompts';
 
 // 2. Define our agent state, which includes CopilotKit state to

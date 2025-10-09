@@ -4,7 +4,7 @@
   "dependencies": ["."],
   "graphs": {
     "assistant_agent": "./src/agents/assistant/assistantAgent.ts:graph",
-    "uom_converter_agent": "./src/agents/uom-converter/uomConverterAgent.ts:graph"
+    "unit_converter_agent": "./src/agents/unit-converter/unitConverterAgent.ts:graph"
   },
   "env": ".env.local"
 }

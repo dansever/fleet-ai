@@ -113,7 +113,7 @@ export default function DashboardClientPage() {
     >
       <div className="grid grid-cols-6 gap-4">
         {/* Executive KPI Metrics */}
-        <div className="col-span-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="col-span-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
           {executiveMetrics.map((metric) => (
             <MetricCard
               key={metric.title}
