@@ -252,6 +252,10 @@ input[type='number'] {
   font-family: 'Manrope', sans-serif;
 }
 
+.copilotKitUserMessage {
+  background: #007aff;
+}
+
 .copilotKitButton {
   border: none !important;
   /* purple-600, blue-600 */

@@ -46,8 +46,9 @@ export const serverEnv = createEnv({
     // Tavily
     TAVILY_API_KEY: z.string().min(1),
 
-    // Weather API
-    WEATHER_API_KEY: z.string().min(1),
+    // General APIs
+    WEATHER_API_KEY: z.string().min(1), // Weather API
+    EXCHANGE_RATE_API_KEY: z.string().min(1), // Exchange Rate API
   },
   experimental__runtimeEnv: process.env,
 });

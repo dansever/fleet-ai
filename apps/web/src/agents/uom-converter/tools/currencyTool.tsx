@@ -1,8 +1,12 @@
-// Improved Currency Tool - More robust with better error handling
+// Currency Conversion Tool with authenticated API
+import { serverEnv } from '@/lib/env/server';
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 
-// Better currency API with fallback
+const BASE_URL = 'https://v6.exchangerate-api.com/v6';
+const API_KEY = serverEnv.EXCHANGE_RATE_API_KEY;
+
+// Fetch exchange rate using authenticated API
 async function getExchangeRate(
   base: string,
   quote: string,
@@ -14,43 +18,42 @@ async function getExchangeRate(
     return { rate: 1, timestamp: new Date().toISOString(), source: 'same_currency' };
   }
 
-  // Try multiple APIs for better reliability
-  const apis = [
-    {
-      name: 'exchangerate-api',
-      url: `https://api.exchangerate-api.com/v4/latest/${baseUpper}`,
-      parser: (data: any) => ({ rate: data.rates[quoteUpper], timestamp: data.date }),
-    },
-    {
-      name: 'exchangerate-host',
-      url: `https://api.exchangerate.host/latest?base=${baseUpper}&symbols=${quoteUpper}`,
-      parser: (data: any) => ({ rate: data.rates[quoteUpper], timestamp: data.date }),
-    },
-  ];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
-  for (const api of apis) {
-    try {
-      const response = await fetch(api.url, {
-        headers: { Accept: 'application/json' },
-        // Add timeout
-        signal: AbortSignal.timeout(5000),
-      });
+  try {
+    const url = `${BASE_URL}/${API_KEY}/latest/${baseUpper}`;
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
 
-      if (!response.ok) continue;
-
-      const data = await response.json();
-      const { rate, timestamp } = api.parser(data);
-
-      if (rate && typeof rate === 'number' && rate > 0) {
-        return { rate, timestamp, source: api.name };
-      }
-    } catch (error) {
-      console.warn(`API ${api.name} failed:`, error);
-      continue;
+    if (!response.ok) {
+      throw new Error(`ExchangeRate API error: ${response.status} ${response.statusText}`);
     }
-  }
 
-  throw new Error(`Unable to fetch exchange rate for ${baseUpper}/${quoteUpper} from any provider`);
+    const data = await response.json();
+    const rate = data?.conversion_rates?.[quoteUpper];
+
+    if (!rate || typeof rate !== 'number' || rate <= 0) {
+      throw new Error(`Exchange rate for ${quoteUpper} not found in response`);
+    }
+
+    return {
+      rate,
+      timestamp: data.time_last_update_utc || new Date().toISOString(),
+      source: 'exchangerate-api.com',
+    };
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after 5 seconds`);
+    }
+    throw new Error(
+      `Unable to fetch exchange rate for ${baseUpper}/${quoteUpper}: ${error.message}`,
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 const CurrencySchema = z.object({
