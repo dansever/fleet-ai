@@ -48,7 +48,7 @@ export const BaseCard = ({
   return (
     <Card
       className={cn(
-        'w-full rounded-xl border-slate-200 shadow-none overflow-hidden gap-4',
+        'w-full rounded-xl border-slate-200 shadow-none overflow-hidden gap-2',
         hasHeaderParams && 'pt-0',
         { 'gap-2': cardType === 'inner' },
         className,

@@ -1,4 +1,5 @@
 import { useAirportHub } from '@/app/(platform)/airport-hub/context';
+import { ComingSoon } from '@/components/miscellaneous/ComingSoon';
 import { LoadingComponent } from '@/components/miscellaneous/Loading';
 import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
@@ -131,7 +132,7 @@ export default function ServiceAgreementsPage() {
           width: 'var(--sidebar-w)',
           transition: 'width 240ms ease',
           // Drive width via CSS var so React prop changes animate
-          ['--sidebar-w' as string]: '16rem',
+          ['--sidebar-w' as string]: '18rem',
           // Helps the browser plan for width changes
           willChange: 'width',
         }}
@@ -139,8 +140,6 @@ export default function ServiceAgreementsPage() {
         <ContractSidebar />
       </div>
       <BaseCard
-        headerClassName=""
-        contentClassName=""
         header={
           <div className="flex flex-col gap-4">
             <div className="flex flex-row justify-between items-start">
@@ -210,10 +209,10 @@ export default function ServiceAgreementsPage() {
             <ContractDocuments />
           </TabsContent>
           <TabsContent value="invoices">
-            <div>Invoices</div>
+            <ComingSoon title="Invoices" description="Invoices are coming soon" />
           </TabsContent>
           <TabsContent value="financials">
-            <div>Financials</div>
+            <ComingSoon title="Financials" description="Financials are coming soon" />
           </TabsContent>
         </Tabs>
       </BaseCard>
