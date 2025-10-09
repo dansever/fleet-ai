@@ -1,6 +1,5 @@
 'use client';
 
-import { CardContent } from '@/components/ui/card';
 import type { Airport } from '@/drizzle/types';
 import { useCountryMap } from '@/hooks/use-country-map';
 import { client as airportClient } from '@/modules/core/airports';
@@ -159,9 +158,9 @@ export default function AirportDialog({
       className="min-w-[40vw] sm:min-w-[45vw] md:min-w-[50vw] lg:min-w-[55vw]"
     >
       {(isEditing) => (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <BaseCard title="Airport Information">
-            <CardContent>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <BaseCard title="Airport Information" cardType="inner">
+            <div>
               {isEditing && isAdd ? (
                 <AirportAutocomplete
                   label="Search Airport"
@@ -205,11 +204,11 @@ export default function AirportDialog({
                 name="isHub"
                 value={formData.isHub}
               />
-            </CardContent>
+            </div>
           </BaseCard>
 
-          <BaseCard title="Location Information">
-            <CardContent>
+          <BaseCard title="Location Information" cardType="inner">
+            <div>
               <KeyValuePair
                 label="City"
                 value={formData.city}
@@ -234,7 +233,7 @@ export default function AirportDialog({
                 onChange={(value) => handleFieldChange('country', value)}
                 name="country"
               />
-            </CardContent>
+            </div>
           </BaseCard>
         </div>
       )}

@@ -66,6 +66,7 @@ const FuelTendersPage = memo(function TendersPage() {
     loading,
     setUploadDocument,
     conversionProgress,
+    convertBidsToBase,
   } = useFuelProcurement();
   const selectedAirport = airports[0];
   const fuelBidColumns = useFuelBidColumns();
@@ -129,11 +130,20 @@ const FuelTendersPage = memo(function TendersPage() {
     }
   };
 
-  const refreshNormalizedBids = async () => {
-    if (!selectedTender?.id) return;
+  const handleConvertUnits = async () => {
+    if (!currentTender || bids.length === 0) {
+      toast.error('No tender or bids to convert');
+      return;
+    }
+
     try {
+      await convertBidsToBase();
+      toast.success(
+        `Converted ${bids.length} bids to ${currentTender.baseCurrency}/${currentTender.baseUom}`,
+      );
     } catch (error) {
-      toast.error('Failed to refresh normalized bids');
+      toast.error('Failed to convert bids');
+      console.error(error);
     }
   };
 
@@ -319,11 +329,6 @@ const FuelTendersPage = memo(function TendersPage() {
                     onClick={handleGenerateRandomBid}
                   />
                 </FileUploadPopover>
-                <Button intent="secondary" text="Email Routing" icon={FileText} disabled size="sm">
-                  <div className="pl-1">
-                    <StatusBadge status="warning" text="Soon..." />
-                  </div>
-                </Button>
                 <Button
                   intent="secondary"
                   text="Download CSV"
@@ -366,11 +371,13 @@ const FuelTendersPage = memo(function TendersPage() {
             actions={
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button
-                  intent="secondary"
-                  text="Refresh"
-                  icon={RefreshCw}
+                  intent="primary"
                   size="sm"
-                  onClick={refreshNormalizedBids}
+                  text="Convert Units"
+                  icon={RefreshCw}
+                  onClick={handleConvertUnits}
+                  disabled={!currentTender || bids.length === 0 || loading.convertingBids}
+                  isLoading={loading.convertingBids}
                 />
               </div>
             }

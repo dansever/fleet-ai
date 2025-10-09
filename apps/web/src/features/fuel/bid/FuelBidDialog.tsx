@@ -254,7 +254,7 @@ export default function FuelBidDialog({
       {(isEditing) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Bid Information & Timeline */}
-          <BaseCard title="Bid Information & Timeline">
+          <BaseCard title="Bid Information & Timeline" cardType="inner">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Title"
@@ -314,7 +314,7 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Vendor Information */}
-          <BaseCard title="Vendor Information">
+          <BaseCard title="Vendor Information" cardType="inner">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Vendor Name"
@@ -368,7 +368,7 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Pricing Structure & Terms */}
-          <BaseCard title="Pricing Structure & Terms">
+          <BaseCard title="Pricing Structure & Terms" cardType="inner">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Price Type"
@@ -428,7 +428,7 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Index-Linked Pricing */}
-          <BaseCard title="Index-Linked Pricing">
+          <BaseCard title="Index-Linked Pricing" cardType="inner">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Index Name"
@@ -475,7 +475,7 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Fees & Specifications */}
-          <BaseCard title="Fees & Specifications">
+          <BaseCard title="Fees & Specifications" cardType="inner">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Into Plane Fee"
@@ -535,7 +535,7 @@ export default function FuelBidDialog({
           </BaseCard>
 
           {/* Calculated Fields */}
-          <BaseCard title="Calculated Fields">
+          <BaseCard title="Calculated Fields" cardType="inner">
             <div className="flex flex-col justify-between">
               <KeyValuePair
                 label="Density at 15°C (kg/m³)"

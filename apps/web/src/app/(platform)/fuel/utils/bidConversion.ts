@@ -31,6 +31,21 @@ export interface ConvertedBidField {
   error?: string;
 }
 
+export interface FeeBasisMetadata {
+  intoPlaneFee?: {
+    basis: string | null;
+    note: string;
+  };
+  handlingFee?: {
+    basis: string | null;
+    note: string;
+  };
+  otherFee?: {
+    basis: string | null;
+    note: string;
+  };
+}
+
 export interface ConvertedBid extends FuelBid {
   // Converted pricing fields
   convertedBaseUnitPrice?: ConvertedBidField;
@@ -38,6 +53,16 @@ export interface ConvertedBid extends FuelBid {
   convertedHandlingFee?: ConvertedBidField;
   convertedOtherFee?: ConvertedBidField;
   convertedDifferential?: ConvertedBidField;
+
+  // Calculated totals
+  normalizedTotalBeforeTax?: number;
+  normalizedTotalWithTax?: number;
+
+  // Fee basis metadata
+  feesBasis?: FeeBasisMetadata;
+
+  // Pricing display
+  pricingDisplay?: string;
 
   // Conversion metadata
   conversionStatus: 'pending' | 'converting' | 'completed' | 'error';
@@ -212,4 +237,95 @@ export function getDisplayValue(
     unit,
     isConverted: false,
   };
+}
+
+/**
+ * Gets total price for a bid (before or after tax)
+ */
+export function getTotalPrice(bid: ConvertedBid, includeTax: boolean = false): number {
+  if (includeTax && bid.normalizedTotalWithTax !== undefined) {
+    return bid.normalizedTotalWithTax;
+  }
+
+  if (!includeTax && bid.normalizedTotalBeforeTax !== undefined) {
+    return bid.normalizedTotalBeforeTax;
+  }
+
+  // Fallback calculation if totals not pre-calculated
+  let total = 0;
+
+  // Base price
+  const basePrice = getDisplayValue(bid, 'baseUnitPrice');
+  total += basePrice.value;
+
+  // Differential for index pricing
+  if (bid.priceType === 'index_formula') {
+    const differential = getDisplayValue(bid, 'differentialValue');
+    total += differential.value;
+  }
+
+  // Fees (only if per_uom)
+  if (bid.intoPlaneFeeUnit === 'per_uom' || !bid.intoPlaneFeeUnit) {
+    const intoPlaneFee = getDisplayValue(bid, 'intoPlaneFee');
+    total += intoPlaneFee.value;
+  }
+
+  if (bid.handlingFeeBasis === 'per_uom' || !bid.handlingFeeBasis) {
+    const handlingFee = getDisplayValue(bid, 'handlingFee');
+    total += handlingFee.value;
+  }
+
+  if (bid.otherFeeBasis === 'per_uom' || !bid.otherFeeBasis) {
+    const otherFee = getDisplayValue(bid, 'otherFee');
+    total += otherFee.value;
+  }
+
+  // Add tax if requested
+  if (includeTax && !bid.includesTaxes) {
+    total *= 1.1; // 10% estimated tax
+  }
+
+  return total;
+}
+
+/**
+ * Gets formatted pricing display (Fixed or Index-based)
+ */
+export function getFormattedPriceDisplay(bid: ConvertedBid): string {
+  if (bid.pricingDisplay) {
+    return bid.pricingDisplay;
+  }
+
+  // Fallback if not pre-calculated
+  if (bid.priceType === 'index_formula') {
+    const indexName = bid.indexName || 'Index';
+    const location = bid.indexLocation ? ` ${bid.indexLocation}` : '';
+    return `Index: ${indexName}${location}`;
+  }
+  return 'Fixed';
+}
+
+/**
+ * Gets fee basis note for display
+ */
+export function getFeeBasisNote(
+  bid: ConvertedBid,
+  feeType: 'intoPlaneFee' | 'handlingFee' | 'otherFee',
+): string {
+  if (bid.feesBasis && bid.feesBasis[feeType]) {
+    return bid.feesBasis[feeType]?.note || '';
+  }
+
+  // Fallback if not pre-calculated
+  const basisField =
+    feeType === 'intoPlaneFee'
+      ? bid.intoPlaneFeeUnit
+      : feeType === 'handlingFee'
+        ? bid.handlingFeeBasis
+        : bid.otherFeeBasis;
+
+  if (!basisField || basisField === 'per_uom') return '';
+  if (basisField === 'per_uplift') return '(per uplift)';
+  if (basisField === 'per_delivery') return '(per delivery)';
+  return `(${basisField})`;
 }

@@ -89,7 +89,7 @@ const getDecisionBadge = (decision: string | null) => {
       <DropdownMenuTrigger asChild>
         <Badge
           variant={getBadgeVariant(decision)}
-          className={`shadow-md hover:shadow-lg text-sm hover:cursor-pointer hover:scale-105 transition-all duration-300 ${getBadgeColor(decision)}`}
+          className={`rounded-lg shadow-md hover:shadow-lg text-sm hover:cursor-pointer hover:scale-105 transition-all duration-300 ${getBadgeColor(decision)}`}
         >
           {decisionText}
         </Badge>
@@ -246,7 +246,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
 
               {/* Index Formula Details */}
               {isIndexPricing && (
-                <div className="space-y-1.5 bg-blue-50 border border-blue-200 rounded-lg p-2">
+                <div className="space-y-1 bg-blue-50 border border-blue-200 rounded-lg p-2">
                   <p className="text-xs font-semibold text-blue-800">Index Formula:</p>
                   {bid.indexName && (
                     <p className="text-xs text-blue-700 font-medium">
@@ -323,7 +323,7 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
                   )}
 
                   {/* Quality & Physical Properties */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     {bid.qualitySpecification && (
                       <div>
                         <p className="text-xs font-semibold text-slate-800">Quality Spec:</p>

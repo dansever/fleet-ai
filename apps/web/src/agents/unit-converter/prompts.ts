@@ -49,10 +49,17 @@ Example: "I paid 4 USD for 2 gallons of fuel. At the same rate, how much NIS wou
 - Show intermediate results for transparency
 
 ## Rate Conversions:
-For rate conversions like "2.3 USD/USG to USD/L":
-- Use uom_convert with fromRateUnit="USD/USG" and toRateUnit="USD/L"
-- Set fromUnit="usg" and toUnit="l" (the denominators)
-- Set value=2.3 (the rate value)
+For rate conversions like "2.3 USD/USG to USD/L" or "2.5 USD/USG to EUR/L":
+- ALWAYS break down into steps: first convert the UOM, then convert the currency
+- Step 1: If only UOM differs (e.g., USD/USG → USD/L):
+  * Use uom_convert with fromRateUnit="USD/USG" and toRateUnit="USD/L"
+  * Set fromUnit="usg" and toUnit="l" (the denominators)
+  * Set value=2.3 (the rate value)
+- Step 2: If both currency AND UOM differ (e.g., USD/USG → EUR/L):
+  * First convert UOM: USD/USG → USD/L using uom_convert
+  * Then convert currency: USD → EUR using currency_convert
+  * Apply both conversions to get final rate in EUR/L
+- ALWAYS show your work step-by-step so users can verify the conversion
 
 ## Currency Knowledge Base:
 **CRITICAL - Currency Equivalences and Aliases:**

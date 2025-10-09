@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { runConversionAgent } from '@/agents/uom-converter/uomConverterAgent';
+import { runConversionAgent } from '@/agents/unit-converter/unitConverterAgent';
 import { FuelBid, FuelTender } from '@/drizzle/types';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -21,6 +21,21 @@ interface ConvertedBidField {
   error?: string;
 }
 
+interface FeeBasisMetadata {
+  intoPlaneFee?: {
+    basis: string | null;
+    note: string;
+  };
+  handlingFee?: {
+    basis: string | null;
+    note: string;
+  };
+  otherFee?: {
+    basis: string | null;
+    note: string;
+  };
+}
+
 interface ConvertedBid extends FuelBid {
   // Converted pricing fields
   convertedBaseUnitPrice?: ConvertedBidField;
@@ -28,6 +43,16 @@ interface ConvertedBid extends FuelBid {
   convertedHandlingFee?: ConvertedBidField;
   convertedOtherFee?: ConvertedBidField;
   convertedDifferential?: ConvertedBidField;
+
+  // Calculated totals
+  normalizedTotalBeforeTax?: number;
+  normalizedTotalWithTax?: number;
+
+  // Fee basis metadata
+  feesBasis?: FeeBasisMetadata;
+
+  // Pricing display
+  pricingDisplay?: string;
 
   // Conversion metadata
   conversionStatus: 'pending' | 'converting' | 'completed' | 'error';
@@ -69,6 +94,7 @@ function needsConversion(
 
 /**
  * Creates conversion request text for the AI agent
+ * Matches the format expected by unitConverterSystemPrompt
  */
 function createConversionRequest(
   value: number,
@@ -76,9 +102,7 @@ function createConversionRequest(
   toUnit: string,
   isCurrency: boolean = false,
 ): string {
-  if (isCurrency) {
-    return `Convert ${value} ${fromUnit} to ${toUnit}`;
-  }
+  // Both currency and UOM conversions use the same format
   return `Convert ${value} ${fromUnit} to ${toUnit}`;
 }
 
@@ -132,6 +156,130 @@ function parseConversionResult(result: string): ConvertedBidField | null {
   }
 }
 
+/**
+ * Creates fee basis metadata with human-readable notes
+ */
+function createFeeBasisMetadata(bid: FuelBid): FeeBasisMetadata {
+  const metadata: FeeBasisMetadata = {};
+
+  if (bid.intoPlaneFeeUnit) {
+    const basis = bid.intoPlaneFeeUnit;
+    let note = '';
+    if (basis === 'per_uplift') note = '(per uplift)';
+    else if (basis === 'per_delivery') note = '(per delivery)';
+    else if (basis === 'per_uom') note = '';
+    else note = `(${basis})`;
+
+    metadata.intoPlaneFee = { basis, note };
+  }
+
+  if (bid.handlingFeeBasis) {
+    const basis = bid.handlingFeeBasis;
+    let note = '';
+    if (basis === 'per_uplift') note = '(per uplift)';
+    else if (basis === 'per_delivery') note = '(per delivery)';
+    else if (basis === 'per_uom') note = '';
+    else note = `(${basis})`;
+
+    metadata.handlingFee = { basis, note };
+  }
+
+  if (bid.otherFeeBasis) {
+    const basis = bid.otherFeeBasis;
+    let note = '';
+    if (basis === 'per_uplift') note = '(per uplift)';
+    else if (basis === 'per_delivery') note = '(per delivery)';
+    else if (basis === 'per_uom') note = '';
+    else note = `(${basis})`;
+
+    metadata.otherFee = { basis, note };
+  }
+
+  return metadata;
+}
+
+/**
+ * Creates pricing display string for fixed vs index-based pricing
+ */
+function createPricingDisplay(bid: FuelBid): string {
+  if (bid.priceType === 'index_formula') {
+    const indexName = bid.indexName || 'Index';
+    const location = bid.indexLocation ? ` ${bid.indexLocation}` : '';
+    return `Index: ${indexName}${location}`;
+  }
+  return 'Fixed';
+}
+
+/**
+ * Calculates normalized total price (before tax)
+ */
+function calculateNormalizedTotal(convertedBid: ConvertedBid): number {
+  let total = 0;
+
+  // Add base unit price
+  if (convertedBid.convertedBaseUnitPrice && !convertedBid.convertedBaseUnitPrice.error) {
+    total += convertedBid.convertedBaseUnitPrice.convertedValue;
+  } else if (convertedBid.baseUnitPrice) {
+    total += Number(convertedBid.baseUnitPrice);
+  }
+
+  // Add differential for index pricing
+  if (convertedBid.priceType === 'index_formula') {
+    if (convertedBid.convertedDifferential && !convertedBid.convertedDifferential.error) {
+      total += convertedBid.convertedDifferential.convertedValue;
+    } else if (convertedBid.differentialValue) {
+      total += Number(convertedBid.differentialValue);
+    }
+  }
+
+  // Add into plane fee (only if per_uom basis)
+  if (convertedBid.intoPlaneFeeUnit === 'per_uom' || !convertedBid.intoPlaneFeeUnit) {
+    if (convertedBid.convertedIntoPlaneFee && !convertedBid.convertedIntoPlaneFee.error) {
+      total += convertedBid.convertedIntoPlaneFee.convertedValue;
+    } else if (convertedBid.intoPlaneFee) {
+      total += Number(convertedBid.intoPlaneFee);
+    }
+  }
+
+  // Add handling fee (only if per_uom basis)
+  if (convertedBid.handlingFeeBasis === 'per_uom' || !convertedBid.handlingFeeBasis) {
+    if (convertedBid.convertedHandlingFee && !convertedBid.convertedHandlingFee.error) {
+      total += convertedBid.convertedHandlingFee.convertedValue;
+    } else if (convertedBid.handlingFee) {
+      total += Number(convertedBid.handlingFee);
+    }
+  }
+
+  // Add other fee (only if per_uom basis)
+  if (convertedBid.otherFeeBasis === 'per_uom' || !convertedBid.otherFeeBasis) {
+    if (convertedBid.convertedOtherFee && !convertedBid.convertedOtherFee.error) {
+      total += convertedBid.convertedOtherFee.convertedValue;
+    } else if (convertedBid.otherFee) {
+      total += Number(convertedBid.otherFee);
+    }
+  }
+
+  return total;
+}
+
+/**
+ * Estimates total with tax (simple estimation if tax not included)
+ */
+function calculateNormalizedTotalWithTax(
+  convertedBid: ConvertedBid,
+  totalBeforeTax: number,
+): number {
+  // If taxes are already included, return the same total
+  if (convertedBid.includesTaxes) {
+    return totalBeforeTax;
+  }
+
+  // Estimate tax at 10% if not included (this is a simplified estimation)
+  // In production, you'd want to use actual tax rates based on location
+  const estimatedTaxRate = 0.1;
+  return totalBeforeTax * (1 + estimatedTaxRate);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { bids, tender }: ConvertBidsRequest = await req.json();
@@ -166,14 +314,19 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        // Convert base unit price (UOM conversion)
+        // Convert base unit price (Rate conversion: price per unit)
+        // This handles both currency and UOM conversion if needed
         if (needsConversion(bid.baseUnitPrice, bid.uom, tender.baseUom)) {
-          const conversionRequest = createConversionRequest(
-            Number(bid.baseUnitPrice),
-            bid.uom || 'USG',
-            tender.baseUom || 'USG',
-            false, // UOM conversion
-          );
+          const bidCurrency = bid.currency || 'USD';
+          const tenderCurrency = tender.baseCurrency || 'USD';
+          const bidUom = bid.uom || 'USG';
+          const tenderUom = tender.baseUom || 'USG';
+
+          // If currency is different, we need multi-step conversion
+          // For now, create a rate conversion request
+          const fromRate = `${bidCurrency}/${bidUom}`;
+          const toRate = `${tenderCurrency}/${tenderUom}`;
+          const conversionRequest = `Convert ${Number(bid.baseUnitPrice)} ${fromRate} to ${toRate}`;
 
           const result = await convertValue(conversionRequest);
           const converted = parseConversionResult(result);
@@ -258,17 +411,19 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Convert differential for index-based pricing (UOM conversion)
+        // Convert differential for index-based pricing (Rate conversion)
         if (
           bid.priceType === 'index_formula' &&
           needsConversion(bid.differentialValue, bid.differentialUnit, tender.baseUom)
         ) {
-          const conversionRequest = createConversionRequest(
-            Number(bid.differentialValue),
-            bid.differentialUnit || bid.uom || 'USG',
-            tender.baseUom || 'USG',
-            false, // UOM conversion
-          );
+          const bidCurrency = bid.differentialCurrency || bid.currency || 'USD';
+          const tenderCurrency = tender.baseCurrency || 'USD';
+          const bidUom = bid.differentialUnit || bid.uom || 'USG';
+          const tenderUom = tender.baseUom || 'USG';
+
+          const fromRate = `${bidCurrency}/${bidUom}`;
+          const toRate = `${tenderCurrency}/${tenderUom}`;
+          const conversionRequest = `Convert ${Number(bid.differentialValue)} ${fromRate} to ${toRate}`;
 
           const result = await convertValue(conversionRequest);
           const converted = parseConversionResult(result);
@@ -281,6 +436,20 @@ export async function POST(req: NextRequest) {
             );
           }
         }
+
+        // Add fee basis metadata
+        convertedBid.feesBasis = createFeeBasisMetadata(bid);
+
+        // Add pricing display
+        convertedBid.pricingDisplay = createPricingDisplay(bid);
+
+        // Calculate totals
+        const totalBeforeTax = calculateNormalizedTotal(convertedBid);
+        convertedBid.normalizedTotalBeforeTax = totalBeforeTax;
+        convertedBid.normalizedTotalWithTax = calculateNormalizedTotalWithTax(
+          convertedBid,
+          totalBeforeTax,
+        );
 
         convertedBid.conversionStatus = 'completed';
       } catch (error) {

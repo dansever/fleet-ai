@@ -126,15 +126,13 @@ export default function FuelProcurementClientPage() {
                 />
               </div>
             </div>
-            <div className="fixed top-2 right-36">
-              <Button
-                intent="glass"
-                text="Refresh"
-                icon={RefreshCw}
-                onClick={handleRefresh}
-                isLoading={loading.tenders || loading.bids}
-              />
-            </div>
+            <Button
+              intent="glass"
+              text="Refresh"
+              icon={RefreshCw}
+              onClick={handleRefresh}
+              isLoading={loading.tenders || loading.bids}
+            />
           </div>
         ) : (
           <div className="flex flex-row items-center gap-4 justify-between w-full">

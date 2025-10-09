@@ -112,6 +112,9 @@ interface FuelProcurementContextType {
   addBid: (bid: FuelBid) => void;
   updateBid: (bid: FuelBid) => void;
   removeBid: (bidId: string) => void;
+
+  // Conversion operations
+  convertBidsToBase: () => Promise<void>;
 }
 
 const FuelProcurementContext = createContext<FuelProcurementContextType | undefined>(undefined);
@@ -628,6 +631,18 @@ export function FuelProcurementProvider({
         console.error('Error removing bid from context:', error);
         // Could add error state handling here if needed
       }
+    },
+
+    // Conversion operations
+    convertBidsToBase: async () => {
+      if (!state.selectedTender) {
+        throw new Error('No tender selected');
+      }
+      if (state.bids.length === 0) {
+        throw new Error('No bids to convert');
+      }
+
+      await triggerBidConversion(state.bids, state.selectedTender);
     },
   };
 

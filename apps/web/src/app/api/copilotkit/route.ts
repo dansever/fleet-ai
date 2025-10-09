@@ -25,7 +25,7 @@ const runtime = new CopilotRuntime({
           description: 'Main AI assistant',
         },
         {
-          name: 'uom_converter_agent',
+          name: 'unit_converter_agent',
           description: 'UOM converter assistant.',
         },
       ],

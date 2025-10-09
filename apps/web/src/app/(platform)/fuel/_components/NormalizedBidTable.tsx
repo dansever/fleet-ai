@@ -1,10 +1,15 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { FuelBid, FuelTender } from '@/drizzle/types';
-import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
-import { BarChart3 } from 'lucide-react';
-import { getDisplayValue } from '../utils/bidConversion';
+import { Info } from 'lucide-react';
+import {
+  ConvertedBid,
+  getDisplayValue,
+  getFeeBasisNote,
+  getFormattedPriceDisplay,
+  getTotalPrice,
+} from '../utils/bidConversion';
 
 export function NormalizedBidTable({
   currentTender,
@@ -15,107 +20,181 @@ export function NormalizedBidTable({
   bids: FuelBid[];
   convertedBids: FuelBid[];
 }) {
+  const baseCurrency = currentTender?.baseCurrency || 'USD';
+  const baseUom = currentTender?.baseUom || 'USG';
+  const priceUnit = `${baseCurrency}/${baseUom}`;
+
   return (
     <div className="space-y-4">
-      {/* Toggle Controls */}
-      <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
+      {/* Normalization Info */}
+      <div className="flex flex-wrap gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 bg-green-100 border border-green-300 rounded-sm flex items-center justify-center">
-            <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-          </div>
-          <label className="text-sm font-medium text-green-700">
-            Normalized to ({currentTender?.baseCurrency})
-          </label>
+          <Info className="h-4 w-4 text-blue-600" />
+          <span className="text-sm font-medium text-blue-800">
+            All prices normalized to <span className="font-bold">{priceUnit}</span> for comparison
+          </span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 bg-green-100 border border-green-300 rounded-sm flex items-center justify-center">
-            <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-          </div>
-          <label className="text-sm font-medium text-green-700">
-            Normalized to ({currentTender?.baseUom})
-          </label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox id="include-taxes" disabled />
-          <label htmlFor="include-taxes" className="text-sm font-medium">
-            Include taxes
-          </label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox id="include-fees" disabled />
-          <label htmlFor="include-fees" className="text-sm font-medium">
-            Include airport fees
-          </label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox id="market-reference" disabled />
-          <label htmlFor="market-reference" className="text-sm font-medium">
-            Overlay market reference
-          </label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox id="anomaly-flag" disabled />
-          <label htmlFor="anomaly-flag" className="text-sm font-medium">
-            Z-score anomaly flag
-          </label>
-        </div>
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+          Currency: {baseCurrency}
+        </Badge>
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+          UOM: {baseUom}
+        </Badge>
       </div>
 
       {/* Comparison Table */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50">
-              <th className="border border-gray-200 p-3 text-left font-medium">Supplier</th>
-              <th className="border border-gray-200 p-3 text-center font-medium">
-                Normalized Price
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs sticky left-0 bg-gray-50 z-10">
+                Vendor
               </th>
-              <th className="border border-gray-200 p-3 text-center font-medium">vs Market</th>
-              <th className="border border-gray-200 p-3 text-center font-medium">Z-Score</th>
-              <th className="border border-gray-200 p-3 text-center font-medium">Anomaly</th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Pricing Type
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Base Price
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Differential
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Into Plane Fee
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Handling Fee
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Other Fees
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs bg-blue-50">
+                Total (Pre-Tax)
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs bg-green-50">
+                Total (With Tax)
+              </th>
+              <th className="border border-gray-200 p-2 text-center font-medium text-xs">
+                Payment Terms
+              </th>
             </tr>
           </thead>
           <tbody>
-            {bids.map((bid) => {
+            {bids.map((bid, index) => {
               // Use converted bid if available, otherwise use original
-              const displayBid = convertedBids.find((cb) => cb.id === bid.id) || bid;
+              const displayBid = (convertedBids.find((cb) => cb.id === bid.id) ||
+                bid) as ConvertedBid;
 
-              // Get normalized price (converted if available)
-              const normalizedPrice = getDisplayValue(displayBid as any, 'baseUnitPrice');
-              const intoPlaneFee = getDisplayValue(displayBid as any, 'intoPlaneFee');
-              const handlingFee = getDisplayValue(displayBid as any, 'handlingFee');
+              // Get all values
+              const basePrice = getDisplayValue(displayBid, 'baseUnitPrice');
+              const differential = getDisplayValue(displayBid, 'differentialValue');
+              const intoPlaneFee = getDisplayValue(displayBid, 'intoPlaneFee');
+              const handlingFee = getDisplayValue(displayBid, 'handlingFee');
+              const otherFee = getDisplayValue(displayBid, 'otherFee');
 
-              // Calculate total normalized price including fees
-              const totalNormalizedPrice =
-                normalizedPrice.value + intoPlaneFee.value + handlingFee.value;
+              // Get basis notes
+              const intoPlaneFeeNote = getFeeBasisNote(displayBid, 'intoPlaneFee');
+              const handlingFeeNote = getFeeBasisNote(displayBid, 'handlingFee');
+              const otherFeeNote = getFeeBasisNote(displayBid, 'otherFee');
+
+              // Get totals
+              const totalPreTax = getTotalPrice(displayBid, false);
+              const totalWithTax = getTotalPrice(displayBid, true);
+
+              // Pricing display
+              const pricingDisplay = getFormattedPriceDisplay(displayBid);
+
+              // Check if normalized
+              const isNormalized =
+                basePrice.isConverted ||
+                intoPlaneFee.isConverted ||
+                handlingFee.isConverted ||
+                otherFee.isConverted;
+
+              // Payment terms display
+              const paymentTermsDisplay = displayBid.creditDays
+                ? `${displayBid.creditDays} days`
+                : displayBid.paymentTerms || '-';
 
               return (
-                <tr key={bid.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-200 p-3 font-medium">
+                <tr key={bid.id || `bid-${index}`} className="hover:bg-gray-50">
+                  <td className="border border-gray-200 p-2 sticky left-0 bg-white z-10">
                     <div className="flex flex-col">
-                      <span>{bid.vendorName || 'Unknown'}</span>
-                      {normalizedPrice.isConverted && (
-                        <span className="text-xs text-blue-600">Normalized</span>
+                      <span className="font-medium">{bid.vendorName || 'Unknown'}</span>
+                      {isNormalized && (
+                        <Badge
+                          variant="outline"
+                          className="mt-1 text-xs bg-blue-50 text-blue-700 border-blue-300 w-fit"
+                        >
+                          Normalized
+                        </Badge>
                       )}
                     </div>
                   </td>
-                  <td className="border border-gray-200 p-3 text-center">
-                    <div className="flex flex-col">
-                      <span className="font-medium">
-                        {totalNormalizedPrice.toFixed(3)}/{normalizedPrice.unit}
+                  <td className="border border-gray-200 p-2">
+                    <Badge
+                      variant={bid.priceType === 'index_formula' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {pricingDisplay}
+                    </Badge>
+                  </td>
+                  <td className="border border-gray-200 p-2 text-right font-mono">
+                    {basePrice.value > 0 ? basePrice.value.toFixed(4) : '-'}
+                  </td>
+                  <td className="border border-gray-200 p-2 text-right font-mono">
+                    {bid.priceType === 'index_formula' && differential.value !== 0 ? (
+                      <span className={differential.value > 0 ? 'text-green-600' : 'text-red-600'}>
+                        {differential.value > 0 ? '+' : ''}
+                        {differential.value.toFixed(4)}
                       </span>
-                      <span className="text-xs text-gray-500">
-                        Base: {normalizedPrice.value.toFixed(3)} | Fees:{' '}
-                        {(intoPlaneFee.value + handlingFee.value).toFixed(3)}
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td className="border border-gray-200 p-2 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="font-mono">
+                        {intoPlaneFee.value > 0 ? intoPlaneFee.value.toFixed(4) : '-'}
                       </span>
+                      {intoPlaneFeeNote && (
+                        <span className="text-xs text-gray-500">{intoPlaneFeeNote}</span>
+                      )}
                     </div>
                   </td>
-                  <td className="border border-gray-200 p-3 text-center">
-                    <span className="text-green-600">-2.3%</span>
+                  <td className="border border-gray-200 p-2 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="font-mono">
+                        {handlingFee.value > 0 ? handlingFee.value.toFixed(4) : '-'}
+                      </span>
+                      {handlingFeeNote && (
+                        <span className="text-xs text-gray-500">{handlingFeeNote}</span>
+                      )}
+                    </div>
                   </td>
-                  <td className="border border-gray-200 p-3 text-center">-0.8</td>
-                  <td className="border border-gray-200 p-3 text-center">
-                    <StatusBadge status="success" text="Normal" />
+                  <td className="border border-gray-200 p-2 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="font-mono">
+                        {otherFee.value > 0 ? otherFee.value.toFixed(4) : '-'}
+                      </span>
+                      {otherFeeNote && (
+                        <span className="text-xs text-gray-500">{otherFeeNote}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="border border-gray-200 p-2 text-right font-bold bg-blue-50 font-mono">
+                    {totalPreTax.toFixed(4)}
+                  </td>
+                  <td className="border border-gray-200 p-2 text-right bg-green-50">
+                    <div className="flex flex-col items-end">
+                      <span className="font-bold font-mono">{totalWithTax.toFixed(4)}</span>
+                      {!displayBid.includesTaxes && (
+                        <span className="text-xs text-gray-500">(estimated)</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="border border-gray-200 p-2 text-center text-xs">
+                    {paymentTermsDisplay}
                   </td>
                 </tr>
               );
@@ -124,23 +203,18 @@ export function NormalizedBidTable({
         </table>
       </div>
 
-      {/* Market Reference Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <BarChart3 className="h-4 w-4 text-blue-600" />
-          <span className="font-medium text-blue-800">Market Reference</span>
-        </div>
-        <p className="text-sm font-medium text-blue-700">
-          Current market price: <span className="font-bold">$0.661/{currentTender?.baseUom} </span>
-          (Platts Jet A-1 Med) • Last updated: Jan 20, 2024
+      {/* Legend */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <p className="text-xs text-gray-600 mb-2">
+          <span className="font-semibold">Notes:</span>
         </p>
-        <p className="text-xs text-blue-600 mt-1">
-          All prices normalized to{' '}
-          <span className="font-medium">
-            {currentTender?.baseCurrency || 'USD'}/{currentTender?.baseUom}
-          </span>{' '}
-          {currentTender?.baseUom} for comparison
-        </p>
+        <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+          <li>All fees shown in {priceUnit} (per unit of measure)</li>
+          <li>Fees with different basis (per uplift, per delivery) are marked with notes</li>
+          <li>Only per-UOM fees are included in totals for accurate comparison</li>
+          <li>Tax estimates use 10% rate for bids not including taxes</li>
+          <li>Differential values show premium (+) or discount (-) for index-based pricing</li>
+        </ul>
       </div>
     </div>
   );
