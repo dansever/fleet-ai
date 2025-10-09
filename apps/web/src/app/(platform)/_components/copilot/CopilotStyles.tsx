@@ -1,3 +1,5 @@
+'use client';
+
 import {
   HeaderProps,
   Markdown,
@@ -7,22 +9,23 @@ import {
 } from '@copilotkit/react-ui';
 
 import '@copilotkit/react-ui/styles.css';
-import { BookOpenIcon } from 'lucide-react';
+import { PanelRightClose } from 'lucide-react';
 
 export function HeaderStyle({}: HeaderProps) {
-  const { setOpen, icons, labels } = useChatContext();
+  const { setOpen, open, icons, labels } = useChatContext();
 
   return (
-    <div className="rounded-t-lg flex justify-between items-center p-3 bg-secondary/90 text-white">
-      <div className="w-24">
-        <BookOpenIcon className="w-6 h-6" />
-      </div>
-      <div className="text-lg">{labels.title}</div>
-      <div className="w-24 flex justify-end">
-        <button onClick={() => setOpen(false)} aria-label="Close">
-          {icons.headerCloseIcon}
-        </button>
-      </div>
+    <div
+      onClick={() => setOpen(!open)}
+      aria-label={open ? 'Close sidebar' : 'Open sidebar'}
+      className="relative p-2 flex items-center justify-center cursor-pointer
+  bg-gradient-to-r from-blue-400 via-violet-400 to-blue-500 text-white"
+    >
+      {/* Left icon */}
+      <PanelRightClose className="absolute left-3 hover:scale-110 transition-all duration-300 ease-in-out" />
+
+      {/* Centered title */}
+      <h3 className="text-center">{labels.title}</h3>
     </div>
   );
 }

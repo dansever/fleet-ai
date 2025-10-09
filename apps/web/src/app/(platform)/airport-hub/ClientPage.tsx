@@ -19,12 +19,7 @@ import { Button } from '@/stories/Button/Button';
 import { PageLayout } from '@/stories/PageLayout/PageLayout';
 import { StatusBadge } from '@/stories/StatusBadge/StatusBadge';
 import { Tabs } from '@/stories/Tabs/Tabs';
-import {
-  AssistantMessageStyle,
-  HeaderStyle,
-  UserMessageStyle,
-} from '@/styles/copilotKitPopupStyles';
-import { CopilotKitCSSProperties, CopilotPopup } from '@copilotkit/react-ui';
+import { CopilotKitCSSProperties } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { Eye, FileText, MapPin, Plane, RefreshCw, Star, Users } from 'lucide-react';
 import Image from 'next/image';
@@ -232,36 +227,7 @@ export default function AirportHubClientPage() {
             '--copilot-kit-contrast-color': 'white',
           } as CopilotKitCSSProperties
         }
-      >
-        <CopilotPopup
-          Header={HeaderStyle}
-          AssistantMessage={AssistantMessageStyle}
-          UserMessage={UserMessageStyle}
-          observabilityHooks={{
-            onChatExpanded: () => {
-              console.log('Popup opened');
-            },
-            onChatMinimized: () => {
-              console.log('Popup closed');
-            },
-          }}
-          onThumbsUp={() => {
-            console.log('Thumbs up');
-          }}
-          onThumbsDown={() => {
-            console.log('Thumbs down');
-          }}
-          instructions={
-            'You are assisting the user as best as you can. Answer in the best way possible given the data you have.'
-          }
-          labels={{
-            title: 'FleetAI AI Assistant',
-            initial: 'Hi! 👋 How can I assist you today?',
-            stopGenerating: 'Stop',
-            regenerateResponse: 'Regenerate',
-          }}
-        />
-      </div>
+      ></div>
     </PageLayout>
   );
 }

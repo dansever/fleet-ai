@@ -2,6 +2,7 @@
 
 import { CopyableText } from '@/components/miscellaneous/CopyableText';
 import { CardContent } from '@/components/ui/card';
+
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { formatDate, formatSnakeCaseToTitle } from '@/lib/core/formatters';
 import { client as contractsClient } from '@/modules/contracts';
@@ -148,10 +149,13 @@ export function ContractOverview() {
 
           {/* Vendor Information Section */}
           <BaseCard cardType="inner" icon={<Building2 />} title="Vendor Information">
-            <div className="space-y-2">
-              <div>
-                <p>Company Name</p>
-                <h3>{contract.vendorName}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-row gap-2">
+                <Building2 className="mt-0.5 h-4 w-4 text-gray-400 flex-shrink-0" />
+                <div>
+                  <p>Company Name</p>
+                  <p className="font-semibold">{contract.vendorName}</p>
+                </div>
               </div>
               <div className="flex flex-row gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 text-gray-400 flex-shrink-0" />

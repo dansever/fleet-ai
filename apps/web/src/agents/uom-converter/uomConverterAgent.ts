@@ -86,3 +86,84 @@ const memory = new MemorySaver();
 export const graph = workflow.compile({
   checkpointer: memory,
 });
+
+/**
+ * Runs the conversion agent with a given input string
+ * @param input - The conversion request (e.g., "Convert 100 USD to EUR" or "Convert 5 gallons to liters")
+ * @returns The conversion result as an object
+ */
+export async function runConversionAgent(input: string): Promise<any> {
+  try {
+    // Create a unique thread ID for this conversion
+    const threadId = `conversion-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+    // Invoke the graph with the user message
+    const result = await graph.invoke(
+      {
+        messages: [
+          {
+            role: 'user',
+            content: input,
+          },
+        ],
+      },
+      {
+        configurable: {
+          thread_id: threadId,
+        },
+        recursionLimit: 10,
+      },
+    );
+
+    // Extract the last AI message from the result
+    const messages = result.messages;
+    const lastMessage = messages[messages.length - 1];
+
+    // Check if the last message is an AI message with tool calls
+    if (
+      'tool_calls' in lastMessage &&
+      Array.isArray(lastMessage.tool_calls) &&
+      lastMessage.tool_calls.length > 0
+    ) {
+      // Find the tool message that contains the result
+      const toolCallId = lastMessage.tool_calls[0].id;
+      const toolMessage = messages.find(
+        (msg: any) => msg.type === 'tool' && msg.tool_call_id === toolCallId,
+      );
+
+      if (toolMessage) {
+        try {
+          const content =
+            typeof toolMessage.content === 'string'
+              ? toolMessage.content
+              : JSON.stringify(toolMessage.content);
+          return JSON.parse(content);
+        } catch {
+          const content =
+            typeof toolMessage.content === 'string'
+              ? toolMessage.content
+              : JSON.stringify(toolMessage.content);
+          return { value: content, unit: '', explanation: content };
+        }
+      }
+    }
+
+    // If no tool call, return the AI's text response
+    if (lastMessage.content) {
+      const content =
+        typeof lastMessage.content === 'string'
+          ? lastMessage.content
+          : JSON.stringify(lastMessage.content);
+      return {
+        value: content,
+        unit: '',
+        explanation: content,
+      };
+    }
+
+    throw new Error('No valid response from conversion agent');
+  } catch (error) {
+    console.error('Error running conversion agent:', error);
+    throw error;
+  }
+}

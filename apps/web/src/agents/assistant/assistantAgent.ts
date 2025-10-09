@@ -3,6 +3,7 @@
  * It defines the workflow graph, state, tools, nodes and edges.
  */
 
+import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch';
 import { AIMessage, SystemMessage } from '@langchain/core/messages';
 import { RunnableConfig } from '@langchain/core/runnables';
 import { Annotation, MemorySaver, START, StateGraph } from '@langchain/langgraph';
@@ -24,6 +25,10 @@ import { assistantSystemPrompt } from './prompts';
 //    provide actions to the state.
 export const AgentStateAnnotation = Annotation.Root({
   proverbs: Annotation<string[]>,
+  toolSteps: Annotation<Array<{ name: string; status: string }>>({
+    reducer: (x, y) => y ?? x,
+    default: () => [],
+  }),
   ...CopilotKitStateAnnotation.spec,
 });
 
@@ -54,37 +59,82 @@ async function chat_node(state: AgentState, config: RunnableConfig) {
   // 5.4 Invoke the model with the system message and the messages in the state
   const response = await modelWithTools.invoke([systemMessage, ...state.messages], config);
 
-  // 5.5 Return the response, which will be added to the state
+  // 5.5 Track tool calls for UI feedback
+  const toolSteps: Array<{ name: string; status: string }> = [];
+  if (response.tool_calls && response.tool_calls.length > 0) {
+    // Add all tool calls as pending
+    for (const toolCall of response.tool_calls) {
+      toolSteps.push({
+        name: toolCall.name,
+        status: 'pending',
+      });
+    }
+    // Emit the state with pending tools
+    await dispatchCustomEvent(
+      'manually_emit_state',
+      { ...state, toolSteps, messages: [...state.messages, response] },
+      config,
+    );
+  }
+
+  // 5.6 Return the response, which will be added to the state
   return {
     messages: response,
+    toolSteps,
   };
 }
 
-// 6. Define the function that determines whether to continue or not,
+// 6. Custom tool node that marks tools as completed
+async function custom_tool_node(state: AgentState, config: RunnableConfig) {
+  // 6.1 Execute the tools using the standard ToolNode
+  const toolNode = new ToolNode(tools);
+  const result = await toolNode.invoke(state, config);
+
+  // 6.2 Mark all tools as completed
+  const completedToolSteps = state.toolSteps.map((step) => ({
+    ...step,
+    status: 'completed',
+  }));
+
+  // 6.3 Emit the updated state
+  await dispatchCustomEvent(
+    'manually_emit_state',
+    { ...state, toolSteps: completedToolSteps, messages: [...state.messages, ...result.messages] },
+    config,
+  );
+
+  // 6.4 Return the result with updated tool steps
+  return {
+    ...result,
+    toolSteps: completedToolSteps,
+  };
+}
+
+// 7. Define the function that determines whether to continue or not,
 //    this is used to determine the next node to run
 function shouldContinue({ messages, copilotkit }: AgentState) {
-  // 6.1 Get the last message from the state
+  // 7.1 Get the last message from the state
   const lastMessage = messages[messages.length - 1] as AIMessage;
 
-  // 6.2 If the LLM makes a tool call, then we route to the "tools" node
+  // 7.2 If the LLM makes a tool call, then we route to the "tools" node
   if (lastMessage.tool_calls?.length) {
     const actions = copilotkit?.actions;
     const toolCallName = lastMessage.tool_calls![0].name;
 
-    // 6.3 Only route to the tool node if the tool call is not a CopilotKit action
+    // 7.3 Only route to the tool node if the tool call is not a CopilotKit action
     if (!actions || actions.every((action) => action.name !== toolCallName)) {
       return 'tool_node';
     }
   }
 
-  // 6.4 Otherwise, we stop (reply to the user) using the special "__end__" node
+  // 7.4 Otherwise, we stop (reply to the user) using the special "__end__" node
   return '__end__';
 }
 
 // Define the workflow graph
 const workflow = new StateGraph(AgentStateAnnotation)
   .addNode('chat_node', chat_node)
-  .addNode('tool_node', new ToolNode(tools))
+  .addNode('tool_node', custom_tool_node)
   .addEdge(START, 'chat_node')
   .addEdge('tool_node', 'chat_node')
   .addConditionalEdges('chat_node', shouldContinue as any);

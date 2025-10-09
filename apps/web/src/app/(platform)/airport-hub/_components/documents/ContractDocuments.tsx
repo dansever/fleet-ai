@@ -233,7 +233,7 @@ export function ContractDocuments() {
             ) : undefined
           }
         >
-          <div className="flex flex-row ">
+          <div className="flex flex-col w-full">
             {loading.documents ? (
               <div className="flex flex-col gap-6 p-4">
                 {/* Header Skeleton */}
@@ -280,11 +280,11 @@ export function ContractDocuments() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 w-full">
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="px-2 py-1 rounded-lg bg-blue-50 border border-blue-100">
-                    <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                  <div className="px-2 py-1 rounded-lg border border-blue-100">
+                    <span className="text-xs font-medium text-blue-600 tracking-wide">
                       File Size
                     </span>
                     <p className="font-semibold text-blue-700">
@@ -294,8 +294,8 @@ export function ContractDocuments() {
                     </p>
                   </div>
 
-                  <div className="px-2 py-1 rounded-lg bg-purple-50 border border-purple-100">
-                    <span className="text-xs font-medium text-purple-600 uppercase tracking-wide">
+                  <div className="px-2 py-1 rounded-lg border border-purple-100">
+                    <span className="text-xs font-medium text-purple-600 tracking-wide">
                       Created
                     </span>
                     <p className="font-semibold text-purple-700">
@@ -305,8 +305,8 @@ export function ContractDocuments() {
                     </p>
                   </div>
 
-                  <div className="px-2 py-1 rounded-lg bg-indigo-50 border border-indigo-100">
-                    <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+                  <div className="px-2 py-1 rounded-lg border border-indigo-100">
+                    <span className="text-xs font-medium text-indigo-600 tracking-wide">
                       Updated
                     </span>
                     <p className="font-semibold text-indigo-700">
@@ -316,8 +316,8 @@ export function ContractDocuments() {
                     </p>
                   </div>
 
-                  <div className="px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100">
-                    <span className="text-xs font-medium text-emerald-600 uppercase tracking-wide">
+                  <div className="px-2 py-1 rounded-lg border border-emerald-100">
+                    <span className="text-xs font-medium text-emerald-600 tracking-wide">
                       {selectedDocument.confidence ? 'AI Confidence' : 'Status'}
                     </span>
                     <p className="font-semibold text-emerald-700">
