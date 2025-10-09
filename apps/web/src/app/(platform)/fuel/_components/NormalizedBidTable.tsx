@@ -23,6 +23,7 @@ export function NormalizedBidTable({
   const baseCurrency = currentTender?.baseCurrency || 'USD';
   const baseUom = currentTender?.baseUom || 'USG';
   const priceUnit = `${baseCurrency}/${baseUom}`;
+  const hasConvertedBids = convertedBids && convertedBids.length > 0;
 
   return (
     <div className="space-y-4">
@@ -31,7 +32,17 @@ export function NormalizedBidTable({
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-blue-600" />
           <span className="text-sm font-medium text-blue-800">
-            All prices normalized to <span className="font-bold">{priceUnit}</span> for comparison
+            {hasConvertedBids ? (
+              <>
+                All prices normalized to <span className="font-bold">{priceUnit}</span> for
+                comparison
+              </>
+            ) : (
+              <>
+                Click "Convert" button to normalize all prices to{' '}
+                <span className="font-bold">{priceUnit}</span>
+              </>
+            )}
           </span>
         </div>
         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
@@ -40,6 +51,11 @@ export function NormalizedBidTable({
         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
           UOM: {baseUom}
         </Badge>
+        {hasConvertedBids && (
+          <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-400">
+            ✓ Normalized
+          </Badge>
+        )}
       </div>
 
       {/* Comparison Table */}

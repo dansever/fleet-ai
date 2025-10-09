@@ -7,6 +7,7 @@ import { server as fuelTenderServer } from '@/modules/fuel/tenders';
 import { client as invoiceClient } from '@/modules/invoices';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
+  clearConvertedBidsCache,
   ConversionProgress,
   convertBidsToTenderBase,
   ConvertedBid,
@@ -221,7 +222,7 @@ export function FuelProcurementProvider({
     [updateState],
   );
 
-  // Load bids for selected tender with caching and conversion
+  // Load bids for selected tender with caching
   const loadBids = useCallback(
     async (tenderId: string, forceRefresh = false) => {
       const cacheKey = createCacheKey(CACHE_KEYS.BIDS, tenderId);
@@ -236,10 +237,13 @@ export function FuelProcurementProvider({
             bidsError: null,
           });
 
-          // Trigger conversion if we have a selected tender
-          const selectedTender = state.tenders.find((t) => t.id === tenderId);
-          if (selectedTender && cachedBids.length > 0) {
-            triggerBidConversion(cachedBids, selectedTender);
+          // Check if we have cached converted bids and load them too
+          const cachedConvertedBids = getCachedConvertedBids(tenderId);
+          if (cachedConvertedBids && cachedConvertedBids.length === cachedBids.length) {
+            console.log('Loading cached converted bids for tender:', tenderId);
+            updateState({
+              convertedBids: cachedConvertedBids,
+            });
           }
           return;
         }
@@ -254,10 +258,13 @@ export function FuelProcurementProvider({
 
         updateState({ bids, loadingBids: false });
 
-        // Trigger conversion if we have a selected tender
-        const selectedTender = state.tenders.find((t) => t.id === tenderId);
-        if (selectedTender && bids.length > 0) {
-          triggerBidConversion(bids, selectedTender);
+        // Check if we have cached converted bids and load them too
+        const cachedConvertedBids = getCachedConvertedBids(tenderId);
+        if (cachedConvertedBids && cachedConvertedBids.length === bids.length) {
+          console.log('Loading cached converted bids for tender:', tenderId);
+          updateState({
+            convertedBids: cachedConvertedBids,
+          });
         }
       } catch (error) {
         updateState({
@@ -267,7 +274,7 @@ export function FuelProcurementProvider({
         });
       }
     },
-    [updateState, state.tenders],
+    [updateState],
   );
 
   // Trigger bid conversion to tender base currency/UOM
@@ -587,6 +594,8 @@ export function FuelProcurementProvider({
         if (bid.tenderId) {
           const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
           cacheManager.delete(cacheKey);
+          // Clear converted bids cache
+          clearConvertedBidsCache(bid.tenderId);
         }
         updateState({
           bids: [bid, ...state.bids],
@@ -604,6 +613,8 @@ export function FuelProcurementProvider({
         if (bid.tenderId) {
           const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
           cacheManager.delete(cacheKey);
+          // Clear converted bids cache
+          clearConvertedBidsCache(bid.tenderId);
         }
         updateState({
           bids: state.bids.map((b) => (b.id === bid.id ? bid : b)),
@@ -622,10 +633,12 @@ export function FuelProcurementProvider({
         if (bid?.tenderId) {
           const cacheKey = createCacheKey(CACHE_KEYS.BIDS, bid.tenderId);
           cacheManager.delete(cacheKey);
+          // Clear converted bids cache
+          clearConvertedBidsCache(bid.tenderId);
         }
         updateState({
           bids: state.bids.filter((b) => b.id !== bidId),
-          convertedBids: state.convertedBids.filter((b) => b.id !== bidId),
+          convertedBids: [], // Clear all converted bids as count changed
         });
       } catch (error) {
         console.error('Error removing bid from context:', error);
