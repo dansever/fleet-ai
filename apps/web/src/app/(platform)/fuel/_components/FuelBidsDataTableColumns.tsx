@@ -133,10 +133,6 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
 
   const handleDeleteBid = useCallback(
     async (bidId: string) => {
-      console.log('handleDeleteBid called with bidId:', bidId);
-      console.log('bidId type:', typeof bidId);
-      console.log('bidId is undefined?', bidId === undefined);
-
       if (!bidId) {
         toast.error('Cannot delete bid: No bid ID provided');
         return;
@@ -719,13 +715,9 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
                 />
               }
               popoverIntent="danger"
-              title="Delete Bid"
+              title="Delete bid"
               description="Are you sure you want to delete this bid?"
               onConfirm={() => {
-                console.log('Delete button clicked for bid:', bid);
-                console.log('bid.id:', bid.id);
-                console.log('bid object keys:', Object.keys(bid));
-
                 if (!bid.id) {
                   console.error('Bid has no ID:', bid);
                   toast.error('Cannot delete bid: Missing bid ID');

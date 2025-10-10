@@ -42,7 +42,7 @@ export function AppSidebar({
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar collapsible="icon" variant={variant} className="border-r-primary/40">
+    <Sidebar collapsible="icon" variant={variant} className="border-r-slate-200">
       <SidebarHeader
         className={cn(
           'flex flex-row items-center w-full h-16 min-h-16 px-2',

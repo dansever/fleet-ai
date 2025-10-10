@@ -11,7 +11,7 @@
 /* ========== CORE VARIABLES ========== */
 :root {
   /* ========= THEME COLORS ========= */
-  --color-background: #f9fdff;
+  --color-background: #f8fbfc;
   --color-foreground: #1e293b;
   --color-card: white;
   --color-card-foreground: var(--color-foreground);
@@ -44,7 +44,7 @@
 
   /* ========= SEMANTIC COLORS ========= */
   --color-sidebar: white;
-  --color-sidebar-background: 0 0% 98%;
+  --color-sidebar-background: white;
   --color-sidebar-foreground: 240 5.3% 26.1%;
   --color-sidebar-primary: 240 5.9% 10%;
   --color-sidebar-primary-foreground: 0 0% 98%;
@@ -58,7 +58,7 @@
   --color-status-success: #10b981;
   --color-status-background: rgba(17, 24, 39, 0.6);
   --color-status-border: rgba(255, 255, 255, 0.1);
-  --sidebar: hsl(0 0% 98%);
+  --sidebar: white;
   --sidebar-foreground: hsl(240 5.3% 26.1%);
   --sidebar-primary: hsl(240 5.9% 10%);
   --sidebar-primary-foreground: hsl(0 0% 98%);
@@ -93,7 +93,7 @@
   --color-chart-3: 30 80% 55%;
   --color-chart-4: 280 65% 60%;
   --color-chart-5: 340 75% 55%;
-  --color-sidebar: var(--background);
+  --color-sidebar: white;
   --color-sidebar-background: 240 5.9% 10%;
   --color-sidebar-foreground: 240 4.8% 95.9%;
   --color-sidebar-primary: 224.3 76.3% 48%;
