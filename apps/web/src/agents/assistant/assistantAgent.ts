@@ -15,10 +15,10 @@ import {
   convertActionsToDynamicStructuredTools,
   CopilotKitStateAnnotation,
 } from '@copilotkit/sdk-js/langgraph';
-import { webSearch } from '../tools/TavilySearch';
+import { webSearch } from '../tools/tavilySearch';
 import { getWeather } from '../tools/weather';
-import { currencyConvert } from '../unit-converter/tools/currencyTool';
-import { uomConvert } from '../unit-converter/tools/uomTool';
+import { currencyConvertTool } from '../unit-converter/tools/currencyConversionTool';
+import { unitConvertTool } from '../unit-converter/tools/unitConversionTool';
 import { assistantSystemPrompt } from './prompts';
 
 // 2. Define our agent state, which includes CopilotKit state to
@@ -36,7 +36,7 @@ export const AgentStateAnnotation = Annotation.Root({
 export type AgentState = typeof AgentStateAnnotation.State;
 
 // 4. Put our tools into an array
-const tools = [getWeather, webSearch, uomConvert, currencyConvert];
+const tools = [getWeather, webSearch, unitConvertTool, currencyConvertTool];
 
 // 5. Define the chat node, which will handle the chat logic
 async function chat_node(state: AgentState, config: RunnableConfig) {

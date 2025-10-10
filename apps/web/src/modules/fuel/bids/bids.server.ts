@@ -38,7 +38,10 @@ export async function createFuelBid(data: NewFuelBid): Promise<FuelBid> {
 export async function updateFuelBid(id: FuelBid['id'], data: UpdateFuelBid): Promise<FuelBid> {
   const result = await db
     .update(fuelBidsTable)
-    .set(data)
+    .set({
+      ...data,
+      updatedAt: new Date(),
+    })
     .where(eq(fuelBidsTable.id, id))
     .returning();
   return result[0];

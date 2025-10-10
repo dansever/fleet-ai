@@ -54,7 +54,10 @@ const normalize = (
   return formatFuelPrice(numValue, baseCurrency) || '';
 };
 
-const getDecisionBadge = (decision: string | null) => {
+const getDecisionBadge = (
+  decision: string | null,
+  onDecisionChange: (newDecision: 'accepted' | 'rejected' | 'shortlisted') => void,
+) => {
   const decisionText = getDecisionDisplay(decision);
   const isOpen = !decision || decision === 'open';
 
@@ -101,7 +104,7 @@ const getDecisionBadge = (decision: string | null) => {
           icon={CheckCircle}
           size="sm"
           className="px-0 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-600"
-          onClick={() => {}}
+          onClick={() => onDecisionChange('accepted')}
         />
         <Button
           intent="ghost"
@@ -109,7 +112,7 @@ const getDecisionBadge = (decision: string | null) => {
           icon={XCircle}
           size="sm"
           className="px-1 text-red-600 hover:bg-red-50 hover:text-red-600"
-          onClick={() => {}}
+          onClick={() => onDecisionChange('rejected')}
         />
         <Button
           intent="ghost"
@@ -117,7 +120,7 @@ const getDecisionBadge = (decision: string | null) => {
           icon={ListCheck}
           size="sm"
           className="px-1 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-600"
-          onClick={() => {}}
+          onClick={() => onDecisionChange('shortlisted')}
         />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -125,7 +128,7 @@ const getDecisionBadge = (decision: string | null) => {
 };
 
 export const useFuelBidColumns = (): Column<FuelBid>[] => {
-  const { selectedTender, removeBid, loading } = useFuelProcurement();
+  const { selectedTender, removeBid, updateBid, loading, dbUser, bids } = useFuelProcurement();
 
   const handleDeleteBid = useCallback(
     async (bidId: string) => {
@@ -153,6 +156,67 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
       }
     },
     [removeBid, loading.bids],
+  );
+
+  const handleDecisionChange = useCallback(
+    async (bidId: string, newDecision: 'accepted' | 'rejected' | 'shortlisted') => {
+      if (!bidId) {
+        toast.error('Cannot update decision: No bid ID provided');
+        return;
+      }
+
+      if (loading.bids) {
+        toast.error('Cannot update decision: Data is still loading');
+        return;
+      }
+
+      // Store original bid state for rollback if API call fails
+      const originalBid = bids.find((b) => b.id === bidId);
+      if (!originalBid) {
+        toast.error('Cannot find bid to update');
+        return;
+      }
+
+      // Create optimistic update data
+      const now = new Date();
+      const optimisticBid: FuelBid = {
+        ...originalBid,
+        decision: newDecision,
+        decisionByUserId: dbUser.id,
+        decisionAt: now,
+        updatedAt: now,
+      };
+
+      try {
+        // Optimistic update: Update local state immediately for instant feedback
+        updateBid(optimisticBid);
+
+        // Prepare API update data
+        const updateData = {
+          decision: newDecision,
+          decisionByUserId: dbUser.id,
+          decisionAt: now.toISOString(),
+        };
+
+        // Background API update to persist to database
+        const updatedBidFromServer = await fuelBidClient.updateFuelBid(bidId, updateData);
+
+        // Update with server response (in case server modified any fields)
+        updateBid(updatedBidFromServer);
+
+        // Show success only after server confirms
+        toast.success(`Bid ${newDecision} successfully`);
+      } catch (error) {
+        console.error('Update decision error:', error);
+
+        // Rollback: Restore original bid state on failure
+        updateBid(originalBid);
+
+        // Show clear error message
+        toast.error('Failed to update bid decision. Changes have been reverted.');
+      }
+    },
+    [dbUser.id, updateBid, loading.bids, bids],
   );
 
   return useMemo(
@@ -190,7 +254,9 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         header: <span className="whitespace-nowrap ">Decision</span>,
         accessor: (bid: FuelBid) => (
           <div className="space-y-1.5 min-w-[160px]">
-            {getDecisionBadge(bid.decision)}
+            {getDecisionBadge(bid.decision, (newDecision) =>
+              handleDecisionChange(bid.id, newDecision),
+            )}
             {bid.decisionAt && (
               <p className="text-xs text-slate-500 font-medium">{formatDate(bid.decisionAt)}</p>
             )}
@@ -674,6 +740,6 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
         align: 'left' as const,
       },
     ],
-    [selectedTender, removeBid],
+    [selectedTender, removeBid, handleDecisionChange],
   );
 };

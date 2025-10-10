@@ -51,6 +51,9 @@ interface FuelProcurementState {
 }
 
 interface FuelProcurementContextType {
+  // User
+  dbUser: User;
+
   // Data
   airports: Airport[];
   tenders: FuelTender[];
@@ -423,6 +426,9 @@ export function FuelProcurementProvider({
 
   // Context value
   const contextValue: FuelProcurementContextType = {
+    // User
+    dbUser,
+
     // Data
     airports: state.airports,
     tenders: state.tenders,

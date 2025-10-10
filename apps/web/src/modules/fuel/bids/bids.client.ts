@@ -41,7 +41,7 @@ export async function createFuelBid(
  * Update an existing fuel bid
  */
 export async function updateFuelBid(id: string, data: FuelBidUpdateInput): Promise<FuelBid> {
-  const res = await api.put(`/api/fuel/bids?id=${id}`, data);
+  const res = await api.put(`/api/fuel/bids/${id}`, data);
   return res.data;
 }
 

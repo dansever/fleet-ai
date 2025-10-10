@@ -12,8 +12,8 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { createChatModel } from '@/lib/langchain/model';
 import { CopilotKitStateAnnotation } from '@copilotkit/sdk-js/langgraph';
 import { unitConverterSystemPrompt } from './prompts';
-import { currencyConvert } from './tools/currencyTool';
-import { uomConvert } from './tools/uomTool';
+import { currencyConvertTool } from './tools/currencyConversionTool';
+import { unitConvertTool } from './tools/unitConversionTool';
 
 // 2. Define our agent state, which includes CopilotKit state to
 //    provide actions to the state.
@@ -26,7 +26,7 @@ export const AgentStateAnnotation = Annotation.Root({
 export type AgentState = typeof AgentStateAnnotation.State;
 
 // 4. Put our tools into an array
-const tools = [uomConvert, currencyConvert];
+const tools = [unitConvertTool, currencyConvertTool];
 
 // 5. Define the chat node, which will handle the chat logic
 async function chat_node(state: AgentState, config: RunnableConfig) {

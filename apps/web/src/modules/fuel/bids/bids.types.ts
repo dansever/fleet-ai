@@ -19,5 +19,10 @@ export type FuelBidCreateInput = Omit<
 
 /**
  * For updating fuel bids from forms - all fields optional except id is excluded
+ * Includes decision-related fields that can be updated
  */
-export type FuelBidUpdateInput = Partial<FuelBidCreateInput>;
+export type FuelBidUpdateInput = Partial<FuelBidCreateInput> & {
+  decisionAt?: Date | string | null;
+  decisionByUserId?: string | null;
+  decision?: 'open' | 'shortlisted' | 'rejected' | 'accepted' | null;
+};

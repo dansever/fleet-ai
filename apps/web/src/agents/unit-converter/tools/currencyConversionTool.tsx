@@ -1,10 +1,33 @@
 // Currency Conversion Tool with authenticated API
+import { CURRENCY_ALIASES, CURRENCY_MAP, SYMBOL_TO_CODE_MAP } from '@/lib/constants/currencies';
 import { serverEnv } from '@/lib/env/server';
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 
 const BASE_URL = 'https://v6.exchangerate-api.com/v6';
 const API_KEY = serverEnv.EXCHANGE_RATE_API_KEY;
+
+/**
+ * Normalizes currency input to standard ISO codes.
+ * Supports codes (USD, EUR), symbols ($, €), and aliases (ILS→NIS, RMB→CNY).
+ */
+export function normalizeCurrencyCode(input: string): string {
+  const trimmed = input.trim().toUpperCase();
+
+  // Check currency code
+  if (trimmed in CURRENCY_MAP) return trimmed;
+
+  // Check aliases
+  if (trimmed in CURRENCY_ALIASES) return CURRENCY_ALIASES[trimmed];
+
+  // Check symbols
+  if (trimmed in SYMBOL_TO_CODE_MAP) return SYMBOL_TO_CODE_MAP[trimmed];
+
+  // Unsupported
+  throw new Error(
+    `Unsupported currency: "${input}". Supported: ${Object.keys(CURRENCY_MAP).join(', ')}`,
+  );
+}
 
 // Fetch exchange rate using authenticated API
 async function getExchangeRate(
@@ -58,25 +81,21 @@ async function getExchangeRate(
 
 const CurrencySchema = z.object({
   amount: z.number().positive('Amount must be positive'),
-  fromCurrency: z
-    .string()
-    .length(3, 'Currency code must be 3 characters')
-    .regex(/^[A-Z]{3}$/i, 'Invalid currency code format'),
-  toCurrency: z
-    .string()
-    .length(3, 'Currency code must be 3 characters')
-    .regex(/^[A-Z]{3}$/i, 'Invalid currency code format'),
+  fromCurrency: z.string().min(1, 'Currency code required'),
+  toCurrency: z.string().min(1, 'Currency code required'),
 });
 
 export type CurrencyInput = z.infer<typeof CurrencySchema>;
 
-export const currencyConvert = tool(
+export const currencyConvertTool = tool(
   async (input: CurrencyInput) => {
     const { amount, fromCurrency, toCurrency } = input;
-    const base = fromCurrency.toUpperCase();
-    const quote = toCurrency.toUpperCase();
 
     try {
+      // Normalize currency codes using CURRENCY_MAP
+      const base = normalizeCurrencyCode(fromCurrency);
+      const quote = normalizeCurrencyCode(toCurrency);
+
       const { rate, timestamp, source } = await getExchangeRate(base, quote);
       const convertedAmount = Number((amount * rate).toFixed(6));
 
@@ -94,14 +113,15 @@ export const currencyConvert = tool(
         },
       });
     } catch (error: any) {
+      const supportedCurrencies = Object.keys(CURRENCY_MAP).join(', ');
       return JSON.stringify({
         error: 'CURRENCY_CONVERSION_ERROR',
         message: error?.message ?? 'Currency conversion failed',
         details: {
           amount,
-          fromCurrency: base,
-          toCurrency: quote,
-          suggestion: 'Verify currency codes are valid ISO 4217 codes (e.g., USD, EUR, GBP)',
+          fromCurrency,
+          toCurrency,
+          suggestion: `Supported currencies: ${supportedCurrencies}. Symbols like €, $, £, ₪ are supported.`,
         },
       });
     }
@@ -109,7 +129,7 @@ export const currencyConvert = tool(
   {
     name: 'currency_convert',
     description:
-      'Convert currency amounts using real-time exchange rates. Supports ISO 4217 currency codes (USD, EUR, etc.)',
+      'Convert currency amounts using real-time exchange rates. Accepts ISO codes (USD, EUR, GBP, NIS, INR, AUD, CAD, CHF, CNY, JPY) or symbols (€, $, £, ₪, ₹). Handles ILS/NIS equivalence.',
     schema: CurrencySchema,
   },
 );
