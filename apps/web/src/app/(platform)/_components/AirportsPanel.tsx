@@ -26,7 +26,7 @@ export default function AirportsPanel({
           icon={PanelLeftOpen}
           className={cn(
             'gap-2 bg-gradient-to-r from-blue-100 via-violet-100 to-orange-100',
-            'hover:bg-gradient-to-r hover:from-blue-200/80 hover:via-violet-200/80 hover:to-orange-200/80',
+            'font-delius hover:bg-gradient-to-r hover:from-blue-200/80 hover:via-violet-200/80 hover:to-orange-200/80',
           )}
         />
       </SheetTrigger>

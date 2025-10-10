@@ -350,12 +350,26 @@ export function FuelProcurementProvider({
 
       updateState({ loadingContracts: true, contractsError: null });
       try {
-        const contracts = await contractClient.listContractsByAirport(airportId);
+        // Only load fuel contracts for the fuel module
+        const contracts = await contractClient.listContractsByAirportAndType(airportId, 'fuel');
 
         // Cache the results
         cacheManager.set(cacheKey, contracts, CACHE_TTL.CONTRACTS);
 
-        updateState({ contracts, loadingContracts: false });
+        // Auto-select the currently active fuel contract
+        const now = new Date();
+        const active = contracts.find((c) => {
+          const from = c.effectiveFrom ? new Date(c.effectiveFrom as any) : null;
+          const to = c.effectiveTo ? new Date(c.effectiveTo as any) : null;
+          if (from && now < from) return false;
+          if (to && now > to) return false;
+          return true;
+        });
+        updateState({
+          contracts,
+          selectedContract: active || contracts[0] || null,
+          loadingContracts: false,
+        });
       } catch (error) {
         updateState({
           contractsError: error instanceof Error ? error.message : 'Failed to load contracts',

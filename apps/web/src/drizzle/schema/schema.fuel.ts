@@ -9,6 +9,7 @@ import {
   boolean,
   date,
   foreignKey,
+  index,
   integer,
   json,
   numeric,
@@ -153,10 +154,9 @@ export const fuelBidsTable = pgTable(
     tags: json('tags').$type<Record<string, any>>(),
 
     // Decision Tracking
-    decision: decisionEnum('decision'),
+    decision: decisionEnum('decision').default('open'),
     decisionByUserId: uuid('decision_by_user_id'), // fk to users table
     decisionAt: timestamp('decision_at', { withTimezone: true }),
-    decisionNotes: text('decision_notes'),
 
     // Timestamps
     createdAt,
@@ -225,4 +225,70 @@ export const fuelBidsRelations = relations(fuelBidsTable, ({ one, many }) => ({
   }),
   // Each fuel bid can have many documents
   documents: many(documentsTable),
+}));
+
+// -------------------- Fuel Contracts --------------------
+export const fuelContractsTable = pgTable(
+  'fuel_contracts',
+  {
+    // System Fields
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    orgId: uuid('org_id').notNull(), //fk to orgs table
+    airportId: uuid('airport_id').notNull(), //fk to airports table
+
+    // Contract Information
+    title: text('title').notNull(),
+    effectiveFrom: date('effective_from'),
+    effectiveTo: date('effective_to'),
+
+    // Fuel specific information
+    fuelType: text('fuel_type'),
+    fuelVolume: integer('fuel_volume'),
+    fuelPrice: numeric('fuel_price'),
+    fuelPriceUnit: text('fuel_price_unit'),
+    fuelPriceCurrency: text('fuel_price_currency'),
+    fuelPriceType: text('fuel_price_type'),
+
+    // AI Processing
+    terms: json('terms').$type<Record<string, any>>(),
+
+    // Vendor Information
+    vendorName: text('vendor_name'),
+    vendorAddress: text('vendor_address'),
+    vendorContactName: text('vendor_contact_name'),
+    vendorContactEmail: text('vendor_contact_email'),
+    vendorContactPhone: text('vendor_contact_phone'),
+    vendorComments: text('vendor_comments'),
+
+    // Timestamps
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orgId],
+      foreignColumns: [organizationsTable.id],
+      name: 'fk_fuel_contracts_org_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.airportId],
+      foreignColumns: [airportsTable.id],
+      name: 'fk_fuel_contracts_airport_id',
+    }).onDelete('cascade'),
+    index('fuel_contracts_org_id_idx').on(table.orgId),
+    index('fuel_contracts_airport_id_idx').on(table.airportId),
+    index('fuel_contracts_effective_range_idx').on(table.effectiveFrom, table.effectiveTo),
+  ],
+);
+
+/* -------------------- Fuel Contracts Relations -------------------- */
+export const fuelContractsRelations = relations(fuelContractsTable, ({ one }) => ({
+  organization: one(organizationsTable, {
+    fields: [fuelContractsTable.orgId],
+    references: [organizationsTable.id],
+  }),
+  airport: one(airportsTable, {
+    fields: [fuelContractsTable.airportId],
+    references: [airportsTable.id],
+  }),
 }));

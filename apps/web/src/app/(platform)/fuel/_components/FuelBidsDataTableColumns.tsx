@@ -27,18 +27,19 @@ const formatFuelPrice = (
   currency: string | null = 'USD',
 ): string | null => {
   if (amount == null) return null;
-
   const parsedAmount = typeof amount === 'number' ? amount : parseFloat(amount.toString());
   if (isNaN(parsedAmount)) return null;
 
-  const resolvedCurrency = currency?.toUpperCase() || 'USD';
+  const resolvedCurrency = currency?.toUpperCase();
 
-  return new Intl.NumberFormat('en-US', {
+  const result = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: resolvedCurrency,
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
   }).format(parsedAmount);
+
+  return result;
 };
 
 // Normalize function for converting values to tender's base currency and UOM
@@ -258,10 +259,9 @@ export const useFuelBidColumns = (): Column<FuelBid>[] => {
               handleDecisionChange(bid.id, newDecision),
             )}
             {bid.decisionAt && (
-              <p className="text-xs text-slate-500 font-medium">{formatDate(bid.decisionAt)}</p>
-            )}
-            {bid.decisionNotes && (
-              <p className="text-xs text-slate-400 italic whitespace-normal">{bid.decisionNotes}</p>
+              <p className="text-xs text-slate-500 font-medium">
+                {formatDate(bid.decisionAt, undefined, undefined, undefined, true)}
+              </p>
             )}
           </div>
         ),

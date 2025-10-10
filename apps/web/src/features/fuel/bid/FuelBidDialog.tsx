@@ -80,7 +80,6 @@ export default function FuelBidDialog({
 
     // Decision Tracking (matching schema)
     decision: bid?.decision || null,
-    decisionNotes: bid?.decisionNotes || null,
   });
 
   const isAdd = DialogType === 'add';
@@ -119,7 +118,6 @@ export default function FuelBidDialog({
       terms: bid?.terms || null,
       tags: bid?.tags || null,
       decision: bid?.decision || null,
-      decisionNotes: bid?.decisionNotes || null,
     });
   }, [bid]);
 
@@ -196,7 +194,6 @@ export default function FuelBidDialog({
         terms: null,
         tags: null,
         decision: null,
-        decisionNotes: null,
       });
     }
   };
@@ -233,7 +230,6 @@ export default function FuelBidDialog({
       tags: null,
       aiSummary: null,
       decision: null,
-      decisionNotes: null,
     });
   };
 
@@ -294,14 +290,7 @@ export default function FuelBidDialog({
                   value: key,
                 }))}
               />
-              <KeyValuePair
-                label="Decision Notes"
-                value={formData.decisionNotes}
-                valueType="string"
-                editMode={isEditing}
-                onChange={(value) => handleFieldChange('decisionNotes', value)}
-                name="decisionNotes"
-              />
+
               <KeyValuePair
                 label="AI Summary"
                 value={formData.aiSummary}

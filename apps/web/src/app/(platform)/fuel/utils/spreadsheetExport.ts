@@ -142,7 +142,6 @@ export const BID_EXPORT_FIELDS = [
 
   // Decision
   { key: 'decision', label: 'Decision' },
-  { key: 'decisionNotes', label: 'Decision Notes' },
 
   // AI Summary
   { key: 'aiSummary', label: 'AI Summary' },

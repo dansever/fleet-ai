@@ -44,7 +44,9 @@ export const convertPydanticFuelBidToFuelBid = (
     // Index-linked pricing
     indexName: pydanticFuelBid.index_name,
     indexLocation: pydanticFuelBid.index_location,
-    differential: pydanticFuelBid.differential ? String(pydanticFuelBid.differential) : undefined,
+    differentialValue: pydanticFuelBid.differential
+      ? String(pydanticFuelBid.differential)
+      : undefined,
     differentialUnit: pydanticFuelBid.differential_unit,
     formulaNotes: pydanticFuelBid.formula_notes,
 
@@ -74,6 +76,5 @@ export const convertPydanticFuelBidToFuelBid = (
     // decision: undefined,
     // decisionByUserId: undefined,
     // decisionAt: undefined,
-    // decisionNotes: undefined,
   };
 };

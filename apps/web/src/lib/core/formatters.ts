@@ -76,6 +76,7 @@ export function formatDate(
   },
   locale: string = 'en-US',
   useUTC: boolean = false,
+  includeTime: boolean = false,
 ): string {
   if (!date) return '';
 
@@ -92,21 +93,31 @@ export function formatDate(
       // Create UTC midnight so it won't shift across time zones
       d = new Date(Date.UTC(y, m - 1, dd, 0, 0, 0, 0));
     } else {
-      // Timestamps like "2025-05-21T12:34:56.123Z" round-trip correctly
+      // Handle timestamps like "2025-05-21T12:34:56.123Z"
       d = new Date(s);
     }
   } else {
-    // Already a Date (usually from toISOString() or now())
+    // Already a Date
     d = new Date(date.getTime());
   }
 
   if (isNaN(d.getTime())) return '';
 
-  // For date-only values, force UTC to avoid any local-time drift.
-  // For instants, use UTC only when explicitly requested.
+  // For date-only values, force UTC to avoid any local-time drift
   const timeZone = isDateOnly ? 'UTC' : useUTC ? 'UTC' : undefined;
 
-  return d.toLocaleDateString(locale, { ...options, timeZone });
+  // Merge options dynamically
+  const formatOptions: Intl.DateTimeFormatOptions = {
+    ...options,
+    timeZone,
+  };
+
+  if (includeTime) {
+    formatOptions.hour = '2-digit';
+    formatOptions.minute = '2-digit';
+  }
+
+  return d.toLocaleString(locale, formatOptions);
 }
 
 /**

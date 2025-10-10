@@ -119,16 +119,6 @@ export async function generateRandomFuelBid(tenderId: FuelTender['id'], round?: 
     'Balanced proposal with competitive rates and flexible terms.',
   ];
 
-  const DECISION_NOTES = [
-    'Excellent pricing and service record. Proceeding with contract negotiations.',
-    'Good offer but pricing slightly above budget. Requesting revised proposal.',
-    'Service levels do not meet our requirements. Declining this proposal.',
-    'Strong contender for shortlist. Awaiting final evaluation round.',
-    'Competitive pricing but concerns about delivery reliability.',
-    'Outstanding proposal with innovative terms. Highly recommended.',
-    'Standard offer meeting basic requirements. Backup option if needed.',
-  ];
-
   const OTHER_FEE_DESCRIPTIONS = [
     'Additional local surcharge',
     'Environmental compliance fee',
@@ -237,7 +227,7 @@ export async function generateRandomFuelBid(tenderId: FuelTender['id'], round?: 
     // Index-Linked Pricing
     indexName: useIndexPricing ? pickOne(INDEX_NAMES) : null,
     indexLocation: useIndexPricing ? pickOne(INDEX_LOCATIONS) : null,
-    differential: useIndexPricing ? differential?.toString() : null,
+    differentialValue: useIndexPricing ? differential?.toString() : null,
     differentialUnit: useIndexPricing ? pickOne(DIFFERENTIAL_UNITS) : null,
     formulaNotes: useIndexPricing ? pickOne(FORMULA_NOTES) : null,
 
@@ -259,7 +249,6 @@ export async function generateRandomFuelBid(tenderId: FuelTender['id'], round?: 
     // Decision Tracking
     decision: pickOne(decisionEnum.enumValues),
     decisionByUserId: null,
-    decisionNotes: pickOne(DECISION_NOTES),
   };
 
   await fuelBidClient.createFuelBid(tenderId, fuelBid);

@@ -1,124 +1,80 @@
 ---
-
 alwaysApply: false
 applyTo: ['apps/web/**/*']
-
 ---
 
-You are an expert in UI and UX design principles for software development.
+# Cursor UX Guidelines
 
-    Visual Design
-    - Establish a clear visual hierarchy to guide user attention.
-    - Choose a cohesive color palette that reflects the brand (ask the user for guidelines).
-    - Use typography effectively for readability and emphasis.
-    - Maintain sufficient contrast for legibility (WCAG 2.1 AA standard).
-    - Design with a consistent style across the application.
+You are an expert UI and UX reviewer for this codebase. Enforce the rules below. Keep suggestions specific and code-level.
 
-    Interaction Design
-    - Create intuitive navigation patterns.
-    - Use familiar UI components to reduce cognitive load.
-    - Provide clear calls-to-action to guide user behavior.
-    - Implement responsive design for cross-device compatibility.
-    - Use animations judiciously to enhance user experience.
+## Scope
 
-    Accessibility
-    - Follow WCAG guidelines for web accessibility.
-    - Use semantic HTML to enhance screen reader compatibility.
-    - Provide alternative text for images and non-text content.
-    - Ensure keyboard navigability for all interactive elements.
-    - Test with various assistive technologies.
+- Web app surfaces in `apps/web/**/*`.
+- Default stack: React, TypeScript, Tailwind or CSS Modules, shadcn or MUI where applicable.
 
-    Performance Optimization
-    - Optimize images and assets to minimize load times.
-    - Implement lazy loading for non-critical resources.
-    - Use code splitting to improve initial load performance.
-    - Monitor and optimize Core Web Vitals (LCP, FID, CLS).
+## Objectives
 
-    User Feedback
-    - Incorporate clear feedback mechanisms for user actions.
-    - Use loading indicators for asynchronous operations.
-    - Provide clear error messages and recovery options.
-    - Implement analytics to track user behavior and pain points.
+- Ship accessible, consistent, fast UI.
+- Reduce bikeshedding. Prefer known patterns over novelty.
 
-    Information Architecture
-    - Organize content logically to facilitate easy access.
-    - Use clear labeling and categorization for navigation.
-    - Implement effective search functionality.
-    - Create a sitemap to visualize overall structure.
+## Accessibility (WCAG 2.2 AA)
 
-    Mobile-First Design
-    - Design for mobile devices first, then scale up.
-    - Use touch-friendly interface elements.
-    - Implement gestures for common actions (swipe, pinch-to-zoom).
-    - Consider thumb zones for important interactive elements.
+- Targets: minimum **24 by 24 CSS px** or sufficient spacing to achieve 24 px effective size. For mobile OS screens, prefer **44 pt iOS** and **48 dp Android**.
+- Focus: visible and not obscured in all states. Provide clear focus ring that meets contrast.
+- Semantics: use native elements first, add ARIA only when needed.
+- Keyboard: every interactive control is focusable, operable, and has a visible focus order.
 
-    Consistency
-    - Develop and adhere to a design system.
-    - Use consistent terminology throughout the interface.
-    - Maintain consistent positioning of recurring elements.
-    - Ensure visual consistency across different sections.
+## Performance and Web Vitals
 
-    Testing and Iteration
-    - Conduct A/B testing for critical design decisions.
-    - Use heatmaps and session recordings to analyze user behavior.
-    - Regularly gather and incorporate user feedback.
-    - Continuously iterate on designs based on data and feedback.
+- Measure INP, LCP, CLS at P75 for mobile and desktop.
+  - Goals: **INP ≤ 200 ms**, **LCP ≤ 2.5 s**, **CLS ≤ 0.10**.
+- Do: lazy load below-the-fold content, set explicit width and height for images and embeds, preconnect critical origins, code-split by route.
+- Avoid: layout shifts from image or ad slots, heavy client JS in first paint, blocking third-party scripts in head.
 
-    Documentation
-    - Maintain a comprehensive style guide.
-    - Document design patterns and component usage.
-    - Create user flow diagrams for complex interactions.
-    - Keep design assets organized and accessible to the team.
+## Interaction and Navigation
 
-    Fluid Layouts
-    - Use relative units (%, em, rem) instead of fixed pixels.
-    - Implement CSS Grid and Flexbox for flexible layouts.
-    - Design with a mobile-first approach, then scale up.
+- Use a persistent sidebar on desktop for multi-destination apps. Keep global actions in the top bar.
+- Breadcrumbs for deep hierarchies. Each crumb is a link. Truncate intelligently.
+- Command palette on **Cmd or Ctrl + K** for power navigation.
 
-    Media Queries
-    - Use breakpoints to adjust layouts for different screen sizes.
-    - Focus on content needs rather than specific devices.
-    - Test designs across a range of devices and orientations.
+## Forms
 
-    Images and Media
-    - Use responsive images with srcset and sizes attributes.
-    - Implement lazy loading for images and videos.
-    - Use CSS to make embedded media (like iframes) responsive.
+- Labels always visible. Placeholder never acts as label.
+- Inline validation on blur, with error summary near submit. Errors state what happened and how to fix it.
+- Inputs use correct types and autocomplete attributes. Disable submit until required fields are valid only when it helps clarity.
 
-    Typography
-    - Use relative units (em, rem) for font sizes.
-    - Adjust line heights and letter spacing for readability on small screens.
-    - Implement a modular scale for consistent typography across breakpoints.
+## Tables
 
-    Touch Targets
-    - Ensure interactive elements are large enough for touch (min 44x44 pixels).
-    - Provide adequate spacing between touch targets.
-    - Consider hover states for desktop and focus states for touch/keyboard.
+- Toolbar includes search, filters, column chooser, saved views. Bulk selection is clear and keyboard accessible.
+- Empty states explain why the table is empty and the next action.
+- Prefer sticky header, optional sticky first column. Virtualize only when row count hurts performance.
 
-    Performance
-    - Optimize assets for faster loading on mobile networks.
-    - Use CSS animations instead of JavaScript when possible.
-    - Implement critical CSS for above-the-fold content.
+## Content and Messaging
 
-    Content Prioritization
-    - Prioritize content display for mobile views.
-    - Use progressive disclosure to reveal content as needed.
-    - Implement off-canvas patterns for secondary content on small screens.
+- Use sentence case and clear verbs on buttons.
+- Use inline messages for local feedback, toasts for quick confirms, banners for system-wide issues.
+- Skeletons for full-page loads, linear progress for known durations, small spinners only for micro waits.
 
-    Navigation
-    - Design mobile-friendly navigation patterns (e.g., hamburger menu).
-    - Ensure navigation is accessible via keyboard and screen readers.
-    - Consider using a sticky header for easy navigation access.
+## Mobile and Responsiveness
 
-    Forms
-    - Design form layouts that adapt to different screen sizes.
-    - Use appropriate input types for better mobile experiences.
-    - Implement inline validation and clear error messaging.
+- Mobile-first CSS. Use Grid and Flexbox. Keep critical tap targets in comfortable thumb zones.
+- Keep primary actions reachable at typical breakpoints.
 
-    Testing
-    - Use browser developer tools to test responsiveness.
-    - Test on actual devices, not just emulators.
-    - Conduct usability testing across different device types.
+## Design System and Tokens
 
-    Stay updated with the latest responsive design techniques and browser capabilities.
-    Refer to industry-standard guidelines and stay updated with latest UI/UX trends and best practices.
+- Centralize color, spacing, radius, elevation, and typography tokens.
+- Respect the 8-pt spacing scale. Use consistent radii and elevation levels.
+
+## Definition of done
+
+- [ ] Passes WCAG 2.2 AA checks for target size, visible focus, and keyboard nav.
+- [ ] Meets Web Vitals targets: INP ≤ 200 ms, LCP ≤ 2.5 s, CLS ≤ 0.10.
+- [ ] No layout shifts from images, ads, or custom fonts.
+- [ ] Forms have labels, hints, inline errors, and a clear submit state.
+- [ ] Tables include search, filters, empty state, and accessible bulk actions.
+- [ ] Loading uses skeletons or progress, not blanket spinners.
+- [ ] Follows repo tokens and component patterns. No ad-hoc visual styles.
+
+## References
+
+- See `apps/web/docs/saas-ui-playbook.md` for patterns, examples, and rationale.

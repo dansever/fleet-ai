@@ -1,3 +1,4 @@
+import type { ContractType } from '@/drizzle/enums';
 import type { Airport, Contract, NewContract, Organization } from '@/drizzle/types';
 import { api, backendApi } from '@/services/api-client';
 import { ContractUpdateInput } from './contracts.types';
@@ -24,6 +25,17 @@ export async function listContractsByOrg(orgId?: Organization['id']): Promise<Co
  */
 export async function listContractsByAirport(airportId: Airport['id']): Promise<Contract[]> {
   const res = await api.get(`/api/contracts?airportId=${airportId}`);
+  return res.data;
+}
+
+/**
+ * Get contracts by airport and type
+ */
+export async function listContractsByAirportAndType(
+  airportId: Airport['id'],
+  contractType: ContractType,
+): Promise<Contract[]> {
+  const res = await api.get(`/api/contracts?airportId=${airportId}&contractType=${contractType}`);
   return res.data;
 }
 
